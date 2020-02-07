@@ -1,6 +1,6 @@
 ## Documentation
 The documentation is available at
-[mahlet-inc.github.io/](https://mahlet-inc.github.io/).
+[mahlet-inc.github.io](https://mahlet-inc.github.io).
 
 ## Pre-built binaries
 We're still setting up our binary release process, but sort-of-portable linux
@@ -22,7 +22,7 @@ documentation and/or watch
 1. Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)
 in the documentation and/or watch
-[this plugin tutorial video](https://youtu.be/Dg3vknwLO74)
+[this plugin development video](https://youtu.be/Dg3vknwLO74)
 2. Run [wizard_installer.sh](wizards/wizard_installer.sh) from inside the
 [wizards](wizards) directory to add Hobbits Plugin Qt Creator templates (restart
 Qt Creator after doing this)
@@ -31,7 +31,7 @@ desired functionality
 
 ## Get Involved
 Join our [Discord server](https://discord.gg/wRQJpZZ), send us an
-[email](opensource@mahletconsulting.com), and tell your colleagues. We'd love
+email at opensource@mahletconsulting.com, and tell your colleagues. We'd love
 contributions and resumes, but we'll settle for bug reports and memes.
 
 
