@@ -1,0 +1,6 @@
+site_name: Hobbits
+nav:
+  - Overview: index.md
+  - User Guide: user-guide.md
+  - Plugin Developer Guide: plugin-developer-guide.md
+theme: readthedocs

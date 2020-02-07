@@ -1,0 +1,12 @@
+#ifndef HOBBITSCORE_GLOBAL_H
+#define HOBBITSCORE_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined (HOBBITSCORE_LIBRARY)
+#  define HOBBITSCORESHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define HOBBITSCORESHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // HOBBITSCORE_GLOBAL_H

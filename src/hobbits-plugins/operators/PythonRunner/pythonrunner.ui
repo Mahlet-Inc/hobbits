@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PythonRunner</class>
+ <widget class="QWidget" name="PythonRunner">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>947</width>
+    <height>335</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Python Path:</string>
+       </property>
+       <property name="buddy">
+        <cstring>le_pythonPath</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_pythonPath">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="pb_pythonPathSelect">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Script:</string>
+       </property>
+       <property name="buddy">
+        <cstring>te_pythonScript</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="pb_scriptHelp">
+       <property name="text">
+        <string>?</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPlainTextEdit" name="te_pythonScript">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="plainText">
+        <string>def operate_on_bits(input_container, output_container, operator_handle):
+  output_container.set_length(input_container.length)
+  for i in range(0, input_container.length):
+    output_container.set_at(i, input_container.at(i))
+    if i % 256 == 0:
+      operator_handle.check_cancelled()
+      operator_handle.set_progress(i/input_container.length*100)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPlainTextEdit" name="te_pluginOutput">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>le_pythonPath</tabstop>
+  <tabstop>pb_pythonPathSelect</tabstop>
+  <tabstop>te_pythonScript</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

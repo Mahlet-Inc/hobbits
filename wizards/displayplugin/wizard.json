@@ -1,0 +1,92 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ "Qt4ProjectManager.Qt4Project" ],
+    "id": "HobbitsDisplay",
+    "category": "Project",
+    "trDescription": "Creates a hobbits display plugin. General plugin methods and basic plugin structure are provided.",
+    "trDisplayName": "Display Plugin",
+    "trDisplayCategory": "Hobbits Plugin",
+    "icon": "pluginicon.png",
+    "featuresRequired": [ "QtSupport.Wizards.FeatureQt" ],
+    "enabled": "%{JS: [ %{Plugins} ].indexOf('QmakeProjectManager') >= 0}",
+    "options":
+    [
+        { "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
+        { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
+        { "key": "PluginName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "DisplayWidgetName", "value": "%{JS: '%{ProjectName}' + 'Widget'}" },
+        { "key": "ControlWidgetName", "value": "%{JS: '%{ProjectName}' + 'Controls'}" },
+        { "key": "PluginCppFileName", "value": "%{JS: Cpp.classToFileName('%{PluginName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "PluginHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{PluginName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "WidgetCppFileName", "value": "%{JS: Cpp.classToFileName('%{DisplayWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "WidgetHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{DisplayWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ControlsCppFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "ControlsHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ControlsUiFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '.ui')}" }
+    ],
+
+    "pages":
+    [
+        {
+            "trDisplayName": "Project Location",
+            "trShortTitle": "Location",
+            "typeId": "Project",
+            "data": { "trDescription": "Creates a hobbits display plugin. General plugin methods and basic plugin structure are provided." }
+        },
+        {
+            "trDisplayName": "Kit Selection",
+            "trShortTitle": "Kits",
+            "typeId": "Kits",
+            "enabled": "%{IsTopLevelProject}",
+            "data": { "projectFilePath": "%{ProFileName}" }
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators":
+    [
+        {
+            "typeId": "File",
+            "data":
+            [
+                {
+                    "source": "displayplugintemplate.pro",
+                    "target": "%{ProFileName}",
+                    "openAsProject": true
+                },
+                {
+                    "source": "displayplugintemplate.cpp",
+                    "target": "%{PluginCppFileName}"
+                },
+                {
+                    "source": "displayplugintemplate.h",
+                    "target": "%{PluginHeaderFileName}"
+                },
+                {
+                    "source": "displaywidget.cpp",
+                    "target": "%{WidgetCppFileName}"
+                },
+                {
+                    "source": "displaywidget.h",
+                    "target": "%{WidgetHeaderFileName}"
+                },
+                {
+                    "source": "displaycontrols.cpp",
+                    "target": "%{ControlsCppFileName}"
+                },
+                {
+                    "source": "displaycontrols.h",
+                    "target": "%{ControlsHeaderFileName}"
+                },
+                {
+                    "source": "displaycontrols.ui",
+                    "target": "%{ControlsUiFileName}"
+                }
+                
+            ]
+        }
+    ]
+}

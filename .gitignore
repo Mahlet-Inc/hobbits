@@ -1,0 +1,6 @@
+
+*.pro.user
+*.autosave
+/build*
+.vscode
+*.so

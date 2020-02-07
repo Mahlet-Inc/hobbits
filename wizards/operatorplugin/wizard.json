@@ -1,0 +1,70 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ "Qt4ProjectManager.Qt4Project" ],
+    "id": "HobbitsOp",
+    "category": "Project",
+    "trDescription": "Creates a hobbits operator plugin. General plugin methods and basic plugin structure are provided.",
+    "trDisplayName": "Operator Plugin",
+    "trDisplayCategory": "Hobbits Plugin",
+    "icon": "pluginicon.png",
+    "featuresRequired": [ "QtSupport.Wizards.FeatureQt" ],
+    "enabled": "%{JS: [ %{Plugins} ].indexOf('QmakeProjectManager') >= 0}",
+    "options":
+    [
+        { "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
+        { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
+        { "key": "ClassName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "CppFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "UiFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '.ui')}" }
+    ],
+
+    "pages":
+    [
+        {
+            "trDisplayName": "Project Location",
+            "trShortTitle": "Location",
+            "typeId": "Project",
+            "data": { "trDescription": "Creates a hobbits operator plugin. General plugin methods and basic plugin structure are provided." }
+        },
+        {
+            "trDisplayName": "Kit Selection",
+            "trShortTitle": "Kits",
+            "typeId": "Kits",
+            "enabled": "%{IsTopLevelProject}",
+            "data": { "projectFilePath": "%{ProFileName}" }
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators":
+    [
+        {
+            "typeId": "File",
+            "data":
+            [
+                {
+                    "source": "operatorplugintemplate.pro",
+                    "target": "%{ProFileName}",
+                    "openAsProject": true
+                },
+                {
+                    "source": "operatorplugintemplate.cpp",
+                    "target": "%{CppFileName}"
+                },
+                {
+                    "source": "operatorplugintemplate.h",
+                    "target": "%{HeaderFileName}"
+                },
+                {
+                    "source": "operatorplugintemplate.ui",
+                    "target": "%{UiFileName}"
+                }
+                
+            ]
+        }
+    ]
+}
