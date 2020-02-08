@@ -1,11 +1,13 @@
 steps:
   - checkout: self
 
-  - script: sudo apt-get install fftw3-dev
-    displayName: 'Install FFTW3'
+  - script: sudo apt-get update
 
   - script: sudo apt-get install libgl1-mesa-dev
     displayName: 'Install libGL'
+
+  - script: sudo apt-get install fftw3-dev
+    displayName: 'Install FFTW3'
 
   - task: UsePythonVersion@0 
     inputs:
