@@ -1,6 +1,10 @@
 steps:
   - checkout: self
 
+  - script: |
+      tar cvzf test.tgz $(Build.SourcesDirectory)/src
+    displayName: 'just checking this command...'
+
   - script: sudo apt-get update
     displayName: 'Update packages'
 
@@ -33,7 +37,8 @@ steps:
       make -j$(nproc)
     displayName: 'Build hobbits'
 
-  - script: $(Build.SourcesDirectory)/ci/package_linux.sh
+  - script: |
+      tar cvzf hobbits.tgz $(Build.BinariesDirectory) $(Build.SourcesDirectory)/src
 
   - task: CopyFiles@2 
     inputs:
