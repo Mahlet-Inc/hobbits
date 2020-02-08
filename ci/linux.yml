@@ -18,11 +18,11 @@ steps:
     displayName: 'Install Qt 5.14.0'
 
   - script: | 
-      cd $(Build.SourcesDirectory)
+      cd $(Build.SourcesDirectory)/src
       $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/bin/qmake
     displayName: 'Run qmake'
 
   - script: |
-      cd $(Build.SourcesDirectory)
+      cd $(Build.SourcesDirectory)/src
       make
     displayName: 'Build hobbits'
