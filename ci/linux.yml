@@ -2,6 +2,7 @@ steps:
   - checkout: self
 
   - script: sudo apt-get update
+    displayName: 'Update packages'
 
   - script: sudo apt-get install libgl1-mesa-dev
     displayName: 'Install libGL'
