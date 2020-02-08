@@ -1,6 +1,6 @@
 jobs:
 - job: Linux
   pool:
-    vmImage: 'ubuntu-18.04-LTS'
+    vmImage: 'ubuntu-18.04'
   steps:
     - template: ci/linux.yml
