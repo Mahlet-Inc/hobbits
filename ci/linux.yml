@@ -1,10 +1,6 @@
 steps:
   - checkout: self
 
-  - script: |
-      tar cvzf test.tgz $(Build.SourcesDirectory)/src
-    displayName: 'just checking this command...'
-
   - script: sudo apt-get update
     displayName: 'Update packages'
 
@@ -38,7 +34,16 @@ steps:
     displayName: 'Build hobbits'
 
   - script: |
-      tar cvzf hobbits.tgz $(Build.BinariesDirectory) $(Build.SourcesDirectory)/src
+      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters 
+      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/plugins/platforms release/bin
+      cp $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/lib/libQt5*.so* release/lib
+      tar cvzf hobbits.tgz release
 
   - task: CopyFiles@2 
     inputs:
