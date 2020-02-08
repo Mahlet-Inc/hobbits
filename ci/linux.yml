@@ -32,3 +32,15 @@ steps:
       cd $(Build.SourcesDirectory)/src
       make -j$(nproc)
     displayName: 'Build hobbits'
+
+  - script: $(Build.SourcesDirectory)/ci/package_linux.sh
+
+  - task: CopyFiles@2 
+    inputs:
+      contents: hobbits.tgz
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: linux_release
