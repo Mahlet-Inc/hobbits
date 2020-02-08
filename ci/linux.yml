@@ -42,7 +42,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
       cp -r $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/lib/libQt5*.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/lib/lib*.so* release/lib
       tar cvzf hobbits.tgz release
 
   - task: CopyFiles@2 
