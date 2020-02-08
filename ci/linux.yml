@@ -1,0 +1,28 @@
+steps:
+  - checkout: self
+
+  - script: sudo apt-get install fftw3-dev
+    displayName: 'Install FFTW3'
+
+  - task: UsePythonVersion@0 
+    inputs:
+      versionSpec: '3.x'
+      
+  - script: |
+      cd $(Build.SourcesDirectory)
+      python -m pip install aqtinstall
+    displayName: 'Install aqtinstall'
+
+  - script: | 
+      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.0 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.14.0'
+
+  - script: | 
+      cd $(Build.SourcesDirectory)
+      $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/bin/qmake
+    displayName: 'Run qmake'
+
+  - script: |
+      cd $(Build.SourcesDirectory)
+      make
+    displayName: 'Build hobbits'
