@@ -4,6 +4,9 @@ steps:
   - script: sudo apt-get install fftw3-dev
     displayName: 'Install FFTW3'
 
+  - script: sudo apt install libgl1-mesa-dev
+    displayName: 'Install libGL'
+
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.x'
@@ -24,5 +27,5 @@ steps:
 
   - script: |
       cd $(Build.SourcesDirectory)/src
-      make
+      make -j$(nproc)
     displayName: 'Build hobbits'
