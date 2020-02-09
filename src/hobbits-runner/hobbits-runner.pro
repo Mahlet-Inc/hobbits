@@ -1,4 +1,5 @@
-#QT -= gui
+# This is sort of a hack because the core library requires widgets...
+QT += widgets 
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
