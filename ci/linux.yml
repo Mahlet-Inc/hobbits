@@ -25,7 +25,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/bin/qmake
+      $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/bin/qmake
     displayName: 'Run qmake'
 
   - script: |
@@ -41,8 +41,8 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp -r $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.14.0/gcc_64/lib/lib*.so* release/lib
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/plugins/platforms release/bin
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/lib/lib*.so* release/lib
       tar cvzf hobbits.tgz release
 
   - task: CopyFiles@2 
