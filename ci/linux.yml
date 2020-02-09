@@ -34,8 +34,9 @@ steps:
     displayName: 'Build hobbits'
 
   - script: |
-      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters 
+      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
@@ -43,11 +44,12 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
       cp -r $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/plugins/platforms release/bin
       cp $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/lib/lib*.so* release/lib
-      tar cvzf hobbits.tgz release
+      cd release
+      tar cvzf hobbits.tgz bin lib plugins
 
   - task: CopyFiles@2 
     inputs:
-      contents: hobbits.tgz
+      contents: release/hobbits.tgz
       targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1

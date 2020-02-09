@@ -43,6 +43,11 @@ LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
 
+unix:{
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
+
 unix {
     target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/displays
     INSTALLS += target
