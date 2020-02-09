@@ -20,8 +20,8 @@ steps:
     displayName: 'Install aqtinstall'
 
   - script: | 
-      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.0 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-    displayName: 'Install Qt 5.14.0'
+      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.14.1'
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
