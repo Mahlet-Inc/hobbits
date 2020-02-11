@@ -69,8 +69,8 @@ public:
     QJsonDocument serializeJson() const;
     bool deserializeJson(QJsonDocument json);
 
-    friend QDataStream& operator<<(QDataStream&, const BitContainer&);
-    friend QDataStream& operator>>(QDataStream&, BitContainer&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator<<(QDataStream&, const BitContainer&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, BitContainer&);
 
 private:
     QString m_name;

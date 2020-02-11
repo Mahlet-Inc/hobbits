@@ -36,8 +36,8 @@ public:
         Equal = 0x40
     };
 
-    friend QDataStream& operator<<(QDataStream&, const Range&);
-    friend QDataStream& operator>>(QDataStream&, Range&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator<<(QDataStream&, const Range&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, Range&);
 
 private:
     int m_start;
