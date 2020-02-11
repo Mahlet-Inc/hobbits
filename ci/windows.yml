@@ -16,6 +16,8 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
+      dir $(Build.BinariesDirectory)/Qt/5.14.1/
+      dir $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64
       $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/bin/qmake.exe
     displayName: 'Run qmake'
 
