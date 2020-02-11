@@ -38,7 +38,7 @@ FORMS +=        widthframer.ui
 DISTFILES +=     
 
 win32 {
-    LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
+    LIBS += $$OUT_PWD/../../../../windows/libfftw3-3.dll
     INCLUDEPATH += $$OUT_PWD/../../../../windows
     DEPENDPATH += $$OUT_PWD/../../../../windows
 
