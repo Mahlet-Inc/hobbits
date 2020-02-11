@@ -3,7 +3,9 @@
 #include "parseresult.h"
 #include <QObject>
 
-enum ParseType {
+#include "hobbits-core_global.h"
+
+enum HOBBITSCORESHARED_EXPORT ParseType {
     Default = 0,
     No_Unit = 1,
     Hex = 2,
@@ -13,7 +15,7 @@ enum ParseType {
     No_Math = 6
 };
 
-class MathParser
+class HOBBITSCORESHARED_EXPORT MathParser
 {
 public:
     MathParser();

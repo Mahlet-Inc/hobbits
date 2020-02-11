@@ -8,8 +8,10 @@
 #include <QJsonObject>
 #include <QtConcurrent/QtConcurrentRun>
 
+#include "hobbits-core_global.h"
+
 class BitContainerManager;
-class PluginAction
+class HOBBITSCORESHARED_EXPORT PluginAction
 {
 public:
     enum PluginType {

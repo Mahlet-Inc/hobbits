@@ -7,7 +7,9 @@
 #include "plugincallback.h"
 #include <QSharedPointer>
 
-class OperatorInterface
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT OperatorInterface
 {
 public:
     virtual ~OperatorInterface()

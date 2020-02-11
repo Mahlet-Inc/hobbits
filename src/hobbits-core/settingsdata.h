@@ -4,7 +4,9 @@
 #include <QMap>
 #include <QVariant>
 
-class SettingsData
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT SettingsData
 {
 public:
     SettingsData();

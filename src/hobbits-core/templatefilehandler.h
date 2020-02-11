@@ -8,7 +8,9 @@
 #include <QSharedPointer>
 #include <QStringList>
 
-class TemplateFileHandler
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT TemplateFileHandler
 {
 private:
     TemplateFileHandler();

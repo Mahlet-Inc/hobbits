@@ -2,7 +2,9 @@
 #define PARSERESULT_H
 #include <QObject>
 
-class ParseResult
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT ParseResult
 {
 public:
     ParseResult();

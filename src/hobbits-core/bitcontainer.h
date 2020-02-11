@@ -11,12 +11,15 @@
 #include <QPixmap>
 #include <QSharedPointer>
 #include <QUuid>
+
+#include "hobbits-core_global.h"
+
 class PluginActionLineage;
 class PluginAction;
 
 #define MAX_BIT_CONTAINER_SIZE (42 * 1000 * 1000 * 8)
 
-class BitContainer : public QObject
+class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {
     Q_OBJECT
 

@@ -3,7 +3,9 @@
 
 #include <QDataStream>
 
-class Range
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT Range
 {
 public:
     Range();

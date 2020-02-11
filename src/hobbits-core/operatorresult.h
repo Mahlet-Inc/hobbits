@@ -7,7 +7,9 @@
 
 #include "bitcontainer.h"
 
-class OperatorResult
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT OperatorResult
 {
 public:
     OperatorResult();

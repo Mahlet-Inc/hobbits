@@ -5,7 +5,9 @@
 #include <QJsonObject>
 #include <QMap>
 
-class AnalyzerResult
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT AnalyzerResult
 {
 public:
     AnalyzerResult();

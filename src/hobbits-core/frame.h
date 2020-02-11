@@ -5,7 +5,9 @@
 #include "range.h"
 #include <QSharedPointer>
 
-class Frame : public Range
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT Frame : public Range
 {
 public:
     Frame(QSharedPointer<const BitArray> bits, int start, int end);

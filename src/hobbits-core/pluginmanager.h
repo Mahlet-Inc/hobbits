@@ -10,7 +10,9 @@
 #include "importexportinterface.h"
 #include "operatorinterface.h"
 
-class PluginManager
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT PluginManager
 {
 public:
     PluginManager();
