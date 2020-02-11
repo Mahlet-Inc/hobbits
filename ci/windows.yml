@@ -11,40 +11,40 @@ steps:
     displayName: 'Install aqtinstall'
 
   - script: | 
-      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 windows desktop win64_msvc2017_64 -m qtcore qtgui qtnetwork qtwidgets
+      python -m aqt install --outputdir $(Build.BinariesDirectory)\Qt 5.14.1 windows desktop win64_msvc2017_64 -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.14.1'
 
   - script: | 
-      cd $(Build.SourcesDirectory)/src
-      dir $(Build.BinariesDirectory)/Qt/5.14.1/
-      dir $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64
-      $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/bin/qmake.exe
+      cd $(Build.SourcesDirectory)\src
+      dir $(Build.BinariesDirectory)\Qt\5.14.1\
+      dir $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64
+      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe
     displayName: 'Run qmake'
 
   - script: |
-      cd $(Build.SourcesDirectory)/src
+      cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
       nmake release
     displayName: 'Build hobbits'
 
   - script: |
-      mkdir -p release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/windows/fftw3-3.dll release
-      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits.exe release
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner.exe release
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/*.dll release/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/*.dll release/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/*.dll release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/*.dll release/plugins/operators
-      cp $(Build.SourcesDirectory)/src/hobbits-core/hobbits-core.dll release/
-      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/plugins/platforms release/
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/lib/*.dll release/
+      mkdir -p release\plugins\analyzers release\plugins\operators release\plugins\displays release\plugins\importerexporters
+      cp $(Build.SourcesDirectory)\windows\fftw3-3.dll release
+      cp $(Build.SourcesDirectory)\src\hobbits-gui\hobbits.exe release
+      cp $(Build.SourcesDirectory)\src\hobbits-runner\hobbits-runner.exe release
+      cp $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\*\*.dll release\plugins\analyzers
+      cp $(Build.SourcesDirectory)\src\hobbits-plugins\displays\*\*.dll release\plugins\displays
+      cp $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\*\*.dll release\plugins\importerexporters
+      cp $(Build.SourcesDirectory)\src\hobbits-plugins\operators\*\*.dll release\plugins\operators
+      cp $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
+      cp -r $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\
+      cp $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\*.dll release\
   
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: release
       includeRootFolder: false
-      archiveFile: $(Build.ArtifactStagingDirectory)/hobbits.zip
+      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits.zip
 
   - task: PublishBuildArtifacts@1
     inputs:
