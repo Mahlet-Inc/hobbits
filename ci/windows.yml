@@ -16,7 +16,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017/bin/qmake.exe
+      $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/bin/qmake.exe
     displayName: 'Run qmake'
 
   - script: |
@@ -35,8 +35,8 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/*.dll release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/*.dll release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/hobbits-core.dll release/
-      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017/plugins/platforms release/
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017/lib/*.dll release/
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/plugins/platforms release/
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017_64/lib/*.dll release/
   
   - task: ArchiveFiles@2
     inputs:
