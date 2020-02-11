@@ -2,7 +2,7 @@
 QT += widgets 
 
 CONFIG += c++11 console
-CONFIG -= app_bundle
+CONFIG -= app_bundle debug_and_release_target
 
 DEFINES += "HOBBITS_RUNNER_VERSION=\"\\\"Extra Good Developer Version\\\"\""
 

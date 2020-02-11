@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += PRBSGENERATOR_LIBRARY
 
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

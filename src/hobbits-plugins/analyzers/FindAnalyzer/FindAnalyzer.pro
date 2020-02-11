@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = $$qtLibraryTarget(FindAnalyzer)
 TEMPLATE = lib
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 DEFINES += FINDANALYZER_LIBRARY
 

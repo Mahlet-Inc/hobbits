@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = $$qtLibraryTarget(TakeSkipOperator)
 TEMPLATE = lib
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 DEFINES += TAKESKIPOPERATOR_LIBRARY
 

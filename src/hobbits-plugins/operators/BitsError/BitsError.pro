@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = BitsError
 TEMPLATE = lib
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 DEFINES += BITSERROR_LIBRARY
 
