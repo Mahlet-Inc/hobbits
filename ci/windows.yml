@@ -39,10 +39,10 @@ steps:
       cp $(Build.BinariesDirectory)/Qt/5.14.1/msvc2017/lib/*.dll release/
   
   - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: release
-        includeRootFolder: false
-        archiveFile: $(Build.ArtifactStagingDirectory)/hobbits.zip
+    inputs:
+      rootFolderOrFile: release
+      includeRootFolder: false
+      archiveFile: $(Build.ArtifactStagingDirectory)/hobbits.zip
 
   - task: PublishBuildArtifacts@1
     inputs:
