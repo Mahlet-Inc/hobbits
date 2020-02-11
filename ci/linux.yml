@@ -46,6 +46,7 @@ steps:
       cp $(Build.BinariesDirectory)/Qt/5.14.1/gcc_64/lib/lib*.so* release/lib
       cd release
       tar cvzf hobbits.tgz bin lib plugins
+    displayName: 'Collect and package release files'
 
   - task: CopyFiles@2 
     inputs:

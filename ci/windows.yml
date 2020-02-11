@@ -38,6 +38,7 @@ steps:
       cp $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
       cp -r $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\
       cp $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\*.dll release\
+    displayName: 'Collect release files'
   
   - task: ArchiveFiles@2
     inputs:
