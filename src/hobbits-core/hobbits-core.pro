@@ -30,20 +30,16 @@ SOURCES += \
     actionprogress.cpp \
     analyzeractor.cpp \
     analyzerresult.cpp \
-     #   asciidisplay.cpp \
-     #   binarydisplay.cpp \
         bitarray.cpp \
         bitcontainer.cpp \
     bitcontainerlistmodel.cpp \
     bitcontainermanager.cpp \
     bitcontainerpreview.cpp \
-     #   bitraster.cpp \
     bitcontainertreemodel.cpp \
         displaybase.cpp \
     displaybasetext.cpp \
     displayhandle.cpp \
         frame.cpp \
-     #   hexdisplay.cpp \
     hobbitscoreinfo.cpp \
         mathparser.cpp \
     operatoractor.cpp \
@@ -65,21 +61,17 @@ HEADERS += \
     analyzeractor.h \
     analyzerinterface.h \
     analyzerresult.h \
-#        asciidisplay.h \
-   #     binarydisplay.h \
         bitarray.h \
         bitcontainer.h \
     bitcontainerlistmodel.h \
     bitcontainermanager.h \
     bitcontainerpreview.h \
-   #     bitraster.h \
     bitcontainertreemodel.h \
         displaybase.h \
     displaybasetext.h \
     displayhandle.h \
     displayinterface.h \
         frame.h \
-    #    hexdisplay.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     importexportinterface.h \
@@ -106,3 +98,7 @@ unix:{
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
 }
+message(qmake config hobbits-core: $$CONFIG)
+message(Building from: $$PWD)
+message(Building in: $$OUT_PWD)
+message(Target output: $$DESTDIR/$$TARGET)

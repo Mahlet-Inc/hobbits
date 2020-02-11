@@ -41,9 +41,7 @@ FORMS += \
         mainwindow.ui \
         preferencesdialog.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-else:unix: LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
@@ -57,3 +55,9 @@ RESOURCES += \
     icons.qrc
 
 INSTALLS =
+
+
+message(qmake hobbits-gui config: $$CONFIG)
+message(Building from: $$PWD)
+message(Building in: $$OUT_PWD)
+message(Target output: $$DESTDIR/$$TARGET)
