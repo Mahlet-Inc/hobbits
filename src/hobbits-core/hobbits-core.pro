@@ -11,6 +11,8 @@ QT       -= gui
 TARGET = hobbits-core
 TEMPLATE = lib
 
+CONFIG -= debug_and_release debug_and_release_target
+
 DEFINES += HOBBITSCORE_LIBRARY
 
 DEFINES += "HOBBITS_CORE_LIB_VERSION=\"\\\"Super Cool Developer Version\\\"\""
