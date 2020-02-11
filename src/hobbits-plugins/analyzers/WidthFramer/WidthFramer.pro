@@ -69,3 +69,8 @@ unix {
     INSTALLS += target
 }
 
+
+message(qmake widthframer config: $$CONFIG)
+message(Building from: $$PWD)
+message(Building in: $$OUT_PWD)
+message(Target output: $$DESTDIR/$$TARGET)
