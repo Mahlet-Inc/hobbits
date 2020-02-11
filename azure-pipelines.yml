@@ -4,3 +4,8 @@ jobs:
     vmImage: 'ubuntu-18.04'
   steps:
     - template: ci/linux.yml
+- job: Windows
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - template: ci/windows.yml
