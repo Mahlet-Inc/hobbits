@@ -1,7 +1,7 @@
 steps:
   - checkout: self
 
-  - script: brew install fftw3-dev
+  - script: brew install fftw
     displayName: 'Install FFTW3'
 
   - script: brew install pkg-config
