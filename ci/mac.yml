@@ -12,7 +12,7 @@ steps:
       versionSpec: '3.x'
   
   - script: |
-    /bin/bash -c "sudo xcode-select -s /Applications/Xcode_10.app/Contents/Developer"
+      /bin/bash -c "sudo xcode-select -s /Applications/Xcode_10.app/Contents/Developer"
     displayName: 'Use Xcode 10'
       
   - script: |
