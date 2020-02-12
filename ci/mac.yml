@@ -38,23 +38,21 @@ steps:
       ls $(Build.SourcesDirectory)/src/hobbits-gui
       ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib
       ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin
-      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib release/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib release/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib release/plugins/operators
-      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.dylib* release/lib
-      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/lib*.dylib* release/lib
-      cd release
-      tar cvzf hobbits.tgz bin lib plugins
-    displayName: 'Collect and package release files'
+      cd $(Build.SourcesDirectory)/src/hobbits-gui
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/macdeployqt hobbits.app
+      mkdir -p hobbits.app/Contents/plugins/analyzers hobbits.app/Contents/plugins/operators hobbits.app/Contents/plugins/displays hobbits.app/Contents/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib hobbits.app/Contents/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib hobbits.app/Contents/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.dylib* hobbits.app/Contents/Frameworks
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
+      tar cvzf hobbits.tgz hobbits.app
+    displayName: 'Create mac app bundle'
 
   - task: CopyFiles@2 
     inputs:
-      sourceFolder: release
+      sourceFolder: $(Build.SourcesDirectory)/src/hobbits-gui
       contents: hobbits.tgz
       targetFolder: $(Build.ArtifactStagingDirectory)
 
