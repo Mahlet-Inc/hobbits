@@ -15,7 +15,7 @@ steps:
     displayName: 'Install Qt 5.14.1'
 
   - script: | 
-      python -m aqt tool windows tools_openssl_x64 1.1.1-4 qt.tools.openssl.win_x64
+      python -m aqt tool --outputdir $(Build.BinariesDirectory)\Qt windows tools_openssl_x64 1.1.1-4 qt.tools.openssl.win_x64
     displayName: 'Install OpenSSL for QtNetwork'
 
   - script: |
