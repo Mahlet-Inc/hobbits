@@ -34,24 +34,24 @@ steps:
     displayName: 'Build hobbits'
 
   - script: |
-      dir $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin
+      cd $(Build.BinariesDirectory)
       mkdir -p release\plugins\analyzers release\plugins\operators release\plugins\displays release\plugins\importerexporters
       xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll release\
       xcopy $(Build.SourcesDirectory)\src\hobbits-gui\hobbits.exe release\
       xcopy $(Build.SourcesDirectory)\src\hobbits-runner\hobbits-runner.exe release\
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c echo xcopy @path release\plugins\analyzers\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c xcopy @path release\plugins\analyzers\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\displays\ /m *.dll /s /c "cmd /c xcopy @path release\plugins\displays\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\ /m *.dll /s /c "cmd /c xcopy @path release\plugins\importerexporters\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\operators\ /m *.dll /s /c "cmd /c xcopy @path release\plugins\operators\ "
+      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c echo xcopy @path $(Build.BinariesDirectory)\release\plugins\analyzers\ "
+      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\analyzers\ "
+      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\displays\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\displays\ "
+      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\importerexporters\ "
+      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\operators\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\operators\ "
       xcopy $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\platforms /i
-      forfiles /p $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\ /m *.dll /s /c "cmd /c xcopy @path release\ "
+      forfiles /p $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\ "
     displayName: 'Collect release files'
   
   - task: ArchiveFiles@2
     inputs:
-      rootFolderOrFile: release
+      rootFolderOrFile: $(Build.BinariesDirectory)\release
       includeRootFolder: false
       archiveFile: $(Build.ArtifactStagingDirectory)\hobbits.zip
 

@@ -62,7 +62,7 @@ unix {
     packagesExist(fftw3) {
         mac {
             INCLUDEPATH += /usr/local/include
-            LIBS += /usr/local/lib
+            LIBS += -L/usr/local/lib
         }
         LIBS += -lfftw3
         DEFINES += FFTW_AUTOCORRELATION
