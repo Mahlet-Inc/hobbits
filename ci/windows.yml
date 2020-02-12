@@ -16,7 +16,8 @@ steps:
 
   - script: |
       cd $(Build.SourcesDirectory)\windows
-      lib /def:libfftw3-3.def
+      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+      lib.exe /def:libfftw3-3.def
     displayName: 'Create FFTW .lib'
 
   - script: | 
