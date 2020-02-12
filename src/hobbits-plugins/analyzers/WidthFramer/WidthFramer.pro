@@ -37,8 +37,22 @@ FORMS +=        widthframer.ui
 
 DISTFILES +=     
 
-win32 {
-    LIBS += $$OUT_PWD/../../../../windows/libfftw3-3.dll
+
+win32-msvc* {
+    exists($$OUT_PWD/../../../../windows/libfftw3-3.lib) {
+        LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
+        INCLUDEPATH += $$OUT_PWD/../../../../windows
+        DEPENDPATH += $$OUT_PWD/../../../../windows
+
+        DEFINES += FFTW_AUTOCORRELATION
+    }
+    else {
+        warning("The FFTW3 .lib file could not be found, so WidthFramer will build without autocorrelation")
+        warning("Did you turn the .def into a .lib with 'lib /def:libfftw3-3.def' ?")
+    }
+}
+win32-g++ {
+    LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows
     DEPENDPATH += $$OUT_PWD/../../../../windows
 
