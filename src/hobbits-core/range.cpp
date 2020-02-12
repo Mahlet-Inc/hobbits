@@ -16,9 +16,9 @@ Range::Range(int start, int end) :
 
 }
 
-bool Range::operator<(const Range &other)
+bool operator<(const Range &a, const Range &b)
 {
-    return m_start < other.start();
+    return a.start() < b.start();
 }
 
 int Range::size() const

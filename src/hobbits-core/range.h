@@ -12,8 +12,6 @@ public:
     Range(int start, int end);
     Range(const Range &other) = default;
 
-    bool operator<(const Range &other);
-
     int size() const;
 
     int start() const;
@@ -43,5 +41,7 @@ private:
     int m_start;
     int m_end;
 };
+
+bool HOBBITSCORESHARED_EXPORT operator<(const Range &a, const Range &b);
 
 #endif // RANGE_H
