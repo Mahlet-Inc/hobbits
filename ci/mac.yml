@@ -46,6 +46,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.dylib* hobbits.app/Contents/Frameworks
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework hobbits.app/Contents/Frameworks
       cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
       tar cvzf hobbits.tgz hobbits.app
     displayName: 'Create mac app bundle'
