@@ -35,16 +35,16 @@ steps:
 
   - script: |
       mkdir -p release\plugins\analyzers release\plugins\operators release\plugins\displays release\plugins\importerexporters
-      cp $(Build.SourcesDirectory)\windows\fftw3-3.dll release
-      cp $(Build.SourcesDirectory)\src\hobbits-gui\hobbits.exe release
-      cp $(Build.SourcesDirectory)\src\hobbits-runner\hobbits-runner.exe release
-      cp $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\*\*.dll release\plugins\analyzers
-      cp $(Build.SourcesDirectory)\src\hobbits-plugins\displays\*\*.dll release\plugins\displays
-      cp $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\*\*.dll release\plugins\importerexporters
-      cp $(Build.SourcesDirectory)\src\hobbits-plugins\operators\*\*.dll release\plugins\operators
-      cp $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
-      cp -r $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\
-      cp $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\*.dll release\
+      xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll release
+      xcopy $(Build.SourcesDirectory)\src\hobbits-gui\hobbits.exe release
+      xcopy $(Build.SourcesDirectory)\src\hobbits-runner\hobbits-runner.exe release
+      xcopy $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\*\*.dll release\plugins\analyzers
+      xcopy $(Build.SourcesDirectory)\src\hobbits-plugins\displays\*\*.dll release\plugins\displays
+      xcopy $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\*\*.dll release\plugins\importerexporters
+      xcopy $(Build.SourcesDirectory)\src\hobbits-plugins\operators\*\*.dll release\plugins\operators
+      xcopy $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\ /S
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\*.dll release\
     displayName: 'Collect release files'
   
   - task: ArchiveFiles@2
