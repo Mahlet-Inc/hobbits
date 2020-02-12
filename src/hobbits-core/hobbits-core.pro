@@ -96,10 +96,11 @@ DISTFILES +=
 
 INSTALLS =
 
-unix:{
+unix:!mac {
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
 }
+
 message(qmake config hobbits-core: $$CONFIG)
 message(Building from: $$PWD)
 message(Building in: $$OUT_PWD)
