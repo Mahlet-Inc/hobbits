@@ -35,6 +35,9 @@ steps:
     displayName: 'Build hobbits'
 
   - script: |
+      ls $(Build.SourcesDirectory)/src/hobbits-gui
+      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib
+      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin
       mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
       cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
