@@ -9,3 +9,8 @@ jobs:
     vmImage: 'vs2017-win2016'
   steps:
     - template: ci/windows.yml
+- job: Mac
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+    - template: ci/mac.yml

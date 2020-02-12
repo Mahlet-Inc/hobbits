@@ -1,0 +1,61 @@
+steps:
+  - checkout: self
+
+  - script: brew install fftw3-dev
+    displayName: 'Install FFTW3'
+
+  - script: brew install pkg-config
+    displayName: 'Install pkg-config'
+
+  - task: UsePythonVersion@0 
+    inputs:
+      versionSpec: '3.x'
+  
+  - script: |
+    /bin/bash -c "sudo xcode-select -s /Applications/Xcode_10.app/Contents/Developer"
+    displayName: 'Use Xcode 10'
+      
+  - script: |
+      cd $(Build.SourcesDirectory)
+      python -m pip install aqtinstall
+    displayName: 'Install aqtinstall'
+
+  - script: | 
+      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.14.1'
+
+  - script: | 
+      cd $(Build.SourcesDirectory)/src
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake
+    displayName: 'Run qmake'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/src
+      make -j$(nproc)
+    displayName: 'Build hobbits'
+
+  - script: |
+      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/plugins/platforms release/bin
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/lib*.so* release/lib
+      cd release
+      tar cvzf hobbits.tgz bin lib plugins
+    displayName: 'Collect and package release files'
+
+  - task: CopyFiles@2 
+    inputs:
+      sourceFolder: release
+      contents: hobbits.tgz
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: mac_release
