@@ -14,6 +14,10 @@ steps:
       python -m aqt install --outputdir $(Build.BinariesDirectory)\Qt 5.14.1 windows desktop win64_msvc2017_64 -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.14.1'
 
+  - script: | 
+      python -m aqt tool --outputdir $(Build.BinariesDirectory)\Qt windows tools_openssl 1.1.1-1 qt.tools.openssl.win_x64
+    displayName: 'Install OpenSSL for QtNetwork'
+
   - script: |
       cd $(Build.SourcesDirectory)\windows
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
@@ -34,6 +38,7 @@ steps:
     displayName: 'Build hobbits'
 
   - script: |
+      dir $(Build.BinariesDirectory)\Qt\Tools\
       cd $(Build.BinariesDirectory)
       mkdir -p release\plugins\analyzers release\plugins\operators release\plugins\displays release\plugins\importerexporters
       xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll release\
@@ -44,6 +49,7 @@ steps:
       forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\displays\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\displays\ "
       forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\importerexporters\ "
       forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\operators\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\operators\ "
+      forfiles /p $(Build.BinariesDirectory)\Qt\Tools\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release "
       xcopy $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\platforms /i
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Concurrent.dll release\
