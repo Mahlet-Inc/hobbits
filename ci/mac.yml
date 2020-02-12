@@ -38,13 +38,13 @@ steps:
       mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
       cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
-      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib release/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib release/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib release/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.dylib* release/lib
       cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/lib*.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/lib*.dylib* release/lib
       cd release
       tar cvzf hobbits.tgz bin lib plugins
     displayName: 'Collect and package release files'
