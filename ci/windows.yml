@@ -17,7 +17,6 @@ steps:
   - script: |
       cd $(Build.SourcesDirectory)\windows
       lib /def:libfftw3-3.def
-      nmake release
     displayName: 'Create FFTW .lib'
 
   - script: | 
