@@ -11,4 +11,4 @@ steps:
   - script: |
       cd $(Build.SourcesDirectory)
       python3 -m pip install aqtinstall
-      displayName: 'Install aqtinstall'
+    displayName: 'Install aqtinstall'

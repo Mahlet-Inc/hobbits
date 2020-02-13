@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = hobbits-core
 TEMPLATE = lib
 
+CONFIG += c++11
 CONFIG -= debug_and_release_target
 
 DEFINES += HOBBITSCORE_LIBRARY
