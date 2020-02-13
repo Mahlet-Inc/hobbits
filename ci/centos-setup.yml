@@ -1,0 +1,9 @@
+steps:
+    - script: sudo yum update
+      displayName: 'Update packages'
+  
+    - script: sudo yum install mesa-libGL-devel
+      displayName: 'Install libGL'
+  
+    - script: sudo yum install fftw-devel
+      displayName: 'Install FFTW3'

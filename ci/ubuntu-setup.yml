@@ -1,0 +1,9 @@
+steps:
+    - script: sudo apt-get update
+        displayName: 'Update packages'
+
+    - script: sudo apt-get install libgl1-mesa-dev
+        displayName: 'Install libGL'
+
+    - script: sudo apt-get install fftw3-dev
+        displayName: 'Install FFTW3'
