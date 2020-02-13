@@ -1,9 +1,0 @@
-steps:
-  - script: yum update
-    displayName: 'Update packages'
-  
-  - script: yum install mesa-libGL-devel
-    displayName: 'Install libGL'
-  
-  - script: yum install fftw-devel
-    displayName: 'Install FFTW3'
