@@ -1,3 +1,8 @@
+parameters:
+  - name: artifactName
+    type: string
+    default: linux_release
+
 steps:
   - checkout: self
 
@@ -53,4 +58,4 @@ steps:
   - task: PublishBuildArtifacts@1
     inputs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: linux_release
+      artifactName: ${{ parameters.artifactName }}

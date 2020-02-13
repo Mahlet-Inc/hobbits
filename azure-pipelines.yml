@@ -5,12 +5,16 @@ jobs:
   steps:
     - template: ci/ubuntu-setup.yml
     - template: ci/linux.yml
+      parameters:
+        artifactName: centos7_gcc48_release
 - job: CentOSLinuxGCC48
   pool:
     vmImage: 'ubuntu-18.04'
   container: helloadam/hobbitscentosbuilder:latest
   steps:
     - template: ci/linux.yml
+      parameters:
+        artifactName: ubuntu18_gcc7_release
 - job: Windows
   pool:
     vmImage: 'vs2017-win2016'
