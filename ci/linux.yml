@@ -3,6 +3,7 @@ steps:
 
   - script: | 
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+      ls $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib
     displayName: 'Install Qt 5.13.2'
 
   - script: | 
