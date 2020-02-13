@@ -3,7 +3,6 @@ steps:
 
   - script: | 
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-      ls $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib
     displayName: 'Install Qt 5.13.2'
 
   - script: | 
@@ -13,6 +12,9 @@ steps:
 
   - script: |
       cd $(Build.SourcesDirectory)/src
+      echo $LD_LIBRARY_PATH
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/
+      echo $LD_LIBRARY_PATH
       make -j$(nproc)
     displayName: 'Build hobbits'
 
