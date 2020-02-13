@@ -1,10 +1,5 @@
 steps:
   - checkout: self
-      
-  - script: |
-      cd $(Build.SourcesDirectory)
-      python3 -m pip install aqtinstall
-    displayName: 'Install aqtinstall'
 
   - script: | 
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 linux desktop -m qtcore qtgui qtnetwork qtwidgets
