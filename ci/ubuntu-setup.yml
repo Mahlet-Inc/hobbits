@@ -7,3 +7,8 @@ steps:
 
   - script: sudo apt-get install fftw3-dev
     displayName: 'Install FFTW3'
+      
+  - script: |
+      cd $(Build.SourcesDirectory)
+      python3 -m pip install aqtinstall
+      displayName: 'Install aqtinstall'
