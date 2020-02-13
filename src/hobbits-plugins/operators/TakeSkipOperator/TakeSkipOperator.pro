@@ -8,7 +8,7 @@ QT       += widgets
 
 QT       -= gui
 
-TARGET = $$qtLibraryTarget(TakeSkipOperator)
+TARGET = TakeSkipOperator
 TEMPLATE = lib
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -55,6 +55,16 @@ LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+unix:!mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}
 
 unix {
     target.path = $$(HOME)/.local/share/hobbits/plugins/operators

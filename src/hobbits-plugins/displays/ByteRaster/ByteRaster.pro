@@ -45,6 +45,11 @@ unix:!mac {
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
 }
 
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}
+
 unix {
     target.path = /opt/hobbits/plugins/displays
     INSTALLS += target
