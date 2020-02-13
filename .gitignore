@@ -4,3 +4,6 @@
 /build*
 .vscode
 *.so
+
+node_modules
+package-lock.json
