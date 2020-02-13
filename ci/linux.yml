@@ -44,7 +44,10 @@ steps:
       cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Widgets.so* release/lib
       cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5XcbQpa.so* release/lib
       cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Xml.so* release/lib
-      cp /usr/local/lib/libfftw*so* release/lib
+      cp /usr/lib64/libfftw3.so* release/lib
+      cp /usr/lib/libfftw3.so* release/lib
+      cp /usr/local/lib/libfftw3.so* release/lib
+      cp /usr/local/lib64/libfftw3.so* release/lib
       cd release
       tar cvzf hobbits.tgz bin lib plugins
     displayName: 'Collect and package release files'
