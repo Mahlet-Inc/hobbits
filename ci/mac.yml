@@ -40,6 +40,7 @@ steps:
       ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin
       cd $(Build.SourcesDirectory)/src/hobbits-gui
       $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/macdeployqt hobbits.app
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
       mkdir -p hobbits.app/Contents/plugins/analyzers hobbits.app/Contents/plugins/operators hobbits.app/Contents/plugins/displays hobbits.app/Contents/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib hobbits.app/Contents/plugins/analyzers
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib hobbits.app/Contents/plugins/displays
@@ -58,7 +59,6 @@ steps:
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
       tar cvzf hobbits.tgz hobbits.app
     displayName: 'Create mac app bundle'
 
