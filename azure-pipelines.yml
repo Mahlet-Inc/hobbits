@@ -1,11 +1,11 @@
 jobs:
-- job: Linux (Ubuntu 18)
+- job: UbuntuLinuxGCC7
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
     - template: ci/ubuntu-setup.yml
     - template: ci/linux.yml
-- job: Linux (CentOS 7)
+- job: CentOSLinuxGCC48
   pool:
     vmImage: 'ubuntu-18.04'
   container: centos:7
