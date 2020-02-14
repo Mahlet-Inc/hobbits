@@ -59,13 +59,13 @@ steps:
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
-      tar cvzf hobbits.tgz hobbits.app
+      tar cvzf hobbits_mac_release.tgz hobbits.app
     displayName: 'Create mac app bundle'
 
   - task: CopyFiles@2 
     inputs:
       sourceFolder: $(Build.SourcesDirectory)/src/hobbits-gui
-      contents: hobbits.tgz
+      contents: hobbits_mac_release.tgz
       targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1

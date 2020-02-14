@@ -49,13 +49,13 @@ steps:
       cp /usr/local/lib/libfftw3.so* release/lib
       cp /usr/local/lib64/libfftw3.so* release/lib
       cd release
-      tar cvzf hobbits.tgz bin lib plugins
+      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins
     displayName: 'Collect and package release files'
 
   - task: CopyFiles@2 
     inputs:
       sourceFolder: release
-      contents: hobbits.tgz
+      contents: hobbits_${{ parameters.artifactName }}.tgz
       targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1

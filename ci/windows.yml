@@ -66,7 +66,7 @@ steps:
     inputs:
       rootFolderOrFile: $(Build.BinariesDirectory)\release
       includeRootFolder: false
-      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits.zip
+      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits_windows_release.zip
 
   - task: PublishBuildArtifacts@1
     inputs:
