@@ -26,7 +26,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(./qmake_version_args.sh)
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake `./qmake_version_args.sh`
     displayName: 'Run qmake'
 
   - script: |

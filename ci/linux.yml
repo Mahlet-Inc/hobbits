@@ -12,7 +12,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake $(./qmake_version_args.sh)
+      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake `./qmake_version_args.sh`
     displayName: 'Run qmake'
 
   - script: |

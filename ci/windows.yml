@@ -25,12 +25,11 @@ steps:
       dir
     displayName: 'Create FFTW .lib'
 
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: |
-        cd $(Build.SourcesDirectory)/src
-        ./qmake_version_args.sh > qmake_args
+  - bash: |
+      ./qmake_version_args.sh > qmake_args
+      cat qmake_args
+    workingDirectory: $(Build.SourcesDirectory)/src
+    displayName: 'Get version arguments for qmake'
 
   - script: | 
       cd $(Build.SourcesDirectory)\src
