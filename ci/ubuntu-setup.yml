@@ -16,3 +16,9 @@ steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
+
+  - bash: |
+      ./qmake_version_args.sh | sed 's/\\\\/\\\\\\/g' > qmake_args
+      cat qmake_args
+    workingDirectory: $(Build.SourcesDirectory)/src
+    displayName: 'Get version arguments for qmake'
