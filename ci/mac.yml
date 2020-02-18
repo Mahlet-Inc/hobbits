@@ -24,9 +24,15 @@ steps:
       python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.14.1'
 
+  - bash: |
+    ./qmake_version_args.sh > qmake_args
+    cat qmake_args
+  workingDirectory: $(Build.SourcesDirectory)/src
+  displayName: 'Get version arguments for qmake'
+
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake `./qmake_version_args.sh`
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args)
     displayName: 'Run qmake'
 
   - script: |

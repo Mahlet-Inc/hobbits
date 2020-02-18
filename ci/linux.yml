@@ -10,9 +10,15 @@ steps:
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.13.2'
 
+  - bash: |
+    ./qmake_version_args.sh > qmake_args
+    cat qmake_args
+  workingDirectory: $(Build.SourcesDirectory)/src
+  displayName: 'Get version arguments for qmake'
+
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake `./qmake_version_args.sh`
+      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake $(cat qmake_args)
     displayName: 'Run qmake'
 
   - script: |
