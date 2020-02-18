@@ -25,10 +25,18 @@ steps:
       dir
     displayName: 'Create FFTW .lib'
 
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        cd $(Build.SourcesDirectory)/src
+        echo DEFINES+=HOBBITS_GUI_VERSION=\"\\\"`./print_version.sh`\\\"\" DEFINES+=HOBBITS_CORE_VERSION=\"\\\"`./print_version.sh`\\\"\" DEFINES+=HOBBITS_RUNNER_VERSION=\"\\\"`./print_version.sh`\\\"\" > qmake_args
+
   - script: | 
       cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe DEFINES+=HOBBITS_GUI_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_CORE_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_RUNNER_VERSION=\"\\\"`../print_version.sh`\\\"\"
+      set /p QMAKE_VERSION_ARGS= <qmake_args
+      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS%
     displayName: 'Run qmake'
 
   - script: |
