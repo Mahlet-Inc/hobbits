@@ -10,6 +10,10 @@ steps:
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.x'
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
   
   - script: |
       /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.app/Contents/Developer"

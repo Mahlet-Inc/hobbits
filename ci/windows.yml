@@ -4,6 +4,10 @@ steps:
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.x'
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
       
   - script: |
       cd $(Build.SourcesDirectory)
