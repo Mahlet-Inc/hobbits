@@ -30,7 +30,7 @@ steps:
       targetType: 'inline'
       script: |
         cd $(Build.SourcesDirectory)/src
-        echo DEFINES+=HOBBITS_GUI_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_CORE_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_RUNNER_VERSION=\"\\\"`../print_version.sh`\\\"\" > qmake_args
+        ./qmake_version_args.sh > qmake_args
 
   - script: | 
       cd $(Build.SourcesDirectory)\src
