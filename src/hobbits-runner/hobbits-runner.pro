@@ -4,7 +4,9 @@ QT += widgets
 CONFIG += c++11 console
 CONFIG -= app_bundle debug_and_release_target
 
-DEFINES += "HOBBITS_RUNNER_VERSION=\"\\\"Extra Good Developer Version\\\"\""
+!contains(DEFINES, HOBBITS_RUNNER_VERSION.*) {
+    DEFINES += "HOBBITS_RUNNER_VERSION=\"\\\"Extra Good Developer Version\\\"\""
+}
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings

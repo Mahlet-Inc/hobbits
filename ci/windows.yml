@@ -28,7 +28,7 @@ steps:
   - script: | 
       cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe
+      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe DEFINES+=HOBBITS_GUI_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_CORE_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_RUNNER_VERSION=\"\\\"`../print_version.sh`\\\"\"
     displayName: 'Run qmake'
 
   - script: |

@@ -16,7 +16,9 @@ CONFIG -= debug_and_release_target
 
 DEFINES += HOBBITSCORE_LIBRARY
 
-DEFINES += "HOBBITS_CORE_LIB_VERSION=\"\\\"Super Cool Developer Version\\\"\""
+!contains(DEFINES, HOBBITS_CORE_LIB_VERSION.*) {
+    DEFINES += "HOBBITS_CORE_LIB_VERSION=\"\\\"Super Cool Developer Version\\\"\""
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

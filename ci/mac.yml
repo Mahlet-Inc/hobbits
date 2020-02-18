@@ -26,7 +26,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake DEFINES+=HOBBITS_GUI_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_CORE_VERSION=\"\\\"`../print_version.sh`\\\"\" DEFINES+=HOBBITS_RUNNER_VERSION=\"\\\"`../print_version.sh`\\\"\"
     displayName: 'Run qmake'
 
   - script: |
