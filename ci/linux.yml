@@ -11,7 +11,7 @@ steps:
     displayName: 'Install Qt 5.13.2'
 
   - bash: |
-      ./qmake_version_args.sh > qmake_args
+      ./qmake_version_args.sh | sed 's/[^ ][^ ]*/\'&\'/g' > qmake_args
       cat qmake_args
     workingDirectory: $(Build.SourcesDirectory)/src
     displayName: 'Get version arguments for qmake'
