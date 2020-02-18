@@ -25,10 +25,10 @@ steps:
     displayName: 'Install Qt 5.14.1'
 
   - bash: |
-    ./qmake_version_args.sh > qmake_args
-    cat qmake_args
-  workingDirectory: $(Build.SourcesDirectory)/src
-  displayName: 'Get version arguments for qmake'
+      ./qmake_version_args.sh > qmake_args
+      cat qmake_args
+    workingDirectory: $(Build.SourcesDirectory)/src
+    displayName: 'Get version arguments for qmake'
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
