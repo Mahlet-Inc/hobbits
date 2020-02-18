@@ -10,5 +10,5 @@ steps:
       
   - script: |
       cd $(Build.SourcesDirectory)
-      python3 -m pip install aqtinstall
+      python3 -m pip install aqtinstall==0.7.1
     displayName: 'Install aqtinstall'
