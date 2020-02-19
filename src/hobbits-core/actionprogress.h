@@ -4,7 +4,9 @@
 #include <QMutex>
 #include <QObject>
 
-class ActionProgress : public QObject
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT ActionProgress : public QObject
 {
     Q_OBJECT
 

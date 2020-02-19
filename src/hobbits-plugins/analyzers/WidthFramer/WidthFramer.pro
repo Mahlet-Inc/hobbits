@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += WIDTHFRAMER_LIBRARY
 
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -36,7 +37,21 @@ FORMS +=        widthframer.ui
 
 DISTFILES +=     
 
-win32 {
+
+win32-msvc* {
+    exists($$OUT_PWD/../../../../windows/libfftw3-3.lib) {
+        LIBS += -L$$OUT_PWD/../../../../windows -llibfftw3-3
+        INCLUDEPATH += $$OUT_PWD/../../../../windows
+        DEPENDPATH += $$OUT_PWD/../../../../windows
+
+        DEFINES += FFTW_AUTOCORRELATION
+    }
+    else {
+        warning("The FFTW3 .lib file could not be found, so WidthFramer will build without autocorrelation")
+        warning("Did you turn the .def into a .lib with 'lib.exe /def:libfftw3-3.def' ?")
+    }
+}
+win32-g++ {
     LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows
     DEPENDPATH += $$OUT_PWD/../../../../windows
@@ -45,6 +60,10 @@ win32 {
 }
 unix {
     packagesExist(fftw3) {
+        mac {
+            INCLUDEPATH += /usr/local/include
+            LIBS += -L/usr/local/lib
+        }
         LIBS += -lfftw3
         DEFINES += FFTW_AUTOCORRELATION
     }
@@ -58,8 +77,23 @@ LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
 
+unix:!mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}
+
 unix {
     target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
     INSTALLS += target
 }
 
+
+message(qmake widthframer config: $$CONFIG)
+message(Building from: $$PWD)
+message(Building in: $$OUT_PWD)
+message(Target output: $$DESTDIR/$$TARGET)

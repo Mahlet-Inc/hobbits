@@ -3,10 +3,12 @@
 
 #include <QString>
 
+#include "hobbits-core_global.h"
+
 namespace HobbitsCoreInfo
 {
 
-QString getLibVersion();
+HOBBITSCORESHARED_EXPORT QString getLibVersion();
 
 }
 

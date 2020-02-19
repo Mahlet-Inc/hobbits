@@ -1,0 +1,84 @@
+steps:
+  - checkout: self
+
+  - script: brew install fftw
+    displayName: 'Install FFTW3'
+
+  - script: brew install pkg-config
+    displayName: 'Install pkg-config'
+
+  - task: UsePythonVersion@0 
+    inputs:
+      versionSpec: '3.x'
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
+  
+  - script: |
+      /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.app/Contents/Developer"
+    displayName: 'Use Xcode 11'
+      
+  - script: |
+      cd $(Build.SourcesDirectory)
+      python -m pip install aqtinstall
+    displayName: 'Install aqtinstall'
+
+  - script: | 
+      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.14.1'
+
+  - bash: |
+      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
+      cat qmake_args
+    workingDirectory: $(Build.SourcesDirectory)/src
+    displayName: 'Get version arguments for qmake'
+
+  - script: | 
+      cd $(Build.SourcesDirectory)/src
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args)
+    displayName: 'Run qmake'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/src
+      make -j$(nproc)
+    displayName: 'Build hobbits'
+
+  - script: |
+      ls $(Build.SourcesDirectory)/src/hobbits-gui
+      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib
+      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin
+      cd $(Build.SourcesDirectory)/src/hobbits-gui
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/macdeployqt hobbits.app
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
+      mkdir -p hobbits.app/Contents/plugins/analyzers hobbits.app/Contents/plugins/operators hobbits.app/Contents/plugins/displays hobbits.app/Contents/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib hobbits.app/Contents/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib hobbits.app/Contents/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
+      mkdir -p hobbits.app/Contents/Frameworks/QtNetwork.framework/Versions/5/
+      cd hobbits.app/Contents/Frameworks/QtNetwork.framework
+      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/Resources Versions/5/
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/QtNetwork Versions/5/
+      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/QtNetwork .
+      ln -s Versions/5/Resources Resources
+      cd Versions
+      ln -s 5 Current
+      cd $(Build.SourcesDirectory)/src/hobbits-gui
+      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
+      cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
+      install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
+      tar cvzf hobbits_mac_release.tgz hobbits.app
+    displayName: 'Create mac app bundle'
+
+  - task: CopyFiles@2 
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)/src/hobbits-gui
+      contents: hobbits_mac_release.tgz
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: mac_release

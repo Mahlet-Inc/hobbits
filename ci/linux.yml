@@ -1,0 +1,70 @@
+parameters:
+  - name: artifactName
+    type: string
+    default: linux_release
+
+steps:
+  - checkout: self
+
+  - script: | 
+      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.13.2'
+
+  - bash: |
+      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
+      cat qmake_args
+    workingDirectory: $(Build.SourcesDirectory)/src
+    displayName: 'Get version arguments for qmake'
+
+  - script: | 
+      cd $(Build.SourcesDirectory)/src
+      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake $(cat qmake_args)
+    displayName: 'Run qmake'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/src
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/
+      make -j$(nproc)
+    displayName: 'Build hobbits'
+
+  - script: |
+      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
+      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
+      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
+      cp -r $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/plugins/platforms release/bin
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libicu*.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Concurrent.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Core.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5DBus.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Gui.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Network.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5PrintSupport.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Sql.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Test.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5WaylandClient.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Widgets.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5XcbQpa.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Xml.so* release/lib
+      cp /usr/lib64/libfftw3.so* release/lib
+      cp /usr/lib/libfftw3.so* release/lib
+      cp /usr/local/lib/libfftw3.so* release/lib
+      cp /usr/local/lib64/libfftw3.so* release/lib
+      cd release
+      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins
+    displayName: 'Collect and package release files'
+
+  - task: CopyFiles@2 
+    inputs:
+      sourceFolder: release
+      contents: hobbits_${{ parameters.artifactName }}.tgz
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: ${{ parameters.artifactName }}

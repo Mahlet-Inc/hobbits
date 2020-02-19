@@ -4,7 +4,9 @@
 #include "pluginaction.h"
 #include <QSharedPointer>
 
-class PluginActionLineage : public QEnableSharedFromThis<PluginActionLineage>
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT PluginActionLineage : public QEnableSharedFromThis<PluginActionLineage>
 {
 private:
     PluginActionLineage(QSharedPointer<const PluginAction> pluginAction);

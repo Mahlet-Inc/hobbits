@@ -6,7 +6,9 @@
 #include <QItemSelectionModel>
 #include <QSharedPointer>
 
-class BitContainerManager : public QObject
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT BitContainerManager : public QObject
 {
     Q_OBJECT
 

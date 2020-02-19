@@ -10,7 +10,9 @@
 #include "pluginmanager.h"
 #include <QSharedPointer>
 
-class PluginActionManager : public QObject
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT PluginActionManager : public QObject
 {
     Q_OBJECT
 

@@ -4,7 +4,9 @@
 #include "bitcontainer.h"
 #include <QSharedPointer>
 
-class ImportExportInterface
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT ImportExportInterface
 {
 public:
     virtual ~ImportExportInterface()

@@ -11,12 +11,15 @@
 #include <QPixmap>
 #include <QSharedPointer>
 #include <QUuid>
+
+#include "hobbits-core_global.h"
+
 class PluginActionLineage;
 class PluginAction;
 
 #define MAX_BIT_CONTAINER_SIZE (42 * 1000 * 1000 * 8)
 
-class BitContainer : public QObject
+class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {
     Q_OBJECT
 
@@ -66,8 +69,8 @@ public:
     QJsonDocument serializeJson() const;
     bool deserializeJson(QJsonDocument json);
 
-    friend QDataStream& operator<<(QDataStream&, const BitContainer&);
-    friend QDataStream& operator>>(QDataStream&, BitContainer&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator<<(QDataStream&, const BitContainer&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, BitContainer&);
 
 private:
     QString m_name;

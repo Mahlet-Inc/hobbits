@@ -4,7 +4,9 @@
 #include <QByteArray>
 #include <QStringList>
 
-class BitArray
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT BitArray
 {
 public:
     BitArray();

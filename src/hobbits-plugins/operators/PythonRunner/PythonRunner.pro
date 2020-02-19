@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += PYTHONRUNNER_LIBRARY
 
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -39,6 +40,16 @@ LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+unix:!mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}
 
 unix {
     target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/operators

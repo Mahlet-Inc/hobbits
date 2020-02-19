@@ -1,9 +1,12 @@
-#QT -= gui
+# This is sort of a hack because the core library requires widgets...
+QT += widgets 
 
 CONFIG += c++11 console
-CONFIG -= app_bundle
+CONFIG -= app_bundle debug_and_release_target
 
-DEFINES += "HOBBITS_RUNNER_VERSION=\"\\\"Extra Good Developer Version\\\"\""
+!contains(DEFINES, HOBBITS_RUNNER_VERSION.*) {
+    DEFINES += "HOBBITS_RUNNER_VERSION=\"\\\"Extra Good Developer Version\\\"\""
+}
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -32,3 +35,13 @@ LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
+
+unix:!mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}

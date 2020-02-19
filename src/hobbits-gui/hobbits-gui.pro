@@ -11,7 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = hobbits
 TEMPLATE = app
 
-DEFINES += "HOBBITS_GUI_VERSION=\"\\\"Totally Rad Developer Version\\\"\""
+!contains(DEFINES, HOBBITS_GUI_VERSION.*) {
+    DEFINES += "HOBBITS_GUI_VERSION=\"\\\"Totally Rad Developer Version\\\"\""
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -25,6 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
+CONFIG -= debug_and_release_target
 
 SOURCES += \
         hobbitsguiinfo.cpp \
@@ -41,14 +44,28 @@ FORMS += \
         mainwindow.ui \
         preferencesdialog.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-else:unix: LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
+
+unix:!mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+}
 
 RESOURCES += \
     icons.qrc
 
 INSTALLS =
+
+
+message(qmake hobbits-gui config: $$CONFIG)
+message(Building from: $$PWD)
+message(Building in: $$OUT_PWD)
+message(Target output: $$DESTDIR/$$TARGET)

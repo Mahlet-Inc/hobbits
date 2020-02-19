@@ -1,0 +1,18 @@
+steps:
+  - script: sudo apt-get update
+    displayName: 'Update packages'
+
+  - script: sudo apt-get install libgl1-mesa-dev
+    displayName: 'Install libGL'
+
+  - script: sudo apt-get install fftw3-dev
+    displayName: 'Install FFTW3'
+      
+  - script: |
+      cd $(Build.SourcesDirectory)
+      python3 -m pip install aqtinstall==0.7.1
+    displayName: 'Install aqtinstall'
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'

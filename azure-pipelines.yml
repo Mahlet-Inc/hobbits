@@ -1,0 +1,27 @@
+jobs:
+- job: UbuntuLinuxGCC7
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+    - template: ci/ubuntu-setup.yml
+    - template: ci/linux.yml
+      parameters:
+        artifactName: ubuntu18_gcc7_release
+- job: CentOSLinuxGCC48
+  pool:
+    vmImage: 'ubuntu-18.04'
+  container: helloadam/hobbitscentosbuilder:latest
+  steps:
+    - template: ci/linux.yml
+      parameters:
+        artifactName: centos7_gcc48_release
+- job: Windows
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - template: ci/windows.yml
+- job: Mac
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+    - template: ci/mac.yml

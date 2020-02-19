@@ -4,7 +4,9 @@
 #include "settingsdata.h"
 #include <QSettings>
 
-class SettingsManager
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT SettingsManager
 {
 public:
     static SettingsManager& getInstance();

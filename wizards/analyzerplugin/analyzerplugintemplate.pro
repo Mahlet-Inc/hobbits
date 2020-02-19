@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += %{JS: '%{ClassName}'.toUpperCase()}_LIBRARY
 
 CONFIG += c++11 plugin
+CONFIG -= debug_and_release_target
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -35,16 +36,17 @@ HEADERS += \
 FORMS += \
        %{JS: '%{UiFileName}'.toLowerCase()}
 
-DISTFILES += \
-     %{JS: '%{JSONFileName}'.toLowerCase()}
-
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/release/ -lhobbits-core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/debug/ -lhobbits-core
 else:unix: LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+unix:{
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
 
 unix {
     target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers

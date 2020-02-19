@@ -3,14 +3,14 @@
 
 #include <QDataStream>
 
-class Range
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT Range
 {
 public:
     Range();
     Range(int start, int end);
     Range(const Range &other) = default;
-
-    bool operator<(const Range &other);
 
     int size() const;
 
@@ -34,12 +34,14 @@ public:
         Equal = 0x40
     };
 
-    friend QDataStream& operator<<(QDataStream&, const Range&);
-    friend QDataStream& operator>>(QDataStream&, Range&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator<<(QDataStream&, const Range&);
+    friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, Range&);
 
 private:
     int m_start;
     int m_end;
 };
+
+bool HOBBITSCORESHARED_EXPORT operator<(const Range &a, const Range &b);
 
 #endif // RANGE_H

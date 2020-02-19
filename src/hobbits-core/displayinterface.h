@@ -5,10 +5,11 @@
 #include <QStringListModel>
 
 #include "bitcontainer.h"
-
 #include "displayhandle.h"
 
-class DisplayInterface
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT DisplayInterface
 {
 public:
     virtual ~DisplayInterface()

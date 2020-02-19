@@ -4,8 +4,10 @@
 #include "bitcontainer.h"
 #include <QObject>
 
+#include "hobbits-core_global.h"
+
 /// A proxy class for BitContainers that hides bit editing functionality
-class BitContainerPreview : public QObject
+class HOBBITSCORESHARED_EXPORT BitContainerPreview : public QObject
 {
     Q_OBJECT
 

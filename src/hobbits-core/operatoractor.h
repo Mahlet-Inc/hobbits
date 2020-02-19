@@ -9,9 +9,11 @@
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
 
+#include "hobbits-core_global.h"
+
 class PluginActionManager;
 
-class OperatorActor : public QObject
+class HOBBITSCORESHARED_EXPORT OperatorActor : public QObject
 {
     Q_OBJECT
 

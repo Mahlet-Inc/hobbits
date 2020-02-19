@@ -10,7 +10,9 @@
 #include "bitcontainerpreview.h"
 #include "plugincallback.h"
 
-class AnalyzerInterface
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT AnalyzerInterface
 {
 public:
     virtual ~AnalyzerInterface()

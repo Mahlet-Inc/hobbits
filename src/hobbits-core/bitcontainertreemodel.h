@@ -4,7 +4,9 @@
 #include "bitcontainer.h"
 #include <QAbstractItemModel>
 
-class BitContainerTreeModel : public QAbstractItemModel
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT BitContainerTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 

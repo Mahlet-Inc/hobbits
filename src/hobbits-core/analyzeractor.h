@@ -8,9 +8,11 @@
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
 
+#include "hobbits-core_global.h"
+
 class PluginActionManager;
 
-class AnalyzerActor : public QObject
+class HOBBITSCORESHARED_EXPORT AnalyzerActor : public QObject
 {
     Q_OBJECT
 
