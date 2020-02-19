@@ -30,7 +30,7 @@ steps:
     displayName: 'Create FFTW .lib'
 
   - bash: |
-      ./qmake_version_args.sh | sed 's/\\"/""/g' > qmake_args
+      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\\\"/\1\\\\\\\\\\\\\\"/g' | sed 's/\([^\\]\)\\"/\1\\\\\\"/g' > qmake_args
       cat qmake_args
     workingDirectory: $(Build.SourcesDirectory)/src
     displayName: 'Get version arguments for qmake'
