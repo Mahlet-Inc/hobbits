@@ -29,19 +29,19 @@
         {
           "assets": [
             {
-              "path": "hobbits/centos7_gcc48_release/hobbits.tgz",
+              "path": "hobbits/centos7_gcc48_release/hobbits_centos7_gcc48_release.tgz",
               "label": "Hobbits (64-bit CentOS 7 GCC 4.8)"
             },
             {
-              "path": "hobbits/ubuntu18_gcc7_release/hobbits.tgz",
+              "path": "hobbits/ubuntu18_gcc7_release/hobbits_ubuntu18_gcc7_release.tgz",
               "label": "Hobbits (64-bit Ubuntu 18.04 GCC 7)"
             },
             {
-              "path": "hobbits/windows_release/hobbits.zip",
+              "path": "hobbits/windows_release/hobbits_windows_release.zip",
               "label": "Hobbits (64-bit Windows 2016 msvc2017)"
             },
             {
-              "path": "hobbits/mac_release/hobbits.tgz",
+              "path": "hobbits/mac_release/hobbits_mac_release.tgz",
               "label": "Hobbits (64-bit Mac OSX 10.14)"
             }
           ]
