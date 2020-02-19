@@ -8,6 +8,12 @@ steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
+
+  - script: |
+      npm ci
+      npx semantic-release -p @semantic-release/commit-analyzer -p @semantic-release/npm
+    displayName: 'Update the version number for the build'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
       
   - script: |
       cd $(Build.SourcesDirectory)
