@@ -1,54 +1,7 @@
 {
   "name": "hobbits",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "private": true,
-  "release": {
-    "ci": true,
-    "branches": [
-      "master"
-    ],
-    "debug": true,
-    "dryRun": false,
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "CHANGELOG.md",
-            "package.json"
-          ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-        }
-      ],
-      [
-        "@semantic-release/github",
-        {
-          "assets": [
-            {
-              "path": "hobbits/centos7_gcc48_release/hobbits_centos7_gcc48_release.tgz",
-              "label": "Hobbits (64-bit CentOS 7 GCC 4.8)"
-            },
-            {
-              "path": "hobbits/ubuntu18_gcc7_release/hobbits_ubuntu18_gcc7_release.tgz",
-              "label": "Hobbits (64-bit Ubuntu 18.04 GCC 7)"
-            },
-            {
-              "path": "hobbits/windows_release/hobbits_windows_release.zip",
-              "label": "Hobbits (64-bit Windows 2016 msvc2017)"
-            },
-            {
-              "path": "hobbits/mac_release/hobbits_mac_release.tgz",
-              "label": "Hobbits (64-bit Mac OSX 10.14)"
-            }
-          ]
-        }
-      ]
-    ]
-  },
   "config": {
     "commitizen": {
       "path": "node_modules/@commitlint/prompt"
@@ -71,6 +24,7 @@
     "@commitlint/prompt": "^8.3.5",
     "@semantic-release/changelog": "^5.0.0",
     "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
     "@semantic-release/github": "^7.0.3",
     "@semantic-release/npm": "^7.0.3",

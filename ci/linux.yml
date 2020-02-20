@@ -5,10 +5,13 @@ parameters:
 
 steps:
   - checkout: self
+    persistCredentials: true
 
-  - script: |
+  - bash: |
+      rm .releaserc.json
+      cp ci/justversion.releaserc.json .releaserc.json
       npm ci
-      npx semantic-release -p @semantic-release/commit-analyzer -p @semantic-release/npm
+      npx semantic-release
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 

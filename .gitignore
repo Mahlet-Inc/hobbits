@@ -6,3 +6,4 @@
 *.so
 
 node_modules
+.version
