@@ -1,3 +1,10 @@
+## [0.20.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.2...v0.20.3) (2020-02-20)
+
+
+### Bug Fixes
+
+* **release:** fix formatting of windows version number in build ([2878e52](https://github.com/Mahlet-Inc/hobbits/commit/2878e52e00b2fcdbc7819a2bc066d03c936b3fca))
+
 ## [0.20.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.1...v0.20.2) (2020-02-20)
 
 
