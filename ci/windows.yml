@@ -1,5 +1,6 @@
 steps:
   - checkout: self
+    persistCredentials: true
 
   - task: UsePythonVersion@0 
     inputs:
@@ -8,6 +9,14 @@ steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
+
+  - bash: |
+      rm .releaserc.json
+      cp ci/justversion.releaserc.json .releaserc.json
+      npm ci
+      npx semantic-release
+    displayName: 'Update the version number for the build'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
       
   - script: |
       cd $(Build.SourcesDirectory)

@@ -5,6 +5,15 @@ parameters:
 
 steps:
   - checkout: self
+    persistCredentials: true
+
+  - bash: |
+      rm .releaserc.json
+      cp ci/justversion.releaserc.json .releaserc.json
+      npm ci
+      npx semantic-release
+    displayName: 'Update the version number for the build'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script: | 
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets

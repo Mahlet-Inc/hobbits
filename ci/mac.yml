@@ -1,5 +1,6 @@
 steps:
   - checkout: self
+    persistCredentials: true
 
   - script: brew install fftw
     displayName: 'Install FFTW3'
@@ -14,6 +15,14 @@ steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
+
+  - bash: |
+      rm .releaserc.json
+      cp ci/justversion.releaserc.json .releaserc.json
+      npm ci
+      npx semantic-release
+    displayName: 'Update the version number for the build'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   
   - script: |
       /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.app/Contents/Developer"

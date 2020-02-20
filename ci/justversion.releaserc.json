@@ -1,0 +1,22 @@
+{
+    "ci": true,
+    "branches": [
+        "master"
+    ],
+    "debug": true,
+    "dryRun": true,
+    "verifyConditions": [],
+    "analyzeCommits": ["@semantic-release/commit-analyzer"],
+    "verifyRelease": [
+    {
+        "path": "@semantic-release/exec",
+        "cmd": "echo  ${nextRelease.version} > .version"
+    }
+    ],
+    "generateNotes": [],
+    "prepare": [],
+    "publish": [],
+    "success": [],
+    "fail": [],
+    "addChannel": []
+}
