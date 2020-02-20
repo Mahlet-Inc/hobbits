@@ -3,9 +3,8 @@ The documentation is available at
 [mahlet-inc.github.io](https://mahlet-inc.github.io).
 
 ## Pre-built binaries
-We're still setting up our binary release process, but sort-of-portable linux
-binaries are available with
-[the 0.19.0 release](https://github.com/Mahlet-Inc/hobbits/releases/tag/0.19.0)
+There are pre-built binaries of the latest release on the
+[GitHub releases page](https://github.com/Mahlet-Inc/hobbits/releases).
 
 ## Building with Qt Creator and Qt 5.13+
 1. (Optional) Install any dev libraries required to get the full functionality
