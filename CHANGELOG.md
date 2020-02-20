@@ -1,3 +1,11 @@
+## [0.20.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.1...v0.20.2) (2020-02-20)
+
+
+### Bug Fixes
+
+* **release:** adjust how the version number is determined pre build ([9138acf](https://github.com/Mahlet-Inc/hobbits/commit/9138acfefce4af9b492c3c58c5deb34b121ca9c8))
+* **release:** give release builds updated semantic-release version ([cd34bc0](https://github.com/Mahlet-Inc/hobbits/commit/cd34bc0460769ff896a1057d76509599bf1d4f17))
+
 ## [0.20.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.0...v0.20.1) (2020-02-19)
 
 
