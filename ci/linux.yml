@@ -16,8 +16,8 @@ steps:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script: | 
-      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-    displayName: 'Install Qt 5.12.6'
+      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.9.9 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.9.9 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+    displayName: 'Install Qt 5.9.9'
 
   - bash: |
       ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
@@ -27,12 +27,12 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/bin/qmake $(cat qmake_args)
+      $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/bin/qmake $(cat qmake_args)
     displayName: 'Run qmake'
 
   - script: |
       cd $(Build.SourcesDirectory)/src
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/
       make -j$(nproc)
     displayName: 'Build hobbits'
 
@@ -45,20 +45,20 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp -r $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libicu*.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Concurrent.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Core.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5DBus.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Gui.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Network.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5PrintSupport.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Sql.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Test.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5WaylandClient.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Widgets.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5XcbQpa.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.12.6/gcc_64/lib/libQt5Xml.so* release/lib
+      cp -r $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/plugins/platforms release/bin
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libicu*.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Concurrent.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Core.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5DBus.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Gui.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Network.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5PrintSupport.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Sql.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Test.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5WaylandClient.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Widgets.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5XcbQpa.so* release/lib
+      cp $(Build.BinariesDirectory)/Qt/5.9.9/gcc_64/lib/libQt5Xml.so* release/lib
       cp /usr/lib64/libfftw3.so* release/lib
       cp /usr/lib/libfftw3.so* release/lib
       cp /usr/local/lib/libfftw3.so* release/lib
