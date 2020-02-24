@@ -18,6 +18,6 @@ steps:
       versionSpec: '12.x'
   
   - script: | 
-      python3 -m aqt install --outputdir  5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-      QTDIR=$(Build.BinariesDirectory)/Qt/5.12.6/gcc_64
+      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.12.6 linux desktop -m qtcore qtgui qtnetwork qtwidgets
+      echo '##vso[task.setvariable variable=QTDIR]$(Build.BinariesDirectory)/Qt/5.12.6/gcc_64'
     displayName: 'Install Qt 5.12.6'
