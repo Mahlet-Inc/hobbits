@@ -1,6 +1,6 @@
 
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
-[![Discord Chat](https://img.shields.io/discord/672761400220844042.svg)](https://discord.gg/wRQJpZZ)  
+[![Discord Chat](https://discordapp.com/api/guilds/672761400220844042/widget.png?style=shield)](https://discord.gg/wRQJpZZ)  
 
 | master | develop |
 | ------ | ------- |
