@@ -14,7 +14,7 @@ The documentation is available at
 There are pre-built binaries of the latest release on the
 [GitHub releases page](https://github.com/Mahlet-Inc/hobbits/releases).
 
-## Building with Qt Creator and Qt 5.13+
+## Building with Qt Creator and Qt 5.12+
 1. (Optional) Install any dev libraries required to get the full functionality
 of the core plugins ([fftw3](http://www.fftw.org/download.html))
 2. Open the root project file, [src/hobbits.pro](src/hobbits.pro), in Qt Creator
