@@ -23,12 +23,12 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(QTDIR)/bin/qmake $(cat qmake_args)
+      $QTDIR/bin/qmake $(cat qmake_args)
     displayName: 'Run qmake'
 
   - script: |
       cd $(Build.SourcesDirectory)/src
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(QTDIR)/lib/
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QTDIR/lib/
       make -j$(nproc)
     displayName: 'Build hobbits'
 
@@ -41,20 +41,20 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp -r $(QTDIR)/plugins/platforms release/bin
-      cp $(QTDIR)/lib/libicu*.so* release/lib
-      cp $(QTDIR)/lib/libQt5Concurrent.so* release/lib
-      cp $(QTDIR)/lib/libQt5Core.so* release/lib
-      cp $(QTDIR)/lib/libQt5DBus.so* release/lib
-      cp $(QTDIR)/lib/libQt5Gui.so* release/lib
-      cp $(QTDIR)/lib/libQt5Network.so* release/lib
-      cp $(QTDIR)/lib/libQt5PrintSupport.so* release/lib
-      cp $(QTDIR)/lib/libQt5Sql.so* release/lib
-      cp $(QTDIR)/lib/libQt5Test.so* release/lib
-      cp $(QTDIR)/lib/libQt5WaylandClient.so* release/lib
-      cp $(QTDIR)/lib/libQt5Widgets.so* release/lib
-      cp $(QTDIR)/lib/libQt5XcbQpa.so* release/lib
-      cp $(QTDIR)/lib/libQt5Xml.so* release/lib
+      cp -r $QTDIR/plugins/platforms release/bin
+      cp $QTDIR/lib/libicu*.so* release/lib
+      cp $QTDIR/lib/libQt5Concurrent.so* release/lib
+      cp $QTDIR/lib/libQt5Core.so* release/lib
+      cp $QTDIR/lib/libQt5DBus.so* release/lib
+      cp $QTDIR/lib/libQt5Gui.so* release/lib
+      cp $QTDIR/lib/libQt5Network.so* release/lib
+      cp $QTDIR/lib/libQt5PrintSupport.so* release/lib
+      cp $QTDIR/lib/libQt5Sql.so* release/lib
+      cp $QTDIR/lib/libQt5Test.so* release/lib
+      cp $QTDIR/lib/libQt5WaylandClient.so* release/lib
+      cp $QTDIR/lib/libQt5Widgets.so* release/lib
+      cp $QTDIR/lib/libQt5XcbQpa.so* release/lib
+      cp $QTDIR/lib/libQt5Xml.so* release/lib
       cp /usr/lib64/libfftw3.so* release/lib
       cp /usr/lib/libfftw3.so* release/lib
       cp /usr/local/lib/libfftw3.so* release/lib
