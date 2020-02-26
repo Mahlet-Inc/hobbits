@@ -15,10 +15,6 @@ steps:
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
-  - script: | 
-      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.13.2 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-    displayName: 'Install Qt 5.13.2'
-
   - bash: |
       ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
       cat qmake_args
@@ -27,12 +23,12 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/bin/qmake $(cat qmake_args)
+      $QMAKE_BIN $(cat qmake_args)
     displayName: 'Run qmake'
 
   - script: |
       cd $(Build.SourcesDirectory)/src
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_DIR
       make -j$(nproc)
     displayName: 'Build hobbits'
 
@@ -45,20 +41,20 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp -r $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/plugins/platforms release/bin
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libicu*.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Concurrent.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Core.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5DBus.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Gui.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Network.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5PrintSupport.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Sql.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Test.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5WaylandClient.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Widgets.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5XcbQpa.so* release/lib
-      cp $(Build.BinariesDirectory)/Qt/5.13.2/gcc_64/lib/libQt5Xml.so* release/lib
+      cp -r $QT_PLATFORMS_DIR release/bin
+      cp $QT_LIB_DIR/libicu*.so* release/lib
+      cp $QT_LIB_DIR/libQt5Concurrent.so* release/lib
+      cp $QT_LIB_DIR/libQt5Core.so* release/lib
+      cp $QT_LIB_DIR/libQt5DBus.so* release/lib
+      cp $QT_LIB_DIR/libQt5Gui.so* release/lib
+      cp $QT_LIB_DIR/libQt5Network.so* release/lib
+      cp $QT_LIB_DIR/libQt5PrintSupport.so* release/lib
+      cp $QT_LIB_DIR/libQt5Sql.so* release/lib
+      cp $QT_LIB_DIR/libQt5Test.so* release/lib
+      cp $QT_LIB_DIR/libQt5WaylandClient.so* release/lib
+      cp $QT_LIB_DIR/libQt5Widgets.so* release/lib
+      cp $QT_LIB_DIR/libQt5XcbQpa.so* release/lib
+      cp $QT_LIB_DIR/libQt5Xml.so* release/lib
       cp /usr/lib64/libfftw3.so* release/lib
       cp /usr/lib/libfftw3.so* release/lib
       cp /usr/local/lib/libfftw3.so* release/lib

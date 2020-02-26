@@ -1,3 +1,11 @@
+
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![Discord Chat](https://discordapp.com/api/guilds/672761400220844042/widget.png?style=shield)](https://discord.gg/wRQJpZZ)  
+
+| master | develop |
+| ------ | ------- |
+|[![Master Build Status](https://dev.azure.com/mahlet-inc/hobbits/_apis/build/status/Mahlet-Inc.hobbits?branchName=master)](https://dev.azure.com/mahlet-inc/hobbits/_build/latest?definitionId=1&branchName=master)|[![Develop Build Status](https://dev.azure.com/mahlet-inc/hobbits/_apis/build/status/Mahlet-Inc.hobbits?branchName=develop)](https://dev.azure.com/mahlet-inc/hobbits/_build/latest?definitionId=1&branchName=develop)|
+
 ## Documentation
 The documentation is available at
 [mahlet-inc.github.io](https://mahlet-inc.github.io).
@@ -6,7 +14,7 @@ The documentation is available at
 There are pre-built binaries of the latest release on the
 [GitHub releases page](https://github.com/Mahlet-Inc/hobbits/releases).
 
-## Building with Qt Creator and Qt 5.13+
+## Building with Qt Creator and Qt 5.12+
 1. (Optional) Install any dev libraries required to get the full functionality
 of the core plugins ([fftw3](http://www.fftw.org/download.html))
 2. Open the root project file, [src/hobbits.pro](src/hobbits.pro), in Qt Creator
