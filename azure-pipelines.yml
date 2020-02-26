@@ -7,7 +7,7 @@ jobs:
     - template: ci/linux.yml
       parameters:
         artifactName: ubuntu18_gcc7_release
-- job: CentOSLinuxGCC48
+- job: CentOS74LinuxGCC48
   pool:
     vmImage: 'ubuntu-18.04'
   container: helloadam/hobbitscentosbuilder:latest
