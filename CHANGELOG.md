@@ -1,3 +1,10 @@
+## [0.20.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.3...v0.20.4) (2020-02-26)
+
+
+### Bug Fixes
+
+* **release:** use a CentOS 7.4 builder with 7.4 repos for compatibility ([b1192e4](https://github.com/Mahlet-Inc/hobbits/commit/b1192e4ae459e09627dce88d335d44748e5d1745))
+
 ## [0.20.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.2...v0.20.3) (2020-02-20)
 
 
