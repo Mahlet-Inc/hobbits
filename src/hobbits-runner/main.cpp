@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         QStringList() << "o" << "output",
             QCoreApplication::translate("main", "A path prefix for output files"),
             QCoreApplication::translate("main", "file prefix"));
-    parser.addOption(inputFileOption);
+    parser.addOption(outputPrefixOption);
 
 
     QCommandLineOption extraPluginPathOption(
