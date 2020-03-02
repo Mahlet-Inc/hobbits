@@ -45,12 +45,11 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
     }
 
     QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->getBaseBits();
-    int bitLength = inputContainers.at(0)->getBaseBits()->size();
-    QByteArray inputBuffer(bitLength / 8 + 1, 0x00);
+    qint64 bitLength = inputContainers.at(0)->getBaseBits()->sizeInBits();
 
-    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(inputBuffer, bitLength));
+    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitLength));
 
-    for (int i = 0; i < bitLength; i++) {
+    for (qint64 i = 0; i < bitLength; i++) {
         if (_inputBits->at(i) == 0) {
             outputBits->set(i, false);
         }
@@ -65,13 +64,13 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
 
     double TrueBer = ((coeff * (pow(10, exp))));
 
-    int numBitsToFlip = int(floor(bitLength * TrueBer));
-    int incr = bitLength / numBitsToFlip;
-    int start = 0;
-    int end = bitLength / 2;
-    int counter = 0;
-    int mean = int(floor(end / 2));
-    int stddev = int(floor(end / 6)); // Empirical Rule
+    qint64 numBitsToFlip = qint64(floor(bitLength * TrueBer));
+    qint64 incr = bitLength / numBitsToFlip;
+    qint64 start = 0;
+    qint64 end = bitLength / 2;
+    qint64 counter = 0;
+    qint64 mean = qint64(floor(end / 2));
+    qint64 stddev = qint64(floor(end / 6)); // Empirical Rule
 
     std::normal_distribution<double> distribution(0, stddev);
     std::default_random_engine generator;
@@ -80,7 +79,7 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
 
 
     while (counter != numBitsToFlip) {
-        int number = int(distribution(generator)) + mean;
+        qint64 number = qint64(distribution(generator)) + mean;
 
         if (number < 0) {
             number += bitLength;
@@ -131,7 +130,7 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
     }
 
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits->getBytes(), bitLength);
+    bitContainer->setBytes(outputBits);
     output.append(bitContainer);
 
     QJsonObject pluginState(recallablePluginState);
@@ -222,10 +221,9 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
 
     QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->getBaseBits();
 
-    int bitLength = inputContainers.at(0)->getBaseBits()->size();
-    QByteArray inputBuffer(bitLength / 8 + 1, 0x00);
+    qint64 bitLength = inputContainers.at(0)->getBaseBits()->sizeInBits();
 
-    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(inputBuffer, bitLength));
+    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitLength));
 
     for (int i = 0; i < bitLength; i++) {
         if (_inputBits->at(i) == 0) {
@@ -248,7 +246,7 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
 
     int lastPercent = 0;
     if (bitLength > 0) {
-        for (int i = skipStep - 1; i < bitLength; i += skipStep) {
+        for (qint64 i = skipStep - 1; i < bitLength; i += skipStep) {
             if ((outputBits->at(i) ^ 1) == 0) {
                 outputBits->set(i, false);
             }
@@ -274,7 +272,7 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
     }
 
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits->getBytes(), bitLength);
+    bitContainer->setBytes(outputBits);
     outputContainers.append(bitContainer);
 
     QJsonObject pluginState(recallablePluginState);

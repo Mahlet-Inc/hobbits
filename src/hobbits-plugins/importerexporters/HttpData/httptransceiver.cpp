@@ -103,7 +103,7 @@ void HttpTransceiver::progressReceived(qint64 progress, qint64 total)
 
 void HttpTransceiver::replyReceived(QNetworkReply *reply)
 {
-    m_downloadData = reply->read(MAX_BIT_CONTAINER_SIZE);
+    m_downloadData = reply->read(1000 * 1000 * 10);
     m_uploadData.clear();
 
     if (reply->error() == QNetworkReply::NoError) {

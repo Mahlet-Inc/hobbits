@@ -73,8 +73,8 @@ void HexString::exportBits(QSharedPointer<const BitContainer> container, QMap<QS
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    qint64 len = container->getBaseBits()->size() / 8 + (container->getBaseBits()->size() % 8 ? 1 : 0);
-    QByteArray bytes = container->getBaseBits()->getBytes().mid(0, len).toHex(' ');
+    int len = container->getBaseBits()->getPreviewSize() / 8 + (container->getBaseBits()->getPreviewSize() % 8 ? 1 : 0);
+    QByteArray bytes = container->getBaseBits()->getPreviewBytes().mid(0, len).toHex(' ');
     file.write(bytes.data());
     file.close();
 }

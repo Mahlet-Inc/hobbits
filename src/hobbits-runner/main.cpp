@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
             auto container = bitManager->getCurrentContainer();
             QFile output(QString("hobbits_output_%1").arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
-            output.write(container->getBaseBits()->getBytes(), container->getBaseBits()->size() / 8);
+            output.write(container->getBaseBits()->getPreviewBytes(), container->getBaseBits()->getPreviewSize() / 8);
         });
 
         QObject::connect(

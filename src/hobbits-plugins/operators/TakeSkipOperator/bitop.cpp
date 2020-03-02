@@ -9,7 +9,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-BitOp::BitOp(int value) :
+BitOp::BitOp(qint64 value) :
     m_value(value)
 {
 
@@ -28,12 +28,12 @@ QList<QSharedPointer<BitOp>> BitOp::parseOps(QString opString)
     QList<QSharedPointer<BitOp>> ops;
     while (match.hasNext()) {
         QString op = match.next().captured();
-        int value = 0;
+        qint64 value = 0;
         if (op.mid(1) == "*") {
-            value = INT_MAX;
+            value = LONG_LONG_MAX;
         }
         else {
-            value = op.mid(1).toInt();
+            value = op.mid(1).toLongLong();
         }
         if (value < 1) {
             continue;

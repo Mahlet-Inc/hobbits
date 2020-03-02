@@ -1,6 +1,6 @@
 #include "skipop.h"
 
-SkipOp::SkipOp(int value) :
+SkipOp::SkipOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,21 +9,21 @@ SkipOp::SkipOp(int value) :
 void SkipOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
     Q_UNUSED(outputBits)
     Q_UNUSED(outputIdx)
     inputIdx += m_value;
-    inputIdx = qMin(inputIdx, inputBits->size());
+    inputIdx = qMin(inputIdx, inputBits->sizeInBits());
 }
 
-int SkipOp::inputStep() const
+qint64 SkipOp::inputStep(qint64 inputBits) const
 {
     return m_value;
 }
 
-int SkipOp::outputStep() const
+qint64 SkipOp::outputStep(qint64 inputBits) const
 {
     return 0;
 }

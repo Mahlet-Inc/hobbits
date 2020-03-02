@@ -45,7 +45,7 @@ public slots:
     void triggerRun();
 
 private:
-    BitArray getFindBits(const QJsonObject &pluginState);
+    QSharedPointer<BitArray> getFindBits(const QJsonObject &pluginState);
 
     Ui::FindAnalyzer *ui;
 

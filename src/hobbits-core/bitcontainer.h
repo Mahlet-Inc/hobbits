@@ -17,8 +17,6 @@
 class PluginActionLineage;
 class PluginAction;
 
-#define MAX_BIT_CONTAINER_SIZE (42 * 1000 * 1000 * 8)
-
 class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {
     Q_OBJECT
@@ -29,10 +27,10 @@ class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 public:
     explicit BitContainer(QObject *parent = nullptr);
 
-    void setFrames(QList<Frame> frames, int maxFrameWidth = -1);
+    void setFrames(QList<Frame> frames, qint64 maxFrameWidth = -1);
 
     QList<Frame> getFrames() const;
-    int getMaxFrameWidth() const;
+    qint64 getMaxFrameWidth() const;
 
     QList<Range> getHighlights(QString type) const;
     void setHighlights(QString type, QList<Range>);
@@ -44,8 +42,8 @@ public:
     void setName(QString name);
 
     QPixmap getThumbnail();
-    QImage getRasterImage(int x, int y, int w, int h) const;
-    QImage getByteRasterImage(int x, int y, int w, int h) const;
+    QImage getRasterImage(qint64 x, qint64 y, int w, int h) const;
+    QImage getByteRasterImage(qint64 x, qint64 y, int w, int h) const;
 
     QSharedPointer<const BitArray> getBaseBits() const;
 
@@ -74,10 +72,9 @@ public:
 
 private:
     QString m_name;
-    QByteArray m_bytes;
     QSharedPointer<BitArray> m_bits;
     QList<Frame> m_frames;
-    int m_maxFrameWidth;
+    qint64 m_maxFrameWidth;
     QMap<QString, QList<Range>> m_highlightMap;
     QMap<QString, QStringList> m_metadata;
 
@@ -97,7 +94,9 @@ signals:
     void focusRequested(int bitOffset, int frameOffset);
 
 public slots:
-    void setBytes(QByteArray bytes, int bitLen = -1);
+    void setBytes(QIODevice* readableBytes, qint64 bitLen = -1);
+    void setBytes(QByteArray bytes, qint64 bitLen = -1);
+    void setBytes(QSharedPointer<BitArray> bits);
     void requestFocus(int bitOffset, int frameOffset);
     void recordFocus(int bitOffset, int frameOffset);
 

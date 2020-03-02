@@ -72,19 +72,10 @@ QSharedPointer<BitContainer> FileData::importBits(QMap<QString, QString> args, Q
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    ImportBitsWizard *importWizard = new ImportBitsWizard(fileName, parent);
+    QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer);
+    container->setBytes(&file);
 
-    importWizard->setModal(true);
-
-    if (importWizard->exec() == QDialog::Accepted) {
-        auto container = importWizard->getImportedBitContainer();
-        delete importWizard;
-        return container;
-    }
-    else {
-        delete importWizard;
-        return nullResult;
-    }
+    return container;
 }
 
 void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QString, QString> args, QWidget *parent)
@@ -109,8 +100,19 @@ void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    QByteArray bytes = container->getBaseBits()->getBytes();
-    qint64 len = container->getBaseBits()->size() / 8 + (container->getBaseBits()->size() % 8 ? 1 : 0);
-    file.write(bytes.data(), len);
+    qint64 bytesWritten = 0;
+    qint64 bytesToWrite = container->getBaseBits()->sizeInBytes();
+    char* byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    while (bytesToWrite > 0) {
+        qint64 bytesRead = container->getBaseBits()->readBytes(byteBuffer, bytesWritten, CACHE_CHUNK_BYTE_SIZE);
+        file.write(byteBuffer, bytesRead);
+        bytesToWrite -= bytesRead;
+
+        if (bytesToWrite > 0 && bytesRead < 1) {
+            delete[] byteBuffer;
+            throw std::invalid_argument("BitArray failed to provide bytes equal to its size");
+        }
+    }
+    delete[] byteBuffer;
     file.close();
 }

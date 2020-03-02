@@ -77,10 +77,10 @@ bool FindAnalyzer::setPluginStateInUi(const QJsonObject &pluginState)
     return true;
 }
 
-BitArray FindAnalyzer::getFindBits(const QJsonObject &pluginState)
+QSharedPointer<BitArray> FindAnalyzer::getFindBits(const QJsonObject &pluginState)
 {
     if (!canRecallPluginState(pluginState)) {
-        return BitArray();
+        return QSharedPointer<BitArray>();
     }
     return BitArray::fromString(pluginState.value("search_string").toString());
 }
@@ -91,34 +91,34 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         QSharedPointer<ActionProgress> progressTracker)
 {
     QList<Range> results;
-    BitArray findBits = getFindBits(recallablePluginState);
+    QSharedPointer<BitArray> findBits = getFindBits(recallablePluginState);
     QSharedPointer<const BitArray> bits = container->getBaseBits();
 
     QSharedPointer<const AnalyzerResult> nullResult;
-    if (findBits.size() < 1) {
+    if (findBits->sizeInBits() < 1) {
         return nullResult;
     }
 
     int lastPercent = 0;
-    for (int start = 0; start < bits->size(); start++) {
-        if (findBits.size() > bits->size() - start) {
+    for (qint64 start = 0; start < bits->sizeInBits(); start++) {
+        if (findBits->sizeInBits() > bits->sizeInBits() - start) {
             break;
         }
         bool match = true;
-        for (int i = 0; i < findBits.size() && start + i < bits->size(); i++) {
-            if (bits->at(start + i) != findBits.at(i)) {
+        for (int i = 0; i < findBits->sizeInBits() && start + i < bits->sizeInBits(); i++) {
+            if (bits->at(start + i) != findBits->at(i)) {
                 match = false;
                 break;
             }
         }
         if (match) {
-            int end = start + findBits.size() - 1;
+            qint64 end = start + findBits->sizeInBits() - 1;
             results.append(Range(start, end));
             start = end;
-            end = end + findBits.size() - 1;
+            end = end + findBits->sizeInBits() - 1;
         }
 
-        int nextPercent = int(double(start) / double(bits->size()) * 100.0);
+        int nextPercent = int(double(start) / double(bits->sizeInBits()) * 100.0);
         if (nextPercent > lastPercent) {
             lastPercent = nextPercent;
             progressTracker->setProgressPercent(nextPercent);
@@ -138,8 +138,8 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
     analyzerResult->addRanges("find", results);
 
     QString resultHead = "Results for pattern '";
-    for (int i = 0; i < findBits.size(); i++) {
-        if (findBits.at(i)) {
+    for (int i = 0; i < findBits->sizeInBits(); i++) {
+        if (findBits->at(i)) {
             resultHead += "1";
         }
         else {
@@ -149,7 +149,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
     resultHead += "'";
 
     QStringList result;
-    int prev = 0;
+    qint64 prev = 0;
     for (Range range : results) {
         result.append(QString("bit: %1 , delta: %2").arg(range.start()).arg(range.start() - prev));
         prev = range.start();
@@ -180,7 +180,7 @@ void FindAnalyzer::resolveFindFocusHighlight()
 
         int containingFrame = m_previewContainer->getFrameOffsetContaining(focus);
         if (containingFrame >= 0) {
-            int bitOffset = qMax(0, focus.start() - m_previewContainer->getFrames().at(containingFrame).start() - 16);
+            int bitOffset = qMax(0, int(focus.start() - m_previewContainer->getFrames().at(containingFrame).start() - 16));
             int frameOffset = qMax(0, containingFrame - 16);
 
             QList<Range> findFocus;

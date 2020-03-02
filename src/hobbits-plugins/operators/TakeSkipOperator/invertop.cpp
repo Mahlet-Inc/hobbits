@@ -1,6 +1,6 @@
 #include "invertop.h"
 
-InvertOp::InvertOp(int value) :
+InvertOp::InvertOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,22 +9,22 @@ InvertOp::InvertOp(int value) :
 void InvertOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
-    for (int i = 0; i < m_value && inputIdx < inputBits->size(); i++) {
+    for (int i = 0; i < m_value && inputIdx < inputBits->sizeInBits(); i++) {
         outputBits->set(outputIdx, !inputBits->at(inputIdx));
         inputIdx++;
         outputIdx++;
     }
 }
 
-int InvertOp::inputStep() const
+qint64 InvertOp::inputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }
 
-int InvertOp::outputStep() const
+qint64 InvertOp::outputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }
