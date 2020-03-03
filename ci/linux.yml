@@ -64,10 +64,10 @@ steps:
     displayName: 'Collect and package release files'
   
   - bash: |
-    npm install
-    cd test
-    ./test_hobbits.js ../release/bin/hobbits-runner
-  displayName: 'Run tests'
+      npm install
+      cd test
+      ./test_hobbits.js ../release/bin/hobbits-runner
+    displayName: 'Run tests'
 
   - task: CopyFiles@2 
     inputs:
