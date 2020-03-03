@@ -100,19 +100,6 @@ void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    qint64 bytesWritten = 0;
-    qint64 bytesToWrite = container->getBaseBits()->sizeInBytes();
-    char* byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
-    while (bytesToWrite > 0) {
-        qint64 bytesRead = container->getBaseBits()->readBytes(byteBuffer, bytesWritten, CACHE_CHUNK_BYTE_SIZE);
-        file.write(byteBuffer, bytesRead);
-        bytesToWrite -= bytesRead;
-
-        if (bytesToWrite > 0 && bytesRead < 1) {
-            delete[] byteBuffer;
-            throw std::invalid_argument("BitArray failed to provide bytes equal to its size");
-        }
-    }
-    delete[] byteBuffer;
+    container->getBaseBits()->writeTo(&file);
     file.close();
 }

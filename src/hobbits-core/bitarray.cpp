@@ -43,13 +43,7 @@ BitArray::BitArray(qint64 sizeInBits) :
     }
     delete[] byteBuffer;
 
-    if (sizeInBits > 0) {
-        qint64 cacheCount = sizeInBits / CACHE_CHUNK_BIT_SIZE + (sizeInBits % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
-        m_dataCaches = new char*[cacheCount];
-        for (int i = 0; i < cacheCount; i++) {
-            m_dataCaches[i] = nullptr;
-        }
-    }
+    reinitializeCache();
 }
 
 BitArray::BitArray(QByteArray bytes, qint64 sizeInBits) :
@@ -64,13 +58,7 @@ BitArray::BitArray(QByteArray bytes, qint64 sizeInBits) :
     m_size = sizeInBits;
     m_dataFile.write(bytes);
 
-    if (sizeInBits > 0) {
-        qint64 cacheCount = sizeInBits / CACHE_CHUNK_BIT_SIZE + (sizeInBits % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
-        m_dataCaches = new char*[cacheCount];
-        for (int i = 0; i < cacheCount; i++) {
-            m_dataCaches[i] = nullptr;
-        }
-    }
+    reinitializeCache();
 }
 
 BitArray::BitArray(QIODevice* dataStream, qint64 sizeInBits) :
@@ -86,10 +74,7 @@ BitArray::BitArray(const BitArray &other) :
 
 BitArray::~BitArray()
 {
-    while(!m_recentCacheAccess.isEmpty()) {
-        delete[] m_dataCaches[m_recentCacheAccess.dequeue()];
-    }
-    delete[] m_dataCaches;
+    deleteCache();
 }
 
 BitArray& BitArray::operator=(const BitArray &other)
@@ -126,13 +111,28 @@ void BitArray::initFromIO(QIODevice* dataStream, qint64 sizeInBits)
     }
     delete[] byteBuffer;
 
-    if (sizeInBits > 0) {
-        qint64 cacheCount = sizeInBits / CACHE_CHUNK_BIT_SIZE + (sizeInBits % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
+    reinitializeCache();
+}
+
+
+void BitArray::reinitializeCache() {
+    if (m_dataCaches) {
+        deleteCache();
+    }
+    if (sizeInBits() > 0) {
+        qint64 cacheCount = sizeInBits() / CACHE_CHUNK_BIT_SIZE + (sizeInBits() % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
         m_dataCaches = new char*[cacheCount];
         for (int i = 0; i < cacheCount; i++) {
             m_dataCaches[i] = nullptr;
         }
     }
+}
+
+void BitArray::deleteCache() {
+    while(!m_recentCacheAccess.isEmpty()) {
+        delete[] m_dataCaches[m_recentCacheAccess.dequeue()];
+    }
+    delete[] m_dataCaches;
 }
 
 bool BitArray::at(qint64 i) const
@@ -192,6 +192,18 @@ qint64 BitArray::sizeInBytes() const
     return m_size / 8 + (m_size % 8 ? 1 : 0);
 }
 
+void BitArray::resize(qint64 sizeInBits) {
+    if (sizeInBits > this->sizeInBits()) {
+        return;
+    }
+
+    syncCacheToFile();
+
+    m_size = sizeInBits;
+    reinitializeCache();
+    m_dataFile.resize(sizeInBytes());
+}
+
 void BitArray::set(qint64 i, bool value)
 {
     if (i < 0 || i >= m_size) {
@@ -229,6 +241,24 @@ qint64 BitArray::readBytes(char* data, qint64 byteOffset, qint64 maxBytes) const
 {
     syncCacheToFile();
     return readBytesNoSync(data, byteOffset, maxBytes);
+}
+
+void BitArray::writeTo(QIODevice* outputStream) const
+{
+    QIODevice* reader = dataReader();
+    char* byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    qint64 bytesToWrite = sizeInBytes();
+    while (bytesToWrite > 0) {
+        qint64 bytesRead = reader->read(byteBuffer, CACHE_CHUNK_BYTE_SIZE);
+        outputStream->write(byteBuffer, bytesRead);
+        bytesToWrite -= bytesRead;
+
+        if (bytesToWrite > 0 && bytesRead < 1) {
+            delete[] byteBuffer;
+            throw std::invalid_argument("BitArray failed to provide bytes equal to its size during writeTo");
+        }
+    }
+    delete[] byteBuffer;
 }
 
 qint64 BitArray::readBytesNoSync(char* data, qint64 byteOffset, qint64 maxBytes) const

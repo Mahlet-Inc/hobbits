@@ -130,6 +130,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         }
     }
 
+    outputBits->resize(outputIdx);
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
     bitContainer->setBytes(outputBits);
     outputContainers.append(bitContainer);
