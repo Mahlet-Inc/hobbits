@@ -78,14 +78,14 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         // need to check for integer overflow
         qint64 inTotal = op->inputStep(inputBits->sizeInBits()) + inputStepTotal;
         if (inTotal < op->inputStep(inputBits->sizeInBits()) || inTotal < inputStepTotal) {
-            inputStepTotal = LONG_LONG_MAX;
+            inputStepTotal = LLONG_MAX;
         }
         else {
             inputStepTotal = inTotal;
         }
         qint64 outTotal = op->outputStep(inputBits->sizeInBits()) + outputStepTotal;
         if (outTotal < op->outputStep(inputBits->sizeInBits()) || outTotal < outputStepTotal) {
-            outputStepTotal = LONG_LONG_MAX;
+            outputStepTotal = LLONG_MAX;
         }
         else {
             outputStepTotal = outTotal;
@@ -99,7 +99,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                    + (inputContainers.at(0)->getBaseBits()->sizeInBits() % inputStepTotal ? 1 : 0);
     qint64 outputBufferSize = opCycles * outputStepTotal;
     if (outputBufferSize < outputStepTotal) {
-        outputBufferSize = LONG_LONG_MAX;
+        outputBufferSize = LLONG_MAX;
     }
 
     qint64 inputIdx = 0;

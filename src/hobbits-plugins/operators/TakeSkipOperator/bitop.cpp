@@ -30,7 +30,7 @@ QList<QSharedPointer<BitOp>> BitOp::parseOps(QString opString)
         QString op = match.next().captured();
         qint64 value = 0;
         if (op.mid(1) == "*") {
-            value = LONG_LONG_MAX;
+            value = LLONG_MAX;
         }
         else {
             value = op.mid(1).toLongLong();

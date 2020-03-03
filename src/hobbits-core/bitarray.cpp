@@ -12,6 +12,8 @@ static char INVERSE_BIT_MASKS[8] = {
     0x7f, -65, -33, -17, -9, -5, -3, -2
 };
 
+#define CACHE_CHUNK_BYTE_SIZE (10 * 1000 * 1000)
+#define CACHE_CHUNK_BIT_SIZE (CACHE_CHUNK_BYTE_SIZE * 8)
 #define MAX_ACTIVE_CACHE_CHUNKS 5
 
 BitArray::BitArray() :

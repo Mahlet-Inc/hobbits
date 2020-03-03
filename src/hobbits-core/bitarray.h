@@ -10,9 +10,6 @@
 
 #include "hobbits-core_global.h"
 
-#define CACHE_CHUNK_BYTE_SIZE (10 * 1000 * 1000)
-#define CACHE_CHUNK_BIT_SIZE (CACHE_CHUNK_BYTE_SIZE * 8)
-
 class HOBBITSCORESHARED_EXPORT BitArray
 {
 public:
