@@ -1,8 +1,8 @@
 #include "bitcontainer.h"
 #include "pluginactionlineage.h"
 #include "settingsmanager.h"
-#include <QDebug>
 #include <QBuffer>
+#include <QDebug>
 
 BitContainer::BitContainer(QObject *parent) :
     QObject(parent),
@@ -24,7 +24,6 @@ qint64 BitContainer::getMaxFrameWidth() const
     return m_maxFrameWidth;
 }
 
-
 void BitContainer::setBytes(QByteArray bytes, qint64 bitLen)
 {
     QBuffer buffer(&bytes);
@@ -32,7 +31,7 @@ void BitContainer::setBytes(QByteArray bytes, qint64 bitLen)
     setBytes(&buffer, bitLen);
 }
 
-void BitContainer::setBytes(QIODevice* readableBytes, qint64 bitLen)
+void BitContainer::setBytes(QIODevice *readableBytes, qint64 bitLen)
 {
     setBytes(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)));
 }

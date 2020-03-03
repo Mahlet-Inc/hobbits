@@ -425,7 +425,8 @@ void MainWindow::loadPlugins()
                 QString(
                         "The plugin at '%1' was running when the application terminated.  Do you want to blacklist this plugin? You can always edit the blacklist in the Preferences.")
                 .arg(badPluginPath.toString())) == QMessageBox::Yes) {
-            QVariant oldBlacklist = SettingsManager::getInstance().getPluginLoaderSetting(SettingsData::PLUGIN_BLACKLIST_KEY);
+            QVariant oldBlacklist = SettingsManager::getInstance().getPluginLoaderSetting(
+                    SettingsData::PLUGIN_BLACKLIST_KEY);
             QStringList blacklist;
             if (oldBlacklist.isValid() && oldBlacklist.canConvert<QStringList>()) {
                 blacklist = oldBlacklist.toStringList();

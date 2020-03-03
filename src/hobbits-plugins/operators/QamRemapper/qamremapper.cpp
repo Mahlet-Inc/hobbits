@@ -169,7 +169,8 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
     int lastPercent = 0;
     int failedRemappings = 0;
     BitArray inputBitChunk(bitChunkLength);
-    for (int i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits(); i += bitChunkLength) {
+    for (int i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits();
+         i += bitChunkLength) {
         for (int ii = 0; ii < bitChunkLength; ii++) {
             inputBitChunk.set(ii, inputBits->at(i + ii));
         }

@@ -96,7 +96,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     }
 
     qint64 opCycles = inputContainers.at(0)->getBaseBits()->sizeInBits() / inputStepTotal
-                   + (inputContainers.at(0)->getBaseBits()->sizeInBits() % inputStepTotal ? 1 : 0);
+                      + (inputContainers.at(0)->getBaseBits()->sizeInBits() % inputStepTotal ? 1 : 0);
     qint64 outputBufferSize = opCycles * outputStepTotal;
     if (outputBufferSize < outputStepTotal) {
         outputBufferSize = LLONG_MAX;
@@ -138,8 +138,8 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     pluginState.insert(
             "container_name",
             QString("%1 <- %2")
-                .arg(recallablePluginState.value("take_skip_string").toString())
-                .arg(inputContainers.at(0)->getName()));
+            .arg(recallablePluginState.value("take_skip_string").toString())
+            .arg(inputContainers.at(0)->getName()));
     return QSharedPointer<const OperatorResult>(
             (new OperatorResult())->setOutputContainers(
                     outputContainers)->setPluginState(pluginState));

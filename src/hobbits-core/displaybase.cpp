@@ -499,7 +499,12 @@ void DisplayBase::showContextMenu(const QPoint &point)
             return;
         }
 
-        manualHighlights.append(Range(focusBit, qMin(container->getBaseBits()->sizeInBits() - 1, focusBit + length - 1)));
+        manualHighlights.append(
+                Range(
+                        focusBit,
+                        qMin(
+                                container->getBaseBits()->sizeInBits() - 1,
+                                focusBit + length - 1)));
         std::sort(manualHighlights.begin(), manualHighlights.end());
         container->setHighlights("manual_highlights", manualHighlights);
     });

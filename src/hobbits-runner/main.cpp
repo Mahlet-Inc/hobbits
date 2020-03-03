@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
                 bitManager.data(),
                 &BitContainerManager::currSelectionChanged,
                 [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](const QItemSelection &selected,
-                                                                     const QItemSelection &deselected) {
+                                                                                   const QItemSelection &deselected) {
             Q_UNUSED(selected)
             Q_UNUSED(deselected)
             auto container = bitManager->getCurrentContainer();

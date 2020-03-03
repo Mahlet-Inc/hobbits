@@ -2,11 +2,11 @@
 #define BITARRAY_H
 
 #include <QByteArray>
-#include <QStringList>
+#include <QIODevice>
 #include <QMap>
 #include <QQueue>
+#include <QStringList>
 #include <QTemporaryFile>
-#include <QIODevice>
 
 #include "hobbits-core_global.h"
 
@@ -16,9 +16,10 @@ public:
     BitArray();
     BitArray(qint64 sizeInBits);
     BitArray(QByteArray bytes, qint64 sizeInBits);
-    BitArray(QIODevice* dataStream, qint64 sizeInBits);
+    BitArray(QIODevice *dataStream, qint64 sizeInBits);
     BitArray(const BitArray &other, qint64 sizeInBits);
     BitArray(const BitArray &other);
+
     BitArray& operator=(const BitArray &other);
 
     ~BitArray();
@@ -31,8 +32,8 @@ public:
 
     void set(qint64 i, bool value);
 
-    qint64 readBytes(char* data, qint64 byteOffset, qint64 maxBytes) const;
-    void writeTo(QIODevice* outputStream) const;
+    qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    void writeTo(QIODevice *outputStream) const;
 
     int getPreviewSize() const;
     QByteArray getPreviewBytes() const;
@@ -40,18 +41,19 @@ public:
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
-    qint64 readBytesNoSync(char* data, qint64 byteOffset, qint64 maxBytes) const;
+    qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
     QIODevice* dataReader() const;
-    void initFromIO(QIODevice* dataStream, qint64 sizeInBits);
+    void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
     void reinitializeCache();
     void deleteCache();
     bool loadCacheAt(qint64 bitIndex) const;
     void syncCacheToFile() const;
+
     QTemporaryFile m_dataFile;
     qint64 m_size;
 
     QQueue<qint64> m_recentCacheAccess;
-    char** m_dataCaches;
+    char **m_dataCaches;
     bool m_dirtyCache;
 };
 

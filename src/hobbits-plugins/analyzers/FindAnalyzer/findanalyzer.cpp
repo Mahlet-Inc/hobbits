@@ -180,7 +180,9 @@ void FindAnalyzer::resolveFindFocusHighlight()
 
         int containingFrame = m_previewContainer->getFrameOffsetContaining(focus);
         if (containingFrame >= 0) {
-            int bitOffset = qMax(0, int(focus.start() - m_previewContainer->getFrames().at(containingFrame).start() - 16));
+            int bitOffset = qMax(
+                    0,
+                    int(focus.start() - m_previewContainer->getFrames().at(containingFrame).start() - 16));
             int frameOffset = qMax(0, containingFrame - 16);
 
             QList<Range> findFocus;
