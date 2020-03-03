@@ -64,8 +64,8 @@ steps:
     displayName: 'Collect and package release files'
   
   - bash: |
-      npm install
-      cd test
+      npm ci
+      cd tests
       ./test_hobbits.js ../release/bin/hobbits-runner
     displayName: 'Run tests'
 
