@@ -5,6 +5,7 @@ parameters:
 
 steps:
   - checkout: self
+    lfs: true
     persistCredentials: true
 
   - bash: |
