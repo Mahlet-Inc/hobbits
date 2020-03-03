@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         QStringList() << "o" << "output",
             QCoreApplication::translate("main", "A path prefix for output files"),
             QCoreApplication::translate("main", "file prefix"));
-    parser.addOption(inputFileOption);
+    parser.addOption(outputPrefixOption);
 
 
     QCommandLineOption extraPluginPathOption(
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
             err << parser.helpText() << endl;
             return -1;
         }
+        QSharedPointer<BitContainer> targetContainer = QSharedPointer<BitContainer>(new BitContainer());
         QByteArray inputData;
         if (pipedInData.isNull()) {
             QFile inputFile(parser.value(inputFileOption));
@@ -133,14 +134,12 @@ int main(int argc, char *argv[])
                 err << "Error: cannot open input file: " << parser.value(inputFileOption) << endl;
                 return -1;
             }
-            inputData = inputFile.readAll();
+            targetContainer->setBytes(&inputFile);
             inputFile.close();
         }
         else {
-            inputData = pipedInData;
+            targetContainer->setBytes(pipedInData);
         }
-        QSharedPointer<BitContainer> targetContainer = QSharedPointer<BitContainer>(new BitContainer());
-        targetContainer->setBytes(inputData);
 
         QSharedPointer<BitContainerManager> bitManager = QSharedPointer<BitContainerManager>(new BitContainerManager());
         bitManager->getTreeModel()->addContainer(targetContainer);
@@ -154,18 +153,24 @@ int main(int argc, char *argv[])
             a.exit(-1);
         });
 
+        QString outputPrefix = "hobbits_output_";
+        if (parser.isSet(outputPrefixOption)) {
+            outputPrefix = parser.value(outputPrefixOption);
+        }
+
         int outputNumber = 1;
         QObject::connect(
                 bitManager.data(),
                 &BitContainerManager::currSelectionChanged,
-                [&a, bitManager, &outputNumber, pluginActionManager](const QItemSelection &selected,
-                                                                     const QItemSelection &deselected) {
+                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](const QItemSelection &selected,
+                                                                                   const QItemSelection &deselected) {
             Q_UNUSED(selected)
             Q_UNUSED(deselected)
             auto container = bitManager->getCurrentContainer();
-            QFile output(QString("hobbits_output_%1").arg(outputNumber++));
+            QFile output(QString("%1%2").arg(outputPrefix).arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
-            output.write(container->getBaseBits()->getBytes(), container->getBaseBits()->size() / 8);
+            container->getBaseBits()->writeTo(&output);
+            output.close();
         });
 
         QObject::connect(

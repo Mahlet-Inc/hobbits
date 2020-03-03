@@ -1,6 +1,7 @@
 #include "bitcontainer.h"
 #include "pluginactionlineage.h"
 #include "settingsmanager.h"
+#include <QBuffer>
 #include <QDebug>
 
 BitContainer::BitContainer(QObject *parent) :
@@ -18,33 +19,40 @@ QList<Frame> BitContainer::getFrames() const
     return m_frames;
 }
 
-int BitContainer::getMaxFrameWidth() const
+qint64 BitContainer::getMaxFrameWidth() const
 {
     return m_maxFrameWidth;
 }
 
-void BitContainer::setBytes(QByteArray bytes, int bitLen)
+void BitContainer::setBytes(QByteArray bytes, qint64 bitLen)
 {
-    if (bitLen < 0) {
-        bitLen = qMin(MAX_BIT_CONTAINER_SIZE, bytes.size() * 8);
-    }
-    m_bytes = bytes;
-    m_bits = QSharedPointer<BitArray>(new BitArray(m_bytes, bitLen));
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::ReadOnly);
+    setBytes(&buffer, bitLen);
+}
 
+void BitContainer::setBytes(QIODevice *readableBytes, qint64 bitLen)
+{
+    setBytes(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)));
+}
+
+void BitContainer::setBytes(QSharedPointer<BitArray> bits)
+{
+    m_bits = bits;
 
     // Initialize frames
-    int frameWidth = 256;
+    qint64 frameWidth = 256;
     QList<Frame> frames;
 
-    for (int i = 0; i < m_bits->size(); i += frameWidth) {
-        int width = qMin(frameWidth - 1, m_bits->size() - i - 1);
+    for (qint64 i = 0; i < m_bits->sizeInBits(); i += frameWidth) {
+        qint64 width = qMin(frameWidth - 1, m_bits->sizeInBits() - i - 1);
         frames.append(Frame(m_bits, i, i + width));
     }
 
     this->setFrames(frames, frameWidth);
 }
 
-void BitContainer::setFrames(QList<Frame> frames, int maxFrameWidth)
+void BitContainer::setFrames(QList<Frame> frames, qint64 maxFrameWidth)
 {
     m_frames = frames;
 
@@ -60,15 +68,15 @@ void BitContainer::setFrames(QList<Frame> frames, int maxFrameWidth)
     emit changed(this);
 }
 
-QImage BitContainer::getRasterImage(int x, int y, int w, int h) const
+QImage BitContainer::getRasterImage(qint64 x, qint64 y, int w, int h) const
 {
     QColor trueColor = SettingsManager::getInstance().getUiSetting(SettingsData::ONE_COLOR_KEY).value<QColor>();
     QColor falseColor = SettingsManager::getInstance().getUiSetting(SettingsData::ZERO_COLOR_KEY).value<QColor>();
     QImage raster(w, h, QImage::Format_ARGB32);
     raster.fill(qRgba(0x66, 0x66, 0x66, 0x66));
 
-    int frameOffset = y;
-    int bitOffset = x;
+    qint64 frameOffset = y;
+    qint64 bitOffset = x;
 
     if (frameOffset < 0) {
         return raster;
@@ -78,7 +86,7 @@ QImage BitContainer::getRasterImage(int x, int y, int w, int h) const
         if (i + frameOffset >= getFrames().size()) {
             break;
         }
-        Frame frame = getFrames().at(i + frameOffset);
+        Frame frame = getFrames().at(int(i + frameOffset));
 
         for (int ii = 0; ii < w; ii++) {
             if (ii + bitOffset >= frame.size()) {
@@ -96,14 +104,14 @@ QImage BitContainer::getRasterImage(int x, int y, int w, int h) const
     return raster;
 }
 
-QImage BitContainer::getByteRasterImage(int x, int y, int w, int h) const
+QImage BitContainer::getByteRasterImage(qint64 x, qint64 y, int w, int h) const
 {
     QImage raster(w, h, QImage::Format_ARGB32);
     raster.fill(qRgba(0x66, 0x66, 0x66, 0x66));
 
-    int frameOffset = y;
-    int byteOffset = x / 8;
-    int bitOffset = byteOffset * 8;
+    qint64 frameOffset = y;
+    qint64 byteOffset = x / 8;
+    qint64 bitOffset = byteOffset * 8;
 
     if (frameOffset < 0) {
         return raster;
@@ -113,7 +121,7 @@ QImage BitContainer::getByteRasterImage(int x, int y, int w, int h) const
         if (i + frameOffset >= getFrames().size()) {
             break;
         }
-        Frame frame = getFrames().at(i + frameOffset);
+        Frame frame = getFrames().at(int(i + frameOffset));
 
         for (int ii = 0; ii < w * 8; ii += 8) {
             if (ii + bitOffset + 8 >= frame.size()) {
@@ -313,8 +321,8 @@ void BitContainer::addParent(QUuid parentId)
 QJsonDocument BitContainer::serializeJson() const
 {
     QJsonObject root;
-    root.insert("size", m_bits->size());
-    root.insert("data", QString(m_bits->getBytes().toBase64()));
+    root.insert("size", m_bits->getPreviewSize());
+    root.insert("data", QString(m_bits->getPreviewBytes().toBase64()));
     return QJsonDocument(root);
 }
 
@@ -329,7 +337,7 @@ bool BitContainer::deserializeJson(QJsonDocument json)
     }
 
     QByteArray data = QByteArray::fromBase64(root.value("data").toString().toLocal8Bit());
-    int size = root.value("size").toInt();
+    qint64 size = root.value("size").toInt();
     if (size > data.length() * 8) {
         return false;
     }
@@ -345,8 +353,8 @@ QDataStream& operator<<(QDataStream &stream, const BitContainer &container)
     stream << VERSION_2;
     stream << container.m_highlightMap;
     stream << container.m_metadata;
-    stream << container.getBaseBits()->size();
-    stream << container.getBaseBits()->getBytes();
+    stream << container.getBaseBits()->getPreviewSize();
+    stream << container.getBaseBits()->getPreviewBytes();
 
     return stream;
 }

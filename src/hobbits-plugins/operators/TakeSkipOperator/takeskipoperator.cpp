@@ -70,20 +70,22 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         return nullResult;
     }
 
-    int inputStepTotal = 0;
-    int outputStepTotal = 0;
+    QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->getBaseBits();
+
+    qint64 inputStepTotal = 0;
+    qint64 outputStepTotal = 0;
     for (QSharedPointer<BitOp> op : ops) {
         // need to check for integer overflow
-        int inTotal = op->inputStep() + inputStepTotal;
-        if (inTotal < op->inputStep() || inTotal < inputStepTotal) {
-            inputStepTotal = INT_MAX;
+        qint64 inTotal = op->inputStep(inputBits->sizeInBits()) + inputStepTotal;
+        if (inTotal < op->inputStep(inputBits->sizeInBits()) || inTotal < inputStepTotal) {
+            inputStepTotal = LLONG_MAX;
         }
         else {
             inputStepTotal = inTotal;
         }
-        int outTotal = op->outputStep() + outputStepTotal;
-        if (inTotal < op->outputStep() || outTotal < outputStepTotal) {
-            outputStepTotal = INT_MAX;
+        qint64 outTotal = op->outputStep(inputBits->sizeInBits()) + outputStepTotal;
+        if (outTotal < op->outputStep(inputBits->sizeInBits()) || outTotal < outputStepTotal) {
+            outputStepTotal = LLONG_MAX;
         }
         else {
             outputStepTotal = outTotal;
@@ -93,28 +95,25 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         return nullResult;
     }
 
-    int opCycles = inputContainers.at(0)->getBaseBits()->size() / inputStepTotal
-                   + (inputContainers.at(0)->getBaseBits()->size() % inputStepTotal ? 1 : 0);
-    int outputBufferSize = opCycles * outputStepTotal;
+    qint64 opCycles = inputContainers.at(0)->getBaseBits()->sizeInBits() / inputStepTotal
+                      + (inputContainers.at(0)->getBaseBits()->sizeInBits() % inputStepTotal ? 1 : 0);
+    qint64 outputBufferSize = opCycles * outputStepTotal;
     if (outputBufferSize < outputStepTotal) {
-        outputBufferSize = INT_MAX;
+        outputBufferSize = LLONG_MAX;
     }
-    outputBufferSize = qMin(outputBufferSize / 8 + (outputBufferSize % 8 ? 1 : 0), MAX_BIT_CONTAINER_SIZE / 8);
 
-    int inputIdx = 0;
-    int outputIdx = 0;
-    QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->getBaseBits();
+    qint64 inputIdx = 0;
+    qint64 outputIdx = 0;
 
-    QByteArray bytes(outputBufferSize, 0x00);
-    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bytes, bytes.size() * 8));
+    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputBufferSize));
 
     int lastPercent = 0;
-    while (inputIdx < inputBits->size()) {
+    while (inputIdx < inputBits->sizeInBits()) {
         for (QSharedPointer<BitOp> op : ops) {
             op->apply(inputBits, outputBits, inputIdx, outputIdx);
         }
         if (inputIdx > 0) {
-            int nextPercent = int(double(inputIdx) / double(inputBits->size()) * 100.0);
+            int nextPercent = int(double(inputIdx) / double(inputBits->sizeInBits()) * 100.0);
             if (nextPercent > lastPercent) {
                 lastPercent = nextPercent;
                 progressTracker->setProgressPercent(nextPercent);
@@ -131,16 +130,16 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         }
     }
 
+    outputBits->resize(outputIdx);
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits->getBytes(), outputIdx);
+    bitContainer->setBytes(outputBits);
     outputContainers.append(bitContainer);
     QJsonObject pluginState(recallablePluginState);
     pluginState.insert(
             "container_name",
-            QString("%1 <- %2").arg(recallablePluginState.value("take_skip_string").toString()).arg(
-                    inputContainers.at(0)
-                    ->
-                    getName()));
+            QString("%1 <- %2")
+            .arg(recallablePluginState.value("take_skip_string").toString())
+            .arg(inputContainers.at(0)->getName()));
     return QSharedPointer<const OperatorResult>(
             (new OperatorResult())->setOutputContainers(
                     outputContainers)->setPluginState(pluginState));

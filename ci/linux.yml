@@ -5,6 +5,7 @@ parameters:
 
 steps:
   - checkout: self
+    lfs: true
     persistCredentials: true
 
   - bash: |
@@ -62,6 +63,12 @@ steps:
       cd release
       tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins
     displayName: 'Collect and package release files'
+  
+  - bash: |
+      npm ci
+      cd tests
+      ./test_hobbits.js ../release/bin/hobbits-runner
+    displayName: 'Run tests'
 
   - task: CopyFiles@2 
     inputs:

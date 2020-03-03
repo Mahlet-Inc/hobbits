@@ -49,7 +49,7 @@ ImportBitsWizard::~ImportBitsWizard()
 
 void ImportBitsWizard::adjustMaxBits()
 {
-    double maxKb = qMin(double(MAX_BIT_CONTAINER_SIZE) / 1000.0 / 8.0, m_fileSizeKb - ui->sb_startKb->value());
+    double maxKb = m_fileSizeKb - ui->sb_startKb->value();
     ui->sb_takeKb->setMinimum(0.001);
     ui->sb_takeKb->setMaximum(maxKb);
 }

@@ -2,7 +2,7 @@
 
 #include <QString>
 
-Frame::Frame(QSharedPointer<const BitArray> bits, int start, int end) :
+Frame::Frame(QSharedPointer<const BitArray> bits, qint64 start, qint64 end) :
     Range(start, end),
     m_bits(bits)
 {
@@ -16,7 +16,7 @@ Frame::Frame(QSharedPointer<const BitArray> bits, Range range) :
 
 }
 
-bool Frame::at(int i) const
+bool Frame::at(qint64 i) const
 {
     Q_ASSERT_X(
             i >= 0 && i < this->size(),

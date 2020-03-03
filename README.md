@@ -14,6 +14,15 @@ The documentation is available at
 There are pre-built binaries of the latest release on the
 [GitHub releases page](https://github.com/Mahlet-Inc/hobbits/releases).
 
+## Setting up Git hooks
+The `husky` and `git-lfs` hooks don't play nice with each other. When you first
+clone the project, you might need to do something like this so that the `husky`
+hooks take precedence (they superset the `git-lfs` hooks):
+```
+rm -rf .git/hooks
+npm ci
+```
+
 ## Building with Qt Creator and Qt 5.12+
 1. (Optional) Install any dev libraries required to get the full functionality
 of the core plugins ([fftw3](http://www.fftw.org/download.html))

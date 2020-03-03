@@ -137,7 +137,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
         return nullResult;
     }
 
-    QHash<BitArray, BitArray> bitMapping;
+    QHash<BitArray, QSharedPointer<BitArray>> bitMapping;
     QJsonArray mappingsArray = recallablePluginState.value("mappings").toArray();
     int bitChunkLength = 0;
     for (auto valueRef : mappingsArray) {
@@ -149,8 +149,8 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
         QStringList parseErrors;
 
-        BitArray oldBits = BitArray::fromString("0b" + oldVal, parseErrors);
-        BitArray newBits = BitArray::fromString("0b" + newVal, parseErrors);
+        BitArray oldBits = *(BitArray::fromString("0b" + oldVal, parseErrors).data());
+        QSharedPointer<BitArray> newBits = BitArray::fromString("0b" + newVal, parseErrors);
 
         if (!parseErrors.isEmpty()) {
             return nullResult;
@@ -160,23 +160,24 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
     }
 
     QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->getBaseBits();
-    int inputBitsLength = inputBits->size();
+    qint64 inputBitsLength = inputBits->sizeInBits();
 
-    BitArray outputArray(QByteArray(inputBitsLength / 8 + (inputBitsLength % 8 == 0 ? 0 : 1), 0), inputBitsLength);
+    QSharedPointer<BitArray> outputArray = QSharedPointer<BitArray>(new BitArray(inputBitsLength));
 
     QJsonObject pluginState = recallablePluginState;
 
     int lastPercent = 0;
     int failedRemappings = 0;
-    BitArray inputBitChunk(QByteArray(bitChunkLength / 8 + (bitChunkLength % 8 == 0 ? 0 : 1), 0), bitChunkLength);
-    for (int i = 0; i < outputArray.size() && i + bitChunkLength <= inputBits->size(); i += bitChunkLength) {
+    BitArray inputBitChunk(bitChunkLength);
+    for (int i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits();
+         i += bitChunkLength) {
         for (int ii = 0; ii < bitChunkLength; ii++) {
             inputBitChunk.set(ii, inputBits->at(i + ii));
         }
         if (bitMapping.contains(inputBitChunk)) {
-            BitArray mappedValue = bitMapping.value(inputBitChunk);
-            for (int ii = 0; ii < mappedValue.size(); ii++) {
-                outputArray.set(i + ii, mappedValue.at(ii));
+            QSharedPointer<BitArray> mappedValue = bitMapping.value(inputBitChunk);
+            for (int ii = 0; ii < mappedValue->sizeInBits(); ii++) {
+                outputArray->set(i + ii, mappedValue->at(ii));
             }
         }
         else {
@@ -208,7 +209,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
     QList<QSharedPointer<BitContainer>> containers;
     QSharedPointer<BitContainer> container(new BitContainer());
-    container->setBytes(outputArray.getBytes(), outputArray.size());
+    container->setBytes(outputArray);
     containers << container;
 
     pluginState.insert("container_name", QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->getName()));

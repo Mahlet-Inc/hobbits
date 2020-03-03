@@ -1,6 +1,6 @@
 #include "takeop.h"
 
-TakeOp::TakeOp(int value) :
+TakeOp::TakeOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,22 +9,22 @@ TakeOp::TakeOp(int value) :
 void TakeOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
-    for (int i = 0; i < m_value && inputIdx < inputBits->size(); i++) {
+    for (qint64 i = 0; i < m_value && inputIdx < inputBits->sizeInBits(); i++) {
         outputBits->set(outputIdx, inputBits->at(inputIdx));
         inputIdx++;
         outputIdx++;
     }
 }
 
-int TakeOp::inputStep() const
+qint64 TakeOp::inputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }
 
-int TakeOp::outputStep() const
+qint64 TakeOp::outputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }

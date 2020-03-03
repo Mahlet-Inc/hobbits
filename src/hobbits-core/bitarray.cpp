@@ -1,6 +1,7 @@
 #include "bitarray.h"
 
 #include <QRegularExpression>
+#include <QSharedPointer>
 #include <QString>
 
 static char BIT_MASKS[8] = {
@@ -11,109 +12,284 @@ static char INVERSE_BIT_MASKS[8] = {
     0x7f, -65, -33, -17, -9, -5, -3, -2
 };
 
-BitArray::BitArray() :
-    m_size(0)
-{
+#define CACHE_CHUNK_BYTE_SIZE (10 * 1000 * 1000)
+#define CACHE_CHUNK_BIT_SIZE (CACHE_CHUNK_BYTE_SIZE * 8)
+#define MAX_ACTIVE_CACHE_CHUNKS 5
 
+BitArray::BitArray() :
+    m_dataFile("bitarray"),
+    m_size(0),
+    m_dataCaches(nullptr)
+{
+    m_dataFile.open();
 }
 
-BitArray::BitArray(QByteArray bytes, int size) :
-    m_bytes(bytes),
-    m_size(size)
+BitArray::BitArray(qint64 sizeInBits) :
+    BitArray()
 {
-    Q_ASSERT_X(size >= 0, "Bit Array", QStringLiteral("Negative bit array size is not allowed").toLocal8Bit().data());
-    Q_ASSERT_X(
-            size <= bytes.size() * 8,
-            "Bit Array",
-            QStringLiteral("Bit array size %1 is too big for the given byte array").arg(size).toLocal8Bit().data());
+    m_size = sizeInBits;
+    qint64 bytesToWrite = this->sizeInBytes();
+    char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    for (int i = 0; i < CACHE_CHUNK_BYTE_SIZE; i++) {
+        byteBuffer[i] = 0;
+    }
+    while (bytesToWrite > 0) {
+        qint64 byteChunkSize = qMin(bytesToWrite, qint64(CACHE_CHUNK_BYTE_SIZE));
+        qint64 bytesWritten = m_dataFile.write(byteBuffer, byteChunkSize);
+        bytesToWrite -= bytesWritten;
+
+        if (bytesToWrite > 0 && bytesWritten < 1) {
+            delete[] byteBuffer;
+            throw std::invalid_argument(
+                    QString("Failed to initialize BitArray file of %1 bits").arg(
+                            sizeInBits).toStdString());
+        }
+    }
+    delete[] byteBuffer;
+
+    reinitializeCache();
+}
+
+BitArray::BitArray(QByteArray bytes, qint64 sizeInBits) :
+    BitArray()
+{
+    if (sizeInBits < 0) {
+        sizeInBits = bytes.size() * 8;
+    }
+    if (sizeInBits > bytes.size() * 8) {
+        throw std::invalid_argument(
+                QString("Cannot create BitArray of size '%2' from %1 bytes").arg(bytes.size()).arg(
+                        sizeInBits).toStdString());
+    }
+    m_size = sizeInBits;
+    m_dataFile.write(bytes);
+
+    reinitializeCache();
+}
+
+BitArray::BitArray(QIODevice *dataStream, qint64 sizeInBits) :
+    BitArray()
+{
+    initFromIO(dataStream, sizeInBits);
 }
 
 BitArray::BitArray(const BitArray &other) :
-    BitArray(other.getBytes(), other.size())
+    BitArray(other.dataReader(), other.sizeInBits())
 {
 }
 
-bool BitArray::at(int i) const
+BitArray::~BitArray()
 {
-    Q_ASSERT_X(
-            i < m_size,
-            "Bit Array",
-            QStringLiteral("Trying to access bit %1 of BitArray with size %2 bits").arg(i).arg(
-                    m_size).toLocal8Bit().data());
-    return m_bytes.at(i / 8) & BIT_MASKS[i % 8];
+    deleteCache();
 }
 
-int BitArray::size() const
+BitArray& BitArray::operator=(const BitArray &other)
+{
+    initFromIO(other.dataReader(), other.sizeInBits());
+    return *this;
+}
+
+QIODevice* BitArray::dataReader() const
+{
+    syncCacheToFile();
+    QTemporaryFile *dataReader = const_cast<QTemporaryFile*>(&m_dataFile);
+    dataReader->seek(0);
+    return dataReader;
+}
+
+void BitArray::initFromIO(QIODevice *dataStream, qint64 sizeInBits)
+{
+    if (sizeInBits < 0) {
+        sizeInBits = dataStream->bytesAvailable() * 8;
+    }
+    m_size = sizeInBits;
+    qint64 bytesToRead = this->sizeInBytes();
+    char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    while (bytesToRead > 0) {
+        qint64 bytesRead = dataStream->read(byteBuffer, CACHE_CHUNK_BYTE_SIZE);
+        m_dataFile.write(byteBuffer, bytesRead);
+        bytesToRead -= bytesRead;
+
+        if (bytesToRead > 0 && bytesRead < 1) {
+            delete[] byteBuffer;
+            throw std::invalid_argument("'dataStream' provided to BitArray constructor had fewer than 'sizeInBits' bits");
+        }
+    }
+    delete[] byteBuffer;
+
+    reinitializeCache();
+}
+
+void BitArray::reinitializeCache()
+{
+    if (m_dataCaches) {
+        deleteCache();
+    }
+    if (sizeInBits() > 0) {
+        qint64 cacheCount = sizeInBits() / CACHE_CHUNK_BIT_SIZE + (sizeInBits() % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
+        m_dataCaches = new char*[cacheCount];
+        for (int i = 0; i < cacheCount; i++) {
+            m_dataCaches[i] = nullptr;
+        }
+    }
+}
+
+void BitArray::deleteCache()
+{
+    while (!m_recentCacheAccess.isEmpty()) {
+        delete[] m_dataCaches[m_recentCacheAccess.dequeue()];
+    }
+    delete[] m_dataCaches;
+}
+
+bool BitArray::at(qint64 i) const
+{
+    if (i < 0 || i >= m_size) {
+        throw std::invalid_argument(QString("Invalid bit index '%1'").arg(i).toStdString());
+    }
+    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    if (!m_dataCaches[cacheIdx]) {
+        loadCacheAt(i);
+    }
+    int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
+    return m_dataCaches[cacheIdx][index / 8] & BIT_MASKS[index % 8];
+}
+
+bool BitArray::loadCacheAt(qint64 i) const
+{
+    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
+    if (m_dataCaches[cacheIdx]) {
+        return m_dataCaches[cacheIdx][index / 8] & BIT_MASKS[index % 8];
+    }
+
+    QQueue<qint64> *unconstRecentCacheAccess = const_cast<QQueue<qint64>*>(&m_recentCacheAccess);
+    char **unconstDataCaches = const_cast<char**>(m_dataCaches);
+
+    qint64 byteIdx = cacheIdx * CACHE_CHUNK_BYTE_SIZE;
+
+    char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    readBytesNoSync(byteBuffer, byteIdx, CACHE_CHUNK_BYTE_SIZE);
+
+    unconstDataCaches[cacheIdx] = byteBuffer;
+    unconstRecentCacheAccess->enqueue(cacheIdx);
+    if (unconstRecentCacheAccess->size() > MAX_ACTIVE_CACHE_CHUNKS) {
+        qint64 removedCacheIndex = unconstRecentCacheAccess->dequeue();
+
+        if (m_dirtyCache) {
+            QTemporaryFile *noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
+            noConstFile->seek(removedCacheIndex * CACHE_CHUNK_BYTE_SIZE);
+            qint64 cacheChunkByteLength =
+                qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (removedCacheIndex * CACHE_CHUNK_BIT_SIZE));
+            noConstFile->write(unconstDataCaches[removedCacheIndex], cacheChunkByteLength);
+        }
+
+        delete[] unconstDataCaches[removedCacheIndex];
+        unconstDataCaches[removedCacheIndex] = nullptr;
+    }
+
+    return byteBuffer[index / 8] & BIT_MASKS[index % 8];
+}
+
+qint64 BitArray::sizeInBits() const
 {
     return m_size;
 }
 
-void BitArray::set(int i, bool value)
+qint64 BitArray::sizeInBytes() const
 {
+    return m_size / 8 + (m_size % 8 ? 1 : 0);
+}
+
+void BitArray::resize(qint64 sizeInBits)
+{
+    syncCacheToFile();
+    m_size = sizeInBits;
+    reinitializeCache();
+    m_dataFile.resize(sizeInBytes());
+}
+
+void BitArray::set(qint64 i, bool value)
+{
+    if (i < 0 || i >= m_size) {
+        throw std::invalid_argument(QString("Invalid bit index '%1'").arg(i).toStdString());
+    }
+
+    m_dirtyCache = true;
+
+    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    if (!m_dataCaches[cacheIdx]) {
+        loadCacheAt(i);
+    }
+    int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     if (value) {
-        m_bytes[i / 8] = m_bytes.at(i / 8) | BIT_MASKS[i % 8];
+        m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] | BIT_MASKS[index % 8];
     }
     else {
-        m_bytes[i / 8] = m_bytes.at(i / 8) & INVERSE_BIT_MASKS[i % 8];
+        m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] & INVERSE_BIT_MASKS[index % 8];
     }
 }
 
-void BitArray::setSize(int size)
+void BitArray::syncCacheToFile() const
 {
-    m_size = size;
-}
-
-QByteArray BitArray::getBytes() const
-{
-    return m_bytes;
-}
-
-BitArray BitArray::xorAt(int offset, const BitArray &mask)
-{
-    BitArray result(QByteArray(((mask.size() - 1) / 8) + 1, 0x00), mask.size());
-    for (int i = 0; i < mask.size(); i++) {
-        result.set(i, at(offset + i) ^ mask.at(i));
+    if (m_dirtyCache) {
+        for (qint64 cacheIdx : m_recentCacheAccess) {
+            QTemporaryFile *noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
+            noConstFile->seek(cacheIdx * CACHE_CHUNK_BYTE_SIZE);
+            qint64 cacheChunkByteLength =
+                qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBytes() - (cacheIdx * CACHE_CHUNK_BYTE_SIZE));
+            noConstFile->write(m_dataCaches[cacheIdx], cacheChunkByteLength);
+        }
     }
-    return result;
 }
 
-BitArray BitArray::andAt(int offset, const BitArray &mask)
+qint64 BitArray::readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const
 {
-    BitArray result(QByteArray(((mask.size() - 1) / 8) + 1, 0x00), mask.size());
-    for (int i = 0; i < mask.size(); i++) {
-        result.set(i, at(offset + i) & mask.at(i));
-    }
-    return result;
+    syncCacheToFile();
+    return readBytesNoSync(data, byteOffset, maxBytes);
 }
 
-BitArray BitArray::orAt(int offset, const BitArray &mask) const
+void BitArray::writeTo(QIODevice *outputStream) const
 {
-    BitArray result(QByteArray(((mask.size() - 1) / 8) + 1, 0x00), mask.size());
-    for (int i = 0; i < mask.size(); i++) {
-        result.set(i, at(offset + i) | mask.at(i));
+    QIODevice *reader = dataReader();
+    char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    qint64 bytesToWrite = sizeInBytes();
+    while (bytesToWrite > 0) {
+        qint64 bytesRead = reader->read(byteBuffer, CACHE_CHUNK_BYTE_SIZE);
+        outputStream->write(byteBuffer, bytesRead);
+        bytesToWrite -= bytesRead;
+
+        if (bytesToWrite > 0 && bytesRead < 1) {
+            delete[] byteBuffer;
+            throw std::invalid_argument("BitArray failed to provide bytes equal to its size during writeTo");
+        }
     }
-    return result;
+    delete[] byteBuffer;
 }
 
-int BitArray::countOnes()
+qint64 BitArray::readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const
 {
-    int ones = 0;
-    for (int i = 0; i < m_size; i++) {
-        ones += at(i);
+    QTemporaryFile *noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
+    if (!noConstFile->seek(byteOffset)) {
+        return 0;
     }
-    return ones;
+
+    return noConstFile->read(data, maxBytes);
 }
 
-QString BitArray::toString()
+int BitArray::getPreviewSize() const
 {
-    QString binString = "";
-    for (int i = 0; i < m_size; i++) {
-        binString += at(i) ? "1" : "0";
-    }
-    return binString;
+    return int(qMin(sizeInBits(), qint64(CACHE_CHUNK_BIT_SIZE)));
 }
 
-BitArray BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
+QByteArray BitArray::getPreviewBytes() const
+{
+    loadCacheAt(0);
+    QByteArray preview(m_dataCaches[0], int(qMin(sizeInBytes(), qint64(CACHE_CHUNK_BYTE_SIZE))));
+    return preview;
+}
+
+QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
 {
     int size = 0;
     if (bitArraySpec.startsWith("0x")) {
@@ -126,17 +302,16 @@ BitArray BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
             }
             QByteArray bytes = QByteArray::fromHex(evenSpec.toLocal8Bit());
             size = qMin((bitArraySpec.length() - 2) * 4, bytes.size() * 8);
-            return BitArray(bytes, size);
+            return QSharedPointer<BitArray>(new BitArray(bytes, size));
         }
         else {
             parseErrors.append(QString("Expected only hex digits in '0x'-prefixed data - got '%1'").arg(bitArraySpec));
-            return BitArray();
+            return QSharedPointer<BitArray>(new BitArray());
         }
     }
     else if (bitArraySpec.startsWith("0o")) {
         size = (bitArraySpec.length() - 2) * 3;
-        QByteArray bytes(size / 8 + 1, 0x00);
-        BitArray bits = BitArray(bytes, size);
+        QSharedPointer<BitArray> bits = QSharedPointer<BitArray>(new BitArray(size));
         bool parseOk;
         for (int i = 2; i < bitArraySpec.size(); i++) {
             parseOk = true;
@@ -151,24 +326,21 @@ BitArray BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
             }
 
             for (int bit = 0; bit < 3; bit++) {
-                bits.set((i - 2) * 3 + bit, val & BIT_MASKS[5 + bit]);
+                bits->set((i - 2) * 3 + bit, val & BIT_MASKS[5 + bit]);
             }
         }
         return bits;
     }
     else if (bitArraySpec.startsWith("0b")) {
         size = bitArraySpec.length() - 2;
-        QByteArray bytes(size / 8 + 1, 0x00);
-        BitArray bits = BitArray(bytes, size);
+        QSharedPointer<BitArray> bits = QSharedPointer<BitArray>(new BitArray(size));
         for (int i = 2; i < bitArraySpec.size(); i++) {
             if (bitArraySpec.at(i) == '1') {
-                bits.set(i - 2, true);
+                bits->set(i - 2, true);
             }
             else if (bitArraySpec.at(i) != '0') {
                 parseErrors.append(
-                        QString("Expected '1' or '0' in '0b'-prefixed data - got '%1'").arg(
-                                bitArraySpec.at(
-                                        i)));
+                        QString("Expected '1' or '0' in '0b'-prefixed data - got '%1'").arg(bitArraySpec.at(i)));
             }
         }
         return bits;
@@ -176,6 +348,6 @@ BitArray BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
     else {
         QByteArray bytes = bitArraySpec.toLocal8Bit();
         size = bitArraySpec.length() * 8;
-        return BitArray(bytes, size);
+        return QSharedPointer<BitArray>(new BitArray(bytes, size));
     }
 }

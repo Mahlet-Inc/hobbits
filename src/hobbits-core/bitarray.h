@@ -2,7 +2,11 @@
 #define BITARRAY_H
 
 #include <QByteArray>
+#include <QIODevice>
+#include <QMap>
+#include <QQueue>
 #include <QStringList>
+#include <QTemporaryFile>
 
 #include "hobbits-core_global.h"
 
@@ -10,41 +14,57 @@ class HOBBITSCORESHARED_EXPORT BitArray
 {
 public:
     BitArray();
-    BitArray(QByteArray bytes, int size);
+    BitArray(qint64 sizeInBits);
+    BitArray(QByteArray bytes, qint64 sizeInBits);
+    BitArray(QIODevice *dataStream, qint64 sizeInBits);
+    BitArray(const BitArray &other, qint64 sizeInBits);
     BitArray(const BitArray &other);
 
-    bool at(int i) const;
-    int size() const;
+    BitArray& operator=(const BitArray &other);
 
-    static BitArray fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
+    ~BitArray();
 
-    void set(int i, bool value);
-    void setSize(int size);
+    bool at(qint64 i) const;
+    qint64 sizeInBits() const;
+    qint64 sizeInBytes() const;
 
-    BitArray xorAt(int offset, const BitArray &mask);
-    BitArray andAt(int offset, const BitArray &mask);
-    BitArray orAt(int offset, const BitArray &mask) const;
+    void resize(qint64 sizeInBits);
 
-    QByteArray getBytes() const;
+    void set(qint64 i, bool value);
 
-    QString toString();
+    qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    void writeTo(QIODevice *outputStream) const;
 
-    int countOnes();
+    int getPreviewSize() const;
+    QByteArray getPreviewBytes() const;
+
+    static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
-    QByteArray m_bytes;
-    int m_size;
+    qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    QIODevice* dataReader() const;
+    void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
+    void reinitializeCache();
+    void deleteCache();
+    bool loadCacheAt(qint64 bitIndex) const;
+    void syncCacheToFile() const;
 
+    QTemporaryFile m_dataFile;
+    qint64 m_size;
+
+    QQueue<qint64> m_recentCacheAccess;
+    char **m_dataCaches;
+    bool m_dirtyCache;
 };
 
 inline bool operator==(const BitArray &b1, const BitArray &b2)
 {
-    return b1.getBytes() == b2.getBytes();
+    return b1.getPreviewBytes().compare(b2.getPreviewBytes()) == 0;
 }
 
 inline uint qHash(const BitArray &key, uint seed)
 {
-    return qHash(key.getBytes(), seed) ^ uint(key.size());
+    return qHash(key.getPreviewBytes(), seed) ^ uint(key.getPreviewSize());
 }
 
 #endif // BITARRAY_H

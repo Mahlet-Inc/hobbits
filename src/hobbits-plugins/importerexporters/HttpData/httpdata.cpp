@@ -59,6 +59,6 @@ void HttpData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
     if (!http) {
         http = new HttpTransceiver();
     }
-    http->setUploadMode(container->getBaseBits()->getBytes());
+    http->setUploadMode(container->getBaseBits()->getPreviewBytes());
     http->exec();
 }

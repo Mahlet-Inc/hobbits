@@ -1,6 +1,6 @@
 #include "reverseop.h"
 
-ReverseOp::ReverseOp(int value) :
+ReverseOp::ReverseOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,22 +9,22 @@ ReverseOp::ReverseOp(int value) :
 void ReverseOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
-    for (int i = m_value - 1; i >= 0 && inputIdx + i < inputBits->size(); i--) {
+    for (qint64 i = m_value - 1; i >= 0 && inputIdx + i < inputBits->sizeInBits(); i--) {
         outputBits->set(outputIdx, inputBits->at(inputIdx + i));
         outputIdx++;
     }
-    inputIdx = qMin(inputBits->size(), inputIdx + m_value);
+    inputIdx = qMin(inputBits->sizeInBits(), inputIdx + m_value);
 }
 
-int ReverseOp::inputStep() const
+qint64 ReverseOp::inputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }
 
-int ReverseOp::outputStep() const
+qint64 ReverseOp::outputStep(qint64 inputBits) const
 {
-    return m_value;
+    return qMin(inputBits, m_value);
 }
