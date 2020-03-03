@@ -195,12 +195,7 @@ qint64 BitArray::sizeInBytes() const
 }
 
 void BitArray::resize(qint64 sizeInBits) {
-    if (sizeInBits > this->sizeInBits()) {
-        return;
-    }
-
     syncCacheToFile();
-
     m_size = sizeInBits;
     reinitializeCache();
     m_dataFile.resize(sizeInBytes());
@@ -233,7 +228,7 @@ void BitArray::syncCacheToFile() const {
         for (qint64 cacheIdx: m_recentCacheAccess) {
             QTemporaryFile* noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
             noConstFile->seek(cacheIdx*CACHE_CHUNK_BYTE_SIZE);
-            qint64 cacheChunkByteLength = qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (cacheIdx * CACHE_CHUNK_BIT_SIZE));
+            qint64 cacheChunkByteLength = qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBytes() - (cacheIdx * CACHE_CHUNK_BYTE_SIZE));
             noConstFile->write(m_dataCaches[cacheIdx], cacheChunkByteLength);
         }
     }

@@ -137,10 +137,9 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     QJsonObject pluginState(recallablePluginState);
     pluginState.insert(
             "container_name",
-            QString("%1 <- %2").arg(recallablePluginState.value("take_skip_string").toString()).arg(
-                    inputContainers.at(0)
-                    ->
-                    getName()));
+            QString("%1 <- %2")
+                .arg(recallablePluginState.value("take_skip_string").toString())
+                .arg(inputContainers.at(0)->getName()));
     return QSharedPointer<const OperatorResult>(
             (new OperatorResult())->setOutputContainers(
                     outputContainers)->setPluginState(pluginState));

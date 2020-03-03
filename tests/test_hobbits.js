@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { readdirSync, unlinkSync } = require('fs')
+const { readdirSync, unlinkSync, existsSync } = require('fs')
 const { join } = require('path')
 const { execFileSync } = require("child_process");
 const glob = require('glob');
@@ -29,7 +29,13 @@ async function runTests() {
     
         try {
             let input = join(testDir, "input.bits")
+            if (!existsSync(input)) {
+                throw Error(`Failed to find input.bits!`)
+            }
             let output = join(testDir, "output.bits")
+            if (!existsSync(output)) {
+                throw Error(`Failed to find output.bits!`)
+            }
             let testOutputPrefix = join(testDir, "testrunoutput.")
             let testOutputGlob = testOutputPrefix+"*"
             let templateGlob = join(testDir, "*.hobbits_template")
@@ -55,7 +61,15 @@ async function runTests() {
             if (testOutputMatches.length < 1) {
                 throw Error(`Failed to find an output file matching ${testOutputGlob}`)
             }
-            let testOutput = testOutputMatches[0]
+            // we only care about the last output
+            let testOutput = testOutputMatches[0];
+            for (let outputFile of testOutputMatches) {
+                let currVal = parseInt(testOutput.split(".")[1]);
+                let thisVal = parseInt(outputFile.split(".")[1]);
+                if (thisVal > currVal) {
+                    testOutput = outputFile;
+                }
+            }
     
             let match = await new Promise((resolve, reject) => {
                 filecompare(output, testOutput, isEqual => resolve(isEqual))

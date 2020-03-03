@@ -1,0 +1,19 @@
+{
+    "lineages": [
+        {
+            "actions": [
+                {
+                    "action": {
+                        "name": "Take Skip",
+                        "state": {
+                            "container_name": "s1t2 <- Some Bits",
+                            "take_skip_string": "s1t2"
+                        },
+                        "type": 2
+                    },
+                    "outputPosition": 0
+                }
+            ]
+        }
+    ]
+}

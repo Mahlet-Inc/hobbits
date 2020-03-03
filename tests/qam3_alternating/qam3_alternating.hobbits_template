@@ -1,0 +1,52 @@
+{
+    "lineages": [
+        {
+            "actions": [
+                {
+                    "action": {
+                        "name": "QAM Remapper",
+                        "state": {
+                            "container_name": "QAM Remap <- Some Bits",
+                            "mappings": [
+                                {
+                                    "new": "000",
+                                    "old": "000"
+                                },
+                                {
+                                    "new": "001",
+                                    "old": "001"
+                                },
+                                {
+                                    "new": "111",
+                                    "old": "010"
+                                },
+                                {
+                                    "new": "011",
+                                    "old": "011"
+                                },
+                                {
+                                    "new": "100",
+                                    "old": "100"
+                                },
+                                {
+                                    "new": "000",
+                                    "old": "101"
+                                },
+                                {
+                                    "new": "110",
+                                    "old": "110"
+                                },
+                                {
+                                    "new": "111",
+                                    "old": "111"
+                                }
+                            ]
+                        },
+                        "type": 2
+                    },
+                    "outputPosition": 0
+                }
+            ]
+        }
+    ]
+}
