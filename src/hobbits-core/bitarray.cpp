@@ -171,11 +171,12 @@ bool BitArray::loadCacheAt(qint64 i) const
     if (unconstRecentCacheAccess->size() > MAX_ACTIVE_CACHE_CHUNKS) {
         qint64 removedCacheIndex = unconstRecentCacheAccess->dequeue();
 
-        // TODO: check for dirty marker on chunk
-        QTemporaryFile* noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
-        noConstFile->seek(removedCacheIndex*CACHE_CHUNK_BYTE_SIZE);
-        qint64 cacheChunkByteLength = qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (removedCacheIndex * CACHE_CHUNK_BIT_SIZE));
-        noConstFile->write(unconstDataCaches[removedCacheIndex], cacheChunkByteLength);
+        if (m_dirtyCache) {
+            QTemporaryFile* noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
+            noConstFile->seek(removedCacheIndex*CACHE_CHUNK_BYTE_SIZE);
+            qint64 cacheChunkByteLength = qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (removedCacheIndex * CACHE_CHUNK_BIT_SIZE));
+            noConstFile->write(unconstDataCaches[removedCacheIndex], cacheChunkByteLength);
+        }
 
         delete[] unconstDataCaches[removedCacheIndex];
         unconstDataCaches[removedCacheIndex] = nullptr;
