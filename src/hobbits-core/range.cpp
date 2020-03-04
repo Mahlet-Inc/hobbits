@@ -9,7 +9,7 @@ Range::Range() :
 
 }
 
-Range::Range(int start, int end) :
+Range::Range(qint64 start, qint64 end) :
     m_start(start),
     m_end(end)
 {
@@ -21,17 +21,17 @@ bool operator<(const Range &a, const Range &b)
     return a.start() < b.start();
 }
 
-int Range::size() const
+qint64 Range::size() const
 {
     return m_end - m_start + 1;
 }
 
-int Range::start() const
+qint64 Range::start() const
 {
     return m_start;
 }
 
-int Range::end() const
+qint64 Range::end() const
 {
     return m_end;
 }
@@ -69,8 +69,8 @@ Range Range::getOverlap(const Range &other) const
 {
     unsigned int comparison = this->compare(other);
     Q_ASSERT_X(comparison & Range::Overlapping, "Frame", "Cannot get overlap for non-overlapping frames");
-    int start = other.start();
-    int end = other.end();
+    qint64 start = other.start();
+    qint64 end = other.end();
     if (comparison & Range::Before) {
         start = this->start();
     }
@@ -81,7 +81,7 @@ Range Range::getOverlap(const Range &other) const
     return Range(start, end);
 }
 
-void Range::translate(int offset)
+void Range::translate(qint64 offset)
 {
     m_start += offset;
     m_end += offset;

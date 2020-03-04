@@ -51,12 +51,12 @@ QString HeaderFramer::getHeaderString()
     }
 
     QStringList parseErrors;
-    BitArray header = BitArray::fromString(ui->le_header->text(), parseErrors);
+    QSharedPointer<BitArray> header = BitArray::fromString(ui->le_header->text(), parseErrors);
     if (!parseErrors.isEmpty()) {
         return QString();
     }
 
-    ui->sb_frameLength->setMinimum(header.size());
+    ui->sb_frameLength->setMinimum(int(header->sizeInBits()));
 
     return ui->le_header->text();
 }
@@ -188,9 +188,9 @@ int HeaderFramer::getMaxInputContainers()
     return 1;
 }
 
-bool headerGreaterThan(QPair<BitArray, int> a, QPair<BitArray, int> b)
+bool headerGreaterThan(QPair<QSharedPointer<BitArray>, int> a, QPair<QSharedPointer<BitArray>, int> b)
 {
-    return a.first.size() > b.first.size();
+    return a.first->sizeInBits() > b.first->sizeInBits();
 }
 
 QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
@@ -209,12 +209,12 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
         return result;
     }
 
-    QList<QPair<BitArray, int>> headers;
+    QList<QPair<QSharedPointer<BitArray>, int>> headers;
     QJsonArray headersArray = recallablePluginState.value("headers").toArray();
     for (auto valueRef : headersArray) {
         QJsonObject headerData = valueRef.toObject();
         QStringList parseErrors;
-        BitArray header = BitArray::fromString(headerData.value("header").toString());
+        QSharedPointer<BitArray> header = BitArray::fromString(headerData.value("header").toString());
         if (!parseErrors.isEmpty()) {
             result->setPluginState(QJsonObject({QPair<QString, QJsonValue>("error", parseErrors.join("\n"))}));
             return result;
@@ -236,7 +236,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
                 return result;
             }
         }
-        headers.append(QPair<BitArray, int>(header, length));
+        headers.append(QPair<QSharedPointer<BitArray>, int>(header, length));
     }
 
     std::sort(headers.begin(), headers.end(), headerGreaterThan);
@@ -244,21 +244,21 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     QSharedPointer<const BitArray> bits = inputContainers.at(0)->getBaseBits();
 
     QList<Frame> frames;
-    int maxFrameWidth = 0;
+    qint64 maxFrameWidth = 0;
     int lastPercent = 0;
-    int start = 0;
-    int pos = 0;
-    int outputSize = 0;
+    qint64 start = 0;
+    qint64 pos = 0;
+    qint64 outputSize = 0;
     bool buildingFrame = false;
-    for ( ; pos < bits->size(); pos++) {
+    for ( ; pos < bits->sizeInBits(); pos++) {
         for (auto headerInfo : headers) {
-            BitArray header = headerInfo.first;
-            if (header.size() > bits->size() - pos) {
+            QSharedPointer<BitArray> header = headerInfo.first;
+            if (header->sizeInBits() > bits->sizeInBits() - pos) {
                 break;
             }
             bool match = true;
-            for (int i = 0; i < header.size() && pos + i < bits->size(); i++) {
-                if (bits->at(pos + i) != header.at(i)) {
+            for (qint64 i = 0; i < header->sizeInBits() && pos + i < bits->sizeInBits(); i++) {
+                if (bits->at(pos + i) != header->at(i)) {
                     match = false;
                     break;
                 }
@@ -275,8 +275,8 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
                 if (headerInfo.second > 0) {
                     // This header's frame has a static length, so we can just add the whole frame
                     buildingFrame = false;
-                    int end = pos + headerInfo.second - 1;
-                    if (end < bits->size()) {
+                    qint64 end = pos + headerInfo.second - 1;
+                    if (end < bits->sizeInBits()) {
                         frames.append(Frame(bits, pos, end));
                         maxFrameWidth = qMax(maxFrameWidth, frames.last().size());
                         outputSize += frames.last().size();
@@ -286,14 +286,14 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
                 else {
                     // This header's frame has an open-ended length, so we need to find the start of the next frame before adding it
                     start = pos;
-                    pos = pos + header.size() - 1;
+                    pos = pos + header->sizeInBits() - 1;
                     buildingFrame = true;
                 }
                 break;
             }
         }
 
-        int nextPercent = int(double(pos) / double(bits->size()) * 100.0);
+        int nextPercent = int(double(pos) / double(bits->sizeInBits()) * 100.0);
         if (nextPercent > lastPercent) {
             lastPercent = nextPercent;
             progressTracker->setProgressPercent(nextPercent);
@@ -309,24 +309,24 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
         }
     }
     if (buildingFrame) {
-        frames.append(Frame(bits, start, bits->size() - 1));
+        frames.append(Frame(bits, start, bits->sizeInBits() - 1));
         maxFrameWidth = qMax(maxFrameWidth, frames.last().size());
         outputSize += frames.last().size();
     }
 
-    BitArray outputBits(QByteArray(outputSize / 8 + 1, 0x00), outputSize);
+    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputSize));
     QList<Range> outputFrames;
     int outputIndex = 0;
     for (Frame frame : frames) {
-        for (int i = 0; i < frame.size(); i++) {
-            outputBits.set(outputIndex + i, frame.at(i));
+        for (qint64 i = 0; i < frame.size(); i++) {
+            outputBits->set(outputIndex + i, frame.at(i));
         }
         outputFrames.append(Range(outputIndex, outputIndex + frame.size() - 1));
         outputIndex += frame.size();
     }
 
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBytes(outputBits.getBytes(), outputBits.size());
+    outputContainer->setBytes(outputBits);
     outputContainer->setHighlights("frames", outputFrames);
     outputContainer->setMetadata("max_frame_width", {QString("%1").arg(maxFrameWidth)});
     outputContainer->frameViaHighlights();

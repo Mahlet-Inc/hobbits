@@ -9,19 +9,19 @@ class HOBBITSCORESHARED_EXPORT Range
 {
 public:
     Range();
-    Range(int start, int end);
+    Range(qint64 start, qint64 end);
     Range(const Range &other) = default;
 
-    int size() const;
+    qint64 size() const;
 
-    int start() const;
-    int end() const;
+    qint64 start() const;
+    qint64 end() const;
 
     unsigned int compare(const Range&) const;
 
     Range getOverlap(const Range &other) const;
 
-    void translate(int offset);
+    void translate(qint64 offset);
 
     enum Comparison {
         Unknown = 0x00,
@@ -38,8 +38,8 @@ public:
     friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, Range&);
 
 private:
-    int m_start;
-    int m_end;
+    qint64 m_start;
+    qint64 m_end;
 };
 
 bool HOBBITSCORESHARED_EXPORT operator<(const Range &a, const Range &b);

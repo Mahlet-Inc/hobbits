@@ -185,17 +185,17 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         return std::move(result);
     }
 
-    int frameWidth = recallablePluginState.value("width").toInt();
+    qint64 frameWidth = recallablePluginState.value("width").toInt();
     QList<Range> frames;
 
     QSharedPointer<const BitArray> bits = container->getBaseBits();
 
     int lastPercent = 0;
-    for (int i = 0; i < bits->size(); i += frameWidth) {
-        int width = qMin(frameWidth - 1, bits->size() - i - 1);
+    for (qint64 i = 0; i < bits->sizeInBits(); i += frameWidth) {
+        qint64 width = qMin(frameWidth - 1, bits->sizeInBits() - i - 1);
         frames.append(Frame(bits, i, i + width));
 
-        int nextPercent = int(double(i) / double(bits->size()) * 100.0);
+        int nextPercent = int(double(i) / double(bits->sizeInBits()) * 100.0);
         if (nextPercent > lastPercent) {
             lastPercent = nextPercent;
             progressTracker->setProgressPercent(nextPercent);
@@ -233,7 +233,7 @@ QVector<QPointF> WidthFramer::autocorrelate(QSharedPointer<const BitArray> bits)
 
     // prepare and run first FFT
     for (int i = 0; i < N; i++) {
-        if (i < bits->size()) {
+        if (i < bits->sizeInBits()) {
             m_fft_in[i][0] = bits->at(i) ? 1 : -1;
             m_fft_in[i][1] = 0;
         }

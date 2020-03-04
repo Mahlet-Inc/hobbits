@@ -7,3 +7,5 @@
 
 node_modules
 .version
+
+/tests/extracted_tests

@@ -7,16 +7,16 @@
 class ZeroOp : public BitOp
 {
 public:
-    ZeroOp(int value);
+    ZeroOp(qint64 value);
 
     void apply(
             QSharedPointer<const BitArray> inputBits,
             QSharedPointer<BitArray> outputBits,
-            int &inputIdx,
-            int &outputIdx) override;
+            qint64 &inputIdx,
+            qint64 &outputIdx) override;
 
-    int inputStep() const override;
-    int outputStep() const override;
+    qint64 inputStep(qint64 inputBits) const override;
+    qint64 outputStep(qint64 inputBits) const override;
 
 };
 

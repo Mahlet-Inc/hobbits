@@ -278,10 +278,10 @@ QVector<QRectF> DisplayBase::getHighlightRects(
                     displayFrame);
 
             for (Range spot : spots) {
-                int displayStart = (spot.start() - displayFrame.start());
+                qint64 displayStart = (spot.start() - displayFrame.start());
                 double hx = getGroupedOffset(displayStart, colWidth, colGroupSize, bitOffset, colGroupMargin);
                 double hy = (i - frameOffset) * rowHeight;
-                int displayEnd = (spot.end() - displayFrame.start());
+                qint64 displayEnd = (spot.end() - displayFrame.start());
                 double hw =
                     getGroupedOffset(displayEnd, colWidth, colGroupSize, bitOffset, colGroupMargin) + colWidth - hx;
                 double hh = rowHeight;
@@ -323,7 +323,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("End of Frame"),
             [this, frame]() {
-        this->m_displayHandle->getHScroll()->setValue(frame.size() - 8);
+        this->m_displayHandle->getHScroll()->setValue(int(frame.size() - 8));
     });
     gotoMenu.addAction(
             tr("Start of frame"),
@@ -430,7 +430,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     menu.addAction(
             tr("Set Marker"),
             [this, frame]() {
-        int focusBit = frame.start() + m_lastHover.x();
+        qint64 focusBit = frame.start() + m_lastHover.x();
         auto container = this->m_displayHandle->getContainer();
         auto markers = container->getMetadata("location_markers");
 
@@ -466,8 +466,8 @@ void DisplayBase::showContextMenu(const QPoint &point)
                 return;
             }
             Frame frame = container->getFrames().at(frameOffset);
-            int bitOffset = bit - frame.start();
-            this->m_displayHandle->setOffsets(bitOffset, frameOffset);
+            qint64 bitOffset = bit - frame.start();
+            this->m_displayHandle->setOffsets(int(bitOffset), frameOffset);
         });
     }
 
@@ -481,7 +481,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     menu.addAction(
             tr("Add Highlight..."),
             [this, frame]() {
-        int focusBit = frame.start() + m_lastHover.x();
+        qint64 focusBit = frame.start() + m_lastHover.x();
         auto container = this->m_displayHandle->getContainer();
         auto manualHighlights = container->getHighlights("manual_highlights");
 
@@ -499,7 +499,12 @@ void DisplayBase::showContextMenu(const QPoint &point)
             return;
         }
 
-        manualHighlights.append(Range(focusBit, qMin(container->getBaseBits()->size() - 1, focusBit + length - 1)));
+        manualHighlights.append(
+                Range(
+                        focusBit,
+                        qMin(
+                                container->getBaseBits()->sizeInBits() - 1,
+                                focusBit + length - 1)));
         std::sort(manualHighlights.begin(), manualHighlights.end());
         container->setHighlights("manual_highlights", manualHighlights);
     });

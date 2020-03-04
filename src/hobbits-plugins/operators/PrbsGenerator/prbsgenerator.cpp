@@ -208,14 +208,12 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
         return result;
     }
 
-    QByteArray outputBuffer(bitsWanted / 8 + 1, 0x00);
-
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputBuffer, bitsWanted));
+    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitsWanted));
 
     std::vector<int> allTaps = findIntsSort(recallablePluginState.value("taps").toString());
-    int numBits = 0;
-    int outputIndex = 0;
+    qint64 numBits = 0;
+    qint64 outputIndex = 0;
     int lastPercent = 0;
 
 
@@ -263,7 +261,7 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
 
     updateEndState(lfsr);
-    bitContainer->setBytes(outputBits->getBytes(), numBits);
+    bitContainer->setBytes(outputBits);
     outputContainers.append(bitContainer);
 
     result->setOutputContainers(outputContainers)->setPluginState(recallablePluginState);

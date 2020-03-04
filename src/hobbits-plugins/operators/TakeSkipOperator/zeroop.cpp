@@ -1,6 +1,6 @@
 #include "zeroop.h"
 
-ZeroOp::ZeroOp(int value) :
+ZeroOp::ZeroOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,23 +9,23 @@ ZeroOp::ZeroOp(int value) :
 void ZeroOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
     Q_UNUSED(inputBits)
     Q_UNUSED(inputIdx)
-    for (int i = 0; i < m_value; i++) {
+    for (qint64 i = 0; i < m_value; i++) {
         outputBits->set(outputIdx, false);
         outputIdx++;
     }
 }
 
-int ZeroOp::inputStep() const
+qint64 ZeroOp::inputStep(qint64 inputBits) const
 {
     return 0;
 }
 
-int ZeroOp::outputStep() const
+qint64 ZeroOp::outputStep(qint64 inputBits) const
 {
     return m_value;
 }

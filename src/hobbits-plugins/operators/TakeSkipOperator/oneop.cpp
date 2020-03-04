@@ -1,6 +1,6 @@
 #include "oneop.h"
 
-OneOp::OneOp(int value) :
+OneOp::OneOp(qint64 value) :
     BitOp(value)
 {
 
@@ -9,8 +9,8 @@ OneOp::OneOp(int value) :
 void OneOp::apply(
         QSharedPointer<const BitArray> inputBits,
         QSharedPointer<BitArray> outputBits,
-        int &inputIdx,
-        int &outputIdx)
+        qint64 &inputIdx,
+        qint64 &outputIdx)
 {
     Q_UNUSED(inputBits)
     Q_UNUSED(inputIdx)
@@ -20,12 +20,12 @@ void OneOp::apply(
     }
 }
 
-int OneOp::inputStep() const
+qint64 OneOp::inputStep(qint64 inputBits) const
 {
     return 0;
 }
 
-int OneOp::outputStep() const
+qint64 OneOp::outputStep(qint64 inputBits) const
 {
     return m_value;
 }

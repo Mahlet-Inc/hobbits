@@ -216,7 +216,7 @@ void SymbolRasterWidget::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        int maxWidth = m_displayHandle->getContainer()->getMaxFrameWidth();
+        qint64 maxWidth = m_displayHandle->getContainer()->getMaxFrameWidth();
         int maxChars = qFloor(log10(maxWidth)) + 1;
         m_displayOffset.setY(fontWidth * (maxChars + 1));
     }

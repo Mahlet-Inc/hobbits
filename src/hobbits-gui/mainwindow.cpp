@@ -37,9 +37,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
         SettingsManager::getInstance().setConfigFilePath(configFilePath);
     }
     resize(SettingsManager::getInstance().getPrivateSetting(SettingsData::WINDOW_SIZE_KEY).toSize());
-    move(
-            SettingsManager::getInstance().getPrivateSetting(
-                    SettingsData::WINDOW_POSITION_KEY).toPoint());
+    move(SettingsManager::getInstance().getPrivateSetting(SettingsData::WINDOW_POSITION_KEY).toPoint());
 
     // Populate View Menu
     ui->menu_View->addAction(ui->dock_bitContainerSelect->toggleViewAction());
@@ -419,16 +417,14 @@ QSharedPointer<OperatorInterface> MainWindow::getCurrentOperator()
 
 void MainWindow::loadPlugins()
 {
-    QVariant badPluginPath = SettingsManager::getInstance().getPrivateSetting(
-            SettingsData::PLUGIN_RUNNING_KEY);
+    QVariant badPluginPath = SettingsManager::getInstance().getPrivateSetting(SettingsData::PLUGIN_RUNNING_KEY);
     if (badPluginPath.isValid()) {
         if (QMessageBox::question(
-                nullptr,
+                this,
                 "Blacklist Plugin?",
                 QString(
                         "The plugin at '%1' was running when the application terminated.  Do you want to blacklist this plugin? You can always edit the blacklist in the Preferences.")
-                .arg(
-                        badPluginPath.toString()))) {
+                .arg(badPluginPath.toString())) == QMessageBox::Yes) {
             QVariant oldBlacklist = SettingsManager::getInstance().getPluginLoaderSetting(
                     SettingsData::PLUGIN_BLACKLIST_KEY);
             QStringList blacklist;
@@ -912,8 +908,7 @@ void MainWindow::on_actionApply_Template_triggered()
     QString fileName = QFileDialog::getOpenFileName(
             this,
             tr("Apply Template"),
-            SettingsManager::getInstance().getPrivateSetting(
-                    SettingsData::LAST_TEMPLATE_PATH_KEY).toString(),
+            SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_TEMPLATE_PATH_KEY).toString(),
             tr("Hobbits Templates (*.hobbits_template)"));
     if (fileName.isEmpty()) {
         return;
