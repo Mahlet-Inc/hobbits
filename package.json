@@ -23,6 +23,7 @@
     }
   },
   "devDependencies": {
+    "7zip-bin": "^5.0.3",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@commitlint/prompt": "^8.3.5",
@@ -34,9 +35,11 @@
     "@semantic-release/npm": "^7.0.3",
     "@semantic-release/release-notes-generator": "^9.0.0",
     "commitizen": "^4.0.3",
+    "del": "^5.1.0",
     "filecompare": "^1.0.4",
     "glob": "^7.1.6",
     "husky": "^4.2.3",
+    "node-7z": "^2.1.1",
     "semantic-release": "^17.0.3",
     "yargs": "^15.1.0"
   }

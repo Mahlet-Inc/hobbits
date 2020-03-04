@@ -67,6 +67,7 @@ steps:
   - bash: |
       npm ci
       cd tests
+      ./prepare_tests.js
       ./test_hobbits.js ../release/bin/hobbits-runner
     displayName: 'Run tests'
 

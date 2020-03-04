@@ -18,14 +18,17 @@ async function runTests() {
     let tests = 0;
     let failures = 0;
     let successes = 0;
+
+    let baseDir = join(__dirname, 'extracted_tests')
     
-    testDirs = readdirSync(__dirname, { withFileTypes: true })
+    testDirs = readdirSync(baseDir, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)
     
     for (let testDir of testDirs) {
         tests++
         console.log(`Testing ${testDir}...`)
+        testDir = join(baseDir, testDir)
     
         try {
             let input = join(testDir, "input.bits")
