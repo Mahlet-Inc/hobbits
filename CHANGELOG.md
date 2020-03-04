@@ -1,3 +1,15 @@
+# [0.21.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.4...v0.21.0) (2020-03-04)
+
+
+### Bug Fixes
+
+* **runner:** make output prefix "-o" option available ([c4412dd](https://github.com/Mahlet-Inc/hobbits/commit/c4412dd9e0b8ebf59b838e4e963bd16eeefe6426))
+
+
+### Features
+
+* add support for loading data larger than 42 MB ([75836d0](https://github.com/Mahlet-Inc/hobbits/commit/75836d04bf6930946e02f2a9da0dd629669eeb54))
+
 ## [0.20.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.3...v0.20.4) (2020-02-26)
 
 
