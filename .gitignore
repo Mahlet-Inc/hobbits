@@ -8,5 +8,4 @@
 node_modules
 .version
 
-/tests/**/testrunoutput.*
 /tests/extracted_tests

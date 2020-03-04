@@ -15,11 +15,7 @@
   },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "post-checkout": "echo $HUSKY_GIT_STDIN | git-lfs-hooks/post-checkout $HUSKY_GIT_PARAMS",
-      "post-commit": "echo $HUSKY_GIT_STDIN | git-lfs-hooks/post-commit $HUSKY_GIT_PARAMS",
-      "post-merge": "echo $HUSKY_GIT_STDIN | git-lfs-hooks/post-merge $HUSKY_GIT_PARAMS",
-      "pre-push": "echo $HUSKY_GIT_STDIN | git-lfs-hooks/pre-push $HUSKY_GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "devDependencies": {
