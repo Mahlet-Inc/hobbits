@@ -211,7 +211,8 @@ void PluginActionManager::continueLineage()
     auto lineageStep = m_current->lineage.at(m_current->step);
     if (lineageStep->getAdditionalInputs().size() > m_current->additionalStep) {
         if (m_current->additionalInputIds.isEmpty()) {
-            emit reportError(QString("Not enough additional inputs provided to execute step %1 - %2").arg(m_current->step).arg(lineageStep->getPluginAction()->getPluginName()));
+            emit reportError(QString("Not enough additional inputs provided to execute step %1 - %2").arg(
+                    m_current->step).arg(lineageStep->getPluginAction()->getPluginName()));
             finishLineage();
             return;
         }
@@ -273,7 +274,7 @@ void PluginActionManager::continueLineage()
             m_current->inputs.clear();
             m_current->inputs.append(parent);
         }
-        for (auto additional: m_current->additionalInputs) {
+        for (auto additional : m_current->additionalInputs) {
             m_current->inputs.append(additional);
         }
 

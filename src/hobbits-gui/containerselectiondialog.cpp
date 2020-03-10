@@ -21,10 +21,11 @@ ContainerSelectionDialog::~ContainerSelectionDialog()
     delete ui;
 }
 
-QList<QSharedPointer<BitContainer>> ContainerSelectionDialog::getSelected() {
+QList<QSharedPointer<BitContainer>> ContainerSelectionDialog::getSelected()
+{
     QList<QSharedPointer<BitContainer>> selected;
 
-    for(auto idx: m_currSelectionModel->selectedIndexes()) {
+    for (auto idx : m_currSelectionModel->selectedIndexes()) {
         selected.append(m_bitManager->getTreeModel()->getContainer(idx));
     }
 

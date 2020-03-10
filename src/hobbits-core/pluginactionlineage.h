@@ -12,21 +12,24 @@ private:
     PluginActionLineage(QSharedPointer<const PluginAction> pluginAction);
 
 public:
-    class TreeNode {
-    public:
+    class TreeNode
+    {
+public:
         QSharedPointer<const PluginActionLineage> lineage;
         QList<QSharedPointer<TreeNode>> children;
 
-        int additionalInputCount() {
+        int additionalInputCount()
+        {
             int count = 0;
             if (!lineage.isNull()) {
                 count += lineage->additionalInputCount();
             }
-            for (auto child: children) {
+            for (auto child : children) {
                 count += child->additionalInputCount();
             }
             return count;
         }
+
     };
 
     static QSharedPointer<PluginActionLineage> create(QSharedPointer<const PluginAction> pluginAction);

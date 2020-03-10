@@ -67,7 +67,13 @@ void TemplateFileHandler::applyLineageTree(
             additionals.append(additionalInputs.takeFirst());
             requiredAdditionalInputs--;
         }
-        pluginActionManager->applyLineage(targetId, lineageTree->lineage, bitManager, name, outputIdOverride, additionals);
+        pluginActionManager->applyLineage(
+                targetId,
+                lineageTree->lineage,
+                bitManager,
+                name,
+                outputIdOverride,
+                additionals);
 
         targetId = outputId;
     }

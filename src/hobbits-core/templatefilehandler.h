@@ -32,6 +32,7 @@ public:
     static QSharedPointer<PluginActionLineage::TreeNode> loadTemplate(
             QString fileName,
             QStringList *warnings = nullptr);
+
 };
 
 #endif // TEMPLATEFILEHANDLER_H

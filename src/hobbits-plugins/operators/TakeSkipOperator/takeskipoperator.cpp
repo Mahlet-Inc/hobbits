@@ -86,7 +86,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     QSharedPointer<const OperatorResult> nullResult;
 
     if (inputContainers.size() < getMinInputContainers(recallablePluginState)
-            || inputContainers.size() > getMaxInputContainers(recallablePluginState)) {
+        || inputContainers.size() > getMaxInputContainers(recallablePluginState)) {
         return nullResult;
     }
 
@@ -95,17 +95,19 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         return nullResult;
     }
 
-    bool frameBased = (recallablePluginState.contains("frame_based") && recallablePluginState.value("frame_based").toBool());
+    bool frameBased =
+        (recallablePluginState.contains("frame_based") && recallablePluginState.value("frame_based").toBool());
     int frameCount = inputContainers.at(0)->getFrames().size();
     QList<QPair<QList<Frame>, qint64>> inputs;
-    for (auto inputContainer: inputContainers) {
+    for (auto inputContainer : inputContainers) {
         if (frameBased) {
             frameCount = qMin(frameCount, inputContainer->getFrames().size());
             inputs.append({inputContainer->getFrames(), 0});
         }
         else {
             frameCount = 1;
-            inputs.append({{Frame(inputContainer->getBaseBits(), 0, inputContainer->getBaseBits()->sizeInBits()-1)}, 0});
+            inputs.append({{Frame(inputContainer->getBaseBits(), 0,
+                    inputContainer->getBaseBits()->sizeInBits() - 1)}, 0});
         }
     }
 
@@ -199,7 +201,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                 return QSharedPointer<const OperatorResult>(cancelled);
             }
         }
-        outputFrames.append(Frame(outputBits, frameStart, outputIdx-1));
+        outputFrames.append(Frame(outputBits, frameStart, outputIdx - 1));
     }
 
     outputBits->resize(outputIdx);

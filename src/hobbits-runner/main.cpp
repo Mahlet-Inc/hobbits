@@ -33,7 +33,9 @@ int main(int argc, char *argv[])
 
     QCommandLineOption inputFileOption(
         QStringList() << "i" << "input",
-            QCoreApplication::translate("main", "File to open on application startup. Use '-' for piped input. This option can be specified more than once if multiple input files are needed"),
+            QCoreApplication::translate(
+                "main",
+                "File to open on application startup. Use '-' for piped input. This option can be specified more than once if multiple input files are needed"),
             QCoreApplication::translate("main", "file"));
     parser.addOption(inputFileOption);
 
@@ -202,12 +204,12 @@ int main(int argc, char *argv[])
             additionalInputs.append(targetContainers.at(i)->getId());
         }
         TemplateFileHandler::applyLineageTree(
-                    targetContainers.at(0)->getId(),
-                    additionalInputs,
-                    lineageTree,
-                    QFileInfo(parser.value(templateOption)).fileName().section(".", 0, 0),
-                    bitManager,
-                    pluginActionManager);
+                targetContainers.at(0)->getId(),
+                additionalInputs,
+                lineageTree,
+                QFileInfo(parser.value(templateOption)).fileName().section(".", 0, 0),
+                bitManager,
+                pluginActionManager);
         a.exec();
     }
     else {
