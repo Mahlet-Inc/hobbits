@@ -20,7 +20,7 @@ public:
 
     ~HttpTransceiver();
 
-    QByteArray getDownloadedData();
+    QTemporaryFile* getDownloadedData();
 
 public slots:
     void setUploadMode(QByteArray data);
@@ -33,12 +33,13 @@ private slots:
     void progressReceived(qint64, qint64);
     void handleError(QNetworkReply::NetworkError);
 
+    void interruptDownload();
+
 private:
     Ui::HttpTransceiver *ui;
     QNetworkAccessManager *m_netManager;
     QTemporaryFile *m_downloadFile;
     QByteArray m_uploadData;
-    QByteArray m_downloadData;
     QNetworkReply *m_reply;
 };
 

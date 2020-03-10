@@ -8,11 +8,13 @@ HttpTransceiver::HttpTransceiver(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::HttpTransceiver),
     m_netManager(new QNetworkAccessManager(this)),
+    m_downloadFile(new QTemporaryFile),
     m_reply(nullptr)
 {
     ui->setupUi(this);
 
     this->setWindowTitle("HTTP Request");
+    m_downloadFile->open();
 
     setDownloadMode();
     connect(
@@ -20,6 +22,8 @@ HttpTransceiver::HttpTransceiver(QWidget *parent) :
             &QNetworkAccessManager::finished,
             this,
             &HttpTransceiver::replyReceived);
+
+    connect(ui->pb_interrupt, &QPushButton::clicked, this, &HttpTransceiver::interruptDownload);
 }
 
 HttpTransceiver::~HttpTransceiver()
@@ -27,9 +31,10 @@ HttpTransceiver::~HttpTransceiver()
     delete ui;
 }
 
-QByteArray HttpTransceiver::getDownloadedData()
+QTemporaryFile* HttpTransceiver::getDownloadedData()
 {
-    return m_downloadData;
+    m_downloadFile->seek(0);
+    return m_downloadFile;
 }
 
 void HttpTransceiver::setUploadMode(QByteArray data)
@@ -41,6 +46,7 @@ void HttpTransceiver::setUploadMode(QByteArray data)
     ui->cb_verb->setEnabled(true);
     ui->le_formDataName->setVisible(true);
     ui->lb_formDataName->setVisible(true);
+    ui->pr_request->setValue(0);
 }
 
 void HttpTransceiver::setDownloadMode()
@@ -50,16 +56,20 @@ void HttpTransceiver::setDownloadMode()
     ui->cb_verb->setEnabled(false);
     ui->le_formDataName->setVisible(false);
     ui->lb_formDataName->setVisible(false);
+    ui->pr_request->setValue(0);
 }
 
 void HttpTransceiver::on_pb_send_clicked()
 {
     ui->pb_send->setEnabled(false);
+    ui->cb_verb->setEnabled(false);
     QNetworkRequest request(QUrl(ui->le_url->text()));
 
     QNetworkReply *reply;
 
     if (ui->cb_verb->currentText() == "GET") {
+        ui->pb_interrupt->setEnabled(true);
+        m_downloadFile->resize(0);
         reply = m_netManager->get(request);
 
         connect(reply, &QNetworkReply::downloadProgress, this, &HttpTransceiver::progressReceived);
@@ -81,12 +91,23 @@ void HttpTransceiver::on_pb_send_clicked()
         else if (ui->cb_verb->currentText() == "PUT") {
             reply = m_netManager->put(request, multiPart);
         }
+        else {
+            QMessageBox msg(this);
+            msg.setWindowTitle("Unsupported HTTP Verb");
+            msg.setText(QString("The selected HTTP Verb '%1' is unsupported").arg(ui->cb_verb->currentText()));
+            msg.setDefaultButton(QMessageBox::Ok);
+            msg.exec();
+            return;
+        }
 
         multiPart->setParent(reply);
 
         connect(reply, &QNetworkReply::uploadProgress, this, &HttpTransceiver::progressReceived);
     }
 
+    if (m_reply) {
+        m_reply->deleteLater();
+    }
     m_reply = reply;
 
     connect(
@@ -96,14 +117,24 @@ void HttpTransceiver::on_pb_send_clicked()
             &HttpTransceiver::handleError);
 }
 
+void HttpTransceiver::interruptDownload()
+{
+    replyReceived(m_reply);
+    m_reply->abort();
+}
+
 void HttpTransceiver::progressReceived(qint64 progress, qint64 total)
 {
     ui->pr_request->setValue(int(double(progress) / double(total) * 100.0));
+    if (ui->cb_verb->currentText() == "GET") {
+        while (m_reply->bytesAvailable()) {
+            m_downloadFile->write(m_reply->read(10 * 1000 * 1000));
+        }
+    }
 }
 
 void HttpTransceiver::replyReceived(QNetworkReply *reply)
 {
-    m_downloadData = reply->read(1000 * 1000 * 10);
     m_uploadData.clear();
 
     if (reply->error() == QNetworkReply::NoError) {
@@ -113,8 +144,9 @@ void HttpTransceiver::replyReceived(QNetworkReply *reply)
         ui->le_formDataName->clear();
     }
 
-    reply->deleteLater();
     ui->pb_send->setEnabled(true);
+    ui->cb_verb->setEnabled(true);
+    ui->pb_interrupt->setEnabled(false);
 }
 
 void HttpTransceiver::handleError(QNetworkReply::NetworkError error)
@@ -122,7 +154,7 @@ void HttpTransceiver::handleError(QNetworkReply::NetworkError error)
     Q_UNUSED(error)
     QMessageBox msg(this);
     msg.setWindowTitle("HTTP Error");
-    msg.setText(QString("Failed to perform HTTP request: '%1'").arg(m_reply->errorString()));
+    msg.setText(QString("Error encountered in HTTP request: '%1'").arg(m_reply->errorString()));
     msg.setDefaultButton(QMessageBox::Ok);
     msg.exec();
 }
