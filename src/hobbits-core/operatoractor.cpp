@@ -105,8 +105,10 @@ void OperatorActor::postProcess()
                                 result->getPluginState()));
             QSharedPointer<PluginActionLineage> lineage = PluginActionLineage::create(action)->setOutputPos(i);
             if (!m_inputContainers.isEmpty()) {
-                // TODO: multiple parents
                 lineage->setParent(m_inputContainers.at(0)->getActionLineage());
+                for (int i = 1; i < m_inputContainers.size(); i++) {
+                    lineage->addAdditionalInput(m_inputContainers.at(i)->getActionLineage());
+                }
             }
             result->getOutputContainers().at(i)->setActionLineage(lineage);
         }

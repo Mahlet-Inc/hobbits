@@ -98,6 +98,14 @@ QSharedPointer<PluginActionLineage> PluginActionLineage::setParent(QSharedPointe
     return sharedFromThis();
 }
 
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::addAdditionalInput(
+        QSharedPointer<const PluginActionLineage> inputLineage)
+{
+    m_additionalInputs.append(inputLineage);
+    return sharedFromThis();
+}
+
 QSharedPointer<PluginActionLineage> PluginActionLineage::setOutputPos(int outputPosition)
 {
     m_outputPosition = outputPosition;
@@ -114,6 +122,11 @@ int PluginActionLineage::getOutputPosition() const
     return m_outputPosition;
 }
 
+QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getAdditionalInputs() const
+{
+    return m_additionalInputs;
+}
+
 QJsonObject PluginActionLineage::serialize() const
 {
     QJsonObject obj;
@@ -122,6 +135,16 @@ QJsonObject PluginActionLineage::serialize() const
         QJsonObject actionObject;
         actionObject.insert("action", action->m_pluginAction->serialize());
         actionObject.insert("outputPosition", action->m_outputPosition);
+        QJsonArray additionalInputs;
+        for (auto input : m_additionalInputs) {
+            if (input.isNull()) {
+                additionalInputs.append(QJsonObject());
+            }
+            else {
+                additionalInputs.append(input->serialize());
+            }
+        }
+        actionObject.insert("additionalInputs", additionalInputs);
         actions.append(actionObject);
     }
     obj.insert("actions", actions);
@@ -154,7 +177,24 @@ QSharedPointer<PluginActionLineage> PluginActionLineage::deserialize(QJsonObject
             return nullLineage;
         }
         int outputPosition = int(actionObject.value("outputPosition").toDouble());
+
         lineage = PluginActionLineage::create(pluginAction)->setParent(lineage)->setOutputPos(outputPosition);
+
+        if (actionObject.contains("additionalInputs")
+                && actionObject.value("additionalInputs").isArray()) {
+            for (auto additional : actionObject.value("additionalInputs").toArray()) {
+                if (!additional.isObject()) {
+                    return nullLineage;
+                }
+                QJsonObject additionalObject = additional.toObject();
+                if (additionalObject.size() == 0) {
+                    lineage->addAdditionalInput(QSharedPointer<PluginActionLineage>());
+                }
+                else {
+                    lineage->addAdditionalInput(PluginActionLineage::deserialize(additionalObject));
+                }
+            }
+        }
     }
 
     return lineage;
@@ -168,4 +208,13 @@ QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getLineage
     }
     lineage.append(this->sharedFromThis());
     return lineage;
+}
+
+int PluginActionLineage::additionalInputCount() const
+{
+    int count = 0;
+    for (auto lineage: getLineage()) {
+        count += lineage->getAdditionalInputs().size();
+    }
+    return count;
 }

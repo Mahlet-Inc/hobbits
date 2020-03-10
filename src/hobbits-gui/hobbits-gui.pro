@@ -30,17 +30,20 @@ CONFIG += c++11
 CONFIG -= debug_and_release_target
 
 SOURCES += \
+        containerselectiondialog.cpp \
         hobbitsguiinfo.cpp \
         main.cpp \
         mainwindow.cpp \
         preferencesdialog.cpp
 
 HEADERS += \
+        containerselectiondialog.h \
         hobbitsguiinfo.h \
         mainwindow.h \
         preferencesdialog.h
 
 FORMS += \
+        containerselectiondialog.ui \
         mainwindow.ui \
         preferencesdialog.ui
 

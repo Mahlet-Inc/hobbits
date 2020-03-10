@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQueue>
+#include <QStack>
 
 #include "actionwatcher.h"
 #include "analyzeractor.h"
@@ -21,10 +22,15 @@ public:
 
     struct LineageAction {
         QUuid containerId;
-        QSharedPointer<const PluginActionLineage> lineage;
+        QList<QSharedPointer<const PluginActionLineage>> lineage;
+        QList<QSharedPointer<BitContainer>> inputs;
+        QList<QSharedPointer<BitContainer>> additionalInputs;
         QSharedPointer<BitContainerManager> bitContainerManager;
         QString baseName;
         QMap<int, QUuid> outputIdOverride;
+        QList<QUuid> additionalInputIds;
+        int step;
+        int additionalStep;
     };
 
     bool isBusy() const;
@@ -38,7 +44,10 @@ public:
             QSharedPointer<const PluginActionLineage> lineage,
             QSharedPointer<BitContainerManager> bitContainerManager,
             QString baseName,
-            QMap<int, QUuid> outputIdOverride = QMap<int, QUuid>());
+            QMap<int, QUuid> outputIdOverride = QMap<int, QUuid>(),
+            QList<QUuid> additionalInputs = QList<QUuid>());
+
+    void applyLineage(QSharedPointer<LineageAction> lineageAction);
 
     QSharedPointer<OperatorActor> operatorActor();
     QSharedPointer<AnalyzerActor> analyzerActor();
@@ -67,13 +76,9 @@ private:
     QSharedPointer<OperatorActor> m_operatorActor;
     QSharedPointer<AnalyzerActor> m_analyzerActor;
 
-    bool m_activeLineage;
-    QList<QSharedPointer<const PluginActionLineage>> m_currLineage;
-    QList<QSharedPointer<BitContainer>> m_currLineageContainers;
-    QSharedPointer<BitContainerManager> m_lineageBitContainerManager;
-    QString m_lineageBaseName;
-    int m_lineageStep;
-    QMap<int, QUuid> m_currOutputIdOverride;
+    QSharedPointer<LineageAction> m_current;
+
+    QStack<QSharedPointer<LineageAction>> m_lineageStack;
 
     QQueue<QSharedPointer<LineageAction>> m_lineageQueue;
 

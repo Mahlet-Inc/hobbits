@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     QCommandLineOption inputFileOption(
         QStringList() << "i" << "input",
-            QCoreApplication::translate("main", "File to open on application startup (use '-' for piped input)"),
+            QCoreApplication::translate("main", "File to open on application startup. Use '-' for piped input. This option can be specified more than once if multiple input files are needed"),
             QCoreApplication::translate("main", "file"));
     parser.addOption(inputFileOption);
 
@@ -126,23 +126,31 @@ int main(int argc, char *argv[])
             err << parser.helpText() << endl;
             return -1;
         }
-        QSharedPointer<BitContainer> targetContainer = QSharedPointer<BitContainer>(new BitContainer());
+        QList<QSharedPointer<BitContainer>> targetContainers;
         QByteArray inputData;
         if (pipedInData.isNull()) {
-            QFile inputFile(parser.value(inputFileOption));
-            if (!inputFile.open(QIODevice::ReadOnly)) {
-                err << "Error: cannot open input file: " << parser.value(inputFileOption) << endl;
-                return -1;
+            for (QString fileName : parser.values(inputFileOption)) {
+                QFile inputFile(fileName);
+                if (!inputFile.open(QIODevice::ReadOnly)) {
+                    err << "Error: cannot open input file: " << parser.value(inputFileOption) << endl;
+                    return -1;
+                }
+                auto container = QSharedPointer<BitContainer>(new BitContainer());
+                container->setBytes(&inputFile);
+                targetContainers.append(container);
+                inputFile.close();
             }
-            targetContainer->setBytes(&inputFile);
-            inputFile.close();
         }
         else {
-            targetContainer->setBytes(pipedInData);
+            auto container = QSharedPointer<BitContainer>(new BitContainer());
+            container->setBytes(pipedInData);
+            targetContainers.append(container);
         }
 
         QSharedPointer<BitContainerManager> bitManager = QSharedPointer<BitContainerManager>(new BitContainerManager());
-        bitManager->getTreeModel()->addContainer(targetContainer);
+        for (auto container : targetContainers) {
+            bitManager->getTreeModel()->addContainer(container);
+        }
 
         QObject::connect(
                 pluginActionManager.data(),
@@ -181,18 +189,25 @@ int main(int argc, char *argv[])
         });
 
         warnings.clear();
-        if (!TemplateFileHandler::applyTemplateToContainer(
-                parser.value(templateOption),
-                targetContainer,
-                bitManager,
-                pluginActionManager,
-                &warnings)) {
+        auto lineageTree = TemplateFileHandler::loadTemplate(parser.value(templateOption), &warnings);
+        if (lineageTree.isNull()) {
             err << warnings.join("\n");
             return -1;
         }
         else if (!warnings.isEmpty()) {
             err << warnings.join("\n");
         }
+        QList<QUuid> additionalInputs;
+        for (int i = 1; i < targetContainers.size(); i++) {
+            additionalInputs.append(targetContainers.at(i)->getId());
+        }
+        TemplateFileHandler::applyLineageTree(
+                    targetContainers.at(0)->getId(),
+                    additionalInputs,
+                    lineageTree,
+                    QFileInfo(parser.value(templateOption)).fileName().section(".", 0, 0),
+                    bitManager,
+                    pluginActionManager);
         a.exec();
     }
     else {

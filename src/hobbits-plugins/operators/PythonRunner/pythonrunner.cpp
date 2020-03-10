@@ -112,12 +112,12 @@ bool PythonRunner::canRecallPluginState(const QJsonObject &pluginState)
     return true;
 }
 
-int PythonRunner::getMinInputContainers()
+int PythonRunner::getMinInputContainers(const QJsonObject &pluginState)
 {
     return 1;
 }
 
-int PythonRunner::getMaxInputContainers()
+int PythonRunner::getMaxInputContainers(const QJsonObject &pluginState)
 {
     return 1;
 }

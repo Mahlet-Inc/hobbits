@@ -174,12 +174,12 @@ bool PrbsGenerator::canRecallPluginState(const QJsonObject &pluginState)
     return false;
 }
 
-int PrbsGenerator::getMinInputContainers()
+int PrbsGenerator::getMinInputContainers(const QJsonObject &pluginState)
 {
     return 0;
 }
 
-int PrbsGenerator::getMaxInputContainers()
+int PrbsGenerator::getMaxInputContainers(const QJsonObject &pluginState)
 {
     return 0;
 }
