@@ -1,3 +1,7 @@
+trigger:
+  - master
+  - develop
+
 jobs:
 - job: UbuntuLinuxGCC7
   pool:

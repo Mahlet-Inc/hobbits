@@ -30,8 +30,8 @@ public:
     bool canRecallPluginState(const QJsonObject &pluginState) override;
     virtual bool setPluginStateInUi(const QJsonObject &pluginState) override;
     QJsonObject getStateFromUi() override;
-    int getMinInputContainers() override;
-    int getMaxInputContainers() override;
+    int getMinInputContainers(const QJsonObject &pluginState) override;
+    int getMaxInputContainers(const QJsonObject &pluginState) override;
 
     QSharedPointer<const OperatorResult> operateOnContainers(
             QList<QSharedPointer<const BitContainer>> inputContainers,

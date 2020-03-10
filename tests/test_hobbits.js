@@ -31,9 +31,10 @@ async function runTests() {
         testDir = join(baseDir, testDir)
     
         try {
-            let input = join(testDir, "input.bits")
-            if (!existsSync(input)) {
-                throw Error(`Failed to find input.bits!`)
+            let inputGlob = join(testDir, "input*.bits")
+            let inputMatches = glob.sync(inputGlob, {nonull: false})
+            if (inputMatches.length < 1) {
+                throw Error(`Failed to find input files matching pattern ${inputGlob}!`)
             }
             let output = join(testDir, "output.bits")
             if (!existsSync(output)) {
@@ -52,13 +53,20 @@ async function runTests() {
             for (let oldOutput of testOutputMatches) {
                 unlinkSync(oldOutput)
             }
-    
-            execFileSync(argv.hobbits_runner, [
+
+            let args = [
                 'run',
                 '-t', template,
-                '-i', input,
                 '-o', testOutputPrefix
-            ], {stdio: 'inherit'});
+            ]
+
+            inputMatches.sort()
+            inputMatches.forEach(input => {
+                args.push('-i')
+                args.push(input)
+            })
+
+            execFileSync(argv.hobbits_runner, args, {stdio: 'inherit'});
     
             testOutputMatches = glob.sync(testOutputGlob, {nonull: false})
             if (testOutputMatches.length < 1) {
