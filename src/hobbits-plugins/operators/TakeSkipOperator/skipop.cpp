@@ -7,15 +7,20 @@ SkipOp::SkipOp(qint64 value) :
 }
 
 void SkipOp::apply(
-        QSharedPointer<const BitArray> inputBits,
+        const Frame &inputFrame,
         QSharedPointer<BitArray> outputBits,
         qint64 &inputIdx,
         qint64 &outputIdx)
 {
     Q_UNUSED(outputBits)
     Q_UNUSED(outputIdx)
-    inputIdx += m_value;
-    inputIdx = qMin(inputIdx, inputBits->sizeInBits());
+    inputIdx = inputIdx + m_value;
+    if (inputIdx < m_value) {
+        inputIdx = inputFrame.size();
+    }
+    else {
+        inputIdx = qMin(inputIdx, inputFrame.size());
+    }
 }
 
 qint64 SkipOp::inputStep(qint64 inputBits) const

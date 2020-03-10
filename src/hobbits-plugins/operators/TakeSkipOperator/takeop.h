@@ -9,7 +9,7 @@ public:
     TakeOp(qint64 value);
 
     void apply(
-            QSharedPointer<const BitArray> inputBits,
+            const Frame &inputFrame,
             QSharedPointer<BitArray> outputBits,
             qint64 &inputIdx,
             qint64 &outputIdx) override;

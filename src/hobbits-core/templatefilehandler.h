@@ -21,18 +21,16 @@ public:
             QList<QSharedPointer<const PluginActionLineage>> lineages,
             QStringList *warnings = nullptr);
 
-    static void applyMultipleLineages(
+    static void applyLineageTree(
             QUuid targetId,
+            QList<QUuid> &additionalInputs,
             QSharedPointer<PluginActionLineage::TreeNode> lineageTree,
             QString name,
             QSharedPointer<BitContainerManager> bitManager,
             QSharedPointer<PluginActionManager> pluginActionManager);
 
-    static bool applyTemplateToContainer(
+    static QSharedPointer<PluginActionLineage::TreeNode> loadTemplate(
             QString fileName,
-            QSharedPointer<BitContainer> bitContainer,
-            QSharedPointer<BitContainerManager> bitManager,
-            QSharedPointer<PluginActionManager> pluginActionManager,
             QStringList *warnings = nullptr);
 
 };

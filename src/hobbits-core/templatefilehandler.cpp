@@ -48,8 +48,9 @@ bool TemplateFileHandler::writeTemplate(
     return true;
 }
 
-void TemplateFileHandler::applyMultipleLineages(
+void TemplateFileHandler::applyLineageTree(
         QUuid targetId,
+        QList<QUuid> &additionalInputs,
         QSharedPointer<PluginActionLineage::TreeNode> lineageTree,
         QString name,
         QSharedPointer<BitContainerManager> bitManager,
@@ -60,35 +61,35 @@ void TemplateFileHandler::applyMultipleLineages(
         QUuid outputId = QUuid::createUuid();
         QMap<int, QUuid> outputIdOverride;
         outputIdOverride.insert(0, outputId);
-        pluginActionManager->applyLineage(targetId, lineageTree->lineage, bitManager, name, outputIdOverride);
+        QList<QUuid> additionals;
+        int requiredAdditionalInputs = lineageTree->lineage->additionalInputCount();
+        while (requiredAdditionalInputs > 0) {
+            additionals.append(additionalInputs.takeFirst());
+            requiredAdditionalInputs--;
+        }
+        pluginActionManager->applyLineage(
+                targetId,
+                lineageTree->lineage,
+                bitManager,
+                name,
+                outputIdOverride,
+                additionals);
 
         targetId = outputId;
     }
     for (auto child : lineageTree->children) {
-        applyMultipleLineages(targetId, child, name, bitManager, pluginActionManager);
+        applyLineageTree(targetId, additionalInputs, child, name, bitManager, pluginActionManager);
     }
 }
 
-bool TemplateFileHandler::applyTemplateToContainer(
-        QString fileName,
-        QSharedPointer<BitContainer> bitContainer,
-        QSharedPointer<BitContainerManager> bitManager,
-        QSharedPointer<PluginActionManager> pluginActionManager,
-        QStringList *warnings)
+QSharedPointer<PluginActionLineage::TreeNode> TemplateFileHandler::loadTemplate(QString fileName, QStringList *warnings)
 {
-    if (bitContainer.isNull()) {
-        if (warnings) {
-            warnings->append(QString("Cannot apply a template to a null bit container").arg(fileName));
-        }
-        return false;
-    }
-
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         if (warnings) {
             warnings->append(QString("Template file '%1' cannot be opened").arg(fileName));
         }
-        return false;
+        return QSharedPointer<PluginActionLineage::TreeNode>();
     }
     QJsonDocument serialized = QJsonDocument::fromJson(file.read(5 * 1000 * 1000));
     QFileInfo fileInfo(file.fileName());
@@ -104,23 +105,18 @@ bool TemplateFileHandler::applyTemplateToContainer(
                 if (warnings) {
                     warnings->append(QString("Template file '%1' is not formatted correctly").arg(fileName));
                 }
-                return false;
+                return QSharedPointer<PluginActionLineage::TreeNode>();
             }
             auto actionLineage = PluginActionLineage::deserialize(lineage.toObject());
             if (actionLineage.isNull()) {
                 if (warnings) {
                     warnings->append(QString("Template file '%1' is not formatted correctly").arg(fileName));
                 }
-                return false;
+                return QSharedPointer<PluginActionLineage::TreeNode>();
             }
             lineages.append(actionLineage);
         }
-        applyMultipleLineages(
-                bitContainer->getId(),
-                PluginActionLineage::mergeIntoTree(lineages),
-                templateName,
-                bitManager,
-                pluginActionManager);
+        return PluginActionLineage::mergeIntoTree(lineages);
     }
     else {
         auto actionLineage = PluginActionLineage::deserialize(lineageObject);
@@ -128,9 +124,8 @@ bool TemplateFileHandler::applyTemplateToContainer(
             if (warnings) {
                 warnings->append(QString("Template file '%1' is not formatted correctly").arg(fileName));
             }
-            return false;
+            return QSharedPointer<PluginActionLineage::TreeNode>();
         }
-        pluginActionManager->applyLineage(bitContainer->getId(), actionLineage, bitManager, templateName);
+        return PluginActionLineage::mergeIntoTree({actionLineage});
     }
-    return true;
 }

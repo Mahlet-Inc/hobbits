@@ -25,8 +25,8 @@ public:
     virtual bool canRecallPluginState(const QJsonObject &pluginState) = 0;
     virtual bool setPluginStateInUi(const QJsonObject &pluginState) = 0;
 
-    virtual int getMinInputContainers() = 0;
-    virtual int getMaxInputContainers() = 0;
+    virtual int getMinInputContainers(const QJsonObject &pluginState) = 0;
+    virtual int getMaxInputContainers(const QJsonObject &pluginState) = 0;
     virtual QSharedPointer<const OperatorResult> operateOnContainers(
             QList<QSharedPointer<const BitContainer>> inputContainers,
             const QJsonObject &recallablePluginState,
@@ -34,6 +34,6 @@ public:
 
 };
 
-Q_DECLARE_INTERFACE(OperatorInterface, "hobbits.OperatorInterface.3")
+Q_DECLARE_INTERFACE(OperatorInterface, "hobbits.OperatorInterface.4")
 
 #endif // OPERATORINTERFACE_H

@@ -1,20 +1,19 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QPluginLoader>
-
 #include <QCloseEvent>
+#include <QFileDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
+#include <QPluginLoader>
 #include <QQueue>
 #include <QSettings>
 
+#include "containerselectiondialog.h"
 #include "hobbitscoreinfo.h"
 #include "hobbitsguiinfo.h"
 #include "pluginactionlineage.h"
-
 #include "preferencesdialog.h"
 #include "settingsmanager.h"
 #include "templatefilehandler.h"
@@ -659,15 +658,26 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
         QSharedPointer<OperatorInterface> plugin = m_pluginManager->getOperator(pluginName);
         if (!plugin.isNull()) {
             QList<QSharedPointer<BitContainer>> inputContainers;
-            if (plugin->getMaxInputContainers() == 1 && plugin->getMinInputContainers() == 1) {
+            QJsonObject pluginState = plugin->getStateFromUi();
+            int minInputs = plugin->getMinInputContainers(pluginState);
+            int maxInputs = plugin->getMaxInputContainers(pluginState);
+            if (maxInputs == 1 && minInputs == 1) {
                 inputContainers.append(currContainer());
             }
-            else if (plugin->getMaxInputContainers() != 0) {
-                // TODO: operator selection dialogue - need a multi-input plugin to test it out
-                warningMessage(
-                        "Plugins with variable or more than 1 input are not yet supported by the GUI",
-                        "Unsupported Plugin Charactaristics");
-                return;
+            else if (maxInputs > 1) {
+                ContainerSelectionDialog *selectionDialog = new ContainerSelectionDialog(m_bitContainerManager, this);
+                if (!selectionDialog->exec()) {
+                    return;
+                }
+                inputContainers = selectionDialog->getSelected();
+                if (inputContainers.size() < minInputs
+                    || inputContainers.size() > maxInputs) {
+                    warningMessage(
+                            QString("You must select between %1 and %2 input containers (%3 selected)")
+                            .arg(minInputs).arg(maxInputs).arg(inputContainers.size()),
+                            "Invalid Input Count");
+                    return;
+                }
             }
             if (pluginState.isEmpty()) {
                 pluginState = plugin->getStateFromUi();
@@ -883,17 +893,46 @@ void MainWindow::on_action_Export_Template_triggered()
 void MainWindow::applyTemplateToCurrentContainer(QString fileName)
 {
     QStringList warnings;
-    if (!TemplateFileHandler::applyTemplateToContainer(
-            fileName,
-            currContainer(),
-            m_bitContainerManager,
-            m_pluginActionManager,
-            &warnings)) {
+    auto lineageTree = TemplateFileHandler::loadTemplate(fileName, &warnings);
+    if (lineageTree.isNull()) {
         warningMessage(warnings.join("\n\n"), "Failed to Apply Template");
+        return;
     }
     else if (!warnings.isEmpty()) {
         warningMessage(warnings.join("\n\n"));
     }
+
+    QFileInfo fileInfo(fileName);
+    QString templateName = fileInfo.fileName().section(".", 0, 0);
+    QList<QUuid> additionalInputs;
+    if (lineageTree->additionalInputCount() > 0) {
+        ContainerSelectionDialog *selectionDialog = new ContainerSelectionDialog(m_bitContainerManager, this);
+        selectionDialog->setMessage(
+                QString("Select %1 additional inputs for the provided template").arg(
+                        lineageTree->
+                        additionalInputCount()));
+        if (!selectionDialog->exec()) {
+            return;
+        }
+        auto additionals = selectionDialog->getSelected();
+        if (additionals.size() != lineageTree->additionalInputCount()) {
+            warningMessage(
+                    QString("You must select between %1 input containers (%2 selected)")
+                    .arg(lineageTree->additionalInputCount()).arg(additionals.size()),
+                    "Invalid Input Count");
+            return;
+        }
+        for (auto additional : additionals) {
+            additionalInputs.append(additional->getId());
+        }
+    }
+    TemplateFileHandler::applyLineageTree(
+            currContainer()->getId(),
+            additionalInputs,
+            lineageTree,
+            templateName,
+            m_bitContainerManager,
+            m_pluginActionManager);
 }
 
 void MainWindow::on_actionApply_Template_triggered()

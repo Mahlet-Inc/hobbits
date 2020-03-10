@@ -1,6 +1,7 @@
 #ifndef BITOP_H
 #define BITOP_H
 
+#include "frame.h"
 #include <bitarray.h>
 #include <QSharedPointer>
 
@@ -12,7 +13,7 @@ public:
     virtual ~BitOp();
 
     virtual void apply(
-            QSharedPointer<const BitArray> inputBits,
+            const Frame &inputFrame,
             QSharedPointer<BitArray> outputBits,
             qint64 &inputIdx,
             qint64 &outputIdx) = 0;

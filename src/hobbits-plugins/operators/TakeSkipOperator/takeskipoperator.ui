@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
-    <height>56</height>
+    <width>592</width>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,6 +47,37 @@
      </item>
      <item>
       <widget class="QLineEdit" name="le_takeSkip"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cb_interleaved">
+       <property name="text">
+        <string>Interleave</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cb_frameBased">
+       <property name="text">
+        <string>Frame-based</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

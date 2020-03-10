@@ -7,13 +7,13 @@ InvertOp::InvertOp(qint64 value) :
 }
 
 void InvertOp::apply(
-        QSharedPointer<const BitArray> inputBits,
+        const Frame &inputFrame,
         QSharedPointer<BitArray> outputBits,
         qint64 &inputIdx,
         qint64 &outputIdx)
 {
-    for (int i = 0; i < m_value && inputIdx < inputBits->sizeInBits(); i++) {
-        outputBits->set(outputIdx, !inputBits->at(inputIdx));
+    for (int i = 0; i < m_value && inputIdx < inputFrame.size(); i++) {
+        outputBits->set(outputIdx, !inputFrame.at(inputIdx));
         inputIdx++;
         outputIdx++;
     }

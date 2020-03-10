@@ -7,12 +7,12 @@ ZeroOp::ZeroOp(qint64 value) :
 }
 
 void ZeroOp::apply(
-        QSharedPointer<const BitArray> inputBits,
+        const Frame &inputFrame,
         QSharedPointer<BitArray> outputBits,
         qint64 &inputIdx,
         qint64 &outputIdx)
 {
-    Q_UNUSED(inputBits)
+    Q_UNUSED(inputFrame)
     Q_UNUSED(inputIdx)
     for (qint64 i = 0; i < m_value; i++) {
         outputBits->set(outputIdx, false);
