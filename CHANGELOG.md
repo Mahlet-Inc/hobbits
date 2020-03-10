@@ -1,3 +1,11 @@
+# [0.22.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.21.0...v0.22.0) (2020-03-10)
+
+
+### Features
+
+* add interleaving and frame-based modes to Take Skip operator ([bcbd804](https://github.com/Mahlet-Inc/hobbits/commit/bcbd80469ddabfab829b1d781e603a49c3f24428))
+* add interrupting to HTTP importer downloads for [#8](https://github.com/Mahlet-Inc/hobbits/issues/8) ([b1d63dc](https://github.com/Mahlet-Inc/hobbits/commit/b1d63dcabf169821cc99e16cac56a4ce4c673c38))
+
 # [0.21.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.20.4...v0.21.0) (2020-03-04)
 
 
