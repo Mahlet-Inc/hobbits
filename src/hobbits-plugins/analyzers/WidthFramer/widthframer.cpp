@@ -233,10 +233,13 @@ QVector<QPointF> WidthFramer::autocorrelate(QSharedPointer<const BitArray> bits)
 
     // prepare and run first FFT
     for (int i = 0; i < N; i++) {
+        m_fft_in[i][0] = 0;
+        m_fft_in[i][1] = 0;
         if (i < bits->sizeInBits()) {
             m_fft_in[i][0] = bits->at(i) ? 1 : -1;
-            m_fft_in[i][1] = 0;
         }
+        m_fft_out[i][0] = 0;
+        m_fft_out[i][1] = 0;
     }
     fftw_execute(m_fft_plan1);
 
