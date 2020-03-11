@@ -8,6 +8,12 @@ steps:
   - script: brew install libpcap
     displayName: 'Install libpcap'
 
+  - script: brew install ninja
+    displayName: 'Install Ninja'
+
+  - script: brew install cmake
+    displayName: 'Install CMake'
+
   - script: brew install pkg-config
     displayName: 'Install pkg-config'
 

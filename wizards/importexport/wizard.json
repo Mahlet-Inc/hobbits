@@ -1,0 +1,96 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ "Qt5ProjectManager.Qt5Project" ],
+    "id": "HobbitsImportExport",
+    "category": "Project",
+    "trDescription": "Creates a hobbits import/export plugin. General plugin methods and basic plugin structure are provided.",
+    "trDisplayName": "Import/Export Plugin",
+    "trDisplayCategory": "Hobbits Plugin",
+    "icon": "pluginicon.png",
+    "featuresRequired": [ "QtSupport.Wizards.FeatureQt" ],
+    "enabled": "%{JS: [ %{Plugins} ].indexOf('QmakeProjectManager') >= 0}",
+    "options":
+    [
+        { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
+        { "key": "ClassName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "ImportFormClassName", "value": "%{JS: '%{ProjectName}ImportForm'}" },
+        { "key": "ExportFormClassName", "value": "%{JS: '%{ProjectName}ExportForm'}" },
+        { "key": "CppFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ImportFormCppFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "ImportFormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ImportFormUiFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '.ui')}" },
+        { "key": "ExportFormCppFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "ExportFormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ExportFormUiFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '.ui')}" }
+    ],
+
+    "pages":
+    [
+        {
+            "trDisplayName": "Project Location",
+            "trShortTitle": "Location",
+            "typeId": "Project",
+            "data": { "trDescription": "Creates a hobbits import/export plugin. General plugin methods and basic plugin structure are provided." }
+        },
+        {
+            "trDisplayName": "Kit Selection",
+            "trShortTitle": "Kits",
+            "typeId": "Kits",
+            "enabled": "%{IsTopLevelProject}",
+            "data": { "projectFilePath": "CMakeLists.txt" }
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators":
+    [
+        {
+            "typeId": "File",
+            "data":
+            [
+                {
+                    "openAsProject": true,
+                    "source": "CMakeLists.txt.templ",
+                    "target": "CMakeLists.txt"
+                },
+                {
+                    "source": "importexportplugintemplate.cpp",
+                    "target": "%{CppFileName}"
+                },
+                {
+                    "source": "importexportplugintemplate.h",
+                    "target": "%{HeaderFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.cpp",
+                    "target": "%{ImportFormCppFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.h",
+                    "target": "%{ImportFormHeaderFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.ui",
+                    "target": "%{ImportFormUiFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.cpp",
+                    "target": "%{ExportFormCppFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.h",
+                    "target": "%{ExportFormHeaderFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.ui",
+                    "target": "%{ExportFormUiFileName}"
+                }
+                
+            ]
+        }
+    ]
+}

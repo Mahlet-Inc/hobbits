@@ -1,11 +1,17 @@
 steps:
-  - script: sudo apt-get update
+  - script: sudo apt-get -y update
     displayName: 'Update packages'
 
-  - script: sudo apt-get install libgl1-mesa-dev
+  - script: sudo apt-get -y install libgl1-mesa-dev
     displayName: 'Install libGL'
 
-  - script: sudo apt-get install fftw3-dev
+  - script: sudo apt-get -y install cmake ninja
+    displayName: 'Install CMake'
+
+  - script: sudo apt-get -y install ninja-build
+    displayName: 'Install Ninja'
+
+  - script: sudo apt-get -y install fftw3-dev
     displayName: 'Install FFTW3'
 
   - script: sudo apt-get install libpcap-dev

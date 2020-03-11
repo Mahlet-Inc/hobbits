@@ -71,9 +71,11 @@ void PythonInterpreter::initialize()
     PyConfig_InitPythonConfig(&config);
 
     std::wstring wsPyHome = SettingsManager::getTransientSetting(SettingsManager::PYTHON_HOME_KEY).toString().toStdWString();
-    QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
-    wcscpy(pyHome.data(), wsPyHome.c_str());
-    config.home = pyHome.data();
+    if(wsPyHome.size(0)){
+        QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
+        wcscpy(pyHome.data(), wsPyHome.c_str());
+        config.home = pyHome.data();
+    }
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {

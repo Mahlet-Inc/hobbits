@@ -69,42 +69,36 @@ steps:
   - script: |
       cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      nmake release
+      md build
+      cd build
+      cmake -GNinja -DCPACK_GENERATOR="ZIP" ..
     displayName: 'Build hobbits'
 
   - script: |
       dir $(Build.BinariesDirectory)\Qt\Tools\
       cd $(Build.BinariesDirectory)
-      mkdir -p release\plugins\analyzers release\plugins\operators release\plugins\displays release\plugins\importerexporters
-      xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll release\
-      xcopy $(Build.SourcesDirectory)\src\hobbits-gui\hobbits.exe release\
-      xcopy $(Build.SourcesDirectory)\src\hobbits-runner\hobbits-runner.exe release\
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c echo xcopy @path $(Build.BinariesDirectory)\release\plugins\analyzers\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\analyzers\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\analyzers\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\displays\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\displays\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\importerexporters\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\importerexporters\ "
-      forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\operators\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\operators\ "
-      forfiles /p $(Build.BinariesDirectory)\Qt\Tools\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release "
-      xcopy $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
-      xcopy $(Build.SourcesDirectory)\src\hobbits-widgets\hobbits-widgets.dll release\
-      xcopy $(Build.SourcesDirectory)\src\hobbits-python\hobbits-python.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\platforms /i
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Concurrent.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Core.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Gui.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Network.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Widgets.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libEGL.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libGLSv2.dll release\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\opengl32sw.dll release\
-      xcopy /s /e /f $(Build.SourcesDirectory)\hobbits_python\bin $(Build.BinariesDirectory)\release\
-    displayName: 'Collect release files'
+      ninja package
+      move .\*.zip $(Build.ArtifactStagingDirectory)\
+      
+      mkdir -p dependencies
+      xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll dependencies\
+      forfiles /p $(Build.BinariesDirectory)\Qt\Tools\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\dependencies "
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms dependencies\platforms /i
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Concurrent.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Core.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Gui.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Network.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Widgets.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libEGL.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libGLSv2.dll dependencies\
+      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\opengl32sw.dll dependencies\
+    displayName: 'Collect dependencies files'
   
   - task: ArchiveFiles@2
     inputs:
-      rootFolderOrFile: $(Build.BinariesDirectory)\release
+      rootFolderOrFile: $(Build.BinariesDirectory)\dependencies
       includeRootFolder: false
-      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits_windows_release.zip
+      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits_windows_dependencies.zip
 
   - task: PublishBuildArtifacts@1
     inputs:
