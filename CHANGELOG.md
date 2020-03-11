@@ -1,3 +1,10 @@
+## [0.22.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.22.0...v0.22.1) (2020-03-11)
+
+
+### Bug Fixes
+
+* widthframer no longer accumulates autocorrelation data into NaNs ([362f27b](https://github.com/Mahlet-Inc/hobbits/commit/362f27b7f1e20f9820299d71bb89f3155f134b54))
+
 # [0.22.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.21.0...v0.22.0) (2020-03-10)
 
 
