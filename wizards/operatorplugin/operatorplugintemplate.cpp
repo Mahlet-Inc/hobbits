@@ -60,12 +60,12 @@ QJsonObject %{ClassName}::getStateFromUi()
     return pluginState;
 }
 
-int %{ClassName}::getMinInputContainers()
+int %{ClassName}::getMinInputContainers(const QJsonObject &pluginState)
 {
     return 1;
 }
 
-int %{ClassName}::getMaxInputContainers()
+int %{ClassName}::getMaxInputContainers(const QJsonObject &pluginState)
 {
     return 1;
 }
