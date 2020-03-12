@@ -1,3 +1,16 @@
+# [0.23.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.22.1...v0.23.0) (2020-03-12)
+
+
+### Bug Fixes
+
+* significantly speed-up byte raster rendering ([a434cfa](https://github.com/Mahlet-Inc/hobbits/commit/a434cfad0d9bbb66aa65e3092590703292c77d39)), closes [#19](https://github.com/Mahlet-Inc/hobbits/issues/19)
+
+
+### Features
+
+* add CP437 as optional display format in ASCII display for [#20](https://github.com/Mahlet-Inc/hobbits/issues/20) ([50c3d50](https://github.com/Mahlet-Inc/hobbits/commit/50c3d50925b83b76ed611cce06fcebf98975e9be))
+* auto-locate python in PATH for Python Runner for [#1](https://github.com/Mahlet-Inc/hobbits/issues/1) ([f891407](https://github.com/Mahlet-Inc/hobbits/commit/f89140782bcdc578a602a652d95d01e1fb01d3e9))
+
 ## [0.22.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.22.0...v0.22.1) (2020-03-11)
 
 
