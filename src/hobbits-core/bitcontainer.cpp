@@ -117,6 +117,9 @@ QImage BitContainer::getByteRasterImage(qint64 x, qint64 y, int w, int h) const
         return raster;
     }
 
+    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
+    int hue = c.hue();
+    int saturation = c.saturation();
     for (int i = 0; i < h; i++) {
         if (i + frameOffset >= getFrames().size()) {
             break;
@@ -135,8 +138,7 @@ QImage BitContainer::getByteRasterImage(qint64 x, qint64 y, int w, int h) const
                 }
             }
 
-            QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
-            c.setHsl(c.hue(), c.saturation(), byteVal);
+            c.setHsl(hue, saturation, byteVal);
             raster.setPixel(ii / 8, i, c.rgba());
         }
     }

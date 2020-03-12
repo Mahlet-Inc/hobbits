@@ -2,6 +2,7 @@
 #define ASCIIVIEWWIDGET_H
 
 #include "displaybasetext.h"
+#include "charmaker.h"
 
 class AsciiViewWidget : public DisplayBaseText
 {
@@ -12,6 +13,14 @@ public:
 
     QString getDisplayChars(Frame frame, int offset) override;
     int bitsPerChar() override;
+    void setCharMakers(QList<QSharedPointer<CharMaker>>);
+
+public slots:
+    void setCurrCharMaker(QString charMaker);
+
+private:
+    QSharedPointer<CharMaker> m_currCharMaker;
+    QMap<QString, QSharedPointer<CharMaker>> m_charMakers;
 
 };
 

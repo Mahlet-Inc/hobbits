@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QTemporaryDir>
+#include <QStandardPaths>
 
 #include "pythonsyntaxhighlighter.h"
 
@@ -39,6 +40,22 @@ void PythonRunner::applyToWidget(QWidget *widget)
     ui->te_pluginOutput->hide();
     connect(ui->pb_pythonPathSelect, SIGNAL(pressed()), this, SLOT(openPythonPathDialog()));
     ui->le_pythonPath->setText(SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString());
+
+    // Auto-locate if empty
+    if (ui->le_pythonPath->text().isEmpty()) {
+        QString pythonPath = QStandardPaths::findExecutable("python3");
+        if (!pythonPath.isEmpty()) {
+            ui->le_pythonPath->setText(pythonPath);
+            SettingsManager::getInstance().setPrivateSetting(PYTHON_PATH_KEY, pythonPath);
+        }
+        else {
+            pythonPath = QStandardPaths::findExecutable("python");
+            if (!pythonPath.isEmpty()) {
+                ui->le_pythonPath->setText(pythonPath);
+                SettingsManager::getInstance().setPrivateSetting(PYTHON_PATH_KEY, pythonPath);
+            }
+        }
+    }
 
     connect(ui->pb_scriptHelp, SIGNAL(pressed()), this, SLOT(openHelpDialog()));
 

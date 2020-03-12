@@ -11,6 +11,9 @@ AsciiViewWidget::AsciiViewWidget(QSharedPointer<DisplayHandle> displayHandle, Di
 
 QString AsciiViewWidget::getDisplayChars(Frame frame, int offset)
 {
+    if (!m_currCharMaker.isNull()) {
+        return m_currCharMaker->getDisplayChars(frame, offset);
+    }
     QString frameString = "";
     if (offset + 7 >= frame.size()) {
         // partial char
@@ -37,4 +40,21 @@ QString AsciiViewWidget::getDisplayChars(Frame frame, int offset)
 int AsciiViewWidget::bitsPerChar()
 {
     return 8;
+}
+
+
+void AsciiViewWidget::setCharMakers(QList<QSharedPointer<CharMaker>> charMakers) {
+    m_charMakers.clear();
+    for (auto maker : charMakers) {
+        m_charMakers.insert(maker->getName(), maker);
+    }
+
+    if (!charMakers.isEmpty()) {
+        setCurrCharMaker(charMakers.first()->getName());
+    }
+}
+
+void AsciiViewWidget::setCurrCharMaker(QString charMaker) {
+    m_currCharMaker = m_charMakers.value(charMaker);
+    repaint();
 }
