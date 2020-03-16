@@ -96,6 +96,7 @@ signals:
 public slots:
     void setBytes(QIODevice *readableBytes, qint64 bitLen = -1);
     void setBytes(QByteArray bytes, qint64 bitLen = -1);
+    void setBytes(QSharedPointer<const BitArray> bits);
     void setBytes(QSharedPointer<BitArray> bits);
     void requestFocus(int bitOffset, int frameOffset);
     void recordFocus(int bitOffset, int frameOffset);

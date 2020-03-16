@@ -36,6 +36,11 @@ void BitContainer::setBytes(QIODevice *readableBytes, qint64 bitLen)
     setBytes(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)));
 }
 
+void BitContainer::setBytes(QSharedPointer<const BitArray> bits)
+{
+    setBytes(QSharedPointer<BitArray>(new BitArray(*bits.data())));
+}
+
 void BitContainer::setBytes(QSharedPointer<BitArray> bits)
 {
     m_bits = bits;

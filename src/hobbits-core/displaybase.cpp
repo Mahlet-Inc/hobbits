@@ -240,6 +240,30 @@ void DisplayBase::drawHighlights(
                         SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>());
         painter->drawRects(highlightRects);
     }
+    QMap<QString, QString> highlights = {
+        {"highlight_1", SettingsData::HIGHLIGHT_1_COLOR_KEY},
+        {"highlight_2", SettingsData::HIGHLIGHT_2_COLOR_KEY},
+        {"highlight_3", SettingsData::HIGHLIGHT_3_COLOR_KEY},
+        {"highlight_4", SettingsData::HIGHLIGHT_4_COLOR_KEY},
+        {"highlight_5", SettingsData::HIGHLIGHT_5_COLOR_KEY},
+    };
+    for (auto highlight: highlights.keys()) {
+        highlightRects = getHighlightRects(
+                highlight,
+                colWidth,
+                rowHeight,
+                frameOffset,
+                bitOffset,
+                colCount,
+                rowCount,
+                colGroupSize,
+                colGroupMargin);
+        if (!highlightRects.isEmpty()) {
+            painter->setBrush(
+                    SettingsManager::getInstance().getUiSetting(highlights.value(highlight)).value<QColor>());
+            painter->drawRects(highlightRects);
+        }
+    }
 }
 
 QVector<QRectF> DisplayBase::getHighlightRects(
