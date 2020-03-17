@@ -186,7 +186,7 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
     ksy.write(recallablePluginState.value("katai_struct_yaml").toString().toLocal8Bit());
     ksy.close();
 
-    QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName(), "--verbose", "file"};
+    QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
     QProcess kscProcess;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QProcessEnvironment envUpdate;
