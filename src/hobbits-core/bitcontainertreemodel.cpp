@@ -1,4 +1,5 @@
 #include "bitcontainertreemodel.h"
+#include "displayhelper.h"
 
 BitContainerTreeModel::BitContainerTreeModel(QObject *parent) :
     QAbstractItemModel(parent)
@@ -15,10 +16,10 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
 
     BitContainer *container = static_cast<BitContainer*>(index.internalPointer());
     if (role == Qt::DisplayRole) {
-        return QVariant(container->getName());
+        return QVariant(container->name());
     }
     else if (role == Qt::DecorationRole) {
-        return QVariant(container->getThumbnail());
+        return QVariant(DisplayHelper::bitRasterThumbnail(container));
     }
     return QVariant();
 }

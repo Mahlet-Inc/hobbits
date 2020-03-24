@@ -261,7 +261,7 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
 
     updateEndState(lfsr);
-    bitContainer->setBytes(outputBits);
+    bitContainer->setBits(outputBits);
     outputContainers.append(bitContainer);
 
     result->setOutputContainers(outputContainers)->setPluginState(recallablePluginState);

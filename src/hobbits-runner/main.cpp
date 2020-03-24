@@ -138,14 +138,14 @@ int main(int argc, char *argv[])
                     return -1;
                 }
                 auto container = QSharedPointer<BitContainer>(new BitContainer());
-                container->setBytes(&inputFile);
+                container->setBits(&inputFile);
                 targetContainers.append(container);
                 inputFile.close();
             }
         }
         else {
             auto container = QSharedPointer<BitContainer>(new BitContainer());
-            container->setBytes(pipedInData);
+            container->setBits(pipedInData);
             targetContainers.append(container);
         }
 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
             auto container = bitManager->getCurrentContainer();
             QFile output(QString("%1%2").arg(outputPrefix).arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
-            container->getBaseBits()->writeTo(&output);
+            container->bits()->writeTo(&output);
             output.close();
         });
 

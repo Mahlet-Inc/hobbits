@@ -44,8 +44,8 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
         return result;
     }
 
-    QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->getBaseBits();
-    qint64 bitLength = inputContainers.at(0)->getBaseBits()->sizeInBits();
+    QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->bits();
+    qint64 bitLength = inputContainers.at(0)->bits()->sizeInBits();
 
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitLength));
 
@@ -130,7 +130,7 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
     }
 
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits);
+    bitContainer->setBits(outputBits);
     output.append(bitContainer);
 
     QJsonObject pluginState(recallablePluginState);
@@ -139,7 +139,7 @@ QSharedPointer<OperatorResult> BitsError::gaussianFlip(
             QString("%1e%2 BER <- %3")
             .arg(recallablePluginState.value("error_coeff").toDouble())
             .arg(recallablePluginState.value("error_exp").toDouble())
-            .arg(inputContainers.at(0)->getName()));
+            .arg(inputContainers.at(0)->name()));
 
     result->setOutputContainers(output)->setPluginState(pluginState);
     return result;
@@ -219,9 +219,9 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
     }
 
 
-    QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->getBaseBits();
+    QSharedPointer<const BitArray> _inputBits = inputContainers.at(0)->bits();
 
-    qint64 bitLength = inputContainers.at(0)->getBaseBits()->sizeInBits();
+    qint64 bitLength = inputContainers.at(0)->bits()->sizeInBits();
 
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitLength));
 
@@ -272,7 +272,7 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
     }
 
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits);
+    bitContainer->setBits(outputBits);
     outputContainers.append(bitContainer);
 
     QJsonObject pluginState(recallablePluginState);
@@ -281,7 +281,7 @@ QSharedPointer<const OperatorResult> BitsError::operateOnContainers(
             QString("%1e%2 BER <- %3")
             .arg(recallablePluginState.value("error_coeff").toDouble())
             .arg(recallablePluginState.value("error_exp").toDouble())
-            .arg(inputContainers.at(0)->getName()));
+            .arg(inputContainers.at(0)->name()));
 
     result->setOutputContainers(outputContainers)->setPluginState(pluginState);
     return std::move(result);

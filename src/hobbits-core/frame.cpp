@@ -2,6 +2,12 @@
 
 #include <QString>
 
+Frame::Frame() :
+    Range(-1, -1)
+{
+
+}
+
 Frame::Frame(QSharedPointer<const BitArray> bits, qint64 start, qint64 end) :
     Range(start, end),
     m_bits(bits)

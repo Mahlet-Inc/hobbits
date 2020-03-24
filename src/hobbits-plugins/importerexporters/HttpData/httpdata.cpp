@@ -44,7 +44,8 @@ QSharedPointer<BitContainer> HttpData::importBits(QMap<QString, QString> args, Q
     http->setDownloadMode();
     if (http->exec()) {
         auto container = QSharedPointer<BitContainer>(new BitContainer());
-        container->setBytes(http->getDownloadedData());
+        container->setBits(http->getDownloadedData());
+        container->setName(http->getUrl().toDisplayString());
         return container;
     }
 
@@ -59,6 +60,6 @@ void HttpData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
     if (!http) {
         http = new HttpTransceiver();
     }
-    http->setUploadMode(container->getBaseBits()->getPreviewBytes());
+    http->setUploadMode(container->bits()->getPreviewBytes());
     http->exec();
 }

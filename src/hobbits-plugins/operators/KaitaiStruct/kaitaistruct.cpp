@@ -168,7 +168,7 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
     if (!inputBitFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return nullResult;
     }
-    inputContainers.at(0)->getBaseBits()->writeTo(&inputBitFile);
+    inputContainers.at(0)->bits()->writeTo(&inputBitFile);
     inputBitFile.close();
 
     QString coreScriptName = dir.filePath("core_script.py");
@@ -277,7 +277,7 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
     }
 
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBytes(inputContainers.at(0)->getBaseBits());
+    outputContainer->setBits(inputContainers.at(0)->bits());
     if (!outputRangeFile.open(QIODevice::ReadOnly)) {
         return nullResult;
     }
@@ -289,8 +289,15 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
     if (!outputObj.contains("sections") || !outputObj.value("sections").isArray()) {
         return nullResult;
     }
-    QList<QList<Range>> ranges = {{}, {}, {}, {}, {}};
-    int range = 0;
+    QList<RangeHighlight> highlights;
+    QList<QColor> colors = {
+        QColor(100, 220, 100, 85),
+        QColor(100, 0, 255, 50),
+        QColor(0, 150, 230, 100),
+        QColor(200, 140, 0, 100),
+        QColor(250, 50, 0, 100)
+    };
+    int colorIdx = 0;
     QJsonArray sections = outputObj.value("sections").toArray();
     for (auto section: sections) {
         if (!section.isObject()) {
@@ -300,15 +307,19 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
         if (!s.contains("start") || !s.contains("end") || !s.value("start").isDouble() || !s.value("end").isDouble()) {
             continue;
         }
-        ranges[range].append(Range(qint64(s.value("start").toDouble())*8, qint64(s.value("end").toDouble())*8 - 1));
-        range = (range + 1) % 5;
+        Range range(qint64(s.value("start").toDouble())*8, qint64(s.value("end").toDouble())*8 - 1);
+        QString label = ".";
+        if (s.contains("label") && s.value("label").isString()) {
+            label = s.value("label").toString();
+        }
+        highlights.append(RangeHighlight("kaitai_struct", label, range, colors.at(colorIdx)));
+        colorIdx = (colorIdx + 1) % colors.size();
     }
     outputRangeFile.close();
-    outputContainer->setHighlights("highlight_1", ranges.at(0));
-    outputContainer->setHighlights("highlight_2", ranges.at(1));
-    outputContainer->setHighlights("highlight_3", ranges.at(2));
-    outputContainer->setHighlights("highlight_4", ranges.at(3));
-    outputContainer->setHighlights("highlight_5", ranges.at(4));
+
+    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*inputContainers.at(0)->bitInfo().data()));
+    bitInfo->addHighlights(highlights);
+    outputContainer->setBitInfo(bitInfo);
 
     result->setPluginState(recallablePluginState);
     result->setOutputContainers({outputContainer});

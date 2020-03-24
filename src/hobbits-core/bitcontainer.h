@@ -11,7 +11,7 @@
 #include <QPixmap>
 #include <QSharedPointer>
 #include <QUuid>
-
+#include "bitinfo.h"
 #include "hobbits-core_global.h"
 
 class PluginActionLineage;
@@ -24,36 +24,33 @@ class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
     // this lets OperatorActor set the container's ID when necessary
     friend class OperatorActor;
 
+public slots:
+    void setBits(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
+    void setBits(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
+    void setBits(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
+    void setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
+    void setBitInfo(QSharedPointer<BitInfo>);
+
 public:
     explicit BitContainer(QObject *parent = nullptr);
 
-    void setFrames(QList<Frame> frames, qint64 maxFrameWidth = -1);
+    QSharedPointer<const BitArray> bits() const;
+    QSharedPointer<const BitInfo> bitInfo() const;
+    QSharedPointer<BitInfo> bitInfo();
 
-    QList<Frame> getFrames() const;
-    qint64 getMaxFrameWidth() const;
+    QVector<Frame> frames() const;
+    qint64 maxFrameWidth() const;
 
-    QList<Range> getHighlights(QString type) const;
-    void setHighlights(QString type, QList<Range>);
+    void addHighlight(RangeHighlight highlight);
+    void addHighlights(QList<RangeHighlight> highlights);
+    void setMetadata(QString key, QVariant value);
+    void clearHighlightCategory(QString category);
 
-    QStringList getMetadata(QString) const;
-    void setMetadata(QString, QStringList);
-
-    QString getName() const;
+    QString name() const;
     void setName(QString name);
-
-    QPixmap getThumbnail();
-    QImage getRasterImage(qint64 x, qint64 y, int w, int h) const;
-    QImage getByteRasterImage(qint64 x, qint64 y, int w, int h) const;
-
-    QSharedPointer<const BitArray> getBaseBits() const;
-
-    int getFrameOffsetContaining(Range target) const;
 
     void setActionLineage(QSharedPointer<const PluginActionLineage> lineage);
     QSharedPointer<const PluginActionLineage> getActionLineage() const;
-
-    int getLastFrameOffsetFocus() const;
-    int getLastBitOffsetFocus() const;
 
     bool isRootContainer() const;
     QList<QUuid> getChildUuids() const;
@@ -73,10 +70,7 @@ public:
 private:
     QString m_name;
     QSharedPointer<BitArray> m_bits;
-    QList<Frame> m_frames;
-    qint64 m_maxFrameWidth;
-    QMap<QString, QList<Range>> m_highlightMap;
-    QMap<QString, QStringList> m_metadata;
+    QSharedPointer<BitInfo> m_bitInfo;
 
     QSharedPointer<const PluginActionLineage> m_actionLineage;
 
@@ -84,25 +78,8 @@ private:
     QList<QUuid> m_children;
     QList<QUuid> m_parents;
 
-    int m_lastFrameOffsetFocus;
-    int m_lastBitOffsetFocus;
-
 signals:
-    void highlightsChanged(BitContainer *bitContainer);
-    void framesChanged(BitContainer *bitContainer);
     void changed(BitContainer *bitContainer);
-    void focusRequested(int bitOffset, int frameOffset);
-
-public slots:
-    void setBytes(QIODevice *readableBytes, qint64 bitLen = -1);
-    void setBytes(QByteArray bytes, qint64 bitLen = -1);
-    void setBytes(QSharedPointer<const BitArray> bits);
-    void setBytes(QSharedPointer<BitArray> bits);
-    void requestFocus(int bitOffset, int frameOffset);
-    void recordFocus(int bitOffset, int frameOffset);
-
-    void frameViaHighlights();
-
 };
 
 #endif // BITCONTAINER_H

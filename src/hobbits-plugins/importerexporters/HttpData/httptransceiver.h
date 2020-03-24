@@ -21,6 +21,7 @@ public:
     ~HttpTransceiver();
 
     QTemporaryFile* getDownloadedData();
+    QUrl getUrl() const;
 
 public slots:
     void setUploadMode(QByteArray data);
@@ -41,6 +42,7 @@ private:
     QTemporaryFile *m_downloadFile;
     QByteArray m_uploadData;
     QNetworkReply *m_reply;
+    QUrl m_url;
 };
 
 #endif // HTTPTRANSCEIVER_H

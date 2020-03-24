@@ -95,21 +95,8 @@ void AnalyzerActor::postProcess()
 
     m_container->setActionLineage(lineage);
 
-    for (auto key : result->getMetadata().keys()) {
-        m_container->setMetadata(key, result->getMetadata().value(key));
-    }
-
-    bool shouldFrame = false;
-    for (auto key : result->getRanges().keys()) {
-        m_container->setHighlights(key, result->getRanges().value(key));
-
-        if (key == "frames") {
-            shouldFrame = true;
-        }
-    }
-
-    if (shouldFrame) {
-        m_container->frameViaHighlights();
+    if (!result->bitInfo().isNull()) {
+        m_container->setBitInfo(result->bitInfo());
     }
 }
 

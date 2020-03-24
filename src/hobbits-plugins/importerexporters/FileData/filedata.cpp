@@ -73,7 +73,8 @@ QSharedPointer<BitContainer> FileData::importBits(QMap<QString, QString> args, Q
             QFileInfo(file).dir().path());
 
     QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer);
-    container->setBytes(&file);
+    container->setBits(&file);
+    container->setName(QFileInfo(file).fileName());
 
     return container;
 }
@@ -100,6 +101,6 @@ void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    container->getBaseBits()->writeTo(&file);
+    container->bits()->writeTo(&file);
     file.close();
 }

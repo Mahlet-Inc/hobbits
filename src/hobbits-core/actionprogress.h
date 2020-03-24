@@ -21,6 +21,7 @@ signals:
     void progressPercentChanged(int);
 
 private:
+    int m_lastProgressPercent;
     int m_progressPercent;
     QMutex m_mutex;
     bool m_cancelled;

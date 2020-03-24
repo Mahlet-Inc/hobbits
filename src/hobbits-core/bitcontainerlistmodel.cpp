@@ -1,4 +1,5 @@
 #include "bitcontainerlistmodel.h"
+#include "displayhelper.h"
 
 BitContainerListModel::BitContainerListModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -14,10 +15,10 @@ QVariant BitContainerListModel::data(const QModelIndex &index, int role) const
     Q_ASSERT(index.model() == this);
 
     if (role == Qt::DisplayRole) {
-        return QVariant(m_bitContainers.at(index.row())->getName());
+        return QVariant(m_bitContainers.at(index.row())->name());
     }
     else if (role == Qt::DecorationRole) {
-        return QVariant(m_bitContainers.at(index.row())->getThumbnail());
+        return QVariant(DisplayHelper::bitRasterThumbnail(m_bitContainers.at(index.row())));
     }
     return QVariant();
 }

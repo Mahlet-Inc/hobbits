@@ -241,7 +241,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
 
     std::sort(headers.begin(), headers.end(), headerGreaterThan);
 
-    QSharedPointer<const BitArray> bits = inputContainers.at(0)->getBaseBits();
+    QSharedPointer<const BitArray> bits = inputContainers.at(0)->bits();
 
     QList<Frame> frames;
     qint64 maxFrameWidth = 0;
@@ -315,7 +315,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     }
 
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputSize));
-    QList<Range> outputFrames;
+    QVector<Range> outputFrames;
     int outputIndex = 0;
     for (Frame frame : frames) {
         for (qint64 i = 0; i < frame.size(); i++) {
@@ -326,10 +326,9 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     }
 
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBytes(outputBits);
-    outputContainer->setHighlights("frames", outputFrames);
-    outputContainer->setMetadata("max_frame_width", {QString("%1").arg(maxFrameWidth)});
-    outputContainer->frameViaHighlights();
+    QSharedPointer<BitInfo> bitInfo(new BitInfo);
+    bitInfo->setFrames(outputFrames);
+    outputContainer->setBits(outputBits, bitInfo);
 
     result->setPluginState(recallablePluginState);
     result->setOutputContainers({outputContainer});

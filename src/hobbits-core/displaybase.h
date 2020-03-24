@@ -27,7 +27,7 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void leaveEvent(QEvent *event) override;
 
-    QList<Range> getHighlightSpots(QList<Range> highlights, int &highlightMinIndex, Frame frame);
+    QList<RangeHighlight> getHighlightSpots(QList<RangeHighlight> highlights, int &highlightMinIndex, Frame frame);
 
     QPoint getOffset(int x, int y, int xSize, int ySize, int xGrouping, int bitsPerX);
     void sendHoverUpdate(QMouseEvent *event, int xSize, int ySize, int xGrouping, int bitsPerX, QPoint offset);
@@ -43,8 +43,9 @@ protected:
             int rowCount,
             int colGroupSize,
             int colGroupMargin = 1);
-    QVector<QRectF> getHighlightRects(
-            QString type,
+    QVector<QRectF> drawHighlightRects(
+            QPainter *painter,
+            QString category,
             double colWidth,
             double rowHeight,
             int frameOffset,

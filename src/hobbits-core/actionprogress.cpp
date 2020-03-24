@@ -3,6 +3,7 @@
 
 ActionProgress::ActionProgress(QObject *parent) :
     QObject(parent),
+    m_lastProgressPercent(0),
     m_progressPercent(0),
     m_cancelled(0)
 {
@@ -12,9 +13,11 @@ ActionProgress::ActionProgress(QObject *parent) :
 void ActionProgress::setProgressPercent(int progressPercent)
 {
     QMutexLocker locker(&m_mutex);
-
-    m_progressPercent = progressPercent;
-    emit progressPercentChanged(m_progressPercent);
+    if (progressPercent != m_lastProgressPercent) {
+        m_lastProgressPercent = progressPercent;
+        m_progressPercent = progressPercent;
+        emit progressPercentChanged(m_progressPercent);
+    }
 }
 
 void ActionProgress::setCancelled(bool cancelled)

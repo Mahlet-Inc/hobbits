@@ -50,6 +50,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->dock_operatorPlugins->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
     ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
 
+    // More menu initialization
+    populateRecentTemplatesMenu();
+
     // Configure Bit Container View
     ui->tv_bitContainers->setModel(m_bitContainerManager->getTreeModel().data());
 
@@ -108,27 +111,8 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             m_pluginActionManager.data(),
             &PluginActionManager::cancelAction);
 
-    m_analyzerPluginCallback = QSharedPointer<PluginCallback>(new PluginCallback());
-    connect(
-            m_analyzerPluginCallback.data(),
-            &PluginCallback::runRequested,
-            this,
-            &MainWindow::requestAnalyzerRun);
 
-    m_operatorPluginCallback = QSharedPointer<PluginCallback>(new PluginCallback());
-    connect(
-            m_operatorPluginCallback.data(),
-            &PluginCallback::runRequested,
-            this,
-            &MainWindow::requestOperatorRun);
-
-    //
-    populateRecentTemplatesMenu();
-
-    loadPlugins();
-
-    initializeImporterExporters();
-
+    // Configure display handle and plugin callback
     m_displayHandle = QSharedPointer<DisplayHandle>(
             new DisplayHandle(
                     m_bitContainerManager,
@@ -139,10 +123,26 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             &DisplayHandle::newBitHover,
             this,
             &MainWindow::setHoverBit);
+
+    m_pluginCallback = QSharedPointer<PluginCallback>(new PluginCallback(m_displayHandle));
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::analyzerRunRequested,
+            this,
+            &MainWindow::requestAnalyzerRun);
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::operatorRunRequested,
+            this,
+            &MainWindow::requestOperatorRun);
+
+    // load and initialize plugins
+    loadPlugins();
+    initializeImporterExporters();
     initializeDisplays();
 
+    // create an initial state
     checkOperatorInput();
-
     activateBitContainer();
 }
 
@@ -375,7 +375,7 @@ void MainWindow::importBitfile(QString file)
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
 {
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(rawBytes);
+    bitContainer->setBits(rawBytes);
 
     bitContainer->setName(name);
 
@@ -487,7 +487,7 @@ void MainWindow::loadPlugins()
         opUi->setAutoFillBackground(true);
         int idx = ui->operatorTabs->addTab(opUi, op->getName());
         m_operatorMap.insert(idx, op);
-        op->provideCallback(m_operatorPluginCallback);
+        op->provideCallback(m_pluginCallback);
     }
     ui->operatorTabs->setUpdatesEnabled(true);
 
@@ -514,7 +514,7 @@ void MainWindow::loadPlugins()
         analysisUi->setAutoFillBackground(true);
         int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->getName());
         m_analyzerMap.insert(idx, analyzer);
-        analyzer->provideCallback(m_analyzerPluginCallback);
+        analyzer->provideCallback(m_pluginCallback);
     }
     ui->analyzerTabs->setUpdatesEnabled(true);
 }
@@ -630,7 +630,7 @@ void MainWindow::deleteCurrentBitcontainer()
         reply = QMessageBox::question(
                 this,
                 "Delete Bits Confirmation",
-                QString("Are you sure you want to delete bit container '%1'?").arg(currContainer()->getName()),
+                QString("Are you sure you want to delete bit container '%1'?").arg(currContainer()->name()),
                 QMessageBox::Yes | QMessageBox::No);
         if (reply != QMessageBox::Yes) {
             return;
@@ -658,7 +658,9 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
         QSharedPointer<OperatorInterface> plugin = m_pluginManager->getOperator(pluginName);
         if (!plugin.isNull()) {
             QList<QSharedPointer<BitContainer>> inputContainers;
-            QJsonObject pluginState = plugin->getStateFromUi();
+            if (pluginState.isEmpty()) {
+                pluginState = plugin->getStateFromUi();
+            }
             int minInputs = plugin->getMinInputContainers(pluginState);
             int maxInputs = plugin->getMaxInputContainers(pluginState);
             if (maxInputs == 1 && minInputs == 1) {
@@ -713,8 +715,8 @@ void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
         this->statusBar()->showMessage("");
     }
     else {
-        int totalBitOffset = currContainer()->getFrames().at(frameOffset).start() + bitOffset;
-        int totalByteOffset = totalBitOffset / 8;
+        qint64 totalBitOffset = currContainer()->frames().at(frameOffset).start() + bitOffset;
+        qint64 totalByteOffset = totalBitOffset / 8;
         this->statusBar()->showMessage(
                 QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(
                         totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset));

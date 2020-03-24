@@ -7,218 +7,125 @@
 BitContainer::BitContainer(QObject *parent) :
     QObject(parent),
     m_name("Some Bits"),
-    m_id(QUuid::createUuid()),
-    m_lastFrameOffsetFocus(0),
-    m_lastBitOffsetFocus(0)
+    m_id(QUuid::createUuid())
 {
-
+    setBitInfo(QSharedPointer<BitInfo>(new BitInfo()));
 }
 
-QList<Frame> BitContainer::getFrames() const
-{
-    return m_frames;
-}
-
-qint64 BitContainer::getMaxFrameWidth() const
-{
-    return m_maxFrameWidth;
-}
-
-void BitContainer::setBytes(QByteArray bytes, qint64 bitLen)
+void BitContainer::setBits(QByteArray bytes, qint64 bitLen, QSharedPointer<BitInfo> bitInfo)
 {
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::ReadOnly);
-    setBytes(&buffer, bitLen);
+    setBits(&buffer, bitLen, bitInfo);
 }
 
-void BitContainer::setBytes(QIODevice *readableBytes, qint64 bitLen)
+void BitContainer::setBits(QIODevice *readableBytes, qint64 bitLen, QSharedPointer<BitInfo> bitInfo)
 {
-    setBytes(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)));
+    setBits(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)), bitInfo);
 }
 
-void BitContainer::setBytes(QSharedPointer<const BitArray> bits)
+void BitContainer::setBits(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> bitInfo)
 {
-    setBytes(QSharedPointer<BitArray>(new BitArray(*bits.data())));
+    setBits(QSharedPointer<BitArray>(new BitArray(*bits.data())), bitInfo);
 }
 
-void BitContainer::setBytes(QSharedPointer<BitArray> bits)
+void BitContainer::setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> bitInfo)
 {
     m_bits = bits;
 
-    // Initialize frames
-    qint64 frameWidth = 256;
-    QList<Frame> frames;
-
-    for (qint64 i = 0; i < m_bits->sizeInBits(); i += frameWidth) {
-        qint64 width = qMin(frameWidth - 1, m_bits->sizeInBits() - i - 1);
-        frames.append(Frame(m_bits, i, i + width));
+    if (bitInfo.isNull()) {
+        // Initialize frames
+        qint64 frameWidth = 256;
+        QVector<Range> frames;
+        for (qint64 i = 0; i < m_bits->sizeInBits(); i += frameWidth) {
+            qint64 width = qMin(frameWidth - 1, m_bits->sizeInBits() - i - 1);
+            frames.append(Range(i, i + width));
+        }
+        m_bitInfo->setFrames(frames);
+    }
+    else {
+        m_bitInfo = bitInfo;
     }
 
-    this->setFrames(frames, frameWidth);
+    setBitInfo(m_bitInfo);
 }
 
-void BitContainer::setFrames(QList<Frame> frames, qint64 maxFrameWidth)
+void BitContainer::setBitInfo(QSharedPointer<BitInfo> bitInfo)
 {
-    m_frames = frames;
-
-    if (maxFrameWidth < 1) {
-        maxFrameWidth = 0;
-        for (Frame frame : m_frames) {
-            maxFrameWidth = qMax(maxFrameWidth, frame.size());
-        }
+    if (bitInfo.isNull()) {
+        return;
     }
-    m_maxFrameWidth = maxFrameWidth;
 
-    emit framesChanged(this);
+    m_bitInfo = QSharedPointer<BitInfo>(new BitInfo(*bitInfo.data()));
+    m_bitInfo->setBits(m_bits);
+
     emit changed(this);
 }
 
-QImage BitContainer::getRasterImage(qint64 x, qint64 y, int w, int h) const
+QSharedPointer<const BitArray> BitContainer::bits() const
 {
-    QColor trueColor = SettingsManager::getInstance().getUiSetting(SettingsData::ONE_COLOR_KEY).value<QColor>();
-    QColor falseColor = SettingsManager::getInstance().getUiSetting(SettingsData::ZERO_COLOR_KEY).value<QColor>();
-    QImage raster(w, h, QImage::Format_ARGB32);
-    raster.fill(qRgba(0x66, 0x66, 0x66, 0x66));
-
-    qint64 frameOffset = y;
-    qint64 bitOffset = x;
-
-    if (frameOffset < 0) {
-        return raster;
-    }
-
-    for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= getFrames().size()) {
-            break;
-        }
-        Frame frame = getFrames().at(int(i + frameOffset));
-
-        for (int ii = 0; ii < w; ii++) {
-            if (ii + bitOffset >= frame.size()) {
-                break;
-            }
-
-            if (frame.at(ii + bitOffset)) {
-                raster.setPixel(ii, i, trueColor.rgba());
-            }
-            else {
-                raster.setPixel(ii, i, falseColor.rgba());
-            }
-        }
-    }
-    return raster;
+    return m_bits;
 }
 
-QImage BitContainer::getByteRasterImage(qint64 x, qint64 y, int w, int h) const
+QSharedPointer<const BitInfo> BitContainer::bitInfo() const
 {
-    QImage raster(w, h, QImage::Format_ARGB32);
-    raster.fill(qRgba(0x66, 0x66, 0x66, 0x66));
-
-    qint64 frameOffset = y;
-    qint64 byteOffset = x / 8;
-    qint64 bitOffset = byteOffset * 8;
-
-    if (frameOffset < 0) {
-        return raster;
-    }
-
-    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
-    int hue = c.hue();
-    int saturation = c.saturation();
-    for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= getFrames().size()) {
-            break;
-        }
-        Frame frame = getFrames().at(int(i + frameOffset));
-
-        for (int ii = 0; ii < w * 8; ii += 8) {
-            if (ii + bitOffset + 8 >= frame.size()) {
-                break;
-            }
-
-            quint8 byteVal = 0;
-            for (int bit = 0; bit < 8; bit++) {
-                if (frame.at(ii + bit + bitOffset)) {
-                    byteVal |= 0x80 >> bit;
-                }
-            }
-
-            c.setHsl(hue, saturation, byteVal);
-            raster.setPixel(ii / 8, i, c.rgba());
-        }
-    }
-    return raster;
+    return m_bitInfo;
 }
 
-QString BitContainer::getName() const
+QSharedPointer<BitInfo> BitContainer::bitInfo()
+{
+    return m_bitInfo;
+}
+
+QVector<Frame> BitContainer::frames() const
+{
+    if (m_bitInfo.isNull()) {
+        return QVector<Frame>();
+    }
+    else {
+        return m_bitInfo->frames();
+    }
+}
+
+qint64 BitContainer::maxFrameWidth() const
+{
+    if (m_bitInfo.isNull()) {
+        return 0;
+    }
+    else {
+        return m_bitInfo->maxFrameWidth();
+    }
+}
+
+void BitContainer::addHighlight(RangeHighlight highlight)
+{
+    m_bitInfo->addHighlight(highlight);
+}
+
+void BitContainer::addHighlights(QList<RangeHighlight> highlights)
+{
+    m_bitInfo->addHighlights(highlights);
+}
+
+void BitContainer::setMetadata(QString key, QVariant value)
+{
+    m_bitInfo->setMetadata(key, value);
+}
+
+void BitContainer::clearHighlightCategory(QString category)
+{
+    m_bitInfo->clearHighlightCategory(category);
+}
+
+QString BitContainer::name() const
 {
     return m_name;
-}
-
-QPixmap BitContainer::getThumbnail()
-{
-    return QPixmap::fromImage(this->getRasterImage(0, 0, 64, 64));
 }
 
 void BitContainer::setName(QString name)
 {
     this->m_name = name;
     emit changed(this);
-}
-
-QSharedPointer<const BitArray> BitContainer::getBaseBits() const
-{
-    return m_bits;
-}
-
-QList<Range> BitContainer::getHighlights(QString type) const
-{
-    return m_highlightMap.value(type);
-}
-
-void BitContainer::setHighlights(QString type, QList<Range> highlights)
-{
-    m_highlightMap.insert(type, highlights);
-    emit highlightsChanged(this);
-    emit changed(this);
-}
-
-int BitContainer::getFrameOffsetContaining(Range target) const
-{
-    if (m_frames.isEmpty()) {
-        return -1;
-    }
-    int offset = m_frames.size() / 2;
-    int index = offset;
-    int countdown = 7;
-    while (true) {
-        unsigned int compare = target.compare(m_frames.at(index));
-
-        if (compare & Frame::Overlapping) {
-            return index;
-        }
-
-        if (countdown < 1) {
-            return -1;
-        }
-
-        offset /= 2;
-        if (offset < 1) {
-            offset = 1;
-            countdown--;
-        }
-
-        if (compare & Frame::Before) {
-            index += offset;
-        }
-        else if (compare & Frame::After) {
-            index -= offset;
-        }
-
-        if (index < 0 || index >= m_frames.size()) {
-            return -1;
-        }
-    }
 }
 
 QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
@@ -229,60 +136,6 @@ QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
 void BitContainer::setActionLineage(QSharedPointer<const PluginActionLineage> lineage)
 {
     m_actionLineage = lineage;
-}
-
-QStringList BitContainer::getMetadata(QString key) const
-{
-    return m_metadata.value(key);
-}
-
-void BitContainer::setMetadata(QString key, QStringList value)
-{
-    m_metadata.insert(key, value);
-}
-
-int BitContainer::getLastBitOffsetFocus() const
-{
-    return m_lastBitOffsetFocus;
-}
-
-int BitContainer::getLastFrameOffsetFocus() const
-{
-    return m_lastFrameOffsetFocus;
-}
-
-void BitContainer::requestFocus(int bitOffset, int frameOffset)
-{
-    emit focusRequested(bitOffset, frameOffset);
-}
-
-void BitContainer::recordFocus(int bitOffset, int frameOffset)
-{
-    m_lastFrameOffsetFocus = frameOffset;
-    m_lastBitOffsetFocus = bitOffset;
-}
-
-void BitContainer::frameViaHighlights()
-{
-    QList<Frame> frames;
-    for (auto key : m_highlightMap.keys()) {
-        if (key == "frames") {
-            for (Range range : m_highlightMap.value(key)) {
-                frames.append(Frame(getBaseBits(), range));
-            }
-        }
-    }
-
-    int maxFrameWidth = -1;
-    for (auto key : m_metadata.keys()) {
-        if (key == "max_frame_width") {
-            maxFrameWidth = m_metadata.value(key).at(0).toInt();
-        }
-    }
-
-    if (!frames.isEmpty()) {
-        setFrames(frames, maxFrameWidth);
-    }
 }
 
 bool BitContainer::isRootContainer() const
@@ -349,19 +202,19 @@ bool BitContainer::deserializeJson(QJsonDocument json)
         return false;
     }
 
-    setBytes(data, size);
+    setBits(data, size);
     return true;
 }
 
 const QString VERSION_1 = "Really Good Hobbits Bit Container Serialization Format v1";
 const QString VERSION_2 = "Oh So Good Hobbits Bit Container Serialization Format v2";
+const QString VERSION_3 = "The Best Hobbits Bit Container Serialization Format v3";
 QDataStream& operator<<(QDataStream &stream, const BitContainer &container)
 {
-    stream << VERSION_2;
-    stream << container.m_highlightMap;
-    stream << container.m_metadata;
-    stream << container.getBaseBits()->getPreviewSize();
-    stream << container.getBaseBits()->getPreviewBytes();
+    stream << VERSION_3;
+    stream << *container.m_bitInfo.data();
+    stream << container.bits()->getPreviewSize();
+    stream << container.bits()->getPreviewBytes();
 
     return stream;
 }
@@ -370,15 +223,25 @@ QDataStream& operator>>(QDataStream &stream, BitContainer &container)
 {
     QString version;
     stream >> version;
-    if (version == VERSION_1 || version == VERSION_2) {
-        stream >> container.m_highlightMap;
-        stream >> container.m_metadata;
+    if (version == VERSION_3) {
+        BitInfo bitInfo;
+        stream >> bitInfo;
         int bitLength;
         QByteArray bytes;
         stream >> bitLength;
         stream >> bytes;
-        container.setBytes(bytes, bitLength);
-        container.frameViaHighlights();
+        container.setBits(bytes, bitLength, QSharedPointer<BitInfo>(new BitInfo(bitInfo)));
+    }
+    else if (version == VERSION_1 || version == VERSION_2) {
+        QMap<QString, Range> highlights;
+        QMap<QString, QString> metadata;
+        stream >> highlights;
+        stream >> metadata;
+        int bitLength;
+        QByteArray bytes;
+        stream >> bitLength;
+        stream >> bytes;
+        container.setBits(bytes, bitLength);
     }
     else {
         stream.setStatus(QDataStream::Status::ReadCorruptData);

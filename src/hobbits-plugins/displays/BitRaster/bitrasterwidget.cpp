@@ -5,7 +5,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QtMath>
-
+#include "displayhelper.h"
 #include <QDebug>
 
 BitRasterWidget::BitRasterWidget(QSharedPointer<DisplayHandle> displayHandle, DisplayInterface *pluginRef) :
@@ -46,7 +46,7 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
     if (m_showFrameOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
-            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->getFrames().size()) {
+            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->frames().size()) {
                 break;
             }
 
@@ -79,7 +79,7 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
     if (m_showColumnOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i < displayWidth; i += increment) {
-            if (i + m_displayHandle->getBitOffset() >= m_displayHandle->getContainer()->getMaxFrameWidth()) {
+            if (i + m_displayHandle->getBitOffset() >= m_displayHandle->getContainer()->maxFrameWidth()) {
                 break;
             }
 
@@ -111,11 +111,12 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
     }
     painter.restore();
 
-    QImage raster = m_displayHandle->getContainer()->getRasterImage(
-            m_displayHandle->getBitOffset(),
-            m_displayHandle->getFrameOffset(),
-            displayWidth,
-            displayHeight);
+    QImage raster = DisplayHelper::getBitRasterImage(
+                m_displayHandle->getContainer(),
+                m_displayHandle->getBitOffset(),
+                m_displayHandle->getFrameOffset(),
+                displayWidth,
+                displayHeight);
 
     painter.save();
     painter.translate(m_displayOffset);
@@ -159,7 +160,7 @@ void BitRasterWidget::prepareHeaders()
     m_headerFontSize.setHeight(fontHeight);
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->getFrames().size();
+        int totalFrames = m_displayHandle->getContainer()->frames().size();
         int maxChars = qFloor(log10(totalFrames)) + 1;
         m_displayOffset.setX(qRound(fontWidth * (maxChars + 1.5)));
     }
@@ -168,7 +169,7 @@ void BitRasterWidget::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        int maxWidth = m_displayHandle->getContainer()->getMaxFrameWidth();
+        int maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
         int maxChars = qFloor(log10(maxWidth)) + 1;
         m_displayOffset.setY(fontWidth * (maxChars + 1));
     }

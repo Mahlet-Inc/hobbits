@@ -101,8 +101,7 @@ private:
     QSharedPointer<PluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
 
-    QSharedPointer<PluginCallback> m_operatorPluginCallback;
-    QSharedPointer<PluginCallback> m_analyzerPluginCallback;
+    QSharedPointer<PluginCallback> m_pluginCallback;
 
     QProgressBar *m_pluginActionProgress;
     QPushButton *m_pluginActionCancel;

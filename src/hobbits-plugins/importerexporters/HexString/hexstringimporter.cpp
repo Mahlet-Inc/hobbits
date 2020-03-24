@@ -63,7 +63,8 @@ void HexStringImporter::on_pb_selectFile_pressed()
     }
 
     m_container = QSharedPointer<BitContainer>(new BitContainer());
-    m_container->setBytes(data);
+    m_container->setBits(data);
+    m_container->setName(QString("hex decode < %1").arg(QFileInfo(file).baseName()));
 
     this->accept();
 }
@@ -82,7 +83,8 @@ void HexStringImporter::on_pb_submitInput_pressed()
     }
 
     m_container = QSharedPointer<BitContainer>(new BitContainer());
-    m_container->setBytes(data);
+    m_container->setBits(data);
+    m_container->setName("hex input");
 
     this->accept();
 }
