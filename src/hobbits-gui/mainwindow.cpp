@@ -141,6 +141,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     initializeImporterExporters();
     initializeDisplays();
 
+    // Import menu initialization
+    populateRecentImportsMenu();
+
     // create an initial state
     checkOperatorInput();
     activateBitContainer();
@@ -292,13 +295,7 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Import_Bits_From->addAction(
                     plugin->getName(),
                     [this, plugin]() {
-                QSharedPointer<BitContainer> container = plugin->importBits(QMap<QString, QString>(), this);
-                if (!container.isNull()) {
-                    QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(container);
-                    this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                            addedIndex,
-                            QItemSelectionModel::ClearAndSelect);
-                }
+                this->requestImportRun(plugin->getName());
             });
         }
         if (plugin->canExport()) {
@@ -306,7 +303,7 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Export_Bits_To->addAction(
                     plugin->getName(),
                     [this, plugin]() {
-                plugin->exportBits(this->currContainer(), QMap<QString, QString>(), this);
+                this->requestExportRun(plugin->getName());
             });
         }
     }
@@ -355,21 +352,14 @@ QSharedPointer<BitContainer> MainWindow::currContainer()
 
 void MainWindow::importBitfile(QString file)
 {
-    QMap<QString, QString> args;
-    args.insert("filename", file);
-
     QSharedPointer<ImportExportInterface> fileDataImporter = m_pluginManager->getImporterExporter("File Data");
     if (fileDataImporter.isNull()) {
         warningMessage("Could not import bit file without 'File Data' plugin");
         return;
     }
-    QSharedPointer<BitContainer> container = fileDataImporter->importBits(args, this);
-    if (!container.isNull()) {
-        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(container);
-        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                addedIndex,
-                QItemSelectionModel::ClearAndSelect);
-    }
+    QJsonObject pluginState;
+    pluginState.insert("filename", file);
+    requestImportRun("File Data", pluginState);
 }
 
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
@@ -698,6 +688,33 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
                     ui->le_outputName->text());
         }
     }
+}
+
+void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
+{
+    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+    auto result = plugin->importBits(pluginState, this);
+    if (result.isNull()) {
+        return;
+    }
+    if (!result->getPluginState().isEmpty()) {
+        this->populateRecentImportsMenu({plugin->getName(), result->getPluginState()});
+    }
+    if (!result->getContainer().isNull()) {
+        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(result->getContainer());
+        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
+                addedIndex,
+                QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
+{
+    if (currContainer().isNull()) {
+        warningMessage("Cannot export without a selected bit container");
+    }
+    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+    plugin->exportBits(currContainer(), pluginState, this);
 }
 
 void MainWindow::on_pb_analyze_clicked()
@@ -1041,6 +1058,73 @@ void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
     }
 
     ui->menuApply_Recent_Template->setEnabled(recentlyUsed.length() > 0);
+}
+
+
+void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+{
+    QString key = "recently_imported";
+    QString separator = "/[]\"[]/";
+
+    QString additionString;
+    if (!addition.first.isEmpty() && !addition.second.isEmpty()) {
+        QJsonDocument doc(addition.second);
+        QString additionJson(doc.toJson(QJsonDocument::Compact));
+        additionString = QString("%1%2%3").arg(addition.first).arg(separator).arg(additionJson);
+    }
+    QString removalString;
+    if (!removal.first.isEmpty() && !removal.second.isEmpty()) {
+        QJsonDocument doc(removal.second);
+        QString removalJson(doc.toJson(QJsonDocument::Compact));
+        removalString = QString("%1%2%3").arg(removal.first).arg(separator).arg(removalJson);
+    }
+
+    QStringList recentlyImported;
+    QVariant currentSetting = SettingsManager::getInstance().getPrivateSetting(key);
+    if (!currentSetting.isNull() && currentSetting.canConvert<QStringList>()) {
+        recentlyImported = currentSetting.toStringList();
+    }
+
+    if (!removalString.isEmpty()) {
+        recentlyImported.removeAll(removalString);
+    }
+
+    if (!additionString.isEmpty()) {
+        recentlyImported.removeAll(additionString);
+        recentlyImported.insert(0, additionString);
+    }
+
+    recentlyImported = recentlyImported.mid(0, 10);
+
+    SettingsManager::getInstance().setPrivateSetting(key, recentlyImported);
+
+    ui->menuImport_Recent->clear();
+    for (QString importString : recentlyImported) {
+        QStringList importParts = importString.split(separator);
+        if (importParts.size() != 2) {
+            continue;
+        }
+        QString pluginName = importParts.at(0);
+        QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+        if (plugin.isNull()) {
+            continue;
+        }
+
+        QByteArray pluginStateString = importParts.at(1).toUtf8();
+        QJsonObject pluginState = QJsonDocument::fromJson(pluginStateString).object();
+
+        QString menuLabel = plugin->getImportLabelForState(pluginState);
+        if (menuLabel.isEmpty()) {
+            continue;
+        }
+        ui->menuImport_Recent->addAction(
+                menuLabel,
+                [this, pluginName, pluginState]() {
+            this->requestImportRun(pluginName, pluginState);
+        });
+    }
+
+    ui->menuImport_Recent->setEnabled(recentlyImported.length() > 0);
 }
 
 void MainWindow::on_tb_scrollReset_clicked()

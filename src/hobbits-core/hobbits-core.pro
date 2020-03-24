@@ -48,6 +48,7 @@ SOURCES += \
     displayhelper.cpp \
         frame.cpp \
     hobbitscoreinfo.cpp \
+    importexportresult.cpp \
         mathparser.cpp \
     operatoractor.cpp \
     operatorresult.cpp \
@@ -86,6 +87,7 @@ HEADERS += \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     importexportinterface.h \
+    importexportresult.h \
     operatoractor.h \
         operatorinterface.h \
         mathparser.h \

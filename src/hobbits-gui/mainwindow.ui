@@ -288,7 +288,7 @@
      <x>0</x>
      <y>0</y>
      <width>1286</width>
-     <height>29</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -315,15 +315,24 @@
       <string>Apply Recent Template</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuImport_Recent">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Import Recent</string>
+     </property>
+    </widget>
     <addaction name="action_Save_Current_Container"/>
     <addaction name="actionOpen_Container"/>
     <addaction name="separator"/>
+    <addaction name="menuImport_Recent"/>
     <addaction name="menu_Import_Bits_From"/>
     <addaction name="menu_Export_Bits_To"/>
     <addaction name="separator"/>
-    <addaction name="action_Export_Template"/>
-    <addaction name="actionApply_Template"/>
     <addaction name="menuApply_Recent_Template"/>
+    <addaction name="actionApply_Template"/>
+    <addaction name="action_Export_Template"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -425,6 +434,11 @@
   <action name="actionblah">
    <property name="text">
     <string>blah</string>
+   </property>
+  </action>
+  <action name="actiona">
+   <property name="text">
+    <string>a</string>
    </property>
   </action>
  </widget>

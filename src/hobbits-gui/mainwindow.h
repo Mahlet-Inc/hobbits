@@ -55,6 +55,8 @@ public slots:
 
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState);
+    void requestImportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
+    void requestExportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
 
     QSharedPointer<BitContainer> currContainer();
 
@@ -86,6 +88,7 @@ private slots:
 
     void on_actionPreferences_triggered();
 
+    void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 
     void on_tb_scrollReset_clicked();

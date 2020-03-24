@@ -18,7 +18,9 @@ public:
 
     ~HexStringImporter();
 
+    void importFromFile(QString fileName);
     QSharedPointer<BitContainer> getContainer() const;
+    QString getFileName() const;
 
 private slots:
     void on_te_hexString_textChanged();
@@ -29,6 +31,7 @@ private:
     Ui::HexStringImporter *ui;
 
     QSharedPointer<BitContainer> m_container;
+    QString m_fileName;
 };
 
 #endif // HEXSTRINGIMPORTER_H

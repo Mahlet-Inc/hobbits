@@ -33,33 +33,60 @@ bool HttpData::canImport()
     return true;
 }
 
-QSharedPointer<BitContainer> HttpData::importBits(QMap<QString, QString> args, QWidget *parent)
+QString HttpData::getImportLabelForState(QJsonObject pluginState)
 {
-    Q_UNUSED(args)
-    Q_UNUSED(parent)
+    if (pluginState.contains("url")) {
+        QString url = pluginState.value("url").toString();
+        return QString("Import from %1").arg(url);
+    }
+    return "";
+}
 
+QString HttpData::getExportLabelForState(QJsonObject pluginState)
+{
+    return "";
+}
+
+QSharedPointer<ImportExportResult> HttpData::importBits(QJsonObject pluginState, QWidget *parent)
+{
     if (!http) {
-        http = new HttpTransceiver();
+        http = new HttpTransceiver(parent);
     }
     http->setDownloadMode();
+
+    if (pluginState.contains("url")) {
+        http->setUrl(QUrl(pluginState.value("url").toString()));
+    }
+
     if (http->exec()) {
         auto container = QSharedPointer<BitContainer>(new BitContainer());
         container->setBits(http->getDownloadedData());
         container->setName(http->getUrl().toDisplayString());
-        return container;
+
+        pluginState.remove("url");
+        pluginState.insert("url", http->getUrl().toDisplayString());
+
+        return ImportExportResult::create(container, pluginState);
     }
 
-    return QSharedPointer<BitContainer>();
+    return ImportExportResult::nullResult();
 }
 
-void HttpData::exportBits(QSharedPointer<const BitContainer> container, QMap<QString, QString> args, QWidget *parent)
+QSharedPointer<ImportExportResult> HttpData::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState, QWidget *parent)
 {
-    Q_UNUSED(args)
-    Q_UNUSED(parent)
-
     if (!http) {
-        http = new HttpTransceiver();
+        http = new HttpTransceiver(parent);
     }
     http->setUploadMode(container->bits()->getPreviewBytes());
+
+    if (pluginState.contains("url")) {
+        http->setUrl(QUrl(pluginState.value("url").toString()));
+    }
+
     http->exec();
+
+    pluginState.remove("url");
+    pluginState.insert("url", http->getUrl().toDisplayString());
+
+    return ImportExportResult::create(pluginState);
 }

@@ -24,6 +24,7 @@ public:
     QUrl getUrl() const;
 
 public slots:
+    void setUrl(QUrl url);
     void setUploadMode(QByteArray data);
     void setDownloadMode();
 

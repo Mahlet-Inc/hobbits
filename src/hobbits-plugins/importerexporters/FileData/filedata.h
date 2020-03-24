@@ -27,10 +27,13 @@ public:
     bool canExport() override;
     bool canImport() override;
 
-    QSharedPointer<BitContainer> importBits(QMap<QString, QString> args, QWidget *parent) override;
-    void exportBits(
+    QString getImportLabelForState(QJsonObject pluginState) override;
+    QString getExportLabelForState(QJsonObject pluginState) override;
+
+    QSharedPointer<ImportExportResult> importBits(QJsonObject pluginState, QWidget *parent) override;
+    QSharedPointer<ImportExportResult> exportBits(
             QSharedPointer<const BitContainer> container,
-            QMap<QString, QString> args,
+            QJsonObject pluginState,
             QWidget *parent) override;
 
 private:

@@ -42,6 +42,11 @@ QUrl HttpTransceiver::getUrl() const
     return m_url;
 }
 
+void HttpTransceiver::setUrl(QUrl url)
+{
+    ui->le_url->setText(url.toDisplayString());
+}
+
 void HttpTransceiver::setUploadMode(QByteArray data)
 {
     m_uploadData = data;
