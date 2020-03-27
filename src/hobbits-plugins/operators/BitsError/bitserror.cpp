@@ -291,3 +291,8 @@ OperatorInterface* BitsError::createDefaultOperator()
 {
     return new BitsError();
 }
+
+void BitsError::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}

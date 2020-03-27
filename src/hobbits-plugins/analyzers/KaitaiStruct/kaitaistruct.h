@@ -1,24 +1,25 @@
 #ifndef KAITAISTRUCT_H
 #define KAITAISTRUCT_H
 
-#include "operatorinterface.h"
+#include "analyzerinterface.h"
+#include "highlightnavigator.h"
 
 namespace Ui
 {
 class KaitaiStruct;
-
 }
 
-class KaitaiStruct : public QObject, OperatorInterface
+class KaitaiStruct : public QObject, AnalyzerInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.OperatorInterface.4.KaitaiStruct")
-    Q_INTERFACES(OperatorInterface)
+    Q_PLUGIN_METADATA(IID "hobbits.AnalyzerInterface.KaitaiStruct")
+    Q_INTERFACES(AnalyzerInterface)
 
 public:
     KaitaiStruct();
+    ~KaitaiStruct() override;
 
-    OperatorInterface* createDefaultOperator() override;
+    AnalyzerInterface* createDefaultAnalyzer() override;
     QString getName() override;
 
     void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
@@ -28,11 +29,9 @@ public:
     bool setPluginStateInUi(const QJsonObject &pluginState) override;
     QJsonObject getStateFromUi() override;
 
-    int getMinInputContainers(const QJsonObject &pluginState) override;
-    int getMaxInputContainers(const QJsonObject &pluginState) override;
-
-    QSharedPointer<const OperatorResult> operateOnContainers(
-            QList<QSharedPointer<const BitContainer> > inputContainers,
+    void previewBits(QSharedPointer<BitContainerPreview> container) override;
+    QSharedPointer<const AnalyzerResult> analyzeBits(
+            QSharedPointer<const BitContainer> container,
             const QJsonObject &recallablePluginState,
             QSharedPointer<ActionProgress> progressTracker) override;
 
@@ -44,6 +43,8 @@ private slots:
 
 private:
     Ui::KaitaiStruct *ui;
+    HighlightNavigator* m_highlightNav;
+    QSharedPointer<BitContainerPreview> m_previewContainer;
     QSharedPointer<PluginCallback> m_pluginCallback;
 };
 

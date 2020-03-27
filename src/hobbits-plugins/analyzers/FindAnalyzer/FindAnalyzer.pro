@@ -57,5 +57,4 @@ unix {
 
 DISTFILES +=
 
-RESOURCES += \
-    icons.qrc
+RESOURCES +=

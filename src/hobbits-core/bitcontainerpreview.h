@@ -23,6 +23,9 @@ public:
     void setMetadata(QString key, QVariant value);
     void clearHighlightCategory(QString category);
 
+signals:
+    void changed();
+
 private:
     QSharedPointer<BitContainer> m_bitContainer;
 };

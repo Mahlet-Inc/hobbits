@@ -5,6 +5,7 @@
 #include "bitcontainer.h"
 #include "operatorresult.h"
 #include "plugincallback.h"
+#include "bitcontainerpreview.h"
 #include <QSharedPointer>
 
 #include "hobbits-core_global.h"
@@ -31,6 +32,7 @@ public:
             QList<QSharedPointer<const BitContainer>> inputContainers,
             const QJsonObject &recallablePluginState,
             QSharedPointer<ActionProgress> progressTracker) = 0;
+    virtual void previewBits(QSharedPointer<BitContainerPreview> container) = 0;
 
 };
 

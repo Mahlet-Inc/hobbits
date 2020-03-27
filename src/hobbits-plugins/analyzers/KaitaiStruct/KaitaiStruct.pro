@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-03-13T23:14:47.799Z
+# Project created by QtCreator 2020-03-27T18:04:20.990Z
 #
 #-------------------------------------------------
 
@@ -33,7 +33,6 @@ HEADERS +=         kaitaistruct.h
 
 FORMS +=        kaitaistruct.ui
 
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/release/ -lhobbits-core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/debug/ -lhobbits-core
 else:unix: LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
@@ -47,9 +46,6 @@ unix:{
 }
 
 unix {
-    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/operators
+    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
     INSTALLS += target
 }
-
-RESOURCES += \
-    scripts.qrc

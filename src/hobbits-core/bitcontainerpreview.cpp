@@ -4,6 +4,7 @@
 BitContainerPreview::BitContainerPreview(QSharedPointer<BitContainer> bitContainer) :
     m_bitContainer(bitContainer)
 {
+    connect(bitContainer.data(), SIGNAL(changed(BitContainer*)), this, SIGNAL(changed()));
 }
 
 QString BitContainerPreview::getName() const

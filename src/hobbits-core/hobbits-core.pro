@@ -47,6 +47,7 @@ SOURCES += \
     displayhandle.cpp \
     displayhelper.cpp \
         frame.cpp \
+    highlightnavigator.cpp \
     hobbitscoreinfo.cpp \
     importexportresult.cpp \
         mathparser.cpp \
@@ -84,6 +85,7 @@ HEADERS += \
     displayhelper.h \
     displayinterface.h \
         frame.h \
+    highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     importexportinterface.h \
@@ -118,3 +120,9 @@ message(qmake config hobbits-core: $$CONFIG)
 message(Building from: $$PWD)
 message(Building in: $$OUT_PWD)
 message(Target output: $$DESTDIR/$$TARGET)
+
+FORMS += \
+    highlightnavigator.ui
+
+RESOURCES += \
+    hobbitscoreicons.qrc

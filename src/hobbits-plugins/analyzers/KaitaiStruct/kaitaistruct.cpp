@@ -1,6 +1,6 @@
 #include "kaitaistruct.h"
 #include "ui_kaitaistruct.h"
-#include <QObject>
+#include "pluginhelper.h"
 #include "settingsmanager.h"
 #include <QStandardPaths>
 #include <QFileDialog>
@@ -11,14 +11,22 @@
 
 const QString PYTHON_PATH_KEY = "python_runner_path";
 const QString KAITAI_PATH_KEY = "kaitai_struct_compiler_path";
+const QString KAITAI_STRUCT_CATEGORY = "kaitai_struct";
+const QString KAITAI_RESULT_LABEL = "kaitai_struct_result_label";
 
 KaitaiStruct::KaitaiStruct() :
-    ui(new Ui::KaitaiStruct())
+    ui(new Ui::KaitaiStruct()),
+    m_highlightNav(nullptr)
 {
 
 }
 
-OperatorInterface* KaitaiStruct::createDefaultOperator()
+KaitaiStruct::~KaitaiStruct()
+{
+    delete ui;
+}
+
+AnalyzerInterface* KaitaiStruct::createDefaultAnalyzer()
 {
     return new KaitaiStruct();
 }
@@ -33,6 +41,9 @@ void KaitaiStruct::provideCallback(QSharedPointer<PluginCallback> pluginCallback
 {
     // the plugin callback allows the self-triggering of operateOnContainers
     m_pluginCallback = pluginCallback;
+    if (m_highlightNav) {
+        m_highlightNav->setPluginCallback(m_pluginCallback);
+    }
 }
 
 void KaitaiStruct::applyToWidget(QWidget *widget)
@@ -59,6 +70,14 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
             }
         }
     }
+
+    m_highlightNav = new HighlightNavigator(widget);
+    ui->layout_nav->addWidget(m_highlightNav);
+    ui->layout_nav->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    m_highlightNav->setContainer(m_previewContainer);
+    m_highlightNav->setPluginCallback(m_pluginCallback);
+    m_highlightNav->setHighlightCategory(KAITAI_STRUCT_CATEGORY);
 }
 
 void KaitaiStruct::openPythonPathDialog()
@@ -121,54 +140,57 @@ QJsonObject KaitaiStruct::getStateFromUi()
     return pluginState;
 }
 
-int KaitaiStruct::getMinInputContainers(const QJsonObject &pluginState)
+void KaitaiStruct::previewBits(QSharedPointer<BitContainerPreview> container)
 {
-    return 1;
+    m_previewContainer = container;
+    if (m_highlightNav) {
+        m_highlightNav->setContainer(m_previewContainer);
+        if (m_previewContainer.isNull()) {
+            m_highlightNav->setTitle("");
+        }
+        else {
+            QString resultLabel = m_previewContainer->bitInfo()->metadata(KAITAI_RESULT_LABEL).toString();
+            if (resultLabel.size() > 28) {
+                resultLabel.truncate(25);
+                resultLabel += "...";
+            }
+            m_highlightNav->setTitle(resultLabel);
+        }
+    }
 }
 
-int KaitaiStruct::getMaxInputContainers(const QJsonObject &pluginState)
-{
-    return 1;
-}
-
-QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
-        QList<QSharedPointer<const BitContainer> > inputContainers,
+QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
+        QSharedPointer<const BitContainer> container,
         const QJsonObject &recallablePluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    QSharedPointer<OperatorResult> result(new OperatorResult());
-    //Perform bit operations here
-
     QMetaObject::invokeMethod(this, "clearOutputText", Qt::QueuedConnection);
-    QSharedPointer<const OperatorResult> nullResult;
-    if (inputContainers.length() != 1) {
-        return nullResult;
-    }
+
     if (!canRecallPluginState(recallablePluginState)) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Invalid parameters given to plugin");
     }
 
     QString pythonPath = SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString();
     if (pythonPath.isEmpty()) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("A Python path must be specified");
     }
 
     QString kscPath = SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString();
     if (kscPath.isEmpty()) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("A Kaitai Struct Compiler path must be specified");
     }
 
     QTemporaryDir dir;
     if (!dir.isValid()) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Could not allocate a temporary directory");
     }
 
     QFile inputBitFile(dir.filePath("input_bit_container.bits"));
     QFile outputRangeFile(dir.filePath("parsed_ranges.json"));
     if (!inputBitFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Could not allocate a temporary directory");
     }
-    inputContainers.at(0)->bits()->writeTo(&inputBitFile);
+    container->bits()->writeTo(&inputBitFile);
     inputBitFile.close();
 
     QString coreScriptName = dir.filePath("core_script.py");
@@ -181,7 +203,7 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
 
     QFile ksy(dir.filePath("custom.ksy"));
     if (!ksy.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Could not open ksy file for writing");
     }
     ksy.write(recallablePluginState.value("katai_struct_yaml").toString().toLocal8Bit());
     ksy.close();
@@ -276,18 +298,16 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
         stdoutFile.close();
     }
 
-    QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBits(inputContainers.at(0)->bits());
     if (!outputRangeFile.open(QIODevice::ReadOnly)) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Could not open analysis file for reading");
     }
     QJsonDocument outputData = QJsonDocument::fromJson((outputRangeFile.readAll()));
     if (!outputData.isObject()) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Output analysis file has an invalid format");
     }
     QJsonObject outputObj = outputData.object();
     if (!outputObj.contains("sections") || !outputObj.value("sections").isArray()) {
-        return nullResult;
+        return PluginHelper::analyzerErrorResult("Output analysis file doesn't contain a 'sections' specification");
     }
     QList<RangeHighlight> highlights;
     QList<QColor> colors = {
@@ -312,19 +332,17 @@ QSharedPointer<const OperatorResult> KaitaiStruct::operateOnContainers(
         if (s.contains("label") && s.value("label").isString()) {
             label = s.value("label").toString();
         }
-        highlights.append(RangeHighlight("kaitai_struct", label, range, colors.at(colorIdx)));
+        highlights.append(RangeHighlight(KAITAI_STRUCT_CATEGORY, label, range, colors.at(colorIdx)));
         colorIdx = (colorIdx + 1) % colors.size();
     }
     outputRangeFile.close();
 
-    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*inputContainers.at(0)->bitInfo().data()));
+    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*container->bitInfo().data()));
     bitInfo->addHighlights(highlights);
-    outputContainer->setBitInfo(bitInfo);
 
-    result->setPluginState(recallablePluginState);
-    result->setOutputContainers({outputContainer});
-    return std::move(result);
+    return AnalyzerResult::result(bitInfo, recallablePluginState);
 }
+
 
 void KaitaiStruct::updateOutputText(QString text)
 {

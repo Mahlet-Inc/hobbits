@@ -230,6 +230,11 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                     outputContainers)->setPluginState(pluginState));
 }
 
+void TakeSkipOperator::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}
+
 OperatorInterface* TakeSkipOperator::createDefaultOperator()
 {
     return new TakeSkipOperator();

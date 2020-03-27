@@ -336,6 +336,11 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     return result;
 }
 
+void HeaderFramer::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}
+
 OperatorInterface* HeaderFramer::createDefaultOperator()
 {
     return new HeaderFramer();

@@ -220,6 +220,11 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
     return result;
 }
 
+void QamRemapper::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}
+
 OperatorInterface* QamRemapper::createDefaultOperator()
 {
     return new QamRemapper();

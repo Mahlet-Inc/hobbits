@@ -269,6 +269,11 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
 }
 
+void PrbsGenerator::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}
+
 OperatorInterface* PrbsGenerator::createDefaultOperator()
 {
     return new PrbsGenerator();

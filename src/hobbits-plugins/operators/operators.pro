@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    KaitaiStruct \
     BitsError \
     PrbsGenerator \
     PythonRunner \
