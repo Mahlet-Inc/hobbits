@@ -24,6 +24,7 @@ public:
     qint64 maxFrameWidth() const;
     QVector<Frame> frames() const;
     QList<RangeHighlight> highlights(QString category) const;
+    QList<RangeHighlight> highlights(QString category, QString label) const;
     QList<QString> highlightCategories() const;
     bool containsHighlightCategory(QString category) const;
     QVariant metadata(QString key) const;

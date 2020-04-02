@@ -44,7 +44,7 @@ public slots:
 
     QStringList openHobbitsBits(QString fileName);
 
-    void checkOperatorInput();
+    void checkOperatorInput(QString pluginName = "");
     void checkCurrentDisplays();
 
     void activateBitContainer();
@@ -65,15 +65,17 @@ public slots:
     void warningMessage(QString message, QString windowTitle = "Warning");
 
 private slots:
+    void on_actionOpen_Container_triggered();
+    void on_action_Save_Current_Container_triggered();
     void on_action_Export_Template_triggered();
-
     void on_actionApply_Template_triggered();
+    void on_action_About_triggered();
+    void on_actionPreferences_triggered();
+    void on_tb_scrollReset_clicked();
 
     void pluginActionStarted();
     void pluginActionFinished();
     void pluginActionProgress(int);
-
-    void on_action_About_triggered();
 
     void initializeDisplays();
     void addDisplayGroup();
@@ -82,18 +84,12 @@ private slots:
 
     void containerFocusRequested(int bitOffset, int frameOffset);
 
-    void on_action_Save_Current_Container_triggered();
-
-    void on_actionOpen_Container_triggered();
-
-    void on_actionPreferences_triggered();
-
     void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 
-    void on_tb_scrollReset_clicked();
-
     void setupSplitViewMenu();
+
+    void sendBitContainerPreview();
 
 private:
     Ui::MainWindow *ui;

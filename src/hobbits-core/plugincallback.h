@@ -18,8 +18,10 @@ public:
 signals:
     void operatorRunRequested(QString pluginName, QJsonObject pluginState);
     void analyzerRunRequested(QString pluginName, QJsonObject pluginState);
+    void operatorStateChanged(QString pluginName);
 
 public slots:
+    void sendOperatorStateChanged(QString pluginName);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState = QJsonObject());
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState = QJsonObject());
 

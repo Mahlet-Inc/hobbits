@@ -20,9 +20,11 @@ public:
     OperatorResult* setPluginState(QJsonObject pluginState);
     const QJsonObject getPluginState() const;
 
+    static QSharedPointer<const OperatorResult> result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState);
+    static QSharedPointer<const OperatorResult> error(QString error);
+
 private:
     QList<QSharedPointer<BitContainer>> m_outputContainers;
-    int m_maxFrameWidth;
 
     QJsonObject m_pluginState;
 };

@@ -75,7 +75,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             ui->operatorTabs,
             &QTabWidget::currentChanged,
             this,
-            &MainWindow::checkOperatorInput);
+            [=](){ checkOperatorInput(); } );
 
     connect(
             m_pluginActionManager.data(),
@@ -135,6 +135,11 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             &PluginCallback::operatorRunRequested,
             this,
             &MainWindow::requestOperatorRun);
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::operatorStateChanged,
+            this,
+            &MainWindow::checkOperatorInput);
 
     // load and initialize plugins
     loadPlugins();
@@ -382,12 +387,18 @@ void MainWindow::on_pb_operate_clicked()
     this->requestOperatorRun(op->getName(), pluginState);
 }
 
-void MainWindow::checkOperatorInput()
+void MainWindow::checkOperatorInput(QString pluginName)
 {
     QSharedPointer<OperatorInterface> op = getCurrentOperator();
     if (op.isNull()) {
         ui->pb_operate->setEnabled(false);
         return;
+    }
+
+    if (!pluginName.isEmpty()) {
+        if (pluginName != op->getName()) {
+            return;
+        }
     }
 
     QJsonObject pluginState = op->getStateFromUi();
@@ -521,6 +532,33 @@ void MainWindow::activateBitContainer()
     setCurrentBitContainer();
 }
 
+
+void MainWindow::sendBitContainerPreview()
+{
+    for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
+        if (currContainer().isNull()) {
+            analyzer->previewBits(QSharedPointer<BitContainerPreview>());
+        }
+        else {
+            analyzer->previewBits(
+                    QSharedPointer<BitContainerPreview>(
+                            new BitContainerPreview(
+                                    currContainer())));
+        }
+    }
+    for (QSharedPointer<OperatorInterface> op : m_pluginManager->getAllOperators()) {
+        if (currContainer().isNull()) {
+            op->previewBits(QSharedPointer<BitContainerPreview>());
+        }
+        else {
+            op->previewBits(
+                    QSharedPointer<BitContainerPreview>(
+                            new BitContainerPreview(
+                                    currContainer())));
+        }
+    }
+}
+
 void MainWindow::setCurrentBitContainer()
 {
     QSharedPointer<BitContainer> container = currContainer();
@@ -537,18 +575,7 @@ void MainWindow::setCurrentBitContainer()
                                 int,
                                 int)));
     }
-
-    for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
-        if (currContainer().isNull()) {
-            analyzer->previewBits(QSharedPointer<BitContainerPreview>());
-        }
-        else {
-            analyzer->previewBits(
-                    QSharedPointer<BitContainerPreview>(
-                            new BitContainerPreview(
-                                    currContainer())));
-        }
-    }
+    sendBitContainerPreview();
 
     if (!currContainer().isNull()) {
         // Set the last analyzer plugin settings used on this container
@@ -606,6 +633,8 @@ void MainWindow::setCurrentBitContainer()
             }
         }
     }
+
+    checkOperatorInput();
 }
 
 void MainWindow::containerFocusRequested(int bitOffset, int frameOffset)
@@ -991,12 +1020,7 @@ void MainWindow::pluginActionFinished()
     m_pluginActionProgress->setVisible(false);
     m_pluginActionCancel->setVisible(false);
 
-    for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
-        analyzer->previewBits(
-                QSharedPointer<BitContainerPreview>(
-                        new BitContainerPreview(
-                                currContainer())));
-    }
+    sendBitContainerPreview();
 }
 
 void MainWindow::pluginActionProgress(int progress)

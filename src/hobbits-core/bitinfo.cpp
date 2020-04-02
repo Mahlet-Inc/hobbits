@@ -82,6 +82,17 @@ QList<RangeHighlight> BitInfo::highlights(QString category) const
     return m_rangeHighlights.value(category);
 }
 
+QList<RangeHighlight> BitInfo::highlights(QString category, QString label) const
+{
+    QList<RangeHighlight> matching;
+    for (auto highlight : highlights(category)) {
+        if (highlight.label() == label) {
+            matching.append(highlight);
+        }
+    }
+    return matching;
+}
+
 QList<QString> BitInfo::highlightCategories() const
 {
     return m_rangeHighlights.keys();

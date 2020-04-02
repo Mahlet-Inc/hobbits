@@ -20,3 +20,8 @@ void PluginCallback::requestOperatorRun(QString pluginName, QJsonObject pluginSt
 {
     emit operatorRunRequested(pluginName, pluginState);
 }
+
+void PluginCallback::sendOperatorStateChanged(QString pluginName)
+{
+    emit operatorStateChanged(pluginName);
+}

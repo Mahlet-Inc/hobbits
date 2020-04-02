@@ -18,6 +18,8 @@ public:
     ~HighlightNavigator();
 
     int currentlySelectedRow();
+    bool selectRow(QString);
+    QString currentlySelectedLabel();
 
 public slots:
     void setPluginCallback(QSharedPointer<PluginCallback> pluginCallback);
@@ -29,6 +31,9 @@ public slots:
     void selectPrevious();
     void selectRow(int);
     void updateSelection();
+
+signals:
+    void selectionChanged();
 
 private:
     Ui::HighlightNavigator *ui;

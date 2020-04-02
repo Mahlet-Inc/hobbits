@@ -26,3 +26,22 @@ const QJsonObject OperatorResult::getPluginState() const
 {
     return m_pluginState;
 }
+
+
+QSharedPointer<const OperatorResult> OperatorResult::result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState)
+{
+    return QSharedPointer<const OperatorResult>(
+                (new OperatorResult())->setOutputContainers(outputContainers)->setPluginState(pluginState)
+            );
+}
+
+QSharedPointer<const OperatorResult> OperatorResult::error(QString error)
+{
+    return QSharedPointer<const OperatorResult>(
+            (new OperatorResult())->setPluginState(
+                    QJsonObject(
+                            {QPair<QString, QJsonValue>(
+                                    "error",
+                                    QJsonValue(error))}))
+            );
+}

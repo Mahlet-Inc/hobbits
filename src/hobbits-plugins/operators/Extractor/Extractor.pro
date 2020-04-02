@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-03-27T18:04:20.990Z
+# Project created by QtCreator 2020-04-02T15:01:10.916Z
 #
 #-------------------------------------------------
 
@@ -8,10 +8,10 @@ QT       += widgets
 
 QT       -= gui
 
-TARGET = KaitaiStruct
+TARGET = Extractor
 TEMPLATE = lib
 
-DEFINES += KAITAISTRUCT_LIBRARY
+DEFINES += EXTRACTOR_LIBRARY
 
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -27,11 +27,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         kaitaistruct.cpp
+SOURCES +=         extractor.cpp
 
-HEADERS +=         kaitaistruct.h
+HEADERS +=         extractor.h
 
-FORMS +=        kaitaistruct.ui
+FORMS +=        extractor.ui
+
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/release/ -lhobbits-core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/debug/ -lhobbits-core
@@ -46,9 +47,6 @@ unix:{
 }
 
 unix {
-    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
+    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/operators
     INSTALLS += target
 }
-
-RESOURCES += \
-    kaitaiscripts.qrc

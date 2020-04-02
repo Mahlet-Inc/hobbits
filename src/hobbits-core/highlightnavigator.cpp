@@ -13,8 +13,9 @@ HighlightNavigator::HighlightNavigator(QWidget *parent) :
     connect(ui->tb_gotoNext, &QToolButton::pressed, this, &HighlightNavigator::selectNext);
     connect(ui->tb_gotoPrevious, &QToolButton::pressed, this, &HighlightNavigator::selectPrevious);
     connect(ui->lw_highlights, SIGNAL(currentRowChanged(int)), this, SLOT(updateSelection()));
+    connect(ui->lw_highlights, SIGNAL(currentRowChanged(int)), this, SIGNAL(selectionChanged()));
 
-    Q_INIT_RESOURCE(icons);
+    Q_INIT_RESOURCE(hobbitscoreicons);
     ui->tb_gotoNext->setIcon(QIcon(":/hobbits-core/images/icons/arrow-right.png"));
     ui->tb_gotoPrevious->setIcon(QIcon(":/hobbits-core/images/icons/arrow-left.png"));
 }
@@ -28,6 +29,25 @@ HighlightNavigator::~HighlightNavigator()
 int HighlightNavigator::currentlySelectedRow()
 {
     return ui->lw_highlights->currentRow();
+}
+
+QString HighlightNavigator::currentlySelectedLabel()
+{
+    auto item = ui->lw_highlights->currentItem();
+    if (item) {
+        return item->text();
+    }
+    return QString();
+}
+
+bool HighlightNavigator::selectRow(QString text)
+{
+    auto items = ui->lw_highlights->findItems(text, Qt::MatchFixedString | Qt::MatchCaseSensitive);
+    if (items.empty()) {
+        return false;
+    }
+    ui->lw_highlights->setCurrentItem(items.at(0));
+    return true;
 }
 
 void HighlightNavigator::setPluginCallback(QSharedPointer<PluginCallback> pluginCallback)
