@@ -166,7 +166,8 @@ QList<RangeHighlight> DisplayBase::getHighlightSpots(QList<RangeHighlight> highl
         intersection = frame.compare(highlight.range());
 
         if (intersection & Frame::Overlapping) {
-            spots.append(highlight);
+            RangeHighlight overlap(highlight.category(), highlight.label(), frame.getOverlap(highlight.range()), highlight.color());
+            spots.append(overlap);
         }
         else if (intersection & Frame::After) {
             break;
