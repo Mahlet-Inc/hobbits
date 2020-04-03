@@ -8,6 +8,7 @@
 const QString SettingsData::ONE_COLOR_KEY = "1-Bit Color";
 const QString SettingsData::ZERO_COLOR_KEY = "0-Bit Color";
 const QString SettingsData::BYTE_HUE_SAT_KEY = "Byte Hue and Saturation";
+const QString SettingsData::FOCUS_COLOR_KEY = "Range Focus Color";
 const QString SettingsData::HIGHLIGHT_1_COLOR_KEY = "Highlight 1";
 const QString SettingsData::HIGHLIGHT_2_COLOR_KEY = "Highlight 2";
 const QString SettingsData::HIGHLIGHT_3_COLOR_KEY = "Highlight 3";
@@ -36,6 +37,7 @@ SettingsData::SettingsData()
     m_uiSettings.insert(ONE_COLOR_KEY, QColor(Qt::black));
     m_uiSettings.insert(ZERO_COLOR_KEY, QColor(255, 255, 200));
     m_uiSettings.insert(BYTE_HUE_SAT_KEY, QColor::fromHsl(120, 200, 128));
+    m_uiSettings.insert(FOCUS_COLOR_KEY, QColor(50, 190, 0, 85));
     m_uiSettings.insert(HIGHLIGHT_1_COLOR_KEY, QColor(100, 220, 100, 85));
     m_uiSettings.insert(HIGHLIGHT_2_COLOR_KEY, QColor(100, 0, 255, 50));
     m_uiSettings.insert(HIGHLIGHT_3_COLOR_KEY, QColor(0, 150, 230, 100));

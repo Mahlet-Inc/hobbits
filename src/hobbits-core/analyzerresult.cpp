@@ -5,37 +5,15 @@ AnalyzerResult::AnalyzerResult()
 
 }
 
-AnalyzerResult* AnalyzerResult::addRanges(QString key, QList<Range> ranges)
+AnalyzerResult* AnalyzerResult::setBitInfo(QSharedPointer<BitInfo> bitInfo)
 {
-    if (m_ranges.contains(key)) {
-        m_ranges.insert(key, m_ranges.value(key) + ranges);
-    }
-    else {
-        m_ranges.insert(key, ranges);
-    }
+    m_bitInfo = bitInfo;
     return this;
 }
 
-const QMap<QString, QList<Range>> AnalyzerResult::getRanges() const
+QSharedPointer<BitInfo> AnalyzerResult::bitInfo() const
 {
-    return m_ranges;
-}
-
-AnalyzerResult* AnalyzerResult::addMetadata(QString key, QString value)
-{
-    m_metadata.insert(key, (QStringList)(value));
-    return this;
-}
-
-AnalyzerResult* AnalyzerResult::addMetadata(QString key, QStringList value)
-{
-    m_metadata.insert(key, value);
-    return this;
-}
-
-const QMap<QString, QStringList> AnalyzerResult::getMetadata() const
-{
-    return m_metadata;
+    return m_bitInfo;
 }
 
 AnalyzerResult* AnalyzerResult::setPluginState(QJsonObject pluginState)
@@ -47,4 +25,24 @@ AnalyzerResult* AnalyzerResult::setPluginState(QJsonObject pluginState)
 const QJsonObject AnalyzerResult::getPluginState() const
 {
     return m_pluginState;
+}
+
+QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, QJsonObject pluginState)
+{
+
+    return QSharedPointer<const AnalyzerResult>(
+                (new AnalyzerResult())->setPluginState(pluginState)->setBitInfo(bitInfo)
+            );
+}
+
+QSharedPointer<const AnalyzerResult> AnalyzerResult::error(QString error)
+{
+
+    return QSharedPointer<const AnalyzerResult>(
+            (new AnalyzerResult())->setPluginState(
+                    QJsonObject(
+                            {QPair<QString, QJsonValue>(
+                                    "error",
+                                    QJsonValue(error))}))
+            );
 }

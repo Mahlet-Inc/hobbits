@@ -62,11 +62,13 @@ QJsonObject %{ClassName}::getStateFromUi()
 
 int %{ClassName}::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
 int %{ClassName}::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
@@ -78,5 +80,12 @@ QSharedPointer<const OperatorResult> %{ClassName}::operateOnContainers(
     QSharedPointer<OperatorResult> result(new OperatorResult());
     //Perform bit operations here
 
-    return result;
+    return OperatorResult::error("Plugin operation is not implemented!");
+    //return OperatorResult::result({outputContainer}, recallablePluginState);
+}
+
+void %{ClassName}::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+    // optionally use the current container to prepare the UI or something
 }

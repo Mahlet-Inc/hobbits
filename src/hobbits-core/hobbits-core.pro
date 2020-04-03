@@ -41,11 +41,15 @@ SOURCES += \
     bitcontainermanager.cpp \
     bitcontainerpreview.cpp \
     bitcontainertreemodel.cpp \
+    bitinfo.cpp \
         displaybase.cpp \
     displaybasetext.cpp \
     displayhandle.cpp \
+    displayhelper.cpp \
         frame.cpp \
+    highlightnavigator.cpp \
     hobbitscoreinfo.cpp \
+    importexportresult.cpp \
         mathparser.cpp \
     operatoractor.cpp \
     operatorresult.cpp \
@@ -54,8 +58,10 @@ SOURCES += \
     pluginactionlineage.cpp \
     pluginactionmanager.cpp \
     plugincallback.cpp \
+    pluginhelper.cpp \
     pluginmanager.cpp \
     range.cpp \
+    rangehighlight.cpp \
     settingsdata.cpp \
     settingsmanager.cpp \
     templatefilehandler.cpp
@@ -72,14 +78,18 @@ HEADERS += \
     bitcontainermanager.h \
     bitcontainerpreview.h \
     bitcontainertreemodel.h \
+    bitinfo.h \
         displaybase.h \
     displaybasetext.h \
     displayhandle.h \
+    displayhelper.h \
     displayinterface.h \
         frame.h \
+    highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     importexportinterface.h \
+    importexportresult.h \
     operatoractor.h \
         operatorinterface.h \
         mathparser.h \
@@ -89,8 +99,10 @@ HEADERS += \
     pluginactionlineage.h \
     pluginactionmanager.h \
     plugincallback.h \
+    pluginhelper.h \
     pluginmanager.h \
     range.h \
+    rangehighlight.h \
     settingsdata.h \
     settingsmanager.h \
     templatefilehandler.h
@@ -108,3 +120,9 @@ message(qmake config hobbits-core: $$CONFIG)
 message(Building from: $$PWD)
 message(Building in: $$OUT_PWD)
 message(Target output: $$DESTDIR/$$TARGET)
+
+FORMS += \
+    highlightnavigator.ui
+
+RESOURCES += \
+    hobbitscoreicons.qrc

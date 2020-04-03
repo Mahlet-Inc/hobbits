@@ -33,6 +33,7 @@ public:
     static const QString ONE_COLOR_KEY;
     static const QString ZERO_COLOR_KEY;
     static const QString BYTE_HUE_SAT_KEY;
+    static const QString FOCUS_COLOR_KEY;
     static const QString HIGHLIGHT_1_COLOR_KEY;
     static const QString HIGHLIGHT_2_COLOR_KEY;
     static const QString HIGHLIGHT_3_COLOR_KEY;

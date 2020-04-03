@@ -23,9 +23,11 @@ public:
 
     void deleteCurrentContainer();
 
-public slots:
+private slots:
+    void manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
 signals:
-    void currSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void currSelectionChanged(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
 
 private:
     QSharedPointer<BitContainerTreeModel> m_bitContainerTreeModel;

@@ -29,15 +29,25 @@ bool %{ClassName}::canImport()
     return true;
 }
 
-QSharedPointer<BitContainer> %{ClassName}::importBits(QMap<QString, QString> args, QWidget *parent)
+QString %{ClassName}::getImportLabelForState(QJsonObject pluginState)
 {
-    QSharedPointer<BitContainer> nullContainer;
-    return nullContainer;
+    return "";
 }
 
-void %{ClassName}::exportBits(
+QString %{ClassName}::getExportLabelForState(QJsonObject pluginState)
+{
+    return "";
+}
+
+QSharedPointer<ImportExportResult> %{ClassName}::importBits(QJsonObject pluginState, QWidget *parent)
+{
+    return ImportExportResult::nullResult();
+}
+
+QSharedPointer<ImportExportResult> %{ClassName}::exportBits(
     QSharedPointer<const BitContainer> container,
-    QMap<QString, QString> args,
+    QJsonObject pluginState,
     QWidget *parent)
 {
+    return ImportExportResult::nullResult();
 }

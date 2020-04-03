@@ -44,10 +44,11 @@ public slots:
 
     QStringList openHobbitsBits(QString fileName);
 
-    void checkOperatorInput();
+    void checkOperatorInput(QString pluginName = "");
     void checkCurrentDisplays();
 
-    void activateBitContainer();
+    void activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
+    void currBitContainerChanged();
     void setCurrentBitContainer();
     void deleteCurrentBitcontainer();
 
@@ -55,6 +56,8 @@ public slots:
 
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState);
+    void requestImportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
+    void requestExportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
 
     QSharedPointer<BitContainer> currContainer();
 
@@ -63,34 +66,29 @@ public slots:
     void warningMessage(QString message, QString windowTitle = "Warning");
 
 private slots:
+    void on_actionOpen_Container_triggered();
+    void on_action_Save_Current_Container_triggered();
     void on_action_Export_Template_triggered();
-
     void on_actionApply_Template_triggered();
+    void on_action_About_triggered();
+    void on_actionPreferences_triggered();
+    void on_tb_scrollReset_clicked();
 
     void pluginActionStarted();
     void pluginActionFinished();
     void pluginActionProgress(int);
-
-    void on_action_About_triggered();
 
     void initializeDisplays();
     void addDisplayGroup();
     void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
-    void containerFocusRequested(int bitOffset, int frameOffset);
-
-    void on_action_Save_Current_Container_triggered();
-
-    void on_actionOpen_Container_triggered();
-
-    void on_actionPreferences_triggered();
-
+    void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 
-    void on_tb_scrollReset_clicked();
-
     void setupSplitViewMenu();
+
+    void sendBitContainerPreview();
 
 private:
     Ui::MainWindow *ui;
@@ -101,8 +99,8 @@ private:
     QSharedPointer<PluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
 
-    QSharedPointer<PluginCallback> m_operatorPluginCallback;
-    QSharedPointer<PluginCallback> m_analyzerPluginCallback;
+    QMutex m_previewMutex;
+    QSharedPointer<PluginCallback> m_pluginCallback;
 
     QProgressBar *m_pluginActionProgress;
     QPushButton *m_pluginActionCancel;

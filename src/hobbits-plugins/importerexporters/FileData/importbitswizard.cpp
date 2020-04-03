@@ -1,5 +1,6 @@
 #include "importbitswizard.h"
 #include "ui_importbitswizard.h"
+#include "displayhelper.h"
 
 #include "settingsmanager.h"
 
@@ -18,10 +19,10 @@ ImportBitsWizard::ImportBitsWizard(QString fileName, QWidget *parent) :
     QByteArray previewData = file.read(100 * 256);
     file.close();
 
-    BitContainer previewContainer;
-    previewContainer.setBytes(previewData);
+    QSharedPointer<BitContainer> previewContainer(new BitContainer());
+    previewContainer->setBits(previewData);
 
-    ui->lb_imagePreview->setPixmap(previewContainer.getThumbnail());
+    ui->lb_imagePreview->setPixmap(DisplayHelper::bitRasterThumbnail(previewContainer));
 
     QFileInfo fileInfo(file);
     m_fileSizeKb = double(fileInfo.size()) / 1000.0;
@@ -65,7 +66,7 @@ QSharedPointer<BitContainer> ImportBitsWizard::getImportedBitContainer()
     file.seek(byteOffset);
     QByteArray data = file.read(bytesToTake);
     QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer());
-    container->setBytes(data, data.size() * 8);
+    container->setBits(data, data.size() * 8);
     container->setName(QFileInfo(file).baseName());
 
     return container;

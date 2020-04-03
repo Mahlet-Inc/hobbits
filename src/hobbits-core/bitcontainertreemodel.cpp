@@ -1,4 +1,5 @@
 #include "bitcontainertreemodel.h"
+#include "displayhelper.h"
 
 BitContainerTreeModel::BitContainerTreeModel(QObject *parent) :
     QAbstractItemModel(parent)
@@ -15,10 +16,10 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
 
     BitContainer *container = static_cast<BitContainer*>(index.internalPointer());
     if (role == Qt::DisplayRole) {
-        return QVariant(container->getName());
+        return QVariant(container->name());
     }
     else if (role == Qt::DecorationRole) {
-        return QVariant(container->getThumbnail());
+        return QVariant(DisplayHelper::bitRasterThumbnail(container));
     }
     return QVariant();
 }
@@ -123,7 +124,7 @@ int BitContainerTreeModel::columnCount(const QModelIndex &parent) const
 
 void BitContainerTreeModel::updateAll()
 {
-
+    // TODO: this is supposed to do something?
 }
 
 QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bitContainer)
@@ -133,7 +134,7 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     int row = getContainerRow(bitContainer.data());
     beginInsertRows(parentIndex, row, row);
     endInsertRows();
-    connect(bitContainer.data(), SIGNAL(changed(BitContainer*)), this, SLOT(updateAll()));
+    connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
     return this->index(row, 0, parentIndex);
 }

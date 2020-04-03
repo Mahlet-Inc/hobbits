@@ -261,12 +261,17 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
 
     updateEndState(lfsr);
-    bitContainer->setBytes(outputBits);
+    bitContainer->setBits(outputBits);
     outputContainers.append(bitContainer);
 
     result->setOutputContainers(outputContainers)->setPluginState(recallablePluginState);
     return result;
 
+}
+
+void PrbsGenerator::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
 }
 
 OperatorInterface* PrbsGenerator::createDefaultOperator()

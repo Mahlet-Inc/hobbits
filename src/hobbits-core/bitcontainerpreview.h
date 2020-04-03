@@ -6,7 +6,7 @@
 
 #include "hobbits-core_global.h"
 
-/// A proxy class for BitContainers that hides bit editing functionality
+/// A proxy class for BitContainers that prevents bit editing, but allows limited metadata editing
 class HOBBITSCORESHARED_EXPORT BitContainerPreview : public QObject
 {
     Q_OBJECT
@@ -14,36 +14,17 @@ class HOBBITSCORESHARED_EXPORT BitContainerPreview : public QObject
 public:
     explicit BitContainerPreview(QSharedPointer<BitContainer> m_bitContainer);
 
-    QList<Frame> getFrames() const;
-    int getMaxFrameWidth() const;
-
-    QList<Range> getHighlights(QString type) const;
-    void setHighlights(QString type, QList<Range>);
-
-    QStringList getMetadata(QString) const;
-    void setMetadata(QString, QStringList);
-
     QString getName() const;
-    void setName(QString name);
+    QSharedPointer<const BitArray> bits() const;
+    QSharedPointer<const BitInfo> bitInfo() const;
 
-    QPixmap getThumbnail() const;
-    QImage getRasterImage(int x, int y, int w, int h) const;
-
-    QSharedPointer<const BitArray> getBaseBits() const;
-
-    int getFrameOffsetContaining(Range target) const;
-
-    int getLastFrameOffsetFocus() const;
-    int getLastBitOffsetFocus() const;
+    void addHighlight(RangeHighlight highlight);
+    void addHighlights(QList<RangeHighlight> highlights);
+    void setMetadata(QString key, QVariant value);
+    void clearHighlightCategory(QString category);
 
 signals:
-    void highlightsChanged(BitContainer *bitContainer);
-    void framesChanged(BitContainer *bitContainer);
-    void changed(BitContainer *bitContainer);
-    void focusRequested(int bitOffset, int frameOffset);
-
-public slots:
-    void requestFocus(int bitOffset, int frameOffset);
+    void changed();
 
 private:
     QSharedPointer<BitContainer> m_bitContainer;

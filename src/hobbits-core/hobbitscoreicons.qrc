@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/hobbits-core">
+        <file>images/icons/arrow-left.png</file>
+        <file>images/icons/arrow-right.png</file>
+    </qresource>
+</RCC>

@@ -138,14 +138,14 @@ int main(int argc, char *argv[])
                     return -1;
                 }
                 auto container = QSharedPointer<BitContainer>(new BitContainer());
-                container->setBytes(&inputFile);
+                container->setBits(&inputFile);
                 targetContainers.append(container);
                 inputFile.close();
             }
         }
         else {
             auto container = QSharedPointer<BitContainer>(new BitContainer());
-            container->setBytes(pipedInData);
+            container->setBits(pipedInData);
             targetContainers.append(container);
         }
 
@@ -172,14 +172,13 @@ int main(int argc, char *argv[])
         QObject::connect(
                 bitManager.data(),
                 &BitContainerManager::currSelectionChanged,
-                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](const QItemSelection &selected,
-                                                                                   const QItemSelection &deselected) {
+                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected) {
             Q_UNUSED(selected)
             Q_UNUSED(deselected)
             auto container = bitManager->getCurrentContainer();
             QFile output(QString("%1%2").arg(outputPrefix).arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
-            container->getBaseBits()->writeTo(&output);
+            container->bits()->writeTo(&output);
             output.close();
         });
 

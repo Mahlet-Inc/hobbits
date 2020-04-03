@@ -10,6 +10,7 @@
 class HOBBITSCORESHARED_EXPORT Frame : public Range
 {
 public:
+    Frame();
     Frame(QSharedPointer<const BitArray> bits, qint64 start, qint64 end);
     Frame(QSharedPointer<const BitArray> bits, Range range);
     Frame(const Frame &other) = default;

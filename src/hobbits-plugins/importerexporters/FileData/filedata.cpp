@@ -36,15 +36,26 @@ bool FileData::canImport()
     return true;
 }
 
-QSharedPointer<BitContainer> FileData::importBits(QMap<QString, QString> args, QWidget *parent)
+QString FileData::getImportLabelForState(QJsonObject pluginState)
 {
+    if (pluginState.contains("filename")) {
+        QString fileName = pluginState.value("filename").toString();
+        return QString("Import file %1").arg(fileName);
+    }
+    return "";
+}
 
-    QSharedPointer<BitContainer> nullResult;
+QString FileData::getExportLabelForState(QJsonObject pluginState)
+{
+    return "";
+}
 
+QSharedPointer<ImportExportResult> FileData::importBits(QJsonObject pluginState, QWidget *parent)
+{
     QString fileName;
 
-    if (args.contains("filename")) {
-        fileName = args.value("filename");
+    if (pluginState.contains("filename")) {
+        fileName = pluginState.value("filename").toString();
     }
     else {
         fileName = QFileDialog::getOpenFileName(
@@ -55,8 +66,11 @@ QSharedPointer<BitContainer> FileData::importBits(QMap<QString, QString> args, Q
     }
 
     if (fileName.isEmpty()) {
-        return nullResult;
+        return ImportExportResult::error("No file selected for import");
     }
+
+    pluginState.remove("filename");
+    pluginState.insert("filename", fileName);
 
     QFile file(fileName);
 
@@ -66,24 +80,25 @@ QSharedPointer<BitContainer> FileData::importBits(QMap<QString, QString> args, Q
         msg.setText(QString("Failed to import bit file: '%1'").arg(fileName));
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
-        return nullResult;
+        return ImportExportResult::error(QString("Failed to import bit file: '%1'").arg(fileName));
     }
     SettingsManager::getInstance().setPrivateSetting(
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
     QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer);
-    container->setBytes(&file);
+    container->setBits(&file);
+    container->setName(QFileInfo(file).fileName());
 
-    return container;
+    return ImportExportResult::create(container, pluginState);
 }
 
-void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QString, QString> args, QWidget *parent)
+QSharedPointer<ImportExportResult> FileData::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState, QWidget *parent)
 {
     QString fileName;
 
-    if (args.contains("filename")) {
-        fileName = args.value("filename");
+    if (pluginState.contains("filename")) {
+        fileName = pluginState.value("filename").toString();
     }
     else {
         fileName = QFileDialog::getSaveFileName(
@@ -92,14 +107,19 @@ void FileData::exportBits(QSharedPointer<const BitContainer> container, QMap<QSt
                 SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_IMPORT_EXPORT_PATH_KEY).toString(),
                 tr("All Files (*)"));
     }
+    pluginState.remove("filename");
+    pluginState.insert("filename", fileName);
+
     QFile file(fileName);
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return;
+        return ImportExportResult::error(QString("Failed to open export bit file: '%1'").arg(fileName));
     }
     SettingsManager::getInstance().setPrivateSetting(
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    container->getBaseBits()->writeTo(&file);
+    container->bits()->writeTo(&file);
     file.close();
+
+    return ImportExportResult::create(pluginState);
 }

@@ -3,7 +3,7 @@
 
 #include <QJsonObject>
 #include <QObject>
-
+#include "displayhandle.h"
 #include "hobbits-core_global.h"
 
 class HOBBITSCORESHARED_EXPORT PluginCallback : public QObject
@@ -11,14 +11,22 @@ class HOBBITSCORESHARED_EXPORT PluginCallback : public QObject
     Q_OBJECT
 
 public:
-    explicit PluginCallback(QObject *parent = nullptr);
+    explicit PluginCallback(QSharedPointer<DisplayHandle> displayHandle, QObject *parent = nullptr);
+
+    QSharedPointer<DisplayHandle> getDisplayHandle();
 
 signals:
-    void runRequested(QString pluginName, QJsonObject pluginState);
+    void operatorRunRequested(QString pluginName, QJsonObject pluginState);
+    void analyzerRunRequested(QString pluginName, QJsonObject pluginState);
+    void operatorStateChanged(QString pluginName);
 
 public slots:
-    void requestRun(QString pluginName, QJsonObject pluginState = QJsonObject());
+    void sendOperatorStateChanged(QString pluginName);
+    void requestOperatorRun(QString pluginName, QJsonObject pluginState = QJsonObject());
+    void requestAnalyzerRun(QString pluginName, QJsonObject pluginState = QJsonObject());
 
+private:
+    QSharedPointer<DisplayHandle> m_displayHandle;
 };
 
 #endif // PLUGINCALLBACK_H

@@ -2,6 +2,7 @@
 #define IMPORTEXPORTINTERFACE_H
 
 #include "bitcontainer.h"
+#include "importexportresult.h"
 #include <QSharedPointer>
 
 #include "hobbits-core_global.h"
@@ -20,10 +21,13 @@ public:
     virtual bool canImport() = 0;
     virtual bool canExport() = 0;
 
-    virtual QSharedPointer<BitContainer> importBits(QMap<QString, QString> args, QWidget *parent) = 0;
-    virtual void exportBits(
+    virtual QString getImportLabelForState(QJsonObject pluginState) = 0;
+    virtual QString getExportLabelForState(QJsonObject pluginState) = 0;
+
+    virtual QSharedPointer<ImportExportResult> importBits(QJsonObject pluginState, QWidget *parent) = 0;
+    virtual QSharedPointer<ImportExportResult> exportBits(
             QSharedPointer<const BitContainer> container,
-            QMap<QString, QString> args,
+            QJsonObject pluginState,
             QWidget *parent) = 0;
 
 };

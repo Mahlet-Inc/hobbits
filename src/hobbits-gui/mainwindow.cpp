@@ -50,6 +50,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->dock_operatorPlugins->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
     ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
 
+    // More menu initialization
+    populateRecentTemplatesMenu();
+
     // Configure Bit Container View
     ui->tv_bitContainers->setModel(m_bitContainerManager->getTreeModel().data());
 
@@ -72,7 +75,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             ui->operatorTabs,
             &QTabWidget::currentChanged,
             this,
-            &MainWindow::checkOperatorInput);
+            [=](){ checkOperatorInput(); } );
 
     connect(
             m_pluginActionManager.data(),
@@ -108,27 +111,8 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             m_pluginActionManager.data(),
             &PluginActionManager::cancelAction);
 
-    m_analyzerPluginCallback = QSharedPointer<PluginCallback>(new PluginCallback());
-    connect(
-            m_analyzerPluginCallback.data(),
-            &PluginCallback::runRequested,
-            this,
-            &MainWindow::requestAnalyzerRun);
 
-    m_operatorPluginCallback = QSharedPointer<PluginCallback>(new PluginCallback());
-    connect(
-            m_operatorPluginCallback.data(),
-            &PluginCallback::runRequested,
-            this,
-            &MainWindow::requestOperatorRun);
-
-    //
-    populateRecentTemplatesMenu();
-
-    loadPlugins();
-
-    initializeImporterExporters();
-
+    // Configure display handle and plugin callback
     m_displayHandle = QSharedPointer<DisplayHandle>(
             new DisplayHandle(
                     m_bitContainerManager,
@@ -139,11 +123,35 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             &DisplayHandle::newBitHover,
             this,
             &MainWindow::setHoverBit);
+
+    m_pluginCallback = QSharedPointer<PluginCallback>(new PluginCallback(m_displayHandle));
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::analyzerRunRequested,
+            this,
+            &MainWindow::requestAnalyzerRun);
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::operatorRunRequested,
+            this,
+            &MainWindow::requestOperatorRun);
+    connect(
+            m_pluginCallback.data(),
+            &PluginCallback::operatorStateChanged,
+            this,
+            &MainWindow::checkOperatorInput);
+
+    // load and initialize plugins
+    loadPlugins();
+    initializeImporterExporters();
     initializeDisplays();
 
-    checkOperatorInput();
+    // Import menu initialization
+    populateRecentImportsMenu();
 
-    activateBitContainer();
+    // create an initial state
+    checkOperatorInput();
+    activateBitContainer(currContainer(), QSharedPointer<BitContainer>());
 }
 
 MainWindow::~MainWindow()
@@ -292,13 +300,7 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Import_Bits_From->addAction(
                     plugin->getName(),
                     [this, plugin]() {
-                QSharedPointer<BitContainer> container = plugin->importBits(QMap<QString, QString>(), this);
-                if (!container.isNull()) {
-                    QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(container);
-                    this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                            addedIndex,
-                            QItemSelectionModel::ClearAndSelect);
-                }
+                this->requestImportRun(plugin->getName());
             });
         }
         if (plugin->canExport()) {
@@ -306,7 +308,7 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Export_Bits_To->addAction(
                     plugin->getName(),
                     [this, plugin]() {
-                plugin->exportBits(this->currContainer(), QMap<QString, QString>(), this);
+                this->requestExportRun(plugin->getName());
             });
         }
     }
@@ -355,27 +357,20 @@ QSharedPointer<BitContainer> MainWindow::currContainer()
 
 void MainWindow::importBitfile(QString file)
 {
-    QMap<QString, QString> args;
-    args.insert("filename", file);
-
     QSharedPointer<ImportExportInterface> fileDataImporter = m_pluginManager->getImporterExporter("File Data");
     if (fileDataImporter.isNull()) {
         warningMessage("Could not import bit file without 'File Data' plugin");
         return;
     }
-    QSharedPointer<BitContainer> container = fileDataImporter->importBits(args, this);
-    if (!container.isNull()) {
-        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(container);
-        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                addedIndex,
-                QItemSelectionModel::ClearAndSelect);
-    }
+    QJsonObject pluginState;
+    pluginState.insert("filename", file);
+    requestImportRun("File Data", pluginState);
 }
 
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
 {
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(rawBytes);
+    bitContainer->setBits(rawBytes);
 
     bitContainer->setName(name);
 
@@ -392,12 +387,18 @@ void MainWindow::on_pb_operate_clicked()
     this->requestOperatorRun(op->getName(), pluginState);
 }
 
-void MainWindow::checkOperatorInput()
+void MainWindow::checkOperatorInput(QString pluginName)
 {
     QSharedPointer<OperatorInterface> op = getCurrentOperator();
     if (op.isNull()) {
         ui->pb_operate->setEnabled(false);
         return;
+    }
+
+    if (!pluginName.isEmpty()) {
+        if (pluginName != op->getName()) {
+            return;
+        }
     }
 
     QJsonObject pluginState = op->getStateFromUi();
@@ -487,7 +488,7 @@ void MainWindow::loadPlugins()
         opUi->setAutoFillBackground(true);
         int idx = ui->operatorTabs->addTab(opUi, op->getName());
         m_operatorMap.insert(idx, op);
-        op->provideCallback(m_operatorPluginCallback);
+        op->provideCallback(m_pluginCallback);
     }
     ui->operatorTabs->setUpdatesEnabled(true);
 
@@ -514,13 +515,20 @@ void MainWindow::loadPlugins()
         analysisUi->setAutoFillBackground(true);
         int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->getName());
         m_analyzerMap.insert(idx, analyzer);
-        analyzer->provideCallback(m_analyzerPluginCallback);
+        analyzer->provideCallback(m_pluginCallback);
     }
     ui->analyzerTabs->setUpdatesEnabled(true);
 }
 
-void MainWindow::activateBitContainer()
+void MainWindow::activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected)
 {
+    if (!deselected.isNull()) {
+        disconnect(deselected.data(), SIGNAL(changed()), this, SLOT(currBitContainerChanged()));
+    }
+    if (!selected.isNull()) {
+        connect(selected.data(), SIGNAL(changed()), this, SLOT(currBitContainerChanged()));
+    }
+
     QSharedPointer<BitContainer> bitContainer = currContainer();
     if (bitContainer.isNull()) {
         ui->tb_removeBitContainer->setEnabled(false);
@@ -531,23 +539,17 @@ void MainWindow::activateBitContainer()
     setCurrentBitContainer();
 }
 
-void MainWindow::setCurrentBitContainer()
+void MainWindow::currBitContainerChanged()
 {
-    QSharedPointer<BitContainer> container = currContainer();
-
-    disconnect(this, SIGNAL(containerFocusRequested(int,int)));
-
-    if (!container.isNull()) {
-        connect(
-                container.data(),
-                SIGNAL(focusRequested(int,int)),
-                this,
-                SLOT(
-                        containerFocusRequested(
-                                int,
-                                int)));
+    if (m_previewMutex.tryLock()) {
+        sendBitContainerPreview();
+        m_previewMutex.unlock();
     }
+    checkOperatorInput();
+}
 
+void MainWindow::sendBitContainerPreview()
+{
     for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
         if (currContainer().isNull()) {
             analyzer->previewBits(QSharedPointer<BitContainerPreview>());
@@ -559,6 +561,22 @@ void MainWindow::setCurrentBitContainer()
                                     currContainer())));
         }
     }
+    for (QSharedPointer<OperatorInterface> op : m_pluginManager->getAllOperators()) {
+        if (currContainer().isNull()) {
+            op->previewBits(QSharedPointer<BitContainerPreview>());
+        }
+        else {
+            op->previewBits(
+                    QSharedPointer<BitContainerPreview>(
+                            new BitContainerPreview(
+                                    currContainer())));
+        }
+    }
+}
+
+void MainWindow::setCurrentBitContainer()
+{
+    currBitContainerChanged();
 
     if (!currContainer().isNull()) {
         // Set the last analyzer plugin settings used on this container
@@ -618,11 +636,6 @@ void MainWindow::setCurrentBitContainer()
     }
 }
 
-void MainWindow::containerFocusRequested(int bitOffset, int frameOffset)
-{
-    m_displayHandle->setOffsets(bitOffset, frameOffset);
-}
-
 void MainWindow::deleteCurrentBitcontainer()
 {
     if (!currContainer().isNull()) {
@@ -630,7 +643,7 @@ void MainWindow::deleteCurrentBitcontainer()
         reply = QMessageBox::question(
                 this,
                 "Delete Bits Confirmation",
-                QString("Are you sure you want to delete bit container '%1'?").arg(currContainer()->getName()),
+                QString("Are you sure you want to delete bit container '%1'?").arg(currContainer()->name()),
                 QMessageBox::Yes | QMessageBox::No);
         if (reply != QMessageBox::Yes) {
             return;
@@ -638,7 +651,7 @@ void MainWindow::deleteCurrentBitcontainer()
 
         ui->tb_removeBitContainer->setEnabled(false);
         m_bitContainerManager->deleteCurrentContainer();
-        activateBitContainer();
+        //activateBitContainer();
     }
 }
 
@@ -658,7 +671,9 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
         QSharedPointer<OperatorInterface> plugin = m_pluginManager->getOperator(pluginName);
         if (!plugin.isNull()) {
             QList<QSharedPointer<BitContainer>> inputContainers;
-            QJsonObject pluginState = plugin->getStateFromUi();
+            if (pluginState.isEmpty()) {
+                pluginState = plugin->getStateFromUi();
+            }
             int minInputs = plugin->getMinInputContainers(pluginState);
             int maxInputs = plugin->getMaxInputContainers(pluginState);
             if (maxInputs == 1 && minInputs == 1) {
@@ -698,6 +713,33 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
     }
 }
 
+void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
+{
+    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+    auto result = plugin->importBits(pluginState, this);
+    if (result.isNull()) {
+        return;
+    }
+    if (!result->getPluginState().isEmpty()) {
+        this->populateRecentImportsMenu({plugin->getName(), result->getPluginState()});
+    }
+    if (!result->getContainer().isNull()) {
+        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(result->getContainer());
+        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
+                addedIndex,
+                QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
+{
+    if (currContainer().isNull()) {
+        warningMessage("Cannot export without a selected bit container");
+    }
+    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+    plugin->exportBits(currContainer(), pluginState, this);
+}
+
 void MainWindow::on_pb_analyze_clicked()
 {
     if (!currContainer().isNull()) {
@@ -713,8 +755,8 @@ void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
         this->statusBar()->showMessage("");
     }
     else {
-        int totalBitOffset = currContainer()->getFrames().at(frameOffset).start() + bitOffset;
-        int totalByteOffset = totalBitOffset / 8;
+        qint64 totalBitOffset = currContainer()->frames().at(frameOffset).start() + bitOffset;
+        qint64 totalByteOffset = totalBitOffset / 8;
         this->statusBar()->showMessage(
                 QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(
                         totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset));
@@ -972,12 +1014,7 @@ void MainWindow::pluginActionFinished()
     m_pluginActionProgress->setVisible(false);
     m_pluginActionCancel->setVisible(false);
 
-    for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
-        analyzer->previewBits(
-                QSharedPointer<BitContainerPreview>(
-                        new BitContainerPreview(
-                                currContainer())));
-    }
+    sendBitContainerPreview();
 }
 
 void MainWindow::pluginActionProgress(int progress)
@@ -1039,6 +1076,73 @@ void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
     }
 
     ui->menuApply_Recent_Template->setEnabled(recentlyUsed.length() > 0);
+}
+
+
+void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+{
+    QString key = "recently_imported";
+    QString separator = "/[]\"[]/";
+
+    QString additionString;
+    if (!addition.first.isEmpty() && !addition.second.isEmpty()) {
+        QJsonDocument doc(addition.second);
+        QString additionJson(doc.toJson(QJsonDocument::Compact));
+        additionString = QString("%1%2%3").arg(addition.first).arg(separator).arg(additionJson);
+    }
+    QString removalString;
+    if (!removal.first.isEmpty() && !removal.second.isEmpty()) {
+        QJsonDocument doc(removal.second);
+        QString removalJson(doc.toJson(QJsonDocument::Compact));
+        removalString = QString("%1%2%3").arg(removal.first).arg(separator).arg(removalJson);
+    }
+
+    QStringList recentlyImported;
+    QVariant currentSetting = SettingsManager::getInstance().getPrivateSetting(key);
+    if (!currentSetting.isNull() && currentSetting.canConvert<QStringList>()) {
+        recentlyImported = currentSetting.toStringList();
+    }
+
+    if (!removalString.isEmpty()) {
+        recentlyImported.removeAll(removalString);
+    }
+
+    if (!additionString.isEmpty()) {
+        recentlyImported.removeAll(additionString);
+        recentlyImported.insert(0, additionString);
+    }
+
+    recentlyImported = recentlyImported.mid(0, 10);
+
+    SettingsManager::getInstance().setPrivateSetting(key, recentlyImported);
+
+    ui->menuImport_Recent->clear();
+    for (QString importString : recentlyImported) {
+        QStringList importParts = importString.split(separator);
+        if (importParts.size() != 2) {
+            continue;
+        }
+        QString pluginName = importParts.at(0);
+        QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+        if (plugin.isNull()) {
+            continue;
+        }
+
+        QByteArray pluginStateString = importParts.at(1).toUtf8();
+        QJsonObject pluginState = QJsonDocument::fromJson(pluginStateString).object();
+
+        QString menuLabel = plugin->getImportLabelForState(pluginState);
+        if (menuLabel.isEmpty()) {
+            continue;
+        }
+        ui->menuImport_Recent->addAction(
+                menuLabel,
+                [this, pluginName, pluginState]() {
+            this->requestImportRun(pluginName, pluginState);
+        });
+    }
+
+    ui->menuImport_Recent->setEnabled(recentlyImported.length() > 0);
 }
 
 void MainWindow::on_tb_scrollReset_clicked()

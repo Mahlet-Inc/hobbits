@@ -97,17 +97,17 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
 
     bool frameBased =
         (recallablePluginState.contains("frame_based") && recallablePluginState.value("frame_based").toBool());
-    int frameCount = inputContainers.at(0)->getFrames().size();
-    QList<QPair<QList<Frame>, qint64>> inputs;
+    int frameCount = inputContainers.at(0)->frames().size();
+    QList<QPair<QVector<Frame>, qint64>> inputs;
     for (auto inputContainer : inputContainers) {
         if (frameBased) {
-            frameCount = qMin(frameCount, inputContainer->getFrames().size());
-            inputs.append({inputContainer->getFrames(), 0});
+            frameCount = qMin(frameCount, inputContainer->frames().size());
+            inputs.append({inputContainer->frames(), 0});
         }
         else {
             frameCount = 1;
-            inputs.append({{Frame(inputContainer->getBaseBits(), 0,
-                    inputContainer->getBaseBits()->sizeInBits() - 1)}, 0});
+            inputs.append({{Frame(inputContainer->bits(), 0,
+                    inputContainer->bits()->sizeInBits() - 1)}, 0});
         }
     }
 
@@ -156,7 +156,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
 
     qint64 outputIdx = 0;
     int lastPercent = 0;
-    QList<Frame> outputFrames;
+    QVector<Range> outputFrames;
 
     for (int currFrame = 0; currFrame < frameCount; currFrame++) {
         qint64 bitsProcessed = 0;
@@ -201,14 +201,14 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                 return QSharedPointer<const OperatorResult>(cancelled);
             }
         }
-        outputFrames.append(Frame(outputBits, frameStart, outputIdx - 1));
+        outputFrames.append(Range(frameStart, outputIdx - 1));
     }
 
     outputBits->resize(outputIdx);
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBytes(outputBits);
+    bitContainer->setBits(outputBits);
     if (frameBased) {
-        bitContainer->setFrames(outputFrames);
+        bitContainer->bitInfo()->setFrames(outputFrames);
     }
     outputContainers.append(bitContainer);
     QJsonObject pluginState(recallablePluginState);
@@ -223,11 +223,16 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                 "container_name",
                 QString("%1 <- %2")
                 .arg(recallablePluginState.value("take_skip_string").toString())
-                .arg(inputContainers.at(0)->getName()));
+                .arg(inputContainers.at(0)->name()));
     }
     return QSharedPointer<const OperatorResult>(
             (new OperatorResult())->setOutputContainers(
                     outputContainers)->setPluginState(pluginState));
+}
+
+void TakeSkipOperator::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
 }
 
 OperatorInterface* TakeSkipOperator::createDefaultOperator()
@@ -238,7 +243,7 @@ OperatorInterface* TakeSkipOperator::createDefaultOperator()
 void TakeSkipOperator::requestRun()
 {
     if (!m_pluginCallback.isNull()) {
-        m_pluginCallback->requestRun(getName());
+        m_pluginCallback->requestOperatorRun(getName());
     }
 }
 
