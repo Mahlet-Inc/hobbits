@@ -7,11 +7,11 @@
 
 namespace PluginHelper
 {
-    void recordProgress(QSharedPointer<ActionProgress> tracker, qint64 completed, qint64 required);
-    void recordProgress(QSharedPointer<ActionProgress> tracker, int completed, int required);
-    void recordProgress(QSharedPointer<ActionProgress> tracker, double completed, double required);
-    QSharedPointer<const OperatorResult> operatorErrorResult(QString error);
-    QSharedPointer<const AnalyzerResult> analyzerErrorResult(QString error);
+    void HOBBITSCORESHARED_EXPORT recordProgress(QSharedPointer<ActionProgress> tracker, qint64 completed, qint64 required);
+    void HOBBITSCORESHARED_EXPORT recordProgress(QSharedPointer<ActionProgress> tracker, int completed, int required);
+    void HOBBITSCORESHARED_EXPORT recordProgress(QSharedPointer<ActionProgress> tracker, double completed, double required);
+    QSharedPointer<const OperatorResult> HOBBITSCORESHARED_EXPORT operatorErrorResult(QString error);
+    QSharedPointer<const AnalyzerResult> HOBBITSCORESHARED_EXPORT analyzerErrorResult(QString error);
 };
 
 #endif // PLUGINHELPER_H

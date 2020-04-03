@@ -9,7 +9,7 @@ namespace Ui {
 class HighlightNavigator;
 }
 
-class HighlightNavigator : public QWidget
+class HOBBITSCORESHARED_EXPORT HighlightNavigator : public QWidget
 {
     Q_OBJECT
 
