@@ -4,7 +4,7 @@
 #include "bitcontainer.h"
 #include <QJsonObject>
 
-class ImportExportResult
+class HOBBITSCORESHARED_EXPORT ImportExportResult
 {
 public:
     ImportExportResult();
