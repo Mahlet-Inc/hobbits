@@ -47,6 +47,7 @@ QDataStream& operator<<(QDataStream& stream, const RangeHighlight& highlight)
     stream << highlight.label();
     stream << highlight.range();
     stream << highlight.color();
+    return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, RangeHighlight& highlight)
@@ -58,6 +59,7 @@ QDataStream& operator>>(QDataStream& stream, RangeHighlight& highlight)
         stream >> highlight.m_label;
         stream >> highlight.m_range;
         stream >> highlight.m_color;
+        return stream;
     }
     else {
         stream.setStatus(QDataStream::Status::ReadCorruptData);
