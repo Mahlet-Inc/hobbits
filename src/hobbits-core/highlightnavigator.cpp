@@ -6,7 +6,8 @@ static const QString FOCUS_HIGHLIGHT_CATEGORY = "Highlight Nav Focus";
 
 HighlightNavigator::HighlightNavigator(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::HighlightNavigator)
+    ui(new Ui::HighlightNavigator),
+    m_shouldHighlightSelection(false)
 {
     ui->setupUi(this);
 
@@ -23,6 +24,12 @@ HighlightNavigator::HighlightNavigator(QWidget *parent) :
 HighlightNavigator::~HighlightNavigator()
 {
     delete ui;
+}
+
+
+void HighlightNavigator::setShouldHighlightSelection(bool shouldHighlight)
+{
+    m_shouldHighlightSelection = shouldHighlight;
 }
 
 
@@ -56,7 +63,6 @@ void HighlightNavigator::setPluginCallback(QSharedPointer<PluginCallback> plugin
         disconnect(m_pluginCallback.data(), SIGNAL(changed()), this, SLOT(refresh()));
     }
     m_pluginCallback = pluginCallback;
-    connect(m_pluginCallback.data(), SIGNAL(changed()), this, SLOT(refresh()));
     refresh();
 }
 
@@ -79,6 +85,24 @@ void HighlightNavigator::setTitle(QString title)
 
 void HighlightNavigator::refresh()
 {
+    // has the important stuff actually changed?
+    // if not, just return
+    if (!m_container.isNull()) {
+        auto newHighlights = m_container->bitInfo()->highlights(m_category);
+        if (newHighlights.size() == m_highlights.size()) {
+            bool same = true;
+            for (int i = 0; i < m_highlights.size(); i++) {
+                if (m_highlights.at(i).label() != newHighlights.at(i).label()) {
+                    same = false;
+                    break;
+                }
+            }
+            if (same) {
+                return;
+            }
+        }
+    }
+
     ui->lw_highlights->clear();
     m_highlights.clear();
 
@@ -162,8 +186,13 @@ void HighlightNavigator::updateSelection()
                 int(focus.range().start() - m_container->bitInfo()->frames().at(containingFrame).start() - 16));
         int frameOffset = qMax(0, containingFrame - 16);
 
-        m_container->clearHighlightCategory(FOCUS_HIGHLIGHT_CATEGORY);
-        m_container->addHighlight(focus);
+        if (m_shouldHighlightSelection) {
+            // Add it only if it is new
+            if (m_container->bitInfo()->highlights(FOCUS_HIGHLIGHT_CATEGORY, focus.label()).isEmpty()) {
+                m_container->clearHighlightCategory(FOCUS_HIGHLIGHT_CATEGORY);
+                m_container->addHighlight(focus);
+            }
+        }
 
         if (!m_pluginCallback.isNull()) {
             m_pluginCallback->getDisplayHandle()->setOffsets(bitOffset, frameOffset);

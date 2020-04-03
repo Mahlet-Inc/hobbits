@@ -32,7 +32,7 @@ protected:
     QPoint getOffset(int x, int y, int xSize, int ySize, int xGrouping, int bitsPerX);
     void sendHoverUpdate(QMouseEvent *event, int xSize, int ySize, int xGrouping, int bitsPerX, QPoint offset);
 
-    double getGroupedOffset(int idx, double width, int groupSize, int offset, int groupMargin);
+    double getGroupedOffset(qint64 idx, double width, int groupSize, int offset, int groupMargin);
     void drawHighlights(
             QPainter *painter,
             double colWidth,

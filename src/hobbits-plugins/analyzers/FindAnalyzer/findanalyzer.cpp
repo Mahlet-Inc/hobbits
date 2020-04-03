@@ -79,6 +79,7 @@ void FindAnalyzer::applyToWidget(QWidget *widget)
     ui->verticalLayout->addWidget(m_highlightNav);
     ui->verticalLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
+    m_highlightNav->setShouldHighlightSelection(true);
     m_highlightNav->setContainer(m_previewContainer);
     m_highlightNav->setHighlightCategory(FOUND_HIGHLIGHT);
 }
@@ -161,7 +162,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
     }
 
     QSharedPointer<AnalyzerResult> analyzerResult = QSharedPointer<AnalyzerResult>(new AnalyzerResult());
-    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*container->bitInfo().data()));
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
     bitInfo->clearHighlightCategory(FOUND_HIGHLIGHT);
     bitInfo->addHighlights(highlights);
 

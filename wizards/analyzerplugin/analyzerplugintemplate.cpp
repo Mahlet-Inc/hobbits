@@ -65,7 +65,8 @@ QJsonObject %{ClassName}::getStateFromUi()
 
 void %{ClassName}::previewBits(QSharedPointer<BitContainerPreview> container)
 {
-    // Prepare operations for the current bit container
+    Q_UNUSED(container)
+    // optionally use the current container to prepare the UI or something
 }
 
 QSharedPointer<const AnalyzerResult> %{ClassName}::analyzeBits(

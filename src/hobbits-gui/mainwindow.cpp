@@ -151,7 +151,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     // create an initial state
     checkOperatorInput();
-    activateBitContainer();
+    activateBitContainer(currContainer(), QSharedPointer<BitContainer>());
 }
 
 MainWindow::~MainWindow()
@@ -520,8 +520,15 @@ void MainWindow::loadPlugins()
     ui->analyzerTabs->setUpdatesEnabled(true);
 }
 
-void MainWindow::activateBitContainer()
+void MainWindow::activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected)
 {
+    if (!deselected.isNull()) {
+        disconnect(deselected.data(), SIGNAL(changed()), this, SLOT(currBitContainerChanged()));
+    }
+    if (!selected.isNull()) {
+        connect(selected.data(), SIGNAL(changed()), this, SLOT(currBitContainerChanged()));
+    }
+
     QSharedPointer<BitContainer> bitContainer = currContainer();
     if (bitContainer.isNull()) {
         ui->tb_removeBitContainer->setEnabled(false);
@@ -532,6 +539,14 @@ void MainWindow::activateBitContainer()
     setCurrentBitContainer();
 }
 
+void MainWindow::currBitContainerChanged()
+{
+    if (m_previewMutex.tryLock()) {
+        sendBitContainerPreview();
+        m_previewMutex.unlock();
+    }
+    checkOperatorInput();
+}
 
 void MainWindow::sendBitContainerPreview()
 {
@@ -561,21 +576,7 @@ void MainWindow::sendBitContainerPreview()
 
 void MainWindow::setCurrentBitContainer()
 {
-    QSharedPointer<BitContainer> container = currContainer();
-
-    disconnect(this, SIGNAL(containerFocusRequested(int,int)));
-
-    if (!container.isNull()) {
-        connect(
-                container.data(),
-                SIGNAL(focusRequested(int,int)),
-                this,
-                SLOT(
-                        containerFocusRequested(
-                                int,
-                                int)));
-    }
-    sendBitContainerPreview();
+    currBitContainerChanged();
 
     if (!currContainer().isNull()) {
         // Set the last analyzer plugin settings used on this container
@@ -633,13 +634,6 @@ void MainWindow::setCurrentBitContainer()
             }
         }
     }
-
-    checkOperatorInput();
-}
-
-void MainWindow::containerFocusRequested(int bitOffset, int frameOffset)
-{
-    m_displayHandle->setOffsets(bitOffset, frameOffset);
 }
 
 void MainWindow::deleteCurrentBitcontainer()
@@ -657,7 +651,7 @@ void MainWindow::deleteCurrentBitcontainer()
 
         ui->tb_removeBitContainer->setEnabled(false);
         m_bitContainerManager->deleteCurrentContainer();
-        activateBitContainer();
+        //activateBitContainer();
     }
 }
 

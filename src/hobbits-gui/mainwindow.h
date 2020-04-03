@@ -47,7 +47,8 @@ public slots:
     void checkOperatorInput(QString pluginName = "");
     void checkCurrentDisplays();
 
-    void activateBitContainer();
+    void activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
+    void currBitContainerChanged();
     void setCurrentBitContainer();
     void deleteCurrentBitcontainer();
 
@@ -82,8 +83,6 @@ private slots:
     void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
-    void containerFocusRequested(int bitOffset, int frameOffset);
-
     void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 
@@ -100,6 +99,7 @@ private:
     QSharedPointer<PluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
 
+    QMutex m_previewMutex;
     QSharedPointer<PluginCallback> m_pluginCallback;
 
     QProgressBar *m_pluginActionProgress;

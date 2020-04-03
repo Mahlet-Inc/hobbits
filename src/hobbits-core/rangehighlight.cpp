@@ -40,7 +40,7 @@ QColor RangeHighlight::color() const
 }
 
 const QString VERSION_1 = "RangeHighlight v1";
-QDataStream& HOBBITSCORESHARED_EXPORT operator<<(QDataStream& stream, const RangeHighlight& highlight)
+QDataStream& operator<<(QDataStream& stream, const RangeHighlight& highlight)
 {
     stream << VERSION_1;
     stream << highlight.category();
@@ -49,7 +49,7 @@ QDataStream& HOBBITSCORESHARED_EXPORT operator<<(QDataStream& stream, const Rang
     stream << highlight.color();
 }
 
-QDataStream& HOBBITSCORESHARED_EXPORT operator>>(QDataStream& stream, RangeHighlight& highlight)
+QDataStream& operator>>(QDataStream& stream, RangeHighlight& highlight)
 {
     QString version;
     stream >> version;

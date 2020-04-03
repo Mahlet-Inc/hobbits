@@ -337,7 +337,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     }
     outputRangeFile.close();
 
-    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*container->bitInfo().data()));
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
     bitInfo->addHighlights(highlights);
 
     return AnalyzerResult::result(bitInfo, recallablePluginState);

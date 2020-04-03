@@ -1,18 +1,23 @@
 #ifndef BITINFO_H
 #define BITINFO_H
 
+#include <QObject>
 #include "frame.h"
 #include "bitarray.h"
 #include "rangehighlight.h"
 #include <QVector>
 #include <QHash>
 #include <QSharedPointer>
+#include <QVariant>
 
-class HOBBITSCORESHARED_EXPORT BitInfo
+class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
 {
+    Q_OBJECT
+
 public:
-    BitInfo();
-    BitInfo(QSharedPointer<const BitArray> bits);
+    explicit BitInfo(QObject *parent = nullptr);
+    BitInfo(QSharedPointer<const BitArray> bits, QObject *parent = nullptr);
+    QSharedPointer<BitInfo> copyMetadata() const;
 
     void setBits(QSharedPointer<const BitArray> bits);
     void setFrames(QVector<Range> frames);
@@ -31,8 +36,11 @@ public:
 
     int frameOffsetContaining(Range target) const;
 
-    friend QDataStream& HOBBITSCORESHARED_EXPORT operator<<(QDataStream&, const BitInfo&);
-    friend QDataStream& HOBBITSCORESHARED_EXPORT operator>>(QDataStream&, BitInfo&);
+    friend QDataStream& operator<<(QDataStream&, const BitInfo&);
+    friend QDataStream& operator>>(QDataStream&, BitInfo&);
+
+signals:
+    void changed();
 
 private:
     void initFrames();

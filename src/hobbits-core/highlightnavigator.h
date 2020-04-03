@@ -31,6 +31,7 @@ public slots:
     void selectPrevious();
     void selectRow(int);
     void updateSelection();
+    void setShouldHighlightSelection(bool);
 
 signals:
     void selectionChanged();
@@ -41,6 +42,7 @@ private:
     QString m_category;
     QSharedPointer<BitContainerPreview> m_container;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    bool m_shouldHighlightSelection;
 };
 
 #endif // HIGHLIGHTNAVIGATOR_H

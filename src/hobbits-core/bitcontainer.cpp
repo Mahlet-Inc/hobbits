@@ -56,10 +56,16 @@ void BitContainer::setBitInfo(QSharedPointer<BitInfo> bitInfo)
         return;
     }
 
-    m_bitInfo = QSharedPointer<BitInfo>(new BitInfo(*bitInfo.data()));
+    if (!m_bitInfo.isNull()) {
+        disconnect(m_bitInfo.data(), SIGNAL(changed()), this, SIGNAL(changed()));
+    }
+
+    m_bitInfo = bitInfo->copyMetadata();
     m_bitInfo->setBits(m_bits);
 
-    emit changed(this);
+    emit changed();
+
+    connect(m_bitInfo.data(), SIGNAL(changed()), this, SIGNAL(changed()));
 }
 
 QSharedPointer<const BitArray> BitContainer::bits() const
@@ -125,7 +131,7 @@ QString BitContainer::name() const
 void BitContainer::setName(QString name)
 {
     this->m_name = name;
-    emit changed(this);
+    emit changed();
 }
 
 QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
@@ -230,7 +236,7 @@ QDataStream& operator>>(QDataStream &stream, BitContainer &container)
         QByteArray bytes;
         stream >> bitLength;
         stream >> bytes;
-        container.setBits(bytes, bitLength, QSharedPointer<BitInfo>(new BitInfo(bitInfo)));
+        container.setBits(bytes, bitLength, bitInfo.copyMetadata());
     }
     else if (version == VERSION_1 || version == VERSION_2) {
         QMap<QString, Range> highlights;

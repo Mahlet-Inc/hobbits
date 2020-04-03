@@ -79,7 +79,7 @@ private:
     QList<QUuid> m_parents;
 
 signals:
-    void changed(BitContainer *bitContainer);
+    void changed();
 };
 
 #endif // BITCONTAINER_H

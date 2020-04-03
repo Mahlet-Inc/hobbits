@@ -17,8 +17,8 @@ public:
     Range range() const;
     QColor color() const;
 
-    friend QDataStream& HOBBITSCORESHARED_EXPORT operator<<(QDataStream&, const RangeHighlight&);
-    friend QDataStream& HOBBITSCORESHARED_EXPORT operator>>(QDataStream&, RangeHighlight&);
+    friend QDataStream& operator<<(QDataStream&, const RangeHighlight&);
+    friend QDataStream& operator>>(QDataStream&, RangeHighlight&);
 
 private:
     QString m_category;

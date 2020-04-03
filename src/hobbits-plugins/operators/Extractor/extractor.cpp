@@ -1,5 +1,6 @@
 #include "extractor.h"
 #include "ui_extractor.h"
+#include "pluginhelper.h"
 #include <QObject>
 
 Extractor::Extractor() :
@@ -118,9 +119,6 @@ QJsonObject Extractor::getStateFromUi()
     if (category.isEmpty() || label.isEmpty()) {
         return pluginState;
     }
-    if (! (ui->ck_after->isChecked() || ui->ck_before->isChecked() || ui->ck_section->isChecked())) {
-        return pluginState;
-    }
 
     pluginState.insert("highlight_category", category);
     pluginState.insert("highlight_label", label);
@@ -192,16 +190,34 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
     if (takeBefore) {
         for (qint64 i = 0; i < range.start(); i++) {
             outBits->set(outputIndex++, inputContainer->bits()->at(i));
+            if (i % 5000 == 0) {
+                progressTracker->setProgress(outputIndex, outputSize);
+                if (progressTracker->getCancelled()) {
+                    return OperatorResult::error("Operation cancelled");
+                }
+            }
         }
     }
     if (takeHighlight) {
         for (qint64 i = range.start(); i <= range.end(); i++) {
             outBits->set(outputIndex++, inputContainer->bits()->at(i));
+            if (i % 5000 == 0) {
+                progressTracker->setProgress(outputIndex, outputSize);
+                if (progressTracker->getCancelled()) {
+                    return OperatorResult::error("Operation cancelled");
+                }
+            }
         }
     }
     if (takeAfter) {
         for (qint64 i = range.end() + 1; i < inputContainer->bits()->sizeInBits(); i++) {
             outBits->set(outputIndex++, inputContainer->bits()->at(i));
+            if (i % 5000 == 0) {
+                progressTracker->setProgress(outputIndex, outputSize);
+                if (progressTracker->getCancelled()) {
+                    return OperatorResult::error("Operation cancelled");
+                }
+            }
         }
     }
 
@@ -212,6 +228,7 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
 
 void Extractor::previewBits(QSharedPointer<BitContainerPreview> container)
 {
+    QJsonObject uiState = getStateFromUi();
     m_previewContainer = container;
     m_highlightNav->setContainer(m_previewContainer);
     if (m_previewContainer.isNull()) {
@@ -221,6 +238,7 @@ void Extractor::previewBits(QSharedPointer<BitContainerPreview> container)
     for (QString category: m_previewContainer->bitInfo()->highlightCategories()) {
         ui->cb_category->addItem(category);
     }
+    setPluginStateInUi(uiState);
 }
 
 void Extractor::setHighlightCategory(QString category)

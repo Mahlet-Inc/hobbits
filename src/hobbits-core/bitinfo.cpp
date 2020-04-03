@@ -1,17 +1,29 @@
 #include "bitinfo.h"
 #include <QVariant>
 
-BitInfo::BitInfo() :
+BitInfo::BitInfo(QObject *parent) :
+    QObject(parent),
     m_maxFrameWidth(0)
 {
 
 }
 
-BitInfo::BitInfo(QSharedPointer<const BitArray> bits) :
+BitInfo::BitInfo(QSharedPointer<const BitArray> bits, QObject *parent) :
+    QObject(parent),
     m_bits(bits),
     m_maxFrameWidth(0)
 {
 
+}
+
+
+QSharedPointer<BitInfo> BitInfo::copyMetadata() const
+{
+    auto copy = new BitInfo();
+    copy->m_ranges = m_ranges;
+    copy->m_metadata = m_metadata;
+    copy->m_rangeHighlights = m_rangeHighlights;
+    return QSharedPointer<BitInfo>(copy);
 }
 
 void BitInfo::setBits(QSharedPointer<const BitArray> bits)
@@ -38,6 +50,7 @@ void BitInfo::addHighlight(RangeHighlight highlight)
     std::sort(newList.begin(), newList.end());
     m_rangeHighlights.remove(highlight.category());
     m_rangeHighlights.insert(highlight.category(), newList);
+    emit changed();
 }
 
 void BitInfo::addHighlights(QList<RangeHighlight> highlights)
@@ -59,12 +72,14 @@ void BitInfo::addHighlights(QList<RangeHighlight> highlights)
         m_rangeHighlights.remove(category);
         m_rangeHighlights.insert(category, newList);
     }
+    emit changed();
 }
 
 void BitInfo::setMetadata(QString key, QVariant value)
 {
     m_metadata.remove(key);
     m_metadata.insert(key, value);
+    emit changed();
 }
 
 void BitInfo::clearHighlightCategory(QString category)
@@ -124,6 +139,7 @@ void BitInfo::initFrames()
             m_maxFrameWidth = qMax(range.size(), m_maxFrameWidth);
         }
     }
+    emit changed();
 }
 
 int BitInfo::frameOffsetContaining(Range target) const
@@ -173,6 +189,7 @@ QDataStream& operator<<(QDataStream& stream, const BitInfo& bitInfo)
     stream << bitInfo.m_maxFrameWidth;
     stream << bitInfo.m_metadata;
     stream << bitInfo.m_rangeHighlights;
+    return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, BitInfo& bitInfo)
@@ -184,6 +201,7 @@ QDataStream& operator>>(QDataStream& stream, BitInfo& bitInfo)
         stream >> bitInfo.m_maxFrameWidth;
         stream >> bitInfo.m_metadata;
         stream >> bitInfo.m_rangeHighlights;
+        return stream;
     }
     else {
         stream.setStatus(QDataStream::Status::ReadCorruptData);

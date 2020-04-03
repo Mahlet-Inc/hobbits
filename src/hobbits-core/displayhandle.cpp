@@ -13,7 +13,7 @@ DisplayHandle::DisplayHandle(
 {
     connect(
             m_bitManager.data(),
-            SIGNAL(currSelectionChanged(const QItemSelection&,const QItemSelection&)),
+            SIGNAL(currSelectionChanged(QSharedPointer<BitContainer>, QSharedPointer<BitContainer>)),
             this,
             SLOT(bitContainerSelected()));
     connect(m_vScroll, SIGNAL(valueChanged(int)), this, SLOT(offsetChanged()));
@@ -75,20 +75,12 @@ void DisplayHandle::setFocusDisplays(QSet<DisplayInterface*> focusDisplays)
 
 void DisplayHandle::bitContainerSelected()
 {
-    disconnect(this, SIGNAL(containerFramesChanged()));
-    disconnect(this, SIGNAL(containerHighlightsChanged()));
+    disconnect(this, SIGNAL(containerChanged()));
 
     emit newBitContainer();
 
     if (!getContainer().isNull()) {
-        connect(getContainer().data(), SIGNAL(framesChanged(BitContainer*)), this, SIGNAL(containerFramesChanged()));
-        connect(
-                getContainer().data(),
-                SIGNAL(highlightsChanged(BitContainer*)),
-                this,
-                SIGNAL(containerHighlightsChanged()));
-
-        emit containerFramesChanged();
-        emit containerHighlightsChanged();
+        connect(getContainer().data(), SIGNAL(changed()), this, SIGNAL(containerChanged()));
+        emit containerChanged();
     }
 }

@@ -16,8 +16,7 @@ DisplayBase::DisplayBase(QSharedPointer<DisplayHandle> displayHandle, DisplayInt
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     this->setMouseTracking(true);
 
-    connect(m_displayHandle.data(), SIGNAL(containerFramesChanged()), this, SLOT(adjustScrollbars()));
-    connect(m_displayHandle.data(), SIGNAL(containerHighlightsChanged()), this, SLOT(repaint()));
+    connect(m_displayHandle.data(), SIGNAL(containerChanged()), this, SLOT(adjustScrollbars()));
     connect(m_displayHandle.data(), SIGNAL(newOffsets(int,int)), this, SLOT(repaint()));
     connect(
             m_displayHandle.data(),
@@ -263,12 +262,12 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
     return rects;
 }
 
-double DisplayBase::getGroupedOffset(int idx, double width, int groupSize, int offset, int groupMargin)
+double DisplayBase::getGroupedOffset(qint64 idx, double width, int groupSize, int offset, int groupMargin)
 {
     if (groupSize > 1) {
-        int groupOffset = offset % groupSize;
-        int groups = (idx + groupOffset) / groupSize;
-        return width * ((groups * groupMargin) + idx);
+        qint64 groupOffset = offset % groupSize;
+        qint64 groups = (idx + groupOffset) / groupSize;
+        return width * double((groups * groupMargin) + idx);
     }
     else {
         return width * idx;

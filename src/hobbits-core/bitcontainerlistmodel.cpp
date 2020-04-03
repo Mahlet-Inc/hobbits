@@ -44,7 +44,7 @@ QModelIndex BitContainerListModel::addContainer(QSharedPointer<BitContainer> bit
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_bitContainers.append(bitContainer);
     endInsertRows();
-    connect(bitContainer.data(), SIGNAL(changed(BitContainer*)), this, SLOT(updateAll()));
+    connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
     return this->index(m_bitContainers.size() - 1);
 }

@@ -201,7 +201,7 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         }
     }
 
-    QSharedPointer<BitInfo> bitInfo = QSharedPointer<BitInfo>(new BitInfo(*container->bitInfo().data()));
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
 
     bitInfo->setFrames(frames);
     result->setBitInfo(bitInfo);

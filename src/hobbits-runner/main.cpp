@@ -172,8 +172,7 @@ int main(int argc, char *argv[])
         QObject::connect(
                 bitManager.data(),
                 &BitContainerManager::currSelectionChanged,
-                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](const QItemSelection &selected,
-                                                                                   const QItemSelection &deselected) {
+                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected) {
             Q_UNUSED(selected)
             Q_UNUSED(deselected)
             auto container = bitManager->getCurrentContainer();

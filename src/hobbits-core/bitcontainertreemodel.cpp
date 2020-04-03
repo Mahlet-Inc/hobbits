@@ -124,7 +124,7 @@ int BitContainerTreeModel::columnCount(const QModelIndex &parent) const
 
 void BitContainerTreeModel::updateAll()
 {
-
+    // TODO: this is supposed to do something?
 }
 
 QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bitContainer)
@@ -134,7 +134,7 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     int row = getContainerRow(bitContainer.data());
     beginInsertRows(parentIndex, row, row);
     endInsertRows();
-    connect(bitContainer.data(), SIGNAL(changed(BitContainer*)), this, SLOT(updateAll()));
+    connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
     return this->index(row, 0, parentIndex);
 }
