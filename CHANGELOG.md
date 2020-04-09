@@ -1,3 +1,16 @@
+# [0.24.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.23.0...v0.24.0) (2020-04-09)
+
+
+### Bug Fixes
+
+* return  value in RangeHighlight DataStream operator ([e8ec1b0](https://github.com/Mahlet-Inc/hobbits/commit/e8ec1b05edd2fbc77d6464923ccc30f878ac478c))
+
+
+### Features
+
+* add basic Kaitai Struct and Extractor plugins for [#24](https://github.com/Mahlet-Inc/hobbits/issues/24) ([6278b6b](https://github.com/Mahlet-Inc/hobbits/commit/6278b6b5ebdee795fc510fd2a95afe9a3ce71f41))
+* add recent imports to File menu for convenience ([fc2fba7](https://github.com/Mahlet-Inc/hobbits/commit/fc2fba7193833126c4e68b66456fa2455355013c))
+
 # [0.23.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.22.1...v0.23.0) (2020-03-12)
 
 
