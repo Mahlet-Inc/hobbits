@@ -34,16 +34,20 @@ HEADERS +=         extractor.h
 FORMS +=        extractor.ui
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/release/ -lhobbits-core
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/debug/ -lhobbits-core
-else:unix: LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
+
+LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
 
-unix:{
+unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,'$$ORIGIN/../../lib:$$ORIGIN'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+}
+
+mac {
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
 }
 
 unix {
