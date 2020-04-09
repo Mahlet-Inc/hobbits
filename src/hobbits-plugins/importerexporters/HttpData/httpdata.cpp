@@ -33,32 +33,60 @@ bool HttpData::canImport()
     return true;
 }
 
-QSharedPointer<BitContainer> HttpData::importBits(QMap<QString, QString> args, QWidget *parent)
+QString HttpData::getImportLabelForState(QJsonObject pluginState)
 {
-    Q_UNUSED(args)
-    Q_UNUSED(parent)
-
-    if (!http) {
-        http = new HttpTransceiver();
+    if (pluginState.contains("url")) {
+        QString url = pluginState.value("url").toString();
+        return QString("Import from %1").arg(url);
     }
-    http->setDownloadMode();
-    if (http->exec()) {
-        auto container = QSharedPointer<BitContainer>(new BitContainer());
-        container->setBytes(http->getDownloadedData());
-        return container;
-    }
-
-    return QSharedPointer<BitContainer>();
+    return "";
 }
 
-void HttpData::exportBits(QSharedPointer<const BitContainer> container, QMap<QString, QString> args, QWidget *parent)
+QString HttpData::getExportLabelForState(QJsonObject pluginState)
 {
-    Q_UNUSED(args)
-    Q_UNUSED(parent)
+    return "";
+}
 
+QSharedPointer<ImportExportResult> HttpData::importBits(QJsonObject pluginState, QWidget *parent)
+{
     if (!http) {
-        http = new HttpTransceiver();
+        http = new HttpTransceiver(parent);
     }
-    http->setUploadMode(container->getBaseBits()->getPreviewBytes());
+    http->setDownloadMode();
+
+    if (pluginState.contains("url")) {
+        http->setUrl(QUrl(pluginState.value("url").toString()));
+    }
+
+    if (http->exec()) {
+        auto container = QSharedPointer<BitContainer>(new BitContainer());
+        container->setBits(http->getDownloadedData());
+        container->setName(http->getUrl().toDisplayString());
+
+        pluginState.remove("url");
+        pluginState.insert("url", http->getUrl().toDisplayString());
+
+        return ImportExportResult::create(container, pluginState);
+    }
+
+    return ImportExportResult::nullResult();
+}
+
+QSharedPointer<ImportExportResult> HttpData::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState, QWidget *parent)
+{
+    if (!http) {
+        http = new HttpTransceiver(parent);
+    }
+    http->setUploadMode(container->bits()->getPreviewBytes());
+
+    if (pluginState.contains("url")) {
+        http->setUrl(QUrl(pluginState.value("url").toString()));
+    }
+
     http->exec();
+
+    pluginState.remove("url");
+    pluginState.insert("url", http->getUrl().toDisplayString());
+
+    return ImportExportResult::create(pluginState);
 }

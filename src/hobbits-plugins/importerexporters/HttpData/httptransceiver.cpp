@@ -37,6 +37,16 @@ QTemporaryFile* HttpTransceiver::getDownloadedData()
     return m_downloadFile;
 }
 
+QUrl HttpTransceiver::getUrl() const
+{
+    return m_url;
+}
+
+void HttpTransceiver::setUrl(QUrl url)
+{
+    ui->le_url->setText(url.toDisplayString());
+}
+
 void HttpTransceiver::setUploadMode(QByteArray data)
 {
     m_uploadData = data;
@@ -63,7 +73,8 @@ void HttpTransceiver::on_pb_send_clicked()
 {
     ui->pb_send->setEnabled(false);
     ui->cb_verb->setEnabled(false);
-    QNetworkRequest request(QUrl(ui->le_url->text()));
+    m_url = QUrl(ui->le_url->text());
+    QNetworkRequest request(m_url);
 
     QNetworkReply *reply;
 

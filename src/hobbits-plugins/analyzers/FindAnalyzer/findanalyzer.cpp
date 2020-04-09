@@ -1,10 +1,24 @@
 #include "findanalyzer.h"
 #include "ui_findanalyzer.h"
+#include "pluginhelper.h"
+#include "settingsmanager.h"
+
+const QString FIND_COLOR_KEY = "find_color";
+
+const QString FOUND_HIGHLIGHT = "found_patterns";
+const QString FOUND_RESULT_LABEL = "found_result_label";
+
 
 FindAnalyzer::FindAnalyzer() :
     ui(new Ui::FindAnalyzer()),
-    m_focusIndex(0)
+    m_highlightNav(nullptr)
 {
+    // Initialize default color settings
+    QVariant findColor = SettingsManager::getInstance().getPluginSetting(FIND_COLOR_KEY);
+    if (findColor.isNull() || !findColor.canConvert<QColor>()) {
+        findColor = QColor(0, 150, 230, 85);
+    }
+    SettingsManager::getInstance().setPluginSetting(FIND_COLOR_KEY, findColor);
 }
 
 FindAnalyzer::~FindAnalyzer()
@@ -20,20 +34,34 @@ QString FindAnalyzer::getName()
 void FindAnalyzer::previewBits(QSharedPointer<BitContainerPreview> container)
 {
     m_previewContainer = container;
-    m_focusIndex = 0;
-    initializeFindView();
-    resolveFindFocusHighlight();
+    if (m_highlightNav) {
+        m_highlightNav->setContainer(m_previewContainer);
+        if (m_previewContainer.isNull()) {
+            m_highlightNav->setTitle("");
+        }
+        else {
+            QString resultLabel = m_previewContainer->bitInfo()->metadata(FOUND_RESULT_LABEL).toString();
+            if (resultLabel.size() > 28) {
+                resultLabel.truncate(25);
+                resultLabel += "...";
+            }
+            m_highlightNav->setTitle(resultLabel);
+        }
+    }
 }
 
 void FindAnalyzer::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
 {
     m_pluginCallback = pluginCallback;
+    if (m_highlightNav) {
+        m_highlightNav->setPluginCallback(pluginCallback);
+    }
 }
 
 void FindAnalyzer::triggerRun()
 {
     if (!m_pluginCallback.isNull()) {
-        m_pluginCallback->requestRun(this->getName(), this->getStateFromUi());
+        m_pluginCallback->requestAnalyzerRun(this->getName(), this->getStateFromUi());
     }
 }
 
@@ -45,10 +73,15 @@ AnalyzerInterface* FindAnalyzer::createDefaultAnalyzer()
 void FindAnalyzer::applyToWidget(QWidget *widget)
 {
     ui->setupUi(widget);
-    connect(ui->tb_findNext, SIGNAL(pressed()), this, SLOT(focusOnNext()));
-    connect(ui->tb_findPrevious, SIGNAL(pressed()), this, SLOT(focusOnPrevious()));
-    connect(ui->lw_findSummary, SIGNAL(currentRowChanged(int)), this, SLOT(focusOnIndex(int)));
     connect(ui->le_searchString, SIGNAL(returnPressed()), this, SLOT(triggerRun()));
+
+    m_highlightNav = new HighlightNavigator(widget);
+    ui->verticalLayout->addWidget(m_highlightNav);
+    ui->verticalLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    m_highlightNav->setShouldHighlightSelection(true);
+    m_highlightNav->setContainer(m_previewContainer);
+    m_highlightNav->setHighlightCategory(FOUND_HIGHLIGHT);
 }
 
 bool FindAnalyzer::canRecallPluginState(const QJsonObject &pluginState)
@@ -90,16 +123,18 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         const QJsonObject &recallablePluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    QList<Range> results;
     QSharedPointer<BitArray> findBits = getFindBits(recallablePluginState);
-    QSharedPointer<const BitArray> bits = container->getBaseBits();
+    QSharedPointer<const BitArray> bits = container->bits();
 
     QSharedPointer<const AnalyzerResult> nullResult;
     if (findBits->sizeInBits() < 1) {
         return nullResult;
     }
 
-    int lastPercent = 0;
+    QColor findColor = SettingsManager::getInstance().getPluginSetting(FIND_COLOR_KEY).value<QColor>();
+    QList<RangeHighlight> highlights;
+
+    qint64 prev = 0;
     for (qint64 start = 0; start < bits->sizeInBits(); start++) {
         if (findBits->sizeInBits() > bits->sizeInBits() - start) {
             break;
@@ -113,152 +148,42 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         }
         if (match) {
             qint64 end = start + findBits->sizeInBits() - 1;
-            results.append(Range(start, end));
+            QString label = QString("bit: %1 , delta: %2").arg(start).arg(start - prev);
+            highlights.append(RangeHighlight(FOUND_HIGHLIGHT, label, Range(start, end), findColor));
+            prev = start;
             start = end;
             end = end + findBits->sizeInBits() - 1;
         }
 
-        int nextPercent = int(double(start) / double(bits->sizeInBits()) * 100.0);
-        if (nextPercent > lastPercent) {
-            lastPercent = nextPercent;
-            progressTracker->setProgressPercent(nextPercent);
-        }
+        PluginHelper::recordProgress(progressTracker, start, bits->sizeInBits());
         if (progressTracker->getCancelled()) {
-            return QSharedPointer<const AnalyzerResult>(
-                    (new AnalyzerResult())->setPluginState(
-                            QJsonObject(
-                                    {QPair<QString, QJsonValue>(
-                                            "error",
-                                            QJsonValue("Processing cancelled"))}))
-                    );
+            return PluginHelper::analyzerErrorResult("Processing cancelled");
         }
     }
 
     QSharedPointer<AnalyzerResult> analyzerResult = QSharedPointer<AnalyzerResult>(new AnalyzerResult());
-    analyzerResult->addRanges("find", results);
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+    bitInfo->clearHighlightCategory(FOUND_HIGHLIGHT);
+    bitInfo->addHighlights(highlights);
 
-    QString resultHead = "Results for pattern '";
-    for (int i = 0; i < findBits->sizeInBits(); i++) {
-        if (findBits->at(i)) {
-            resultHead += "1";
-        }
-        else {
-            resultHead += "0";
+    QString resultHead = "";
+    if (findBits->sizeInBits() % 8 == 0) {
+        resultHead += "0x" + findBits->getPreviewBytes().toHex();
+    }
+    else {
+        for (int i = 0; i < findBits->sizeInBits(); i++) {
+            if (findBits->at(i)) {
+                resultHead += "1";
+            }
+            else {
+                resultHead += "0";
+            }
         }
     }
-    resultHead += "'";
+    bitInfo->setMetadata(FOUND_RESULT_LABEL, resultHead);
 
-    QStringList result;
-    qint64 prev = 0;
-    for (Range range : results) {
-        result.append(QString("bit: %1 , delta: %2").arg(range.start()).arg(range.start() - prev));
-        prev = range.start();
-    }
-
-    analyzerResult->addMetadata("find-results-head", resultHead);
-    analyzerResult->addMetadata("find-results", result);
+    analyzerResult->setBitInfo(bitInfo);
     analyzerResult->setPluginState(recallablePluginState);
 
-    return analyzerResult;
-}
-
-void FindAnalyzer::resolveFindFocusHighlight()
-{
-    QList<Range> findFocus;
-    if (m_previewContainer.isNull() || m_previewContainer->getHighlights("find").isEmpty()) {
-        m_focusIndex = 0;
-    }
-    else {
-        if (m_focusIndex >= m_previewContainer->getHighlights("find").size()) {
-            m_focusIndex = 0;
-        }
-        else if (m_focusIndex < 0) {
-            m_focusIndex = m_previewContainer->getHighlights("find").size() - 1;
-        }
-        Range focus = m_previewContainer->getHighlights("find").at(m_focusIndex);
-        findFocus.append(focus);
-
-        int containingFrame = m_previewContainer->getFrameOffsetContaining(focus);
-        if (containingFrame >= 0) {
-            int bitOffset = qMax(
-                    0,
-                    int(focus.start() - m_previewContainer->getFrames().at(containingFrame).start() - 16));
-            int frameOffset = qMax(0, containingFrame - 16);
-
-            QList<Range> findFocus;
-            findFocus.append(focus);
-            m_previewContainer->setHighlights("find-focus", findFocus);
-
-            m_previewContainer->requestFocus(bitOffset, frameOffset);
-        }
-    }
-
-    checkFindButtons();
-}
-
-void FindAnalyzer::checkFindButtons()
-{
-    if (m_previewContainer.isNull() || m_previewContainer->getHighlights("find").isEmpty()) {
-        ui->tb_findNext->hide();
-        ui->tb_findPrevious->hide();
-        ui->lb_findGo->hide();
-        ui->lb_findSummary->hide();
-        ui->lw_findSummary->hide();
-        return;
-    }
-    ui->tb_findNext->show();
-    ui->tb_findPrevious->show();
-    ui->lb_findGo->show();
-    ui->lw_findSummary->setCurrentRow(m_focusIndex);
-    ui->lb_findGo->setText(
-            QString("%1 of %2").arg(
-                    m_focusIndex
-                    + 1).arg(m_previewContainer->getHighlights("find").size()));
-}
-
-void FindAnalyzer::initializeFindView()
-{
-    if (m_previewContainer.isNull() || m_previewContainer->getHighlights("find").isEmpty()) {
-        return;
-    }
-    m_focusIndex = 0;
-    QString results_head = m_previewContainer->getMetadata("find-results-head").first();
-    if (results_head.isEmpty()) {
-        ui->lb_findSummary->hide();
-        ui->lw_findSummary->hide();
-        // ui->verticalSpacer->changeSize(20, 20, QSizePolicy::Expanding);
-    }
-    else {
-        ui->lb_findSummary->setText(results_head);
-        ui->lb_findSummary->show();
-        ui->lw_findSummary->clear();
-        ui->lw_findSummary->addItems(m_previewContainer->getMetadata("find-results"));
-        ui->lw_findSummary->setCurrentRow(m_focusIndex);
-        ui->lw_findSummary->show();
-        // ui->verticalSpacer->changeSize(20, 20, QSizePolicy::Ignored);
-    }
-}
-
-void FindAnalyzer::focusOnPrevious()
-{
-    m_focusIndex -= 1;
-    resolveFindFocusHighlight();
-}
-
-void FindAnalyzer::focusOnNext()
-{
-    m_focusIndex += 1;
-    resolveFindFocusHighlight();
-}
-
-void FindAnalyzer::focusOnIndex(int index)
-{
-    if (index == -1) {
-        m_focusIndex = 0;
-        resolveFindFocusHighlight();
-    }
-    else {
-        m_focusIndex = index;
-        resolveFindFocusHighlight();
-    }
+    return std::move(analyzerResult);
 }

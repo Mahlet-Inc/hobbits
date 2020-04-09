@@ -260,6 +260,11 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     return std::move(result);
 }
 
+void PythonRunner::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
+}
+
 OperatorInterface* PythonRunner::createDefaultOperator()
 {
     return new PythonRunner();

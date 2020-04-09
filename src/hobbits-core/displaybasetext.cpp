@@ -57,7 +57,7 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     if (m_showFrameOffsets) {
         painter.fillRect(0, 0, m_displayOffset.x() - m_fontWidth / 2, height(), Qt::lightGray);
         for (int i = 0; i < h; i++) {
-            if (i + frameOffset >= m_displayHandle->getContainer()->getFrames().size()) {
+            if (i + frameOffset >= m_displayHandle->getContainer()->frames().size()) {
                 break;
             }
             painter.setPen(Qt::darkGray);
@@ -75,7 +75,7 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     if (m_showColumnOffsets) {
         painter.fillRect(0, 0, width(), m_displayOffset.y() - m_fontWidth / 2, Qt::lightGray);
         for (int i = 0; i < w; i += 2) {
-            if ((i + charOffset) * bitsPerChar() >= m_displayHandle->getContainer()->getMaxFrameWidth()) {
+            if ((i + charOffset) * bitsPerChar() >= m_displayHandle->getContainer()->maxFrameWidth()) {
                 break;
             }
 
@@ -100,10 +100,10 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     painter.save();
     painter.translate(m_displayOffset);
     for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= m_displayHandle->getContainer()->getFrames().size()) {
+        if (i + frameOffset >= m_displayHandle->getContainer()->frames().size()) {
             break;
         }
-        Frame frame = m_displayHandle->getContainer()->getFrames().at(i + frameOffset);
+        Frame frame = m_displayHandle->getContainer()->frames().at(i + frameOffset);
 
         QString frameString = "";
         QString nibString;
@@ -169,7 +169,7 @@ void DisplayBaseText::prepareHeaders()
     m_frameHeight = m_fontHeight + 2;
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->getFrames().size();
+        int totalFrames = m_displayHandle->getContainer()->frames().size();
         int maxChars = qFloor(log10(totalFrames)) + 1;
         m_displayOffset.setX(qRound(m_fontWidth * (maxChars + 1.5)));
     }
@@ -178,7 +178,7 @@ void DisplayBaseText::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        int maxWidth = m_displayHandle->getContainer()->getMaxFrameWidth();
+        int maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
         int maxChars = qCeil(log10(maxWidth));
         m_displayOffset.setY(qRound(m_fontWidth * (maxChars + 1.5)));
     }
@@ -214,7 +214,7 @@ void DisplayBaseText::adjustScrollbars()
         m_displayHandle->getVScroll()->setPageStep(h);
         m_displayHandle->getHScroll()->setPageStep(w);
         m_displayHandle->getHScroll()->setSingleStep(bitsPerChar());
-        m_displayHandle->getHScroll()->setMaximum(m_displayHandle->getContainer()->getMaxFrameWidth() - bitsPerChar());
+        m_displayHandle->getHScroll()->setMaximum(m_displayHandle->getContainer()->maxFrameWidth() - bitsPerChar());
     }
 }
 

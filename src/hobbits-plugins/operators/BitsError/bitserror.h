@@ -34,7 +34,7 @@ public:
             QList<QSharedPointer<const BitContainer>> inputContainers,
             const QJsonObject &recallablePluginState,
             QSharedPointer<ActionProgress> progressTracker) override;
-
+    void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
     QSharedPointer<OperatorResult> gaussianFlip(
             QList<QSharedPointer<const BitContainer>> inputContainers,

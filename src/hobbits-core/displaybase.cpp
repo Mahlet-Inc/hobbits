@@ -16,8 +16,7 @@ DisplayBase::DisplayBase(QSharedPointer<DisplayHandle> displayHandle, DisplayInt
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     this->setMouseTracking(true);
 
-    connect(m_displayHandle.data(), SIGNAL(containerFramesChanged()), this, SLOT(adjustScrollbars()));
-    connect(m_displayHandle.data(), SIGNAL(containerHighlightsChanged()), this, SLOT(repaint()));
+    connect(m_displayHandle.data(), SIGNAL(containerChanged()), this, SLOT(adjustScrollbars()));
     connect(m_displayHandle.data(), SIGNAL(newOffsets(int,int)), this, SLOT(repaint()));
     connect(
             m_displayHandle.data(),
@@ -94,12 +93,12 @@ void DisplayBase::sendHoverUpdate(QMouseEvent *event, int xSize, int ySize, int 
 
     int frameOffset = m_displayHandle->getFrameOffset() + diff.y();
     int bitOffset = m_displayHandle->getBitOffset() + diff.x();
-    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->getFrames().size()) {
+    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frames().size()) {
         m_lastHover = QPoint();
         emit bitHover(false, 0, 0);
         return;
     }
-    if (bitOffset >= m_displayHandle->getContainer()->getFrames().at(frameOffset).size()) {
+    if (bitOffset >= m_displayHandle->getContainer()->frames().at(frameOffset).size()) {
         m_lastHover = QPoint();
         emit bitHover(false, 0, 0);
         return;
@@ -136,14 +135,14 @@ void DisplayBase::adjustScrollbars()
             m_displayHandle->getHScroll()->setEnabled(true);
             m_displayHandle->getHScroll()->setVisible(true);
             m_displayHandle->getHScroll()->setMinimum(0);
-            m_displayHandle->getHScroll()->setMaximum(m_displayHandle->getContainer()->getMaxFrameWidth() - 1);
+            m_displayHandle->getHScroll()->setMaximum(m_displayHandle->getContainer()->maxFrameWidth() - 1);
             m_displayHandle->getHScroll()->setSingleStep(1);
             m_displayHandle->getHScroll()->setPageStep(this->width());
 
             m_displayHandle->getVScroll()->setEnabled(true);
             m_displayHandle->getVScroll()->setVisible(true);
             m_displayHandle->getVScroll()->setMinimum(0);
-            m_displayHandle->getVScroll()->setMaximum(m_displayHandle->getContainer()->getFrames().size() - 1);
+            m_displayHandle->getVScroll()->setMaximum(m_displayHandle->getContainer()->frames().size() - 1);
             m_displayHandle->getVScroll()->setSingleStep(1);
             m_displayHandle->getVScroll()->setPageStep(this->height());
         }
@@ -152,9 +151,9 @@ void DisplayBase::adjustScrollbars()
     }
 }
 
-QList<Range> DisplayBase::getHighlightSpots(QList<Range> highlights, int &highlightMinIndex, Frame frame)
+QList<RangeHighlight> DisplayBase::getHighlightSpots(QList<RangeHighlight> highlights, int &highlightMinIndex, Frame frame)
 {
-    QList<Range> spots;
+    QList<RangeHighlight> spots;
 
     unsigned int intersection = Frame::Before;
     int highlightIndex = highlightMinIndex;
@@ -162,11 +161,12 @@ QList<Range> DisplayBase::getHighlightSpots(QList<Range> highlights, int &highli
         if (highlightIndex >= highlights.size()) {
             break;
         }
-        Range highlight = highlights.at(highlightIndex);
-        intersection = frame.compare(highlight);
+        RangeHighlight highlight = highlights.at(highlightIndex);
+        intersection = frame.compare(highlight.range());
 
         if (intersection & Frame::Overlapping) {
-            spots.append(frame.getOverlap(highlight));
+            RangeHighlight overlap(highlight.category(), highlight.label(), frame.getOverlap(highlight.range()), highlight.color());
+            spots.append(overlap);
         }
         else if (intersection & Frame::After) {
             break;
@@ -191,59 +191,28 @@ void DisplayBase::drawHighlights(
         int colGroupSize,
         int colGroupMargin)
 {
+    if (m_displayHandle->getContainer().isNull()) {
+        return;
+    }
+
     painter->setPen(Qt::transparent);
-    QVector<QRectF> highlightRects = getHighlightRects(
-            "find",
-            colWidth,
-            rowHeight,
-            frameOffset,
-            bitOffset,
-            colCount,
-            rowCount,
-            colGroupSize,
-            colGroupMargin);
-    if (!highlightRects.isEmpty()) {
-        painter->setBrush(
-                SettingsManager::getInstance().getUiSetting(
-                        SettingsData::HIGHLIGHT_1_COLOR_KEY).value<QColor>());
-        painter->drawRects(highlightRects);
-    }
-    highlightRects = getHighlightRects(
-            "find-focus",
-            colWidth,
-            rowHeight,
-            frameOffset,
-            bitOffset,
-            colCount,
-            rowCount,
-            colGroupSize,
-            colGroupMargin);
-    if (!highlightRects.isEmpty()) {
-        painter->setBrush(
-                SettingsManager::getInstance().getUiSetting(
-                        SettingsData::HIGHLIGHT_2_COLOR_KEY).value<QColor>());
-        painter->drawRects(highlightRects);
-    }
-    highlightRects = getHighlightRects(
-            "manual_highlights",
-            colWidth,
-            rowHeight,
-            frameOffset,
-            bitOffset,
-            colCount,
-            rowCount,
-            colGroupSize,
-            colGroupMargin);
-    if (!highlightRects.isEmpty()) {
-        painter->setBrush(
-                SettingsManager::getInstance().getUiSetting(
-                        SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>());
-        painter->drawRects(highlightRects);
+    for (QString category: m_displayHandle->getContainer()->bitInfo()->highlightCategories()) {
+        drawHighlightRects(painter,
+                           category,
+                           colWidth,
+                           rowHeight,
+                           frameOffset,
+                           bitOffset,
+                           colCount,
+                           rowCount,
+                           colGroupSize,
+                           colGroupMargin);
     }
 }
 
-QVector<QRectF> DisplayBase::getHighlightRects(
-        QString type,
+QVector<QRectF> DisplayBase::drawHighlightRects(
+        QPainter *painter,
+        QString category,
         double colWidth,
         double rowHeight,
         int frameOffset,
@@ -258,46 +227,47 @@ QVector<QRectF> DisplayBase::getHighlightRects(
     }
 
     QVector<QRectF> rects;
-    if (m_displayHandle->getContainer()->getHighlights(type).size() > 0) {
+    if (m_displayHandle->getContainer()->bitInfo()->highlights(category).size() > 0) {
         int lastHighlight = 0;
         int rowOffset = -1;
-        for (int i = frameOffset; i < m_displayHandle->getContainer()->getFrames().size(); i++) {
+        for (int i = frameOffset; i < m_displayHandle->getContainer()->frames().size(); i++) {
             rowOffset++;
             if (rowOffset >= rowCount) {
                 break;
             }
-            Frame frame = m_displayHandle->getContainer()->getFrames().at(i);
+            Frame frame = m_displayHandle->getContainer()->frames().at(i);
             Frame displayFrame =
                 Frame(
-                        m_displayHandle->getContainer()->getBaseBits(),
+                        m_displayHandle->getContainer()->bits(),
                         frame.start() + bitOffset,
                         qMin(frame.end(), frame.start() + bitOffset + colCount - 1));
-            QList<Range> spots = getHighlightSpots(
-                    m_displayHandle->getContainer()->getHighlights(type),
+            QList<RangeHighlight> spots = getHighlightSpots(
+                    m_displayHandle->getContainer()->bitInfo()->highlights(category),
                     lastHighlight,
                     displayFrame);
 
-            for (Range spot : spots) {
-                qint64 displayStart = (spot.start() - displayFrame.start());
+            for (RangeHighlight spot : spots) {
+                qint64 displayStart = (spot.range().start() - displayFrame.start());
                 double hx = getGroupedOffset(displayStart, colWidth, colGroupSize, bitOffset, colGroupMargin);
                 double hy = (i - frameOffset) * rowHeight;
-                qint64 displayEnd = (spot.end() - displayFrame.start());
+                qint64 displayEnd = (spot.range().end() - displayFrame.start());
                 double hw =
                     getGroupedOffset(displayEnd, colWidth, colGroupSize, bitOffset, colGroupMargin) + colWidth - hx;
                 double hh = rowHeight;
-                rects.append(QRectF(hx, hy, hw, hh));
+                painter->setBrush(spot.color());
+                painter->drawRect(QRectF(hx, hy, hw, hh));
             }
         }
     }
     return rects;
 }
 
-double DisplayBase::getGroupedOffset(int idx, double width, int groupSize, int offset, int groupMargin)
+double DisplayBase::getGroupedOffset(qint64 idx, double width, int groupSize, int offset, int groupMargin)
 {
     if (groupSize > 1) {
-        int groupOffset = offset % groupSize;
-        int groups = (idx + groupOffset) / groupSize;
-        return width * ((groups * groupMargin) + idx);
+        qint64 groupOffset = offset % groupSize;
+        qint64 groups = (idx + groupOffset) / groupSize;
+        return width * double((groups * groupMargin) + idx);
     }
     else {
         return width * idx;
@@ -311,7 +281,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     }
     QMenu menu(this);
 
-    Frame frame = m_displayHandle->getContainer()->getFrames().at(m_lastHover.y());
+    Frame frame = m_displayHandle->getContainer()->frames().at(m_lastHover.y());
 
     menu.addSection(
             QString("Frame %1, Bit %2 of %3")
@@ -356,7 +326,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Next Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QList<Frame> frames = m_displayHandle->getContainer()->getFrames();
+        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.y() + 1; i < frames.size(); i++) {
             if (frames.at(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
@@ -368,7 +338,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Previous Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QList<Frame> frames = m_displayHandle->getContainer()->getFrames();
+        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.y() - 1; i >= 0; i--) {
             if (frames.at(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
@@ -379,7 +349,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Next Constant(ish) Column"),
             [this, frame]() {
-        QList<Frame> frames = m_displayHandle->getContainer()->getFrames();
+        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() + 1; i < frame.size(); i++) {
             bool value = frame.at(i);
             bool constantish = true;
@@ -402,7 +372,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Previous Constant(ish) Column"),
             [this, frame]() {
-        QList<Frame> frames = m_displayHandle->getContainer()->getFrames();
+        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() - 1; i >= 0; i--) {
             bool value = frame.at(i);
             bool constantish = true;
@@ -432,7 +402,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             [this, frame]() {
         qint64 focusBit = frame.start() + m_lastHover.x();
         auto container = this->m_displayHandle->getContainer();
-        auto markers = container->getMetadata("location_markers");
+        auto markers = container->bitInfo()->metadata("location_markers").toStringList();
 
         bool ok;
         QString text = QInputDialog::getText(
@@ -452,7 +422,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
 
 
     auto container = this->m_displayHandle->getContainer();
-    auto markers = container->getMetadata("location_markers");
+    auto markers = container->bitInfo()->metadata("location_markers").toStringList();
     QMenu gotoMarkerMenu("Go to Marker");
 
     for (auto marker : markers) {
@@ -461,11 +431,11 @@ void DisplayBase::showContextMenu(const QPoint &point)
         gotoMarkerMenu.addAction(
                 QString("\"%1\"").arg(name),
                 [this, container, name, bit]() {
-            int frameOffset = container->getFrameOffsetContaining(Range(bit, bit));
-            if (frameOffset < 0 || frameOffset >= container->getFrames().size()) {
+            int frameOffset = container->bitInfo()->frameOffsetContaining(Range(bit, bit));
+            if (frameOffset < 0 || frameOffset >= container->frames().size()) {
                 return;
             }
-            Frame frame = container->getFrames().at(frameOffset);
+            Frame frame = container->frames().at(frameOffset);
             qint64 bitOffset = bit - frame.start();
             this->m_displayHandle->setOffsets(int(bitOffset), frameOffset);
         });
@@ -483,7 +453,6 @@ void DisplayBase::showContextMenu(const QPoint &point)
             [this, frame]() {
         qint64 focusBit = frame.start() + m_lastHover.x();
         auto container = this->m_displayHandle->getContainer();
-        auto manualHighlights = container->getHighlights("manual_highlights");
 
         bool ok;
         int length = QInputDialog::getInt(
@@ -499,31 +468,34 @@ void DisplayBase::showContextMenu(const QPoint &point)
             return;
         }
 
-        manualHighlights.append(
-                Range(
-                        focusBit,
-                        qMin(
-                                container->getBaseBits()->sizeInBits() - 1,
-                                focusBit + length - 1)));
-        std::sort(manualHighlights.begin(), manualHighlights.end());
-        container->setHighlights("manual_highlights", manualHighlights);
+        Range range = Range(focusBit,qMin(container->bits()->sizeInBits() - 1,focusBit + length - 1));
+        RangeHighlight highlight(
+            "manual_highlights",
+            QString("%1 to %2").arg(range.start()).arg(range.end()),
+            range,
+            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
+        );
+        container->addHighlight(highlight);
     });
 
     menu.addAction(
             tr("Add Highlight to Frame"),
             [this, frame]() {
         auto container = this->m_displayHandle->getContainer();
-        auto manualHighlights = container->getHighlights("manual_highlights");
-        manualHighlights.append(frame);
-        std::sort(manualHighlights.begin(), manualHighlights.end());
-        container->setHighlights("manual_highlights", manualHighlights);
+        RangeHighlight highlight(
+            "manual_highlights",
+            QString("%1 to %2").arg(frame.start()).arg(frame.end()),
+            frame,
+            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
+        );
+        container->addHighlight(highlight);
     });
 
     menu.addAction(
             tr("Clear All Highlights"),
             [this, frame]() {
         auto container = this->m_displayHandle->getContainer();
-        container->setHighlights("manual_highlights", {});
+        container->clearHighlightCategory("manual_highlights");
     });
 
     menu.exec(this->mapToGlobal(point));

@@ -10,7 +10,22 @@ BitContainerManager::BitContainerManager(QObject *parent) :
             m_currSelectionModel.data(),
             SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
             this,
-            SIGNAL(currSelectionChanged(const QItemSelection&,const QItemSelection&)));
+            SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)));
+}
+
+void BitContainerManager::manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    auto newBits = QSharedPointer<BitContainer>();
+    auto oldBits = QSharedPointer<BitContainer>();
+
+    if (selected.indexes().size() == 1 && selected.indexes().at(0).isValid()) {
+        newBits = m_bitContainerTreeModel->getContainer(selected.indexes().first());
+    }
+    if (deselected.indexes().size() == 1 && deselected.indexes().at(0).isValid()) {
+        oldBits = m_bitContainerTreeModel->getContainer(deselected.indexes().first());
+    }
+
+    emit currSelectionChanged(newBits, oldBits);
 }
 
 QSharedPointer<BitContainer> BitContainerManager::getCurrentContainer()

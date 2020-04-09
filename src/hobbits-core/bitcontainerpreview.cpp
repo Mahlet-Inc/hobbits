@@ -1,89 +1,43 @@
 #include "bitcontainerpreview.h"
+#include <QVariant>
 
 BitContainerPreview::BitContainerPreview(QSharedPointer<BitContainer> bitContainer) :
     m_bitContainer(bitContainer)
 {
-    connect(
-            m_bitContainer.data(),
-            SIGNAL(highlightsChanged(BitContainer*)),
-            this,
-            SIGNAL(highlightsChanged(BitContainer*)));
-    connect(m_bitContainer.data(), SIGNAL(framesChanged(BitContainer*)), this, SIGNAL(framesChanged(BitContainer*)));
-    connect(m_bitContainer.data(), SIGNAL(changed(BitContainer*)), this, SIGNAL(changed(BitContainer*)));
-    connect(m_bitContainer.data(), SIGNAL(focusRequested(int,int)), this, SIGNAL(focusRequested(int,int)));
-}
-
-QList<Frame> BitContainerPreview::getFrames() const
-{
-    return m_bitContainer->getFrames();
-}
-
-int BitContainerPreview::getMaxFrameWidth() const
-{
-    return m_bitContainer->getMaxFrameWidth();
-}
-
-QList<Range> BitContainerPreview::getHighlights(QString type) const
-{
-    return m_bitContainer->getHighlights(type);
-}
-
-void BitContainerPreview::setHighlights(QString type, QList<Range> highlights)
-{
-    m_bitContainer->setHighlights(type, highlights);
-}
-
-QStringList BitContainerPreview::getMetadata(QString type) const
-{
-    return m_bitContainer->getMetadata(type);
-}
-
-void BitContainerPreview::setMetadata(QString type, QStringList metadata)
-{
-    m_bitContainer->setMetadata(type, metadata);
+    connect(bitContainer.data(), SIGNAL(changed()), this, SIGNAL(changed()));
 }
 
 QString BitContainerPreview::getName() const
 {
-    return m_bitContainer->getName();
+    return m_bitContainer->name();
 }
 
-void BitContainerPreview::setName(QString name)
+QSharedPointer<const BitArray> BitContainerPreview::bits() const
 {
-    m_bitContainer->setName(name);
+    return m_bitContainer->bits();
 }
 
-QPixmap BitContainerPreview::getThumbnail() const
+QSharedPointer<const BitInfo> BitContainerPreview::bitInfo() const
 {
-    return m_bitContainer->getThumbnail();
+    return m_bitContainer->bitInfo();
 }
 
-QImage BitContainerPreview::getRasterImage(int x, int y, int w, int h) const
+void BitContainerPreview::addHighlight(RangeHighlight highlight)
 {
-    return m_bitContainer->getRasterImage(x, y, w, h);
+    m_bitContainer->addHighlight(highlight);
 }
 
-QSharedPointer<const BitArray> BitContainerPreview::getBaseBits() const
+void BitContainerPreview::addHighlights(QList<RangeHighlight> highlights)
 {
-    return m_bitContainer->getBaseBits();
+    m_bitContainer->addHighlights(highlights);
 }
 
-int BitContainerPreview::getFrameOffsetContaining(Range target) const
+void BitContainerPreview::setMetadata(QString key, QVariant value)
 {
-    return m_bitContainer->getFrameOffsetContaining(target);
+    m_bitContainer->setMetadata(key, value);
 }
 
-int BitContainerPreview::getLastFrameOffsetFocus() const
+void BitContainerPreview::clearHighlightCategory(QString category)
 {
-    return m_bitContainer->getLastFrameOffsetFocus();
-}
-
-int BitContainerPreview::getLastBitOffsetFocus() const
-{
-    return m_bitContainer->getLastBitOffsetFocus();
-}
-
-void BitContainerPreview::requestFocus(int bitOffset, int frameOffset)
-{
-    m_bitContainer->requestFocus(bitOffset, frameOffset);
+    m_bitContainer->clearHighlightCategory(category);
 }

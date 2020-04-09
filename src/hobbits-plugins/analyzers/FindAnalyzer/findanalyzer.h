@@ -2,6 +2,7 @@
 #define FINDANALYZER_H
 
 #include "analyzerinterface.h"
+#include "highlightnavigator.h"
 
 namespace Ui
 {
@@ -35,13 +36,6 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
 
 public slots:
-    void resolveFindFocusHighlight();
-    void checkFindButtons();
-    void initializeFindView();
-    void focusOnPrevious();
-    void focusOnNext();
-    void focusOnIndex(int index);
-
     void triggerRun();
 
 private:
@@ -49,7 +43,7 @@ private:
 
     Ui::FindAnalyzer *ui;
 
-    int m_focusIndex;
+    HighlightNavigator* m_highlightNav;
     QSharedPointer<BitContainerPreview> m_previewContainer;
     QSharedPointer<PluginCallback> m_pluginCallback;
 };

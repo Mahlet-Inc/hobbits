@@ -197,6 +197,14 @@ void PluginActionManager::analyzerWatcherFinished()
 
 void PluginActionManager::continueLineage()
 {
+    if (m_current.isNull()) {
+        emit reportError("Plugin processing corrupted, aborting");
+        m_lineageStack.clear();
+        m_lineageQueue.clear();
+        finishLineage();
+        return;
+    }
+
     if (m_current->step < 0) {
         emit reportError("Plugin action manager in invalid state: negative lineage step");
         finishLineage();

@@ -37,6 +37,7 @@ public:
             QList<QSharedPointer<const BitContainer>> inputContainers,
             const QJsonObject &recallablePluginState,
             QSharedPointer<ActionProgress> progressTracker) override;
+    void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
 private slots:
     void fixedLengthToggled(int fixed);

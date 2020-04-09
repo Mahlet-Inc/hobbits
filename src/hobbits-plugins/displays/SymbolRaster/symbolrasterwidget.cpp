@@ -36,10 +36,10 @@ QImage SymbolRasterWidget::getSymbolMapImage(
     }
 
     for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= bitContainer->getFrames().size()) {
+        if (i + frameOffset >= bitContainer->frames().size()) {
             break;
         }
-        Frame frame = bitContainer->getFrames().at(i + frameOffset);
+        Frame frame = bitContainer->frames().at(i + frameOffset);
 
         for (int ii = 0; ii < w * m_symbolLength; ii += m_symbolLength) {
             if (ii + bitOffset + m_symbolLength > frame.size()) {
@@ -89,7 +89,7 @@ void SymbolRasterWidget::paintEvent(QPaintEvent*)
     if (m_showFrameOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
-            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->getFrames().size()) {
+            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->frames().size()) {
                 break;
             }
 
@@ -123,7 +123,7 @@ void SymbolRasterWidget::paintEvent(QPaintEvent*)
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i < displayWidth; i += increment) {
             if (i * m_symbolLength + m_displayHandle->getBitOffset()
-                >= m_displayHandle->getContainer()->getMaxFrameWidth()) {
+                >= m_displayHandle->getContainer()->maxFrameWidth()) {
                 break;
             }
 
@@ -207,7 +207,7 @@ void SymbolRasterWidget::prepareHeaders()
     m_headerFontSize.setHeight(fontHeight);
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->getFrames().size();
+        int totalFrames = m_displayHandle->getContainer()->frames().size();
         int maxChars = qFloor(log10(totalFrames)) + 1;
         m_displayOffset.setX(qRound(fontWidth * (maxChars + 1.5)));
     }
@@ -216,7 +216,7 @@ void SymbolRasterWidget::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        qint64 maxWidth = m_displayHandle->getContainer()->getMaxFrameWidth();
+        qint64 maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
         int maxChars = qFloor(log10(maxWidth)) + 1;
         m_displayOffset.setY(fontWidth * (maxChars + 1));
     }

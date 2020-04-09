@@ -159,7 +159,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
         bitMapping.insert(oldBits, newBits);
     }
 
-    QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->getBaseBits();
+    QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->bits();
     qint64 inputBitsLength = inputBits->sizeInBits();
 
     QSharedPointer<BitArray> outputArray = QSharedPointer<BitArray>(new BitArray(inputBitsLength));
@@ -209,15 +209,20 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
     QList<QSharedPointer<BitContainer>> containers;
     QSharedPointer<BitContainer> container(new BitContainer());
-    container->setBytes(outputArray);
+    container->setBits(outputArray);
     containers << container;
 
-    pluginState.insert("container_name", QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->getName()));
+    pluginState.insert("container_name", QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->name()));
 
     QSharedPointer<const OperatorResult> result((new OperatorResult())->setOutputContainers(containers)->setPluginState(
             pluginState));
 
     return result;
+}
+
+void QamRemapper::previewBits(QSharedPointer<BitContainerPreview> container)
+{
+    Q_UNUSED(container)
 }
 
 OperatorInterface* QamRemapper::createDefaultOperator()

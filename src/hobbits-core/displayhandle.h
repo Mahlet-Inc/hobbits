@@ -36,8 +36,7 @@ signals:
     void newBitHover(bool, int, int);
     void newFocusDisplays(QSet<DisplayInterface*>);
 
-    void containerFramesChanged();
-    void containerHighlightsChanged();
+    void containerChanged();
 
 public slots:
     void setOffsets(int bitOffset, int frameOffset);

@@ -6,6 +6,7 @@
 #include "ui_widthframer.h"
 #include "widthframer.h"
 #include <QVBoxLayout>
+#include "pluginhelper.h"
 
 WidthFramer::WidthFramer() :
     ui(new Ui::WidthFramer()),
@@ -94,7 +95,7 @@ void WidthFramer::previewBits(QSharedPointer<BitContainerPreview> container)
         m_peakSelector->setData(QVector<QPointF>());
     }
     else {
-        m_autocorrelation = autocorrelate(container->getBaseBits());
+        m_autocorrelation = autocorrelate(container->bits());
         m_peakSelector->setData(m_autocorrelation);
 
         std::sort(m_autocorrelation.begin(), m_autocorrelation.end(), sortPoints);
@@ -134,7 +135,7 @@ void WidthFramer::requestRun()
         return;
     }
 
-    m_pluginCallback->requestRun(getName(), getStateFromUi());
+    m_pluginCallback->requestAnalyzerRun(getName(), getStateFromUi());
 }
 
 QJsonObject WidthFramer::getStateFromUi()
@@ -182,38 +183,29 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
     QSharedPointer<AnalyzerResult> result(new AnalyzerResult());
 
     if (!canRecallPluginState(recallablePluginState)) {
-        return std::move(result);
+        return PluginHelper::analyzerErrorResult("Invalid parameters passed to plugin");
     }
 
     qint64 frameWidth = recallablePluginState.value("width").toInt();
-    QList<Range> frames;
+    QVector<Range> frames;
 
-    QSharedPointer<const BitArray> bits = container->getBaseBits();
+    QSharedPointer<const BitArray> bits = container->bits();
 
-    int lastPercent = 0;
     for (qint64 i = 0; i < bits->sizeInBits(); i += frameWidth) {
         qint64 width = qMin(frameWidth - 1, bits->sizeInBits() - i - 1);
         frames.append(Frame(bits, i, i + width));
 
-        int nextPercent = int(double(i) / double(bits->sizeInBits()) * 100.0);
-        if (nextPercent > lastPercent) {
-            lastPercent = nextPercent;
-            progressTracker->setProgressPercent(nextPercent);
-        }
+        PluginHelper::recordProgress(progressTracker, i, bits->sizeInBits());
         if (progressTracker->getCancelled()) {
-            return QSharedPointer<const AnalyzerResult>(
-                    (new AnalyzerResult())->setPluginState(
-                            QJsonObject(
-                                    {QPair<QString, QJsonValue>(
-                                            "error",
-                                            QJsonValue("Processing cancelled"))}))
-                    );
+            return PluginHelper::analyzerErrorResult("Processing cancelled");
         }
     }
 
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+
+    bitInfo->setFrames(frames);
+    result->setBitInfo(bitInfo);
     result->setPluginState(recallablePluginState);
-    result->addRanges("frames", frames);
-    result->addMetadata("max_frame_width", QStringList(QString("%1").arg(frameWidth)));
 
     return std::move(result);
 }
