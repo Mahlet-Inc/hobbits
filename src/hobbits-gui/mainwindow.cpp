@@ -148,6 +148,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     // Import menu initialization
     populateRecentImportsMenu();
+    populateRecentExportsMenu();
 
     // create an initial state
     checkOperatorInput();
@@ -720,7 +721,7 @@ void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
     if (result.isNull()) {
         return;
     }
-    if (!result->getPluginState().isEmpty()) {
+    if (!result->getPluginState().isEmpty() && !result->getPluginState().contains("error")) {
         this->populateRecentImportsMenu({plugin->getName(), result->getPluginState()});
     }
     if (!result->getContainer().isNull()) {
@@ -737,7 +738,10 @@ void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
         warningMessage("Cannot export without a selected bit container");
     }
     QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
-    plugin->exportBits(currContainer(), pluginState, this);
+    auto result = plugin->exportBits(currContainer(), pluginState, this);
+    if (!result->getPluginState().isEmpty() && !result->getPluginState().contains("error")) {
+        this->populateRecentExportsMenu({plugin->getName(), result->getPluginState()});
+    }
 }
 
 void MainWindow::on_pb_analyze_clicked()
@@ -1116,6 +1120,7 @@ void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition,
 
     SettingsManager::getInstance().setPrivateSetting(key, recentlyImported);
 
+    int invalidStateCount = 0;
     ui->menuImport_Recent->clear();
     for (QString importString : recentlyImported) {
         QStringList importParts = importString.split(separator);
@@ -1133,6 +1138,7 @@ void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition,
 
         QString menuLabel = plugin->getImportLabelForState(pluginState);
         if (menuLabel.isEmpty()) {
+            invalidStateCount++;
             continue;
         }
         ui->menuImport_Recent->addAction(
@@ -1142,7 +1148,75 @@ void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition,
         });
     }
 
-    ui->menuImport_Recent->setEnabled(recentlyImported.length() > 0);
+    ui->menuImport_Recent->setEnabled(recentlyImported.length() - invalidStateCount > 0);
+}
+
+void MainWindow::populateRecentExportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+{
+    QString key = "recently_exported";
+    QString separator = "/[]\"[]/";
+
+    QString additionString;
+    if (!addition.first.isEmpty() && !addition.second.isEmpty()) {
+        QJsonDocument doc(addition.second);
+        QString additionJson(doc.toJson(QJsonDocument::Compact));
+        additionString = QString("%1%2%3").arg(addition.first).arg(separator).arg(additionJson);
+    }
+    QString removalString;
+    if (!removal.first.isEmpty() && !removal.second.isEmpty()) {
+        QJsonDocument doc(removal.second);
+        QString removalJson(doc.toJson(QJsonDocument::Compact));
+        removalString = QString("%1%2%3").arg(removal.first).arg(separator).arg(removalJson);
+    }
+
+    QStringList recentlyExported;
+    QVariant currentSetting = SettingsManager::getInstance().getPrivateSetting(key);
+    if (!currentSetting.isNull() && currentSetting.canConvert<QStringList>()) {
+        recentlyExported = currentSetting.toStringList();
+    }
+
+    if (!removalString.isEmpty()) {
+        recentlyExported.removeAll(removalString);
+    }
+
+    if (!additionString.isEmpty()) {
+        recentlyExported.removeAll(additionString);
+        recentlyExported.insert(0, additionString);
+    }
+
+    recentlyExported = recentlyExported.mid(0, 10);
+
+    SettingsManager::getInstance().setPrivateSetting(key, recentlyExported);
+
+    int invalidStateCount = 0;
+    ui->menuExport_Recent->clear();
+    for (QString importString : recentlyExported) {
+        QStringList importParts = importString.split(separator);
+        if (importParts.size() != 2) {
+            continue;
+        }
+        QString pluginName = importParts.at(0);
+        QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
+        if (plugin.isNull()) {
+            continue;
+        }
+
+        QByteArray pluginStateString = importParts.at(1).toUtf8();
+        QJsonObject pluginState = QJsonDocument::fromJson(pluginStateString).object();
+
+        QString menuLabel = plugin->getExportLabelForState(pluginState);
+        if (menuLabel.isEmpty()) {
+            invalidStateCount++;
+            continue;
+        }
+        ui->menuExport_Recent->addAction(
+                menuLabel,
+                [this, pluginName, pluginState]() {
+            this->requestExportRun(pluginName, pluginState);
+        });
+    }
+
+    ui->menuExport_Recent->setEnabled(recentlyExported.length() - invalidStateCount > 0);
 }
 
 void MainWindow::on_tb_scrollReset_clicked()
