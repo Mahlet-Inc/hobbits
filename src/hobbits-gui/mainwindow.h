@@ -83,6 +83,7 @@ private slots:
     void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
+    void populateRecentExportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 

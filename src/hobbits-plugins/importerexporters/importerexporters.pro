@@ -3,4 +3,5 @@ TEMPLATE = subdirs
 SUBDIRS += \
     FileData \
     HexString \
-    HttpData
+    HttpData \
+    TcpData

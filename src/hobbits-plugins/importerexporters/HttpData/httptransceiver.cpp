@@ -8,7 +8,7 @@ HttpTransceiver::HttpTransceiver(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::HttpTransceiver),
     m_netManager(new QNetworkAccessManager(this)),
-    m_downloadFile(new QTemporaryFile),
+    m_downloadFile(new QTemporaryFile(this)),
     m_reply(nullptr)
 {
     ui->setupUi(this);
