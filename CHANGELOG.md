@@ -1,3 +1,10 @@
+# [0.25.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.24.0...v0.25.0) (2020-04-10)
+
+
+### Features
+
+* add TCP stream import/export plugin ([384e9a8](https://github.com/Mahlet-Inc/hobbits/commit/384e9a8336536db1acf142568ddf13c4b0a1450a)), closes [#27](https://github.com/Mahlet-Inc/hobbits/issues/27)
+
 # [0.24.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.23.0...v0.24.0) (2020-04-09)
 
 
