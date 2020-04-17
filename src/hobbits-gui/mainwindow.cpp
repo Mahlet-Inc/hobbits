@@ -736,6 +736,7 @@ void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
 {
     if (currContainer().isNull()) {
         warningMessage("Cannot export without a selected bit container");
+        return;
     }
     QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
     auto result = plugin->exportBits(currContainer(), pluginState, this);
