@@ -12,6 +12,8 @@ TcpSender::TcpSender(QSharedPointer<const BitArray> bits, QWidget *parent) :
     ui->pb_cancel->setEnabled(false);
 
     connect(m_socket.data(), &QTcpSocket::bytesWritten, this, &TcpSender::writeNextChunk);
+
+    setWindowTitle("Export via TCP");
 }
 
 TcpSender::~TcpSender()

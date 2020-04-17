@@ -9,6 +9,8 @@ HexStringImporter::HexStringImporter(QWidget *parent) :
     ui(new Ui::HexStringImporter)
 {
     ui->setupUi(this);
+
+    setWindowTitle("Import Hex String");
 }
 
 HexStringImporter::~HexStringImporter()

@@ -12,6 +12,8 @@ TcpReceiver::TcpReceiver(QWidget *parent) :
     connect(m_server, &QTcpServer::newConnection, this, &TcpReceiver::manageConnection);
     m_downloadFile.open();
 
+    setWindowTitle("Import via TCP");
+
     ui->pb_stop->setEnabled(false);
 }
 

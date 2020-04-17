@@ -85,6 +85,11 @@ private slots:
 
     void populateRecentExportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
+    void populatePluginActionMenu(QString key, QMenu* menu,
+                                  const std::function<QString(QString, QJsonObject)> getLabel,
+                                  const std::function<void(QString, QJsonObject)> triggerAction,
+                                  QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(),
+                                  QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
     void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
 
     void setupSplitViewMenu();
