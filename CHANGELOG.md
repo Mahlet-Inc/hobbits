@@ -1,3 +1,10 @@
+## [0.25.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.25.0...v0.25.1) (2020-04-17)
+
+
+### Bug Fixes
+
+* export crash on null container and dialog window titles ([702c2ca](https://github.com/Mahlet-Inc/hobbits/commit/702c2ca1c8ea38d7599ee7248f16d6551246f455))
+
 # [0.25.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.24.0...v0.25.0) (2020-04-10)
 
 
