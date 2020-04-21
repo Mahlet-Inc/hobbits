@@ -1,3 +1,10 @@
+# [0.26.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.25.1...v0.26.0) (2020-04-21)
+
+
+### Features
+
+* add dot, frequency, and digraph plot display plugins ([272d692](https://github.com/Mahlet-Inc/hobbits/commit/272d692aa598ca605ba589c0171c790ba2e9c525))
+
 ## [0.25.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.25.0...v0.25.1) (2020-04-17)
 
 
