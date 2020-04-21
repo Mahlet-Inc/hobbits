@@ -1,14 +1,14 @@
-#ifndef %{JS: '%{DisplayWidgetName}'.toUpperCase()}_H
-#define %{JS: '%{DisplayWidgetName}'.toUpperCase()}_H
+#ifndef FREQUENCYPLOTWIDGET_H
+#define FREQUENCYPLOTWIDGET_H
 
 #include "displaybase.h"
 
-class %{DisplayWidgetName} : public DisplayBase
+class FrequencyPlotWidget : public DisplayBase
 {
     Q_OBJECT
 
 public:
-    %{DisplayWidgetName}(
+    FrequencyPlotWidget(
             QSharedPointer<DisplayHandle> displayHandle,
             DisplayInterface *pluginRef,
             QWidget *parent = nullptr);
@@ -17,4 +17,4 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
 };
 
-#endif // %{JS: '%{DisplayWidgetName}'.toUpperCase()}_H
+#endif // FREQUENCYPLOTWIDGET_H

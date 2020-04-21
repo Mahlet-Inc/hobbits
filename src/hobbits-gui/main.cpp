@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QCoreApplication::setOrganizationName("Mahlet");
     QCoreApplication::setApplicationName("hobbits");
     QCoreApplication::setApplicationVersion(HobbitsGuiInfo::getGuiVersion());
 

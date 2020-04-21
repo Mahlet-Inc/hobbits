@@ -5,5 +5,8 @@ SUBDIRS += \
     BinaryView \
     BitRaster \
     ByteRaster \
+    DigraphPlot \
+    DotPlot \
+    FrequencyPlot \
     HexView \
     SymbolRaster

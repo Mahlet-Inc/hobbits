@@ -261,7 +261,7 @@ void TakeSkipOperator::showHelp()
     QString text = "t - take\ns - skip\nr - take in reverse\ni - invert\no - append a 1\nz - append a 0";
     text += "\n\nThe character '*' can be used instead of a number to indicate 'all remaining bits'";
     text += "\nInterleave: apply the operation in a round-robin fashion between multiple input containers.";
-    text += "\nFrame-based: restart the operation at the begin on every frame";
+    text += "\nFrame-based: apply the operation to each frame of the container independently";
     msg.setInformativeText(text);
     msg.setDefaultButton(QMessageBox::Cancel);
     msg.exec();

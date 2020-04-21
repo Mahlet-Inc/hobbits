@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator %{JS: (new Date().toISOString())}
+# Project created by QtCreator 2020-04-20T23:19:44.928Z
 #
 #-------------------------------------------------
 
@@ -8,10 +8,10 @@ QT       += widgets
 
 QT       -= gui
 
-TARGET = %{PluginName}
+TARGET = FrequencyPlot
 TEMPLATE = lib
 
-DEFINES += %{JS: '%{PluginName}'.toUpperCase()}_LIBRARY
+DEFINES += FREQUENCYPLOT_LIBRARY
 
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -27,39 +27,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
-        %{PluginCppFileName} \
-        %{WidgetCppFileName} \
-        %{ControlsCppFileName}
+SOURCES +=         frequencyplot.cpp         frequencyplotwidget.cpp         frequencyplotcontrols.cpp
 
-HEADERS += \
-        %{PluginHeaderFileName} \
-        %{WidgetHeaderFileName} \
-        %{ControlsHeaderFileName}
+HEADERS +=         frequencyplot.h         frequencyplotwidget.h         frequencyplotcontrols.h
 
-FORMS += \
-        %{ControlsUiFileName}
+FORMS +=         frequencyplotcontrols.ui
 
-DISTFILES +=
-
-RESOURCES += 
-
-LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/release/ -lhobbits-core
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../hobbits-core/debug/ -lhobbits-core
+else:unix: LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
 
-unix:!mac {
+unix:{
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
-}
-
-mac {
-    QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'$$ORIGIN/../../lib:$$ORIGIN'"
 }
 
 unix {
-    target.path = $$(HOME)/.local/share/hobbits/plugins/displays
+    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/displays
     INSTALLS += target
 }

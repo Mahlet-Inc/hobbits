@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QImage>
+#include "displayhelper.h"
 
 %{DisplayWidgetName}::%{DisplayWidgetName}(
             QSharedPointer<DisplayHandle> displayHandle,
@@ -17,7 +18,8 @@ void %{DisplayWidgetName}::paintEvent(QPaintEvent*) {
         return;
     }
 
-    QImage raster = m_displayHandle->getContainer()->getRasterImage(
+    QImage raster = DisplayHelper::getBitRasterImage(
+        m_displayHandle->getContainer(),
         m_displayHandle->getBitOffset(),
         m_displayHandle->getFrameOffset(),
         this->width(), this->height());
