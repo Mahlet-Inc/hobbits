@@ -1,3 +1,10 @@
+# [0.27.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.26.0...v0.27.0) (2020-04-22)
+
+
+### Features
+
+* add fractal hilbert plot ([727a6f1](https://github.com/Mahlet-Inc/hobbits/commit/727a6f14bc14ea3f46e515a2dba9a2aac6e45d5b))
+
 # [0.26.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.25.1...v0.26.0) (2020-04-21)
 
 
