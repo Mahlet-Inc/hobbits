@@ -9,4 +9,5 @@ SUBDIRS += \
     DotPlot \
     FrequencyPlot \
     HexView \
+    HilbertPlot \
     SymbolRaster

@@ -175,6 +175,19 @@ bool BitArray::at(qint64 i) const
 }
 
 
+char BitArray::byteAt(qint64 i) const
+{
+    if (i < 0 || i >= sizeInBytes()) {
+        throw std::invalid_argument(QString("Invalid byte index '%1'").arg(i).toStdString());
+    }
+    qint64 cacheIdx = i / CACHE_CHUNK_BYTE_SIZE;
+    if (!m_dataCaches[cacheIdx]) {
+        loadCacheAt(i);
+    }
+    int index = int(i - cacheIdx * CACHE_CHUNK_BYTE_SIZE);
+    return m_dataCaches[cacheIdx][index];
+}
+
 quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize) const
 {
     quint64 word = 0;
