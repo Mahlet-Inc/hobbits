@@ -25,6 +25,7 @@ public:
     ~BitArray();
 
     bool at(qint64 i) const;
+    char byteAt(qint64 i) const;
     qint64 sizeInBits() const;
     qint64 sizeInBytes() const;
     quint64 getWordValue(qint64 bitOffset, int wordBitSize) const;
