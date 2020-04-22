@@ -182,7 +182,7 @@ char BitArray::byteAt(qint64 i) const
     }
     qint64 cacheIdx = i / CACHE_CHUNK_BYTE_SIZE;
     if (!m_dataCaches[cacheIdx]) {
-        loadCacheAt(i);
+        loadCacheAt(i*8);
     }
     int index = int(i - cacheIdx * CACHE_CHUNK_BYTE_SIZE);
     return m_dataCaches[cacheIdx][index];

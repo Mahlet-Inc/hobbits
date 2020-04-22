@@ -33,6 +33,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     actionprogress.cpp \
+    actionrenderprogress.cpp \
     analyzeractor.cpp \
     analyzerresult.cpp \
         bitarray.cpp \
@@ -60,6 +61,7 @@ SOURCES += \
     plugincallback.cpp \
     pluginhelper.cpp \
     pluginmanager.cpp \
+    previewscrollbar.cpp \
     range.cpp \
     rangehighlight.cpp \
     settingsdata.cpp \
@@ -68,6 +70,7 @@ SOURCES += \
 
 HEADERS += \
     actionprogress.h \
+    actionrenderprogress.h \
     actionwatcher.h \
     analyzeractor.h \
     analyzerinterface.h \
@@ -101,6 +104,7 @@ HEADERS += \
     plugincallback.h \
     pluginhelper.h \
     pluginmanager.h \
+    previewscrollbar.h \
     range.h \
     rangehighlight.h \
     settingsdata.h \

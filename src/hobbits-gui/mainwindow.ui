@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <layout class="QHBoxLayout" name="displayScrollLayout">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
@@ -48,7 +48,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="vScrollLayout">
         <property name="spacing">
          <number>2</number>
         </property>
@@ -288,7 +288,7 @@
      <x>0</x>
      <y>0</y>
      <width>1286</width>
-     <height>29</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

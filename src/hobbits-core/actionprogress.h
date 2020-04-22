@@ -24,7 +24,7 @@ public:
 signals:
     void progressPercentChanged(int);
 
-private:
+protected:
     int m_lastProgressPercent;
     int m_progressPercent;
     QMutex m_mutex;

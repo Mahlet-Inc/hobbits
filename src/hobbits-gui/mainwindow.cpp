@@ -28,6 +28,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_pluginActionProgress(new QProgressBar()),
     m_pluginActionCancel(new QPushButton()),
     m_displayTabsSplitter(new QSplitter(Qt::Horizontal)),
+    m_previewScroll(new PreviewScrollBar()),
     m_splitViewMenu(new QMenu("Split View"))
 {
     ui->setupUi(this);
@@ -113,6 +114,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
 
     // Configure display handle and plugin callback
+    ui->displayScrollLayout->addWidget(m_previewScroll);
     m_displayHandle = QSharedPointer<DisplayHandle>(
             new DisplayHandle(
                     m_bitContainerManager,
@@ -123,6 +125,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             &DisplayHandle::newBitHover,
             this,
             &MainWindow::setHoverBit);
+
+    m_previewScroll->setBitContainerManager(m_bitContainerManager);
+    m_previewScroll->setDisplayHandle(m_displayHandle);
 
     m_pluginCallback = QSharedPointer<PluginCallback>(new PluginCallback(m_displayHandle));
     connect(

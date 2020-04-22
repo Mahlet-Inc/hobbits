@@ -135,6 +135,12 @@ void BitInfo::initFrames()
     }
     else {
         for (Range range: m_ranges) {
+            if (range.start() >= m_bits->sizeInBits()) {
+                break;
+            }
+            if (range.end() >= m_bits->sizeInBits()) {
+                range = Range(range.start(), m_bits->sizeInBits() - 1);
+            }
             m_frames.push_back(Frame(m_bits, range));
             m_maxFrameWidth = qMax(range.size(), m_maxFrameWidth);
         }
