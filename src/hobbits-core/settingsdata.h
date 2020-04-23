@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QVariant>
+#include <QMutex>
 
 #include "hobbits-core_global.h"
 
@@ -56,6 +57,7 @@ private:
     QMap<QString, QVariant> m_uiSettings;
     QMap<QString, QVariant> m_pluginLoaderSettings;
     QMap<QString, QVariant> m_pluginSettings;
+    QMutex m_mutex;
 };
 
 #endif // SETTINGSDATA_H

@@ -7,6 +7,7 @@
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "pluginmanager.h"
+#include "previewscrollbar.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -118,6 +119,7 @@ private:
     QSplitter *m_displayTabsSplitter;
     QSharedPointer<DisplayHandle> m_displayHandle;
     QList<QWidget*> m_currControlWidgets;
+    PreviewScrollBar *m_previewScroll;
 
     QMenu *m_splitViewMenu;
 };

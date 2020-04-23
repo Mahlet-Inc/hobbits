@@ -31,6 +31,7 @@ void BitContainer::setBits(QSharedPointer<const BitArray> bits, QSharedPointer<B
 
 void BitContainer::setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> bitInfo)
 {
+    m_mutex.lock();
     m_bits = bits;
 
     if (bitInfo.isNull()) {
@@ -46,6 +47,7 @@ void BitContainer::setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo
     else {
         m_bitInfo = bitInfo;
     }
+    m_mutex.unlock();
 
     setBitInfo(m_bitInfo);
 }
@@ -56,12 +58,14 @@ void BitContainer::setBitInfo(QSharedPointer<BitInfo> bitInfo)
         return;
     }
 
+    m_mutex.lock();
     if (!m_bitInfo.isNull()) {
         disconnect(m_bitInfo.data(), SIGNAL(changed()), this, SIGNAL(changed()));
     }
 
     m_bitInfo = bitInfo->copyMetadata();
     m_bitInfo->setBits(m_bits);
+    m_mutex.unlock();
 
     emit changed();
 
@@ -130,7 +134,9 @@ QString BitContainer::name() const
 
 void BitContainer::setName(QString name)
 {
+    m_mutex.lock();
     this->m_name = name;
+    m_mutex.unlock();
     emit changed();
 }
 
@@ -141,6 +147,7 @@ QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
 
 void BitContainer::setActionLineage(QSharedPointer<const PluginActionLineage> lineage)
 {
+    QMutexLocker lock(&m_mutex);
     m_actionLineage = lineage;
 }
 
@@ -166,21 +173,25 @@ QUuid BitContainer::getId() const
 
 void BitContainer::detachChild(QUuid childId)
 {
+    QMutexLocker lock(&m_mutex);
     m_children.removeAll(childId);
 }
 
 void BitContainer::detachParent(QUuid parentId)
 {
+    QMutexLocker lock(&m_mutex);
     m_parents.removeAll(parentId);
 }
 
 void BitContainer::addChild(QUuid childId)
 {
+    QMutexLocker lock(&m_mutex);
     m_children.append(childId);
 }
 
 void BitContainer::addParent(QUuid parentId)
 {
+    QMutexLocker lock(&m_mutex);
     m_parents.append(parentId);
 }
 

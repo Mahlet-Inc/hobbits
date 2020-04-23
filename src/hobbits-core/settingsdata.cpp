@@ -88,6 +88,7 @@ QVariant SettingsData::getPrivateSetting(const QString &key, const QVariant &def
 
 void SettingsData::setPrivateSetting(const QString &key, const QVariant &value)
 {
+    QMutexLocker lock(&m_mutex);
     m_privateSettings.remove(key);
     m_privateSettings.insert(key, value);
 }
@@ -104,6 +105,7 @@ QVariant SettingsData::getUiSetting(const QString &key, const QVariant &defaultV
 
 void SettingsData::setUiSetting(const QString &key, const QVariant &value)
 {
+    QMutexLocker lock(&m_mutex);
     m_uiSettings.remove(key);
     m_uiSettings.insert(key, value);
 }
@@ -120,6 +122,7 @@ QVariant SettingsData::getPluginLoaderSetting(const QString &key, const QVariant
 
 void SettingsData::setPluginLoaderSetting(const QString &key, const QVariant &value)
 {
+    QMutexLocker lock(&m_mutex);
     m_pluginLoaderSettings.remove(key);
     m_pluginLoaderSettings.insert(key, value);
 }
@@ -136,6 +139,7 @@ QVariant SettingsData::getPluginSetting(const QString &key, const QVariant &defa
 
 void SettingsData::setPluginSetting(const QString &key, const QVariant &value)
 {
+    QMutexLocker lock(&m_mutex);
     m_pluginSettings.remove(key);
     m_pluginSettings.insert(key, value);
 }

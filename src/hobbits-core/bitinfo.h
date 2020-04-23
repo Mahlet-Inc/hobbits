@@ -9,6 +9,7 @@
 #include <QHash>
 #include <QSharedPointer>
 #include <QVariant>
+#include <QMutex>
 
 class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
 {
@@ -51,6 +52,7 @@ private:
     QVector<Frame> m_frames;
     QHash<QString, QList<RangeHighlight>> m_rangeHighlights;
     QVariantHash m_metadata;
+    QMutex m_mutex;
 };
 
 

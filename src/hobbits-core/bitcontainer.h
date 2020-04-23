@@ -13,6 +13,7 @@
 #include <QUuid>
 #include "bitinfo.h"
 #include "hobbits-core_global.h"
+#include <QMutex>
 
 class PluginActionLineage;
 class PluginAction;
@@ -77,6 +78,7 @@ private:
     QUuid m_id;
     QList<QUuid> m_children;
     QList<QUuid> m_parents;
+    QMutex m_mutex;
 
 signals:
     void changed();

@@ -15,11 +15,13 @@ SettingsManager& SettingsManager::getInstance()
 
 void SettingsManager::setConfigFilePath(const QString &configFilePath)
 {
+    QMutexLocker lock(&m_mutex);
     m_configFilePath = configFilePath;
 }
 
 void SettingsManager::writeSettings()
 {
+    QMutexLocker lock(&m_mutex);
     if (m_configFilePath.isEmpty()) {
         QSettings settings("Hobbits", "Hobbits GUI");
         writeToSettings(settings);
@@ -35,6 +37,7 @@ void SettingsManager::readSettings()
     if (m_hasRead) {
         return;
     }
+    QMutexLocker lock(&m_mutex);
 
     if (m_configFilePath.isEmpty()) {
         QSettings settings("Hobbits", "Hobbits GUI");

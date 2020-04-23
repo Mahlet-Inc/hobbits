@@ -28,13 +28,17 @@ QSharedPointer<BitInfo> BitInfo::copyMetadata() const
 
 void BitInfo::setBits(QSharedPointer<const BitArray> bits)
 {
+    m_mutex.lock();
     m_bits = bits;
+    m_mutex.unlock();
     initFrames();
 }
 
 void BitInfo::setFrames(QVector<Range> frames)
 {
+    m_mutex.lock();
     m_ranges = frames;
+    m_mutex.unlock();
     initFrames();
 }
 
@@ -45,16 +49,19 @@ qint64 BitInfo::maxFrameWidth() const
 
 void BitInfo::addHighlight(RangeHighlight highlight)
 {
+    m_mutex.lock();
     QList<RangeHighlight> newList = this->highlights(highlight.category());
     newList.append(highlight);
     std::sort(newList.begin(), newList.end());
     m_rangeHighlights.remove(highlight.category());
     m_rangeHighlights.insert(highlight.category(), newList);
+    m_mutex.unlock();
     emit changed();
 }
 
 void BitInfo::addHighlights(QList<RangeHighlight> highlights)
 {
+    m_mutex.lock();
     // split into different categories
     QHash<QString, QList<RangeHighlight>> added;
     for (auto highlight: highlights) {
@@ -72,19 +79,27 @@ void BitInfo::addHighlights(QList<RangeHighlight> highlights)
         m_rangeHighlights.remove(category);
         m_rangeHighlights.insert(category, newList);
     }
+    m_mutex.unlock();
     emit changed();
 }
 
 void BitInfo::setMetadata(QString key, QVariant value)
 {
+    m_mutex.lock();
     m_metadata.remove(key);
     m_metadata.insert(key, value);
+    m_mutex.unlock();
     emit changed();
 }
 
 void BitInfo::clearHighlightCategory(QString category)
 {
-    m_rangeHighlights.remove(category);
+    if (m_rangeHighlights.contains(category)) {
+        m_mutex.lock();
+        m_rangeHighlights.remove(category);
+        m_mutex.unlock();
+        emit changed();
+    }
 }
 
 QVector<Frame> BitInfo::frames() const
@@ -125,6 +140,7 @@ QVariant BitInfo::metadata(QString key) const
 
 void BitInfo::initFrames()
 {
+    m_mutex.lock();
     m_maxFrameWidth = 0;
     m_frames.clear();
 
@@ -135,10 +151,17 @@ void BitInfo::initFrames()
     }
     else {
         for (Range range: m_ranges) {
+            if (range.start() >= m_bits->sizeInBits()) {
+                break;
+            }
+            if (range.end() >= m_bits->sizeInBits()) {
+                range = Range(range.start(), m_bits->sizeInBits() - 1);
+            }
             m_frames.push_back(Frame(m_bits, range));
             m_maxFrameWidth = qMax(range.size(), m_maxFrameWidth);
         }
     }
+    m_mutex.unlock();
     emit changed();
 }
 
