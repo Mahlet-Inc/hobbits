@@ -81,9 +81,18 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                     m_renderWatchers.remove(containerPtr);
                 }
                 this->repaint();
-
-                // TODO: clean up image cache via weakref checks
             });
+
+            // clean out any deleted containers
+            m_weakRefMap.insert(containerPtr, QWeakPointer<BitContainer>(container));
+            for (quint64 key : m_weakRefMap.keys()) {
+                if (m_weakRefMap.value(key).isNull()) {
+                    m_weakRefMap.remove(key);
+                    m_imageCache.remove(key);
+                    m_previewImageCache.remove(key);
+                    m_renderWatchers.remove(key);
+                }
+            }
         }
     }
     else {
