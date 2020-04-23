@@ -31,7 +31,6 @@ public slots:
 
 private slots:
     void newContainer();
-    void checkRenderWatchers();
     void checkDisplayHandleOffset();
 
 private:
@@ -45,8 +44,9 @@ private:
 
     QHash<quint64, QWeakPointer<BitContainer>> m_weakRefMap;
     QHash<quint64, QImage> m_imageCache;
+    QHash<quint64, QImage> m_previewImageCache;
 
-    QHash<QSharedPointer<BitContainer>, QSharedPointer<ActionWatcher<QImage>>> m_renderWatchers;
+    QHash<quint64, QSharedPointer<ActionWatcher<QImage>>> m_renderWatchers;
 };
 
 #endif // PREVIEWSCROLLBAR_H

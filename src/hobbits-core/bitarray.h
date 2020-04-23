@@ -7,6 +7,7 @@
 #include <QQueue>
 #include <QStringList>
 #include <QTemporaryFile>
+#include <QMutex>
 
 #include "hobbits-core_global.h"
 
@@ -51,12 +52,16 @@ private:
     bool loadCacheAt(qint64 bitIndex) const;
     void syncCacheToFile() const;
 
-    QTemporaryFile m_dataFile;
+    mutable QTemporaryFile m_dataFile;
     qint64 m_size;
 
     QQueue<qint64> m_recentCacheAccess;
     char **m_dataCaches;
     bool m_dirtyCache;
+
+    QMutex m_mutex;
+    mutable QMutex m_cacheMutex;
+    mutable QMutex m_dataFileMutex;
 };
 
 inline bool operator==(const BitArray &b1, const BitArray &b2)

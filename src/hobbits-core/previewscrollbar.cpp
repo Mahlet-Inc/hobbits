@@ -17,9 +17,10 @@ int PreviewScrollBar::getFrameOffset()
 
 void PreviewScrollBar::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillRect(QRect(QPoint(0,0), this->size()), Qt::black);
+    painter.fillRect(QRect(QPoint(0,0), this->size()), Qt::darkGray);
 
     if (m_manager.isNull() || m_manager->getCurrentContainer().isNull()) {
         return;
@@ -29,23 +30,60 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
     auto containerPtr = reinterpret_cast<quint64>(container.data());
 
     if (!m_imageCache.contains(containerPtr)) {
-        if (!m_renderWatchers.contains(container)) {
+        if (m_previewImageCache.contains(containerPtr)) {
+            QImage preview = m_previewImageCache.value(containerPtr);
+            painter.drawImage(QRect(QPoint(0,0), this->size()), preview);
+        }
+        else if (!m_renderWatchers.contains(containerPtr)) {
             QSharedPointer<ActionRenderProgress> progress(new ActionRenderProgress());
             QFuture<QImage> future = QtConcurrent::run(QThreadPool::globalInstance(),
                                                        PreviewScrollBar::renderPreview,
                                                        container, progress);
 
-            connect(progress.data(), &ActionRenderProgress::renderPreviewChanged, this, [containerPtr, this](const QImage& preview) {
-                m_imageCache.remove(containerPtr);
-                m_imageCache.insert(containerPtr, QImage(preview));
+            auto actionWatcher = QSharedPointer<ActionWatcher<QImage>>(
+                    new ActionWatcher<QImage>(future, progress));
+            m_renderWatchers.insert(containerPtr, actionWatcher);
+
+            auto watcherRef = QWeakPointer<ActionWatcher<QImage>>(actionWatcher);
+
+            connect(progress.data(), &ActionRenderProgress::renderPreviewChanged, this, [containerPtr, watcherRef, this](const QImage& preview) {
+                if (watcherRef.isNull()) {
+                    return;
+                }
+                m_previewImageCache.remove(containerPtr);
+                m_previewImageCache.insert(containerPtr, QImage(preview));
                 this->repaint();
             }, Qt::QueuedConnection);
 
-            auto actionWatcher = QSharedPointer<ActionWatcher<QImage>>(
-                    new ActionWatcher<QImage>(future, progress));
+            connect(container.data(), &BitContainer::changed, this, [containerPtr, watcherRef, this]() {
+                auto watcher = watcherRef.toStrongRef();
+                if (watcherRef.isNull()) {
+                    return;
+                }
+                watcher->progress()->setCancelled(true);
+                m_imageCache.remove(containerPtr);
+                m_previewImageCache.remove(containerPtr);
+                m_renderWatchers.remove(containerPtr);
+                this->repaint();
+            });
 
-            m_renderWatchers.insert(container, actionWatcher);
-            connect(actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(checkRenderWatchers()));
+            connect(actionWatcher->watcher(), &QFutureWatcher<QImage>::finished, this, [containerPtr, watcherRef, this]() {
+                auto watcher = watcherRef.toStrongRef();
+                if (watcherRef.isNull()) {
+                    return;
+                }
+                QImage result = watcher->result();
+                if (m_renderWatchers.value(containerPtr) == watcher) {
+                    if (!result.isNull()) {
+                        m_imageCache.remove(containerPtr);
+                        m_imageCache.insert(containerPtr, result);
+                    }
+                    m_renderWatchers.remove(containerPtr);
+                }
+                this->repaint();
+
+                // TODO: clean up image cache via weakref checks
+            });
         }
     }
     else {
@@ -75,14 +113,15 @@ void PreviewScrollBar::mousePressEvent(QMouseEvent *event)
 
 void PreviewScrollBar::mouseReleaseEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event)
     m_mousePressing = false;
 }
 
 void PreviewScrollBar::leaveEvent(QEvent *event)
 {
+    Q_UNUSED(event)
     m_mousePressing = false;
 }
-
 
 void PreviewScrollBar::getOffsetFromEvent(QMouseEvent* event)
 {
@@ -145,27 +184,6 @@ void PreviewScrollBar::newContainer()
     repaint();
 }
 
-void PreviewScrollBar::checkRenderWatchers()
-{
-    QList<QSharedPointer<BitContainer>> removals;
-    for (auto container: m_renderWatchers.keys()) {
-        if (m_renderWatchers.value(container)->watcher()->isFinished()) {
-            auto containerPtr = reinterpret_cast<quint64>(container.data());
-            removals.append(container);
-            m_imageCache.remove(containerPtr);
-            m_imageCache.insert(containerPtr, m_renderWatchers.value(container)->result());
-        }
-    }
-
-    for (auto removal : removals) {
-        m_renderWatchers.remove(removal);
-    }
-
-    // TODO: clean up cache using weak ref checks and least-recently-used size limit
-
-    repaint();
-}
-
 QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, QSharedPointer<ActionRenderProgress> progress)
 {
     int width = int(container->bitInfo()->maxFrameWidth() / 8);
@@ -178,7 +196,8 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
     int hue = c.hue();
     int saturation = c.saturation();
-    int chunkSize = qMin(container->frames().size(), 10000);
+    int chunkHeight = qMax(50, qMin(10000, 5000000/width));
+    int chunkSize = qMin(container->frames().size(), chunkHeight);
     double chunkHeightRatio = double(chunkSize)/double(container->frames().size());
     double targetChunkHeight = chunkHeightRatio * height;
     QImage bufferChunk(width, chunkSize, QImage::Format_ARGB32);
@@ -198,6 +217,9 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
         QRectF target(0, targetChunkHeight * (frame / chunkSize), width, heightRatio * targetChunkHeight);
         QRectF source(0, 0, width, offset);
         imagePainter.drawImage(target, bufferChunk, source);
+        if (progress->getCancelled()) {
+            return QImage();
+        }
         progress->setRenderPreview(image);
     }
 

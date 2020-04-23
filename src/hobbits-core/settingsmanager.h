@@ -3,6 +3,7 @@
 
 #include "settingsdata.h"
 #include <QSettings>
+#include <QMutex>
 
 #include "hobbits-core_global.h"
 
@@ -42,6 +43,7 @@ private:
     QString m_configFilePath;
 
     SettingsData m_data;
+    QMutex m_mutex;
 
 public:
     SettingsManager(SettingsManager const&) = delete;
