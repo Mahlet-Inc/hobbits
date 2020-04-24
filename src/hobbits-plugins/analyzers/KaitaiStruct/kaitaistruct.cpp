@@ -8,21 +8,55 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QJsonArray>
+#include <QDirIterator>
 
 const QString PYTHON_PATH_KEY = "python_runner_path";
 const QString KAITAI_PATH_KEY = "kaitai_struct_compiler_path";
+const QString KSY_PATH_KEY = "ksy_directory_path";
 const QString KAITAI_STRUCT_CATEGORY = "kaitai_struct";
 const QString KAITAI_RESULT_LABEL = "kaitai_struct_result_label";
 
 KaitaiStruct::KaitaiStruct() :
     ui(new Ui::KaitaiStruct()),
+    m_loadKsyMenu(new QMenu()),
     m_highlightNav(nullptr)
 {
+    m_loadKsyMenu->addAction("Load File...", [this]() {
+        QString fileName = QFileDialog::getOpenFileName(
+                    nullptr,
+                    tr("Select ksy File"),
+                    SettingsManager::getInstance().getPrivateSetting(KSY_PATH_KEY).toString(),
+                    tr("Kaitai Struct File (*.ksy);;All Files (*)"));
+        if (fileName.isEmpty()) {
+            return;
+        }
+        QFile ksyFile(fileName);
+        if (!ksyFile.open(QIODevice::ReadOnly)) {
+            return;
+        }
+        SettingsManager::getInstance().setPrivateSetting(KSY_PATH_KEY, QFileInfo(ksyFile).path());
+        ui->te_ksy->setPlainText(ksyFile.readAll());
+    });
 
+    QDirIterator it(":/kaitaistruct/ksy", QDir::Dirs | QDir::NoDotAndDotDot);
+    while (it.hasNext()) {
+        QDir category = it.next();
+        QMenu* menu = m_loadKsyMenu->addMenu(category.dirName());
+        for (QFileInfo ksyFileInfo :category.entryInfoList(QDir::Files)) {
+            menu->addAction(ksyFileInfo.baseName(), [this, ksyFileInfo]() {
+                QFile ksyFile(ksyFileInfo.filePath());
+                if (!ksyFile.open(QIODevice::ReadOnly)) {
+                    return;
+                }
+                ui->te_ksy->setPlainText(ksyFile.readAll());
+            });
+        }
+    }
 }
 
 KaitaiStruct::~KaitaiStruct()
 {
+    delete m_loadKsyMenu;
     delete ui;
 }
 
@@ -49,6 +83,8 @@ void KaitaiStruct::provideCallback(QSharedPointer<PluginCallback> pluginCallback
 void KaitaiStruct::applyToWidget(QWidget *widget)
 {
     ui->setupUi(widget);
+
+    ui->pb_loadKsy->setMenu(m_loadKsyMenu);
 
     connect(ui->tb_choosePython, SIGNAL(pressed()), this, SLOT(openPythonPathDialog()));
     connect(ui->tb_chooseKsc, SIGNAL(pressed()), this, SLOT(openKscPathDialog()));

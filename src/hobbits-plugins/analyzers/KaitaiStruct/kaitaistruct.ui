@@ -108,6 +108,13 @@
           </layout>
          </item>
          <item>
+          <widget class="QPushButton" name="pb_loadKsy">
+           <property name="text">
+            <string>Load existing ksy...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label">
            <property name="text">
             <string>Enter Kaitai Struct Definition (ksy):</string>

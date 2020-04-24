@@ -2,5 +2,6 @@
     <qresource prefix="/hobbitsgui">
         <file>images/icons/trash.png</file>
         <file>images/icons/HobbitsRingSmall.png</file>
+        <file>images/icons/mahlet.bits</file>
     </qresource>
 </RCC>
