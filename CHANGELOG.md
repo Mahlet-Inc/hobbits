@@ -1,3 +1,10 @@
+# [0.28.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.27.0...v0.28.0) (2020-04-27)
+
+
+### Features
+
+* add full file visual preview with navigation ([f61210b](https://github.com/Mahlet-Inc/hobbits/commit/f61210b0671db33ebd3dd513f5e0b3d91f3a87da))
+
 # [0.27.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.26.0...v0.27.0) (2020-04-22)
 
 
