@@ -18,13 +18,15 @@ PeakSelector::PeakSelector(QWidget *parent) :
     connect(m_hScroll, SIGNAL(valueChanged(int)), this, SLOT(repaint()));
 
     m_zoomSlider = new QSlider(Qt::Horizontal, this);
-    m_zoomSlider->setValue(1);
+    m_zoomSlider->setValue(5);
     m_zoomSlider->setMinimum(1);
-    m_zoomSlider->setMaximum(200);
+    m_zoomSlider->setMaximum(600);
 
     m_zoomSlider->setInvertedControls(true);
 
     connect(m_zoomSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustScroll()));
+
+    this->setMouseTracking(true);
 }
 
 QSlider* PeakSelector::getZoomSlider()
@@ -86,21 +88,65 @@ void PeakSelector::paintEvent(QPaintEvent*)
         path.lineTo(i + 1, maxY);
     }
 
+    QRgb lineColor = qRgb(30, 40, 180);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(Qt::blue);
+    painter.setPen(lineColor);
     painter.drawPath(path);
 
+    QFont font = QFont("monospace", 11);
+    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+    QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
+
+    QFont bigFont = QFont("monospace", 12);
+    bigFont.setStyleStrategy(QFont::ForceIntegerMetrics);
+    QFontMetrics bigFontMetrics = QFontMetrics(bigFont, painter.device());
+
+    int textPad = 2;
     if (m_startDrag >= 0) {
         QPointF peak = getPeak();
         if (!peak.isNull()) {
             double yValue = (peak.y() + yOffset) * yScale;
             yValue = this->height() - yValue;
-            painter.setBrush(QBrush(qRgba(50, 250, 50, 100)));
-            painter.drawEllipse(QPointF((peak.x() - xOffset) / m_zoomSlider->value(), yValue), 3, 3);
+            painter.setBrush(QBrush(lineColor));
+            QPointF peakPoint = QPointF((peak.x() - xOffset) / m_zoomSlider->value(), yValue);
+            painter.drawEllipse(peakPoint + QPointF(1, 0), 2, 2);
+
+            painter.setOpacity(0.85);
+            painter.setPen(Qt::black);
+            painter.setFont(bigFont);
+            QString valString = QString("%1").arg(peak.x());
+            int textWidth = bigFontMetrics.width(valString);
+            int textX = int(peakPoint.x() - textWidth/2);
+            if (textX < textPad) {
+                textX = textPad;
+            }
+            else if (textX + textWidth + textPad > this->width()) {
+                textX = this->width() - textWidth - textPad;
+            }
+            painter.drawText(textX, int(peakPoint.y() - textPad - 3), valString);
         }
 
         painter.setOpacity(0.15);
         painter.fillRect(m_startDrag, 0, m_endDrag - m_startDrag, this->height(), Qt::black);
+    }
+
+    if (!m_hover.isNull()) {
+        painter.setOpacity(0.70);
+        painter.setPen(Qt::black);
+        painter.drawLine(m_hover.x(), 0, m_hover.x(), this->height());
+
+        int location = (m_hover.x() * m_zoomSlider->value()) + m_hScroll->value();
+        if (location >= 0 && location < m_data.size()) {
+            QString valString = QString("%1").arg(location);
+            painter.setFont(font);
+            int textWidth = fontMetrics.width(valString);
+            int textHeight = fontMetrics.height();
+            int textX = m_hover.x() + textPad;
+            if (textWidth + textX > this->width() - textPad) {
+                textX = m_hover.x() - textPad - textWidth;
+            }
+            painter.drawText(textX, textHeight + textPad, valString);
+        }
 
     }
 }
@@ -177,8 +223,9 @@ void PeakSelector::mouseMoveEvent(QMouseEvent *event)
     }
     if (m_startDrag >= 0) {
         m_endDrag = event->x();
-        this->repaint();
     }
+    m_hover = event->pos();
+    this->repaint();
 }
 
 void PeakSelector::mousePressEvent(QMouseEvent *event)
@@ -206,5 +253,14 @@ void PeakSelector::mouseReleaseEvent(QMouseEvent *event)
         emit peakSelected(peak);
     }
 
+    this->repaint();
+}
+
+void PeakSelector::leaveEvent(QEvent * event)
+{
+    if (m_disabled) {
+        return;
+    }
+    m_hover = QPoint();
     this->repaint();
 }

@@ -3,6 +3,7 @@
 
 #include "analyzerinterface.h"
 #include "highlightnavigator.h"
+#include <QMenu>
 
 namespace Ui
 {
@@ -43,9 +44,11 @@ private slots:
 
 private:
     Ui::KaitaiStruct *ui;
+    QMenu* m_loadKsyMenu;
     HighlightNavigator* m_highlightNav;
     QSharedPointer<BitContainerPreview> m_previewContainer;
     QSharedPointer<PluginCallback> m_pluginCallback;
+
 };
 
 #endif // KAITAISTRUCT_H
