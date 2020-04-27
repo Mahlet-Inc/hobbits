@@ -1,3 +1,11 @@
+# [0.29.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.28.0...v0.29.0) (2020-04-27)
+
+
+### Features
+
+* include file loading and presets in kaitai struct plugin ([f348af8](https://github.com/Mahlet-Inc/hobbits/commit/f348af8ee6e657c1ce7f9b2bcb6d110311ef7e9f))
+* make some improvements to the width framer ([0dd2f73](https://github.com/Mahlet-Inc/hobbits/commit/0dd2f732f129957e9b8c2c9d01db775f64ffc969))
+
 # [0.28.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.27.0...v0.28.0) (2020-04-27)
 
 
