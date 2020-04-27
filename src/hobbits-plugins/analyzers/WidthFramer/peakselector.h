@@ -21,6 +21,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void leaveEvent(QEvent * event) override;
 
 public slots:
     void setData(QVector<QPointF> data);
@@ -40,6 +41,7 @@ private:
 
     int m_startDrag;
     int m_endDrag;
+    QPoint m_hover;
 
     bool m_disabled;
     bool m_hasNan;
