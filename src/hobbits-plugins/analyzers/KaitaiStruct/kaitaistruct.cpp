@@ -18,9 +18,40 @@ const QString KAITAI_RESULT_LABEL = "kaitai_struct_result_label";
 
 KaitaiStruct::KaitaiStruct() :
     ui(new Ui::KaitaiStruct()),
-    m_loadKsyMenu(new QMenu()),
+    m_loadKsyMenu(nullptr),
     m_highlightNav(nullptr)
 {
+}
+
+KaitaiStruct::~KaitaiStruct()
+{
+    delete m_loadKsyMenu;
+    delete ui;
+}
+
+AnalyzerInterface* KaitaiStruct::createDefaultAnalyzer()
+{
+    return new KaitaiStruct();
+}
+
+//Return name of operator
+QString KaitaiStruct::getName()
+{
+    return "Kaitai Struct";
+}
+
+void KaitaiStruct::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
+{
+    // the plugin callback allows the self-triggering of operateOnContainers
+    m_pluginCallback = pluginCallback;
+    if (m_highlightNav) {
+        m_highlightNav->setPluginCallback(m_pluginCallback);
+    }
+}
+
+void KaitaiStruct::applyToWidget(QWidget *widget)
+{
+    m_loadKsyMenu = new QMenu();
     m_loadKsyMenu->addAction("Load File...", [this]() {
         QString fileName = QFileDialog::getOpenFileName(
                     nullptr,
@@ -52,36 +83,7 @@ KaitaiStruct::KaitaiStruct() :
             });
         }
     }
-}
 
-KaitaiStruct::~KaitaiStruct()
-{
-    delete m_loadKsyMenu;
-    delete ui;
-}
-
-AnalyzerInterface* KaitaiStruct::createDefaultAnalyzer()
-{
-    return new KaitaiStruct();
-}
-
-//Return name of operator
-QString KaitaiStruct::getName()
-{
-    return "Kaitai Struct";
-}
-
-void KaitaiStruct::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
-{
-    // the plugin callback allows the self-triggering of operateOnContainers
-    m_pluginCallback = pluginCallback;
-    if (m_highlightNav) {
-        m_highlightNav->setPluginCallback(m_pluginCallback);
-    }
-}
-
-void KaitaiStruct::applyToWidget(QWidget *widget)
-{
     ui->setupUi(widget);
 
     ui->pb_loadKsy->setMenu(m_loadKsyMenu);
