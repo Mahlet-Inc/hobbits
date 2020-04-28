@@ -16,6 +16,8 @@ public:
     qint64 start() const;
     qint64 end() const;
 
+    bool isNull() const;
+
     unsigned int compare(const Range&) const;
 
     Range getOverlap(const Range &other) const;
@@ -39,6 +41,7 @@ public:
 private:
     qint64 m_start;
     qint64 m_end;
+    bool m_null;
 };
 
 bool HOBBITSCORESHARED_EXPORT operator<(const Range &a, const Range &b);

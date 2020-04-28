@@ -165,7 +165,7 @@ QList<RangeHighlight> DisplayBase::getHighlightSpots(QList<RangeHighlight> highl
         intersection = frame.compare(highlight.range());
 
         if (intersection & Frame::Overlapping) {
-            RangeHighlight overlap(highlight.category(), highlight.label(), frame.getOverlap(highlight.range()), highlight.color());
+            RangeHighlight overlap(highlight.category(), highlight.label(), frame.getOverlap(highlight.range()), highlight.color(), highlight.children());
             spots.append(overlap);
         }
         else if (intersection & Frame::After) {
@@ -246,7 +246,16 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
                     lastHighlight,
                     displayFrame);
 
-            for (RangeHighlight spot : spots) {
+            while(!spots.isEmpty()) {
+                RangeHighlight spot = spots.takeFirst();
+                if (!spot.children().isEmpty()) {
+                    painter->setOpacity(0.35);
+                    int minIndex = 0;
+                    spots.append(getHighlightSpots(spot.children(), minIndex, displayFrame));
+                }
+                else {
+                    painter->setOpacity(1);
+                }
                 qint64 displayStart = (spot.range().start() - displayFrame.start());
                 double hx = getGroupedOffset(displayStart, colWidth, colGroupSize, bitOffset, colGroupMargin);
                 double hy = (i - frameOffset) * rowHeight;

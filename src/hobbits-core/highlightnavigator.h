@@ -2,6 +2,7 @@
 #define HIGHLIGHTNAVIGATOR_H
 
 #include <QWidget>
+#include <QTreeWidgetItem>
 #include "bitcontainerpreview.h"
 #include "plugincallback.h"
 
@@ -17,7 +18,6 @@ public:
     explicit HighlightNavigator(QWidget *parent = nullptr);
     ~HighlightNavigator();
 
-    int currentlySelectedRow();
     bool selectRow(QString);
     QString currentlySelectedLabel();
 
@@ -29,7 +29,6 @@ public slots:
     void refresh();
     void selectNext();
     void selectPrevious();
-    void selectRow(int);
     void updateSelection();
     void setShouldHighlightSelection(bool);
 
@@ -37,8 +36,11 @@ signals:
     void selectionChanged();
 
 private:
+    QTreeWidgetItem* highlightToItem(const RangeHighlight &highlight, int &count) const;
+
     Ui::HighlightNavigator *ui;
     QList<RangeHighlight> m_highlights;
+    int m_allHighlightCount;
     QString m_category;
     QSharedPointer<BitContainerPreview> m_container;
     QSharedPointer<PluginCallback> m_pluginCallback;

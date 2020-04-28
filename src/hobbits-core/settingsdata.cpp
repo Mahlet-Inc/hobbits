@@ -35,7 +35,7 @@ SettingsData::SettingsData()
     m_privateSettings.insert(LAST_CONTAINER_PATH_KEY, QDir::homePath());
 
     m_uiSettings.insert(ONE_COLOR_KEY, QColor(Qt::black));
-    m_uiSettings.insert(ZERO_COLOR_KEY, QColor(255, 255, 200));
+    m_uiSettings.insert(ZERO_COLOR_KEY, QColor(253, 254, 229));
     m_uiSettings.insert(BYTE_HUE_SAT_KEY, QColor::fromHsl(120, 200, 128));
     m_uiSettings.insert(FOCUS_COLOR_KEY, QColor(50, 190, 0, 85));
     m_uiSettings.insert(HIGHLIGHT_1_COLOR_KEY, QColor(100, 220, 100, 85));

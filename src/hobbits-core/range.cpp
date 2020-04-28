@@ -4,14 +4,16 @@
 
 Range::Range() :
     m_start(0),
-    m_end(0)
+    m_end(0),
+    m_null(true)
 {
 
 }
 
 Range::Range(qint64 start, qint64 end) :
     m_start(start),
-    m_end(end)
+    m_end(end),
+    m_null(false)
 {
 
 }
@@ -34,6 +36,11 @@ qint64 Range::start() const
 qint64 Range::end() const
 {
     return m_end;
+}
+
+bool Range::isNull() const
+{
+    return m_null;
 }
 
 unsigned int Range::compare(const Range &other) const
@@ -99,6 +106,7 @@ QDataStream& operator>>(QDataStream &stream, Range &range)
 {
     stream >> range.m_start;
     stream >> range.m_end;
+    range.m_null = false;
 
     return stream;
 }

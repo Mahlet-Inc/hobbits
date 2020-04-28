@@ -43,6 +43,9 @@ private slots:
     void clearOutputText();
 
 private:
+    int m_highlightColorIdx;
+    RangeHighlight makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData);
+
     Ui::KaitaiStruct *ui;
     QMenu* m_loadKsyMenu;
     HighlightNavigator* m_highlightNav;

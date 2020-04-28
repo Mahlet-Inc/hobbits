@@ -116,6 +116,7 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
     m_highlightNav->setContainer(m_previewContainer);
     m_highlightNav->setPluginCallback(m_pluginCallback);
     m_highlightNav->setHighlightCategory(KAITAI_STRUCT_CATEGORY);
+    m_highlightNav->setShouldHighlightSelection(true);
 }
 
 void KaitaiStruct::openPythonPathDialog()
@@ -340,6 +341,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         return PluginHelper::analyzerErrorResult("Could not open analysis file for reading");
     }
     QJsonDocument outputData = QJsonDocument::fromJson((outputRangeFile.readAll()));
+    outputRangeFile.close();
     if (!outputData.isObject()) {
         return PluginHelper::analyzerErrorResult("Output analysis file has an invalid format");
     }
@@ -348,6 +350,49 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         return PluginHelper::analyzerErrorResult("Output analysis file doesn't contain a 'sections' specification");
     }
     QList<RangeHighlight> highlights;
+    m_highlightColorIdx = 0;
+    QMap<QString, QPair<Range, QList<QString>>> labelMap;
+    QList<QString> topLevel;
+    QJsonArray sections = outputObj.value("sections").toArray();
+    int sectionNum = 0;
+    for (auto section: sections) {
+        if (!section.isObject()) {
+            continue;
+        }
+        sectionNum++;
+        QJsonObject s = section.toObject();
+        QString label = QString("<%1>").arg(sectionNum);
+        if (s.contains("label") && s.value("label").isString()) {
+            label = s.value("label").toString();
+        }
+        if (!s.contains("start") || !s.contains("end") || !s.value("start").isDouble() || !s.value("end").isDouble()) {
+            labelMap.insert(label, {Range(), {}});
+        }
+        else {
+            Range range(qint64(s.value("start").toDouble())*8, qint64(s.value("end").toDouble())*8 - 1);
+            labelMap.insert(label, {range, {}});
+        }
+
+        if (!s.contains("parent") || s.value("parent").toString().isEmpty()) {
+            topLevel.append(label);
+        }
+        else if (labelMap.contains(s.value("parent").toString())) {
+            labelMap[s.value("parent").toString()].second.append(label);
+        }
+    }
+
+    for (auto label : topLevel) {
+        highlights.append(makeHighlight(label, labelMap));
+    }
+
+    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+    bitInfo->addHighlights(highlights);
+
+    return AnalyzerResult::result(bitInfo, recallablePluginState);
+}
+
+RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData)
+{
     QList<QColor> colors = {
         QColor(100, 220, 100, 85),
         QColor(100, 0, 255, 50),
@@ -355,30 +400,24 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         QColor(200, 140, 0, 100),
         QColor(250, 50, 0, 100)
     };
-    int colorIdx = 0;
-    QJsonArray sections = outputObj.value("sections").toArray();
-    for (auto section: sections) {
-        if (!section.isObject()) {
-            continue;
-        }
-        QJsonObject s = section.toObject();
-        if (!s.contains("start") || !s.contains("end") || !s.value("start").isDouble() || !s.value("end").isDouble()) {
-            continue;
-        }
-        Range range(qint64(s.value("start").toDouble())*8, qint64(s.value("end").toDouble())*8 - 1);
-        QString label = ".";
-        if (s.contains("label") && s.value("label").isString()) {
-            label = s.value("label").toString();
-        }
-        highlights.append(RangeHighlight(KAITAI_STRUCT_CATEGORY, label, range, colors.at(colorIdx)));
-        colorIdx = (colorIdx + 1) % colors.size();
+    auto pair = rangeData.value(label);
+    if (pair.second.isEmpty()) {
+        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, pair.first, colors.at(m_highlightColorIdx));
+        m_highlightColorIdx = (m_highlightColorIdx + 1) % colors.size();
+        return highlight;
     }
-    outputRangeFile.close();
-
-    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
-    bitInfo->addHighlights(highlights);
-
-    return AnalyzerResult::result(bitInfo, recallablePluginState);
+    else {
+        int parentColorIndex = m_highlightColorIdx;
+        m_highlightColorIdx = 0;
+        QList<RangeHighlight> children;
+        for (auto child : pair.second) {
+            children.append(makeHighlight(child, rangeData));
+        }
+        m_highlightColorIdx = parentColorIndex;
+        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, children, colors.at(m_highlightColorIdx));
+        m_highlightColorIdx = (m_highlightColorIdx + 1) % colors.size();
+        return highlight;
+    }
 }
 
 

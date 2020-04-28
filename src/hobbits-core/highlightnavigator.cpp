@@ -7,14 +7,15 @@ static const QString FOCUS_HIGHLIGHT_CATEGORY = "Highlight Nav Focus";
 HighlightNavigator::HighlightNavigator(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::HighlightNavigator),
+    m_allHighlightCount(0),
     m_shouldHighlightSelection(false)
 {
     ui->setupUi(this);
 
     connect(ui->tb_gotoNext, &QToolButton::pressed, this, &HighlightNavigator::selectNext);
     connect(ui->tb_gotoPrevious, &QToolButton::pressed, this, &HighlightNavigator::selectPrevious);
-    connect(ui->lw_highlights, SIGNAL(currentRowChanged(int)), this, SLOT(updateSelection()));
-    connect(ui->lw_highlights, SIGNAL(currentRowChanged(int)), this, SIGNAL(selectionChanged()));
+    connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SLOT(updateSelection()));
+    connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged()));
 
     Q_INIT_RESOURCE(hobbitscoreicons);
     ui->tb_gotoNext->setIcon(QIcon(":/hobbits-core/images/icons/arrow-right.png"));
@@ -26,34 +27,27 @@ HighlightNavigator::~HighlightNavigator()
     delete ui;
 }
 
-
 void HighlightNavigator::setShouldHighlightSelection(bool shouldHighlight)
 {
     m_shouldHighlightSelection = shouldHighlight;
 }
 
-
-int HighlightNavigator::currentlySelectedRow()
-{
-    return ui->lw_highlights->currentRow();
-}
-
 QString HighlightNavigator::currentlySelectedLabel()
 {
-    auto item = ui->lw_highlights->currentItem();
+    auto item = ui->tw_highlights->currentItem();
     if (item) {
-        return item->text();
+        return item->text(0);
     }
     return QString();
 }
 
 bool HighlightNavigator::selectRow(QString text)
 {
-    auto items = ui->lw_highlights->findItems(text, Qt::MatchFixedString | Qt::MatchCaseSensitive);
+    auto items = ui->tw_highlights->findItems(text, Qt::MatchFixedString | Qt::MatchCaseSensitive);
     if (items.empty()) {
         return false;
     }
-    ui->lw_highlights->setCurrentItem(items.at(0));
+    ui->tw_highlights->setCurrentItem(items.at(0));
     return true;
 }
 
@@ -83,6 +77,29 @@ void HighlightNavigator::setTitle(QString title)
     ui->lb_title->setText(title);
 }
 
+QTreeWidgetItem* HighlightNavigator::highlightToItem(const RangeHighlight &highlight, int &count) const
+{
+    QTreeWidgetItem* item = new QTreeWidgetItem();
+
+    item->setText(0, highlight.label());
+
+    QPixmap pix(16,16);
+    pix.fill(highlight.color());
+    item->setIcon(0, QIcon(pix));
+
+    QVariant userData;
+    userData.setValue(highlight);
+    item->setData(0, Qt::UserRole, userData);
+
+    item->setData(0, Qt::UserRole + 1, ++count);
+
+    for (auto child : highlight.children()) {
+        item->addChild(highlightToItem(child, count));
+    }
+
+    return item;
+}
+
 void HighlightNavigator::refresh()
 {
     // has the important stuff actually changed?
@@ -103,7 +120,7 @@ void HighlightNavigator::refresh()
         }
     }
 
-    ui->lw_highlights->clear();
+    ui->tw_highlights->clear();
     m_highlights.clear();
 
     ui->tb_gotoNext->setEnabled(false);
@@ -124,45 +141,50 @@ void HighlightNavigator::refresh()
 
     m_highlights = m_container->bitInfo()->highlights(m_category);
 
-    ui->lw_highlights->clear();
-    QStringList labels;
+    QList<QTreeWidgetItem*> items;
+    m_allHighlightCount = 0;
     for (auto highlight: m_container->bitInfo()->highlights(m_category)) {
-        labels.append(highlight.label());
+        items.append(highlightToItem(highlight, m_allHighlightCount));
     }
-    ui->lw_highlights->addItems(labels);
-    ui->lw_highlights->setCurrentRow(0);
+    ui->tw_highlights->addTopLevelItems(items);
+    if (items.size() > 0) {
+        ui->tw_highlights->setCurrentItem(items.first());
+    }
 }
 
 void HighlightNavigator::selectNext()
 {
-    if (currentlySelectedRow() < 0) {
+    if (!ui->tw_highlights->currentItem()) {
         return;
     }
-    selectRow(currentlySelectedRow() + 1);
+    auto next = ui->tw_highlights->itemBelow(ui->tw_highlights->currentItem());
+    if (next) {
+        ui->tw_highlights->setCurrentItem(next);
+        return;
+    }
+    next = ui->tw_highlights->topLevelItem(0);
+    if (next) {
+        ui->tw_highlights->setCurrentItem(next);
+        return;
+    }
 }
 
 void HighlightNavigator::selectPrevious()
 {
-    if (currentlySelectedRow() < 0) {
+    if (!ui->tw_highlights->currentItem()) {
         return;
     }
-    selectRow(currentlySelectedRow() - 1);
-}
-
-void HighlightNavigator::selectRow(int row)
-{
-    if (currentlySelectedRow() < 0) {
+    auto prev = ui->tw_highlights->itemAbove(ui->tw_highlights->currentItem());
+    if (prev) {
+        ui->tw_highlights->setCurrentItem(prev);
         return;
     }
-    if (row < 0) {
-        row = m_highlights.size() - 1;
+    prev = ui->tw_highlights->topLevelItem(ui->tw_highlights->topLevelItemCount()-1);
+    if (prev) {
+        ui->tw_highlights->setCurrentItem(prev);
+        return;
     }
-    else if (row >= m_highlights.size()) {
-        row = 0;
-    }
-    ui->lw_highlights->setCurrentRow(row);
 }
-
 
 void HighlightNavigator::updateSelection()
 {
@@ -170,11 +192,18 @@ void HighlightNavigator::updateSelection()
         return;
     }
 
-    int currIndex = ui->lw_highlights->currentRow();
-    if (currIndex >= m_highlights.size() || currIndex < 0) {
+    auto curr = ui->tw_highlights->currentItem();
+    if (!curr) {
         return;
     }
-    RangeHighlight selected = m_highlights.at(currIndex);
+
+    RangeHighlight selected = curr->data(0, Qt::UserRole).value<RangeHighlight>();
+    // Make sure this exists in the container
+    if (m_container->bitInfo()->highlights(selected.category(), selected.label()).isEmpty()) {
+        return;
+    }
+
+    int selectedNum = curr->data(0, Qt::UserRole + 1).toInt();
 
     QColor focusColor = SettingsManager::getInstance().getUiSetting(SettingsData::FOCUS_COLOR_KEY).value<QColor>();
     RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor);
@@ -184,6 +213,9 @@ void HighlightNavigator::updateSelection()
         int bitOffset = qMax(
                 0,
                 int(focus.range().start() - m_container->bitInfo()->frames().at(containingFrame).start() - 16));
+        if (bitOffset < 256) {
+            bitOffset = 0;
+        }
         int frameOffset = qMax(0, containingFrame - 16);
 
         if (m_shouldHighlightSelection) {
@@ -201,5 +233,5 @@ void HighlightNavigator::updateSelection()
 
     ui->lb_selected->setText(
                 QString("%1 of %2").arg(
-                        currIndex + 1).arg(m_highlights.size()));
+                        selectedNum).arg(m_allHighlightCount));
 }
