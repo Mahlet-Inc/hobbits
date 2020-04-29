@@ -35,7 +35,7 @@ public:
     bool containsHighlightCategory(QString category) const;
     QVariant metadata(QString key) const;
 
-    int frameOffsetContaining(Range target) const;
+    int frameOffsetContaining(Range target, Range frameRange = Range()) const;
 
     friend QDataStream& operator<<(QDataStream&, const BitInfo&);
     friend QDataStream& operator>>(QDataStream&, BitInfo&);

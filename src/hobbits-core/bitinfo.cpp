@@ -119,6 +119,11 @@ QList<RangeHighlight> BitInfo::highlights(QString category, QString label) const
         if (highlight.label() == label) {
             matching.append(highlight);
         }
+        for (auto child : highlight.allDescendants()) {
+            if (child.label() == label) {
+                matching.append(child);
+            }
+        }
     }
     return matching;
 }
@@ -165,19 +170,45 @@ void BitInfo::initFrames()
     emit changed();
 }
 
-int BitInfo::frameOffsetContaining(Range target) const
+int BitInfo::frameOffsetContaining(Range target, Range frameRange) const
 {
     if (frames().isEmpty()) {
         return -1;
     }
-    int offset = frames().size() / 2;
-    int index = offset;
+    if (!frameRange.isNull()) {
+        if (frameRange.end() > frames().size() || frameRange.start() < 0) {
+            return -1;
+        }
+    }
+    else {
+        frameRange = Range(0, frames().size() - 1);
+    }
+
+    if (frameRange.size() < 50) {
+        for (qint64 i = frameRange.start(); i <= frameRange.end(); i++) {
+            unsigned int compare = target.compare(frames().at(int(i)));
+            if (compare & Frame::Overlapping) {
+                return int(i);
+            }
+        }
+        return -1;
+    }
+
+    qint64 offset = frameRange.start() + frameRange.size() / 2;
+    qint64 index = offset;
     int countdown = 7;
+    qint64 lowNo = frameRange.start() - 1;
     while (true) {
-        unsigned int compare = target.compare(frames().at(index));
+        unsigned int compare = target.compare(frames().at(int(index)));
 
         if (compare & Frame::Overlapping) {
-            return index;
+            if (index > lowNo + 1) {
+                int earlierIndex = frameOffsetContaining(target, Range(lowNo + 1, index - 1));
+                if (earlierIndex >= 0) {
+                    return earlierIndex;
+                }
+            }
+            return int(index);
         }
 
         if (countdown < 1) {
@@ -197,7 +228,7 @@ int BitInfo::frameOffsetContaining(Range target) const
             index -= offset;
         }
 
-        if (index < 0 || index >= frames().size()) {
+        if (index < frameRange.start() || index > frameRange.end()) {
             return -1;
         }
     }

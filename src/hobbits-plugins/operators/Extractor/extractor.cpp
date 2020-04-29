@@ -169,7 +169,7 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
     QString label = recallablePluginState.value("highlight_label").toString();
     auto highlights = inputContainer->bitInfo()->highlights(category, label);
     if (highlights.size() < 1) {
-        return OperatorResult::error("No highlight found matching required label and category");
+        return OperatorResult::error(QString("No highlight found matching required label (%1) and category (%2)").arg(label).arg(category));
     }
     RangeHighlight highlight = highlights.at(0);
     Range range = highlight.range();

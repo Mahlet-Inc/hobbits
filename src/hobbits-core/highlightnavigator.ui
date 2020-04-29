@@ -54,7 +54,7 @@
         <string>Previous</string>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
+        <iconset resource="hobbitscoreicons.qrc">
          <normaloff>:/hobbits-core/images/icons/arrow-left.png</normaloff>:/hobbits-core/images/icons/arrow-left.png</iconset>
        </property>
        <property name="iconSize">
@@ -84,7 +84,7 @@
         <string>Next</string>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
+        <iconset resource="hobbitscoreicons.qrc">
          <normaloff>:/hobbits-core/images/icons/arrow-right.png</normaloff>:/hobbits-core/images/icons/arrow-right.png</iconset>
        </property>
        <property name="iconSize">
@@ -98,7 +98,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QListWidget" name="lw_highlights">
+    <widget class="QTreeWidget" name="tw_highlights">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -111,15 +111,20 @@
      <property name="alternatingRowColors">
       <bool>true</bool>
      </property>
-     <property name="spacing">
-      <number>0</number>
-     </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="hobbitscoreicons.qrc"/>
  </resources>
  <connections/>
 </ui>
