@@ -1,3 +1,10 @@
+# [0.30.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.29.0...v0.30.0) (2020-04-29)
+
+
+### Features
+
+* improve kaitai integration with new nested range highlights ([6b781a8](https://github.com/Mahlet-Inc/hobbits/commit/6b781a8725eab9229306f9bf7b53f70c06e6844e))
+
 # [0.29.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.28.0...v0.29.0) (2020-04-27)
 
 
