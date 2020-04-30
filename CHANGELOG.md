@@ -1,3 +1,10 @@
+## [0.30.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.1...v0.30.2) (2020-04-30)
+
+
+### Bug Fixes
+
+* put bitarray swap in the system temp path vs a relative path ([599a657](https://github.com/Mahlet-Inc/hobbits/commit/599a657317e02c59bd0ed709378b0d4dc85e7b5f)), closes [#37](https://github.com/Mahlet-Inc/hobbits/issues/37)
+
 ## [0.30.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.0...v0.30.1) (2020-04-30)
 
 
