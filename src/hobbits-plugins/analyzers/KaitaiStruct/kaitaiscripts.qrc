@@ -18,7 +18,6 @@
         <file>ksy/security/ssh_public_key.ksy</file>
         <file>ksy/security/openpgp_message.ksy</file>
         <file>ksy/security/efivar_signature_list.ksy</file>
-        <file>ksy/scientific/nt_mdt.ksy</file>
         <file>ksy/scientific/nt_mdt_pal.ksy</file>
         <file>ksy/scientific/avantes_roh60.ksy</file>
         <file>ksy/scientific/specpr.ksy</file>
@@ -54,7 +53,6 @@
         <file>ksy/media/creative_voice_file.ksy</file>
         <file>ksy/media/blender_blend.ksy</file>
         <file>ksy/media/avi.ksy</file>
-        <file>ksy/media/android_opengl_shaders_cache.ksy</file>
         <file>ksy/media/fasttracker_xm_module.ksy</file>
         <file>ksy/media/s3m.ksy</file>
         <file>ksy/macos/ds_store.ksy</file>
@@ -105,10 +103,8 @@
         <file>ksy/filesystem/zx_spectrum_tap.ksy</file>
         <file>ksy/filesystem/vmware_vmdk.ksy</file>
         <file>ksy/filesystem/vfat.ksy</file>
-        <file>ksy/filesystem/vdi.ksy</file>
         <file>ksy/filesystem/tr_dos_image.ksy</file>
         <file>ksy/filesystem/mbr_partition_table.ksy</file>
-        <file>ksy/filesystem/lvm2.ksy</file>
         <file>ksy/filesystem/luks.ksy</file>
         <file>ksy/filesystem/iso9660.ksy</file>
         <file>ksy/filesystem/gpt_partition_table.ksy</file>
@@ -124,7 +120,6 @@
         <file>ksy/executable/java_class.ksy</file>
         <file>ksy/executable/elf.ksy</file>
         <file>ksy/executable/dos_mz.ksy</file>
-        <file>ksy/executable/dex.ksy</file>
         <file>ksy/database/tsm.ksy</file>
         <file>ksy/database/sqlite3.ksy</file>
         <file>ksy/database/gettext_mo.ksy</file>
