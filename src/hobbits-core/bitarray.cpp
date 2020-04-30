@@ -3,6 +3,7 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 #include <QString>
+#include <QDir>
 
 static char BIT_MASKS[8] = {
     -128, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
@@ -17,7 +18,7 @@ static char INVERSE_BIT_MASKS[8] = {
 #define MAX_ACTIVE_CACHE_CHUNKS 5
 
 BitArray::BitArray() :
-    m_dataFile("bitarray"),
+    m_dataFile(QDir::temp().absoluteFilePath("bitarray")),
     m_size(0),
     m_dataCaches(nullptr)
 {

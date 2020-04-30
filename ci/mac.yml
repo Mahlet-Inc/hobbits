@@ -50,7 +50,7 @@ steps:
 
   - script: |
       cd $(Build.SourcesDirectory)/src
-      make -j$(nproc)
+      make
     displayName: 'Build hobbits'
 
   - script: |
