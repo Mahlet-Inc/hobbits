@@ -1,3 +1,10 @@
+## [0.30.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.0...v0.30.1) (2020-04-30)
+
+
+### Bug Fixes
+
+* remove kaitai struct definiteions with incompatible licenses ([d9513d6](https://github.com/Mahlet-Inc/hobbits/commit/d9513d69a7bbc7b1d8a0ba458387f4a9a9c3d960))
+
 # [0.30.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.29.0...v0.30.0) (2020-04-29)
 
 
