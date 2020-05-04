@@ -5,7 +5,7 @@ fully integrated set of tools for preprocessing, analyzing, and displaying data
 in a variety of ways. This guide explains how to use the different features of
 the Hobbits GUI, and then presents a few example workflows.
 
-## Example Usage Video
+### Example Usage Video
 
 ![YOUTUBE](6ygkhze36qM)
 
@@ -41,7 +41,9 @@ time-division multiplexed data in a bit raster, it is useful to have each
 multiplexer frame on its own line so that constants, counters, and other
 patterns can be easily identified.
 
-## Displays
+## Plugins
+
+### Displays
 
 One of the most prominent features of the GUI is the variety of displays that it
 provides for looking at data. Switching between displays is as simple as
@@ -58,7 +60,7 @@ same time. Split views can be added or removed via:
  - The `Ctrl-Shift-V` hotkey adds a view to the right
  - The `Ctrl-Shift-X` hotkey removes the rightmost view
 
-## Operators
+### Operators
 
 Operators are displayed in a collapsible panel that appears at the bottom of the
 GUI by default. The panel's visibility can be toggled via:
@@ -77,7 +79,7 @@ only left with the last 206 bits of each frame for further evaluation.
 When an operator modifies data, the original data is still available to work
 with.
 
-## Analyzers
+### Analyzers
 
 Analyzers appear in a collapsible panel on the right side of the GUI by default.
 The panel's visibility can be toggled via:
@@ -93,7 +95,7 @@ one of those widths to the container. You can use the Find analyzer to find
 instances of bit/byte/ASCII sequences in data, and then highlight and quickly
 navigate to them.
 
-## Importer/Exporters
+### Importer/Exporters
 
 Importer/Exporters appear in the `File->Import Bits From` and
 `File->Export Bits To` menus.

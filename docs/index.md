@@ -1,5 +1,7 @@
 # Overview
 
+## Summary
+
 Hobbits is a software platform for analyzing, processing, and visualizing bits.
 The Hobbits GUI is the central tool of the platform, and will be the primary
 focus of this document. However, the configurability and extensibility of the
@@ -7,7 +9,7 @@ analysis and processing parts of the platform make it an attractive option for
 "headless" operation (e.g. a command line utility, or an analysis/processing
 server.)
 
-## Why?
+### Why?
 
 Hobbits was developed to accelerate manual data analysis tasks that were
 starting to burden Mahlet's hardware and software development. The de facto
@@ -22,13 +24,13 @@ dropped, swapped, and executed on a variety of platforms without dependencies
 or restrictions. This is a priceless advantage when developing analysis
 tradecraft across a variety of communities, networks, or access levels.
 
-## What Now?
+### What Now?
 
 The general architecture of Hobbits has proven to be highly effective and agile,
 so the current development priorities are refining the GUI, and adding more
 plugins.
 
-# Hobbits GUI
+## Hobbits GUI
 
 The primary concern of Hobbits GUI is making machine-level data presentable to
 humans so that they can analyze/fix/generate it easily. This usually involves
@@ -120,7 +122,7 @@ frequently, they can save it as a "Template" and perform it later with a single
 step. Templates can also be used to process bits on the command line with the
 hobbits-runner CLI.
 
-# Technical Architecture
+## Technical Architecture
 
 The rest of this document covers the technical architecture of the Hobbits 
 platform.

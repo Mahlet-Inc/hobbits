@@ -10,4 +10,7 @@ remote_branch: master
 extra_javascript:
   - js/youtube.js
 
-copyright: 2020 Mahlet, Inc.
+copyright: © 2020 Mahlet, Inc.
+
+extra:
+  logo: 'img/mahlet_logo_big.png'
