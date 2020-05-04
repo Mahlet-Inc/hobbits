@@ -5,6 +5,10 @@ fully integrated set of tools for preprocessing, analyzing, and displaying data
 in a variety of ways. This guide explains how to use the different features of
 the Hobbits GUI, and then presents a few example workflows.
 
+### Example Usage Video
+
+![YOUTUBE](6ygkhze36qM)
+
 ## GUI Layout
 
 ![The Hobbits GUI](labelled_hobbits_screenshot.png)
@@ -14,6 +18,11 @@ the Hobbits GUI, and then presents a few example workflows.
  3. Analyzer Panel
  4. Controls for the Displays
  5. Operator Panel
+
+## Preferences Menu
+
+Navigating to `Edit->Preferences...` opens the preferences dialog where the
+application configuration can be viewed and edited.
 
 ## Bit Containers
 
@@ -32,7 +41,9 @@ time-division multiplexed data in a bit raster, it is useful to have each
 multiplexer frame on its own line so that constants, counters, and other
 patterns can be easily identified.
 
-## Displays
+## Plugins
+
+### Displays
 
 One of the most prominent features of the GUI is the variety of displays that it
 provides for looking at data. Switching between displays is as simple as
@@ -49,7 +60,7 @@ same time. Split views can be added or removed via:
  - The `Ctrl-Shift-V` hotkey adds a view to the right
  - The `Ctrl-Shift-X` hotkey removes the rightmost view
 
-## Operators
+### Operators
 
 Operators are displayed in a collapsible panel that appears at the bottom of the
 GUI by default. The panel's visibility can be toggled via:
@@ -68,7 +79,7 @@ only left with the last 206 bits of each frame for further evaluation.
 When an operator modifies data, the original data is still available to work
 with.
 
-## Analyzers
+### Analyzers
 
 Analyzers appear in a collapsible panel on the right side of the GUI by default.
 The panel's visibility can be toggled via:
@@ -84,11 +95,23 @@ one of those widths to the container. You can use the Find analyzer to find
 instances of bit/byte/ASCII sequences in data, and then highlight and quickly
 navigate to them.
 
+### Importer/Exporters
+
+Importer/Exporters appear in the `File->Import Bits From` and
+`File->Export Bits To` menus.
+
+Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
+For example, if you want to open a file as bits, selecting the `File Data`
+import plugin will let you select a file and then load it in as a Bit Container.
+
 ## Command line execution
 
 When running Hobbits from the command line, a variety of configuration and
 data loading options are provided. Simply run it with the `--help` option to see
 which options are available.
+
+The hobbits-runner program can be used to apply a saved Hobbits template to an
+input file without needing to open the GUI.
 
 ## Plugin loading
 
@@ -104,3 +127,10 @@ plugin that is not part of the core distribution, you can either:
 - or, specify your plugin path in your GUI config. In Linux, the config is an
   ini file that can be found at `~/.config/Hobbits/Hobbits GUI.conf`, and the
   plugin path configuration is the `path` variable in the `[Plugins]` section.
+
+## Get in touch
+
+If you are having trouble using hobbits, or if you have a suggestion for hobbits
+or the documentation, please open an issue on
+[the GitHub page](https://github.com/Mahlet-Inc/hobbits/issues)
+or ask about it on [the Discord channel](https://discord.gg/wRQJpZZ)

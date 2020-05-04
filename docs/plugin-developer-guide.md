@@ -4,9 +4,14 @@ The Hobbits framework is designed to coordinate the capabilities of various
 plugins into a smooth, cohesive experience. The plugins are where all of the
 "actual work" gets done.
 
-There are currently three types of plugins in Hobbits: Displays, Analyzers, and
-Operators. This document will cover general plugin implementation concepts, and
-then walk through the development process for each type of plugin.
+There are currently four types of plugins in Hobbits: Displays, Analyzers,
+Operators, and Importer/Exporters. This document will cover general plugin
+implementation concepts, and then walk through the development process for each
+type of plugin.
+
+## Example Plugin Development Video
+
+![YOUTUBE](Dg3vknwLO74)
 
 ## General Terms and Concepts
 
@@ -29,8 +34,15 @@ The binary data is held in a `BitArray`, which abstracts byte boundaries from
 the user, and has a modest-but-growing assortment of performance efficiencies
 and helper functions.
 
-General metadata is read and written with the `getMetadata` and `setMetadata`
-methods, and it is stored as a simple map of strings to string lists. Plugins
+Metadata is stored in a `BitInfo` object which is read and written with the
+`bitInfo` and `setBitInfo` methods.
+
+The framing of a bitstream is an important part of its metadata for display
+and processing purposes. The frames of a `BitContainer` can be set in the
+`BitInfo::setFrames` method.
+
+General purpose metadata can be set with `BitInfo::setMetadata` and read with
+`BitInfo::metadata`. Plugins
 can use container metadata as a general purpose bus for communicating with other
 plugins, or even as a cache for their own purposes. For example, the "Find"
 Analyzer plugin stores the results of a find operation in a container's
@@ -38,26 +50,19 @@ metadata so that when that container loses focus, the information will still be
 available when the container comes back into focus.
 
 Highlights are a separate kind of metadata that deal with ranges of bits within
-a bit container. They are read and written with the `getHighlights` and
-`setHighlights` methods, and they are stored as a map of strings to range lists
-(a range list is a list of start and end indices.) The "Find" Analyzer plugin
+a bit container. They are read and written with various functions including
+`BitInfo::addHighlights` and `BitInfo::highlights`
+, and they are stored as a map of strings to `RangeHighlight` lists.
+The "Find" Analyzer plugin
 sets highlights in the ranges where it finds its search string, and several
-Display plugins check for the existence of highlights with the "find" or
-"find-focus"keys, and render visual highlights over those sections.
+Display plugins check for the existence and colors of `RangeHighlight`s in order
+to render visual highlights across those ranges. Plugins like the `Extractor`
+operator use `RangeHighlight`s for their processing.
 
-Analyzer plugins do not have write access to bit containers, so they cannot use
-the `setMetadata`, and `setHighlights` methods. As a result, they must include
-the metadata and highlight entries they wish to add to the container in the
-`AnalyzerResult`s that they return. The `AnalyzerResult` has `addRanges` and
-`addMetadata` methods for this purpose.
-
-**Also, in order for an analyzer to set the frames of a bit container, it must**
-**return an `AnalyzerResult` with the desired frames set via `addRanges` with**
-**the "frames" key, e.g. `result.addRanges("frames", frameRanges)`, and,**
-**ideally, with the maximum frame width set as well via the general metadata,**
-**e.g. `result.addMetadata("max_frame_width", maxWidth)`**. As a result of this
-special behavior, the "frames" range key, and the "max_frame_width" metadata
-key should be considered reserved, and used only for this situation.
+Analyzer plugins do not have write access to bit containers, so they cannot edit
+the `BitInfo` directly. As a result, they must include
+a container's updated `BitInfo` in the
+`AnalyzerResult`s that they return.
 
 ### Common Plugin Interface Methods
 
@@ -78,9 +83,17 @@ The Analyzer and Operator interfaces have several simple methods in common:
  - `getStateFromUi` gets the plugin's current state/configuration based on how
    its UI is filled out. If there are invalid or incomplete entries, the plugin
    can return an empty state to indicate that it is not ready for execution.
+ - `setPluginStateInUi` (conversely from `getStateFromUI`) is given a
+   pluginState, and it must fill out the UI in a way that would return that
+   state if `getStateFromUi` were called immediately afterwards
  - `canRecallPluginState` checks a plugin state to see if it can be used to
    execute the plugin. If the state is empty or incomplete, it must return
    false.
+ - `previewBits` takes a read-only bit container and it can be used to prepare the
+   plugin for execution or enhance the UI options it presents. The Width Framer
+   analyzer plugins generates auto-correlation data in the `previewBits` method,
+   which is used to display a width-selector graph with suggested widths. It is
+   fine to leave this method's implementation empty.
 
 #### Plugin State
 
@@ -90,7 +103,8 @@ guide its execution. The state that it passed in can be provided by the plugin's
 own `getStateFromUi` method, or it can come from a saved template that was
 generated from a state returned by a plugin result (`OperatorResult` or
 `AnalyzerResult`.) Plugin results will usually just return the state that was
-passed in (e.g. `result->setPluginState(recallablePluginState)`,) but sometimes
+passed in (e.g. `AnalyzerResult::result(bitInfo, recallablePluginState)`,) but
+sometimes
 that state needs to be enriched with execution details that were added by the
 plugin, such as a random number seed, so that the execution can be duplicated
 exactly with the returned state.
@@ -138,12 +152,6 @@ state that will enable the operation to be duplicated exactly (see
 separate thread from the main GUI thread, so you cannot use Qt features that
 depend on being in the main thread, e.g., showing a QMessageBox.**
 
-`previewBits` takes a read-only bit container and it can be used to prepare the
-plugin for execution or enhance the UI options it presents. The Width Framer
-analyzer plugins generates auto-correlation data in the `previewBits` method,
-which is used to display a width-selector graph with suggested widths. It is
-fine to leave this method's implementation empty.
-
 ### Display Interface
 
 Displays show the data in some sort of useful format (e.g. a bit raster, or a
@@ -183,7 +191,13 @@ data.
 ## Helpful Tools
 
 In order to simplify the process of developing plugins, there are Qt Creator
-wizards and CMake/Conan Python cookiecutters that take care of most of the
-boilerplate code.
+wizards that take care of most of the boilerplate code.
 
 The wizards can be installed using the wizard_installer.sh script.
+
+## Get in touch
+
+If you are having trouble making a plugin, or if you have a suggestion for
+the hobbits API or documentation please open an issue on
+[the GitHub page](https://github.com/Mahlet-Inc/hobbits/issues)
+or ask about it on [the Discord channel](https://discord.gg/wRQJpZZ)

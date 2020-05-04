@@ -329,11 +329,9 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     QSharedPointer<BitInfo> bitInfo(new BitInfo);
     bitInfo->setFrames(outputFrames);
     outputContainer->setBits(outputBits, bitInfo);
+    outputContainer->setName(QString("h-framed <- %1").arg(inputContainers.at(0)->name()));
 
-    result->setPluginState(recallablePluginState);
-    result->setOutputContainers({outputContainer});
-
-    return result;
+    return OperatorResult::result({outputContainer}, recallablePluginState);
 }
 
 void HeaderFramer::previewBits(QSharedPointer<BitContainerPreview> container)

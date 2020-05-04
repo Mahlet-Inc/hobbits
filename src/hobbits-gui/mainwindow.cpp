@@ -714,7 +714,7 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
                     plugin,
                     inputContainers,
                     m_bitContainerManager,
-                    ui->le_outputName->text());
+                    QString());
         }
     }
 }

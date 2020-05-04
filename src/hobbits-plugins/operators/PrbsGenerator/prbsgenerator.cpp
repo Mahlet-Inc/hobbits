@@ -194,7 +194,6 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 {
     Q_UNUSED(inputContainers)
     QList<QSharedPointer<BitContainer>> outputContainers;
-    QSharedPointer<OperatorResult> result(new OperatorResult());
 
     int bitsWanted = recallablePluginState.value("bits_wanted").toInt();
     QString seed = recallablePluginState.value("polynomial").toString();
@@ -203,9 +202,7 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
     // Displays warning if any input field is empty
     if (bitsWanted == 0 || seed == "" || usedTaps == "") {
-        QMessageBox::warning(nullptr, "Error", "Error: Invalid Input. Please try again.");
-        result->setOutputContainers(outputContainers)->setPluginState(recallablePluginState);
-        return result;
+        return OperatorResult::error("Invalid Input. Please try again.");
     }
 
     QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
@@ -264,9 +261,7 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
     bitContainer->setBits(outputBits);
     outputContainers.append(bitContainer);
 
-    result->setOutputContainers(outputContainers)->setPluginState(recallablePluginState);
-    return result;
-
+    return OperatorResult::result(outputContainers, recallablePluginState);
 }
 
 void PrbsGenerator::previewBits(QSharedPointer<BitContainerPreview> container)

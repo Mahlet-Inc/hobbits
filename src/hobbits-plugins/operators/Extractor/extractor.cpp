@@ -221,6 +221,27 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
         }
     }
 
+    QString name = highlight.label();
+    QString prefix = "";
+    if (takeBefore) {
+        prefix = "pre";
+    }
+    if (takeAfter) {
+        if (takeBefore) {
+            prefix += "+";
+        }
+        prefix += "post";
+    }
+    if (!prefix.isEmpty()) {
+        if (takeHighlight) {
+            prefix += "+";
+        }
+        else {
+            prefix += "-";
+        }
+    }
+    outputContainer->setName(prefix + name);
+
     outputContainer->setBits(outBits);
 
     return OperatorResult::result({outputContainer}, recallablePluginState);

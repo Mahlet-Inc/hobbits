@@ -219,9 +219,6 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
         }
     }
 
-    QSharedPointer<OperatorResult> result(new OperatorResult());
-    QJsonObject pluginState = recallablePluginState;
-
     if (errorFile.open(QIODevice::ReadOnly)) {
         QString output = errorFile.readAll();
         if (!output.isEmpty()) {
@@ -253,11 +250,10 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
 
     outputContainer->deserializeJson(outputData);
+    outputContainer->setName(QString("python <- %1").arg(inputContainers.at(0)->name()));
     outputBitFile.close();
 
-    result->setPluginState(pluginState);
-    result->setOutputContainers({outputContainer});
-    return std::move(result);
+    return OperatorResult::result({outputContainer}, recallablePluginState);
 }
 
 void PythonRunner::previewBits(QSharedPointer<BitContainerPreview> container)

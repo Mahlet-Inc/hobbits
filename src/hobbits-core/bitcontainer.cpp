@@ -7,6 +7,7 @@
 BitContainer::BitContainer(QObject *parent) :
     QObject(parent),
     m_name("Some Bits"),
+    m_nameWasSet(false),
     m_id(QUuid::createUuid())
 {
     setBitInfo(QSharedPointer<BitInfo>(new BitInfo()));
@@ -135,9 +136,15 @@ QString BitContainer::name() const
 void BitContainer::setName(QString name)
 {
     m_mutex.lock();
+    this->m_nameWasSet = true;
     this->m_name = name;
     m_mutex.unlock();
     emit changed();
+}
+
+bool BitContainer::nameWasSet() const
+{
+    return m_nameWasSet;
 }
 
 QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
