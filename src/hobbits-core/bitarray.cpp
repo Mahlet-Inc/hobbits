@@ -79,6 +79,12 @@ BitArray::BitArray(const BitArray &other) :
 {
 }
 
+BitArray::BitArray(const BitArray *other) :
+    BitArray(other->dataReader(), other->sizeInBits())
+{
+}
+
+
 BitArray::~BitArray()
 {
     deleteCache();

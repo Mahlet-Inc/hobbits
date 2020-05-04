@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1286</width>
-    <height>772</height>
+    <width>1299</width>
+    <height>799</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -205,19 +205,6 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Output Name</string>
-             </property>
-             <property name="buddy">
-              <cstring>le_outputName</cstring>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="le_outputName"/>
-           </item>
-           <item>
             <widget class="QPushButton" name="pb_operate">
              <property name="text">
               <string>Apply Operation</string>
@@ -287,7 +274,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1286</width>
+     <width>1299</width>
      <height>27</height>
     </rect>
    </property>
@@ -459,28 +446,10 @@
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>operatorTabs</tabstop>
-  <tabstop>le_outputName</tabstop>
   <tabstop>pb_operate</tabstop>
  </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>le_outputName</sender>
-   <signal>returnPressed()</signal>
-   <receiver>pb_operate</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>944</x>
-     <y>714</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1171</x>
-     <y>721</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

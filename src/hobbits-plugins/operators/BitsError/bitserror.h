@@ -36,12 +36,13 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
-    QSharedPointer<OperatorResult> gaussianFlip(
-            QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker);
-
 private:
+    QSharedPointer<const OperatorResult> getGaussianErrorBits(QSharedPointer<const BitContainer> input,
+                                                      const QJsonObject &recallablePluginState,
+                                                      QSharedPointer<ActionProgress> progressTracker);
+    QSharedPointer<const OperatorResult> getPeriodicErrorBits(QSharedPointer<const BitContainer> input,
+                                                        const QJsonObject &recallablePluginState,
+                                                        QSharedPointer<ActionProgress> progressTracker);
     Ui::BitsError *ui;
     QSharedPointer<PluginCallback> m_pluginCallback;
 

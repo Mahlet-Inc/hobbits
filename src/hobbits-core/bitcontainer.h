@@ -49,6 +49,7 @@ public:
 
     QString name() const;
     void setName(QString name);
+    bool nameWasSet() const;
 
     void setActionLineage(QSharedPointer<const PluginActionLineage> lineage);
     QSharedPointer<const PluginActionLineage> getActionLineage() const;
@@ -70,6 +71,7 @@ public:
 
 private:
     QString m_name;
+    bool m_nameWasSet;
     QSharedPointer<BitArray> m_bits;
     QSharedPointer<BitInfo> m_bitInfo;
 

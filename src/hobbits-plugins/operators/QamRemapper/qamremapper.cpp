@@ -207,17 +207,11 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
                         failedRemappings));
     }
 
-    QList<QSharedPointer<BitContainer>> containers;
     QSharedPointer<BitContainer> container(new BitContainer());
     container->setBits(outputArray);
-    containers << container;
+    container->setName(QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->name()));
 
-    pluginState.insert("container_name", QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->name()));
-
-    QSharedPointer<const OperatorResult> result((new OperatorResult())->setOutputContainers(containers)->setPluginState(
-            pluginState));
-
-    return result;
+    return OperatorResult::result({container}, pluginState);
 }
 
 void QamRemapper::previewBits(QSharedPointer<BitContainerPreview> container)

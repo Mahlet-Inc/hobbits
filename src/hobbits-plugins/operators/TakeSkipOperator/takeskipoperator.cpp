@@ -82,7 +82,6 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         const QJsonObject &recallablePluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    QList<QSharedPointer<BitContainer>> outputContainers;
     QSharedPointer<const OperatorResult> nullResult;
 
     if (inputContainers.size() < getMinInputContainers(recallablePluginState)
@@ -210,24 +209,15 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     if (frameBased) {
         bitContainer->bitInfo()->setFrames(outputFrames);
     }
-    outputContainers.append(bitContainer);
-    QJsonObject pluginState(recallablePluginState);
     if (inputContainers.size() > 1) {
-        pluginState.insert(
-                "container_name",
-                QString("%1 Interleave")
-                .arg(recallablePluginState.value("take_skip_string").toString()));
+        bitContainer->setName(QString("%1 Interleave").arg(recallablePluginState.value("take_skip_string").toString()));
     }
     else {
-        pluginState.insert(
-                "container_name",
-                QString("%1 <- %2")
-                .arg(recallablePluginState.value("take_skip_string").toString())
-                .arg(inputContainers.at(0)->name()));
+        bitContainer->setName(QString("%1 <- %2")
+                                .arg(recallablePluginState.value("take_skip_string").toString())
+                                .arg(inputContainers.at(0)->name()));
     }
-    return QSharedPointer<const OperatorResult>(
-            (new OperatorResult())->setOutputContainers(
-                    outputContainers)->setPluginState(pluginState));
+    return OperatorResult::result({ bitContainer }, recallablePluginState);
 }
 
 void TakeSkipOperator::previewBits(QSharedPointer<BitContainerPreview> container)

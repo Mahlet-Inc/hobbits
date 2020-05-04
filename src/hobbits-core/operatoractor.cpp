@@ -38,7 +38,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorActo
             }
             else if (pluginState.isEmpty()) {
                 emit reportError(QString(
-                        "Plugin '%1' is in an invalid state and can't be excecuted.  Double check the input fields.").arg(
+                        "Plugin '%1' is in an invalid state and can't be executed.  Double check the input fields.").arg(
                                          op->getName()));
             }
             return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
@@ -132,23 +132,23 @@ void OperatorActor::postProcess()
 
     // Add output containers to container manager
     if (result->getOutputContainers().size() > 0) {
-        if (m_outputName.isEmpty()) {
-            if (result->getPluginState().contains("container_name")
-                && result->getPluginState().value("container_name").isString()) {
-                m_outputName = result->getPluginState().value("container_name").toString();
-            }
-            else {
-                m_outputName = m_op->getName() + " Output";
-            }
-        }
         int number = 1;
         QModelIndex lastAdded;
         for (QSharedPointer<BitContainer> output : result->getOutputContainers()) {
+            QString containerName = m_outputName;
+            if (m_outputName.isEmpty()) {
+                if (output->nameWasSet()) {
+                    containerName = output->name();
+                }
+                else {
+                    containerName = m_op->getName() + " Output";
+                }
+            }
             if (result->getOutputContainers().length() > 1) {
-                output->setName(QString("%2: %1").arg(m_outputName).arg(number));
+                output->setName(QString("%2: %1").arg(containerName).arg(number));
             }
             else {
-                output->setName(m_outputName);
+                output->setName(containerName);
             }
             number++;
             lastAdded = m_bitContainerManager->getTreeModel()->addContainer(output);

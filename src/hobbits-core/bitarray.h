@@ -20,6 +20,7 @@ public:
     BitArray(QIODevice *dataStream, qint64 sizeInBits);
     BitArray(const BitArray &other, qint64 sizeInBits);
     BitArray(const BitArray &other);
+    BitArray(const BitArray *other);
 
     BitArray& operator=(const BitArray &other);
 
