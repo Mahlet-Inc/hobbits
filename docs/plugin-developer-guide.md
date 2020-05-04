@@ -9,6 +9,10 @@ Operators, and Importer/Exporters. This document will cover general plugin
 implementation concepts, and then walk through the development process for each
 type of plugin.
 
+## Example Plugin Development Video
+
+![YOUTUBE](Dg3vknwLO74)
+
 ## General Terms and Concepts
 
 ### Qt Plugin API

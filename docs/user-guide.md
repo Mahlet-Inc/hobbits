@@ -5,6 +5,10 @@ fully integrated set of tools for preprocessing, analyzing, and displaying data
 in a variety of ways. This guide explains how to use the different features of
 the Hobbits GUI, and then presents a few example workflows.
 
+## Example Usage Video
+
+![YOUTUBE](6ygkhze36qM)
+
 ## GUI Layout
 
 ![The Hobbits GUI](labelled_hobbits_screenshot.png)
@@ -18,7 +22,7 @@ the Hobbits GUI, and then presents a few example workflows.
 ## Preferences Menu
 
 Navigating to `Edit->Preferences...` opens the preferences dialog where the
-application configuration can be viewed and editted.
+application configuration can be viewed and edited.
 
 ## Bit Containers
 

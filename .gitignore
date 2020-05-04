@@ -8,4 +8,6 @@
 node_modules
 .version
 
+site
+
 /tests/extracted_tests
