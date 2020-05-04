@@ -15,6 +15,11 @@ the Hobbits GUI, and then presents a few example workflows.
  4. Controls for the Displays
  5. Operator Panel
 
+## Preferences Menu
+
+Navigating to `Edit->Preferences...` opens the preferences dialog where the
+application configuration can be viewed and editted.
+
 ## Bit Containers
 
 Hobbits organizes imported data into "bit containers" that appear in a 
@@ -84,11 +89,23 @@ one of those widths to the container. You can use the Find analyzer to find
 instances of bit/byte/ASCII sequences in data, and then highlight and quickly
 navigate to them.
 
+## Importer/Exporters
+
+Importer/Exporters appear in the `File->Import Bits From` and
+`File->Export Bits To` menus.
+
+Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
+For example, if you want to open a file as bits, selecting the `File Data`
+import plugin will let you select a file and then load it in as a Bit Container.
+
 ## Command line execution
 
 When running Hobbits from the command line, a variety of configuration and
 data loading options are provided. Simply run it with the `--help` option to see
 which options are available.
+
+The hobbits-runner program can be used to apply a saved Hobbits template to an
+input file without needing to open the GUI.
 
 ## Plugin loading
 
@@ -104,3 +121,10 @@ plugin that is not part of the core distribution, you can either:
 - or, specify your plugin path in your GUI config. In Linux, the config is an
   ini file that can be found at `~/.config/Hobbits/Hobbits GUI.conf`, and the
   plugin path configuration is the `path` variable in the `[Plugins]` section.
+
+## Get in touch
+
+If you are having trouble using hobbits, or if you have a suggestion for hobbits
+or the documentation, please open an issue on
+[the GitHub page](https://github.com/Mahlet-Inc/hobbits/issues)
+or ask about it on [the Discord channel](https://discord.gg/wRQJpZZ)
