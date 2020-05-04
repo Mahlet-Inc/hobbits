@@ -1,3 +1,10 @@
+# [0.31.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.2...v0.31.0) (2020-05-04)
+
+
+### Features
+
+* improve default operator output container names ([f630c52](https://github.com/Mahlet-Inc/hobbits/commit/f630c5296a5b3333813e4bcef594c80012efb6ce))
+
 ## [0.30.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.1...v0.30.2) (2020-04-30)
 
 
