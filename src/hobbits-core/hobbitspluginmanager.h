@@ -12,10 +12,10 @@
 
 #include "hobbits-core_global.h"
 
-class HOBBITSCORESHARED_EXPORT PluginManager
+class HOBBITSCORESHARED_EXPORT HobbitsPluginManager
 {
 public:
-    PluginManager();
+    HobbitsPluginManager();
 
     // Returns a list of warnings
     QStringList loadPlugins(const QString &pluginPath);

@@ -23,7 +23,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui(new Ui::MainWindow),
     m_extraPluginPath(extraPluginPath),
     m_bitContainerManager(QSharedPointer<BitContainerManager>(new BitContainerManager())),
-    m_pluginManager(QSharedPointer<PluginManager>(new PluginManager())),
+    m_pluginManager(QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager())),
     m_pluginActionManager(new PluginActionManager(m_pluginManager)),
     m_pluginActionProgress(new QProgressBar()),
     m_pluginActionCancel(new QPushButton()),

@@ -1,7 +1,7 @@
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include "settingsdata.h"
 #include <QDialog>
 #include <QLayoutItem>
@@ -16,7 +16,7 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit PreferencesDialog(QSharedPointer<const PluginManager> pluginManager, QWidget *parent = nullptr);
+    explicit PreferencesDialog(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget *parent = nullptr);
 
     ~PreferencesDialog();
 
@@ -41,7 +41,7 @@ private:
     Ui::PreferencesDialog *ui;
 
     SettingsData m_data;
-    QSharedPointer<const PluginManager> m_pluginManager;
+    QSharedPointer<const HobbitsPluginManager> m_pluginManager;
 };
 
 #endif // PREFERENCESDIALOG_H

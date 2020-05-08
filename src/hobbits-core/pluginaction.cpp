@@ -64,7 +64,7 @@ QSharedPointer<PluginAction> PluginAction::deserialize(QJsonObject data)
 
 QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> PluginAction::operatorAct(
         QSharedPointer<OperatorActor> actor,
-        QSharedPointer<const PluginManager> pluginManager,
+        QSharedPointer<const HobbitsPluginManager> pluginManager,
         QList<QSharedPointer<BitContainer>> inputContainers,
         QSharedPointer<BitContainerManager> bitContainerManager,
         QString outputName,
@@ -90,7 +90,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> PluginAction
 
 QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> PluginAction::analyzerAct(
         QSharedPointer<AnalyzerActor> actor,
-        QSharedPointer<const PluginManager> pluginManager,
+        QSharedPointer<const HobbitsPluginManager> pluginManager,
         QSharedPointer<BitContainer> container) const
 {
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> nullResult;

@@ -6,7 +6,7 @@
 #include "operatorinterface.h"
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include "previewscrollbar.h"
 
 #include <QMainWindow>
@@ -103,7 +103,7 @@ private:
     QString m_extraPluginPath;
 
     QSharedPointer<BitContainerManager> m_bitContainerManager;
-    QSharedPointer<PluginManager> m_pluginManager;
+    QSharedPointer<HobbitsPluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
 
     QMutex m_previewMutex;
