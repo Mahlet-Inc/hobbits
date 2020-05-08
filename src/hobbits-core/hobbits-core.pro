@@ -50,6 +50,7 @@ SOURCES += \
         frame.cpp \
     highlightnavigator.cpp \
     hobbitscoreinfo.cpp \
+    hobbitspluginmanager.cpp \
     importexportresult.cpp \
         mathparser.cpp \
     operatoractor.cpp \
@@ -60,7 +61,6 @@ SOURCES += \
     pluginactionmanager.cpp \
     plugincallback.cpp \
     pluginhelper.cpp \
-    pluginmanager.cpp \
     previewscrollbar.cpp \
     range.cpp \
     rangehighlight.cpp \
@@ -91,6 +91,7 @@ HEADERS += \
     highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
+    hobbitspluginmanager.h \
     importexportinterface.h \
     importexportresult.h \
     operatoractor.h \
@@ -103,7 +104,6 @@ HEADERS += \
     pluginactionmanager.h \
     plugincallback.h \
     pluginhelper.h \
-    pluginmanager.h \
     previewscrollbar.h \
     range.h \
     rangehighlight.h \
@@ -113,7 +113,10 @@ HEADERS += \
 
 DISTFILES +=
 
-INSTALLS =
+headers.files   += $$HEADERS
+headers.path    = $$(HOME)/.local/include/hobbits
+target.path = $$(HOME)/.local/lib/hobbits
+INSTALLS += target headers
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=

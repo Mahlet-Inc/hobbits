@@ -1,14 +1,14 @@
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
 #include <QDir>
 #include <QPluginLoader>
 
-PluginManager::PluginManager()
+HobbitsPluginManager::HobbitsPluginManager()
 {
 
 }
 
-QMap<QString, QObject*> PluginManager::loadPluginsFromDirectory(QDir directory, QStringList &warnings)
+QMap<QString, QObject*> HobbitsPluginManager::loadPluginsFromDirectory(QDir directory, QStringList &warnings)
 {
     QMap<QString, QObject*> plugins;
 
@@ -41,7 +41,7 @@ QMap<QString, QObject*> PluginManager::loadPluginsFromDirectory(QDir directory, 
     return plugins;
 }
 
-QStringList PluginManager::loadPlugins(const QString &pluginPath)
+QStringList HobbitsPluginManager::loadPlugins(const QString &pluginPath)
 {
     QStringList warnings;
 
@@ -159,7 +159,7 @@ QStringList PluginManager::loadPlugins(const QString &pluginPath)
             SettingsManager::getInstance().setPrivateSetting(SettingsData::PLUGIN_RUNNING_KEY, QVariant(pluginFile));
             QSharedPointer<ImportExportInterface> importerExporterInstance = QSharedPointer<ImportExportInterface>(
                     importerExporter->createDefaultImporterExporter());
-            if (m_displays.contains(importerExporterInstance->getName())) {
+            if (m_importerExporters.contains(importerExporterInstance->getName())) {
                 warnings.append(
                         QString("Duplicate Import/Export plugin found with name '%1' - skipping...").arg(
                                 importerExporterInstance->getName()));
@@ -181,47 +181,47 @@ QStringList PluginManager::loadPlugins(const QString &pluginPath)
     return warnings;
 }
 
-QList<QSharedPointer<OperatorInterface>> PluginManager::getAllOperators() const
+QList<QSharedPointer<OperatorInterface>> HobbitsPluginManager::getAllOperators() const
 {
     return m_operators.values();
 }
 
-QList<QSharedPointer<AnalyzerInterface>> PluginManager::getAllAnalyzers() const
+QList<QSharedPointer<AnalyzerInterface>> HobbitsPluginManager::getAllAnalyzers() const
 {
     return m_analyzers.values();
 }
 
-QList<QSharedPointer<DisplayInterface>> PluginManager::getAllDisplays() const
+QList<QSharedPointer<DisplayInterface>> HobbitsPluginManager::getAllDisplays() const
 {
     return m_displays.values();
 }
 
-QList<QSharedPointer<ImportExportInterface>> PluginManager::getAllImporterExporters() const
+QList<QSharedPointer<ImportExportInterface>> HobbitsPluginManager::getAllImporterExporters() const
 {
     return m_importerExporters.values();
 }
 
-QSharedPointer<OperatorInterface> PluginManager::getOperator(const QString &name) const
+QSharedPointer<OperatorInterface> HobbitsPluginManager::getOperator(const QString &name) const
 {
     return m_operators.value(name, QSharedPointer<OperatorInterface>());
 }
 
-QSharedPointer<AnalyzerInterface> PluginManager::getAnalyzer(const QString &name) const
+QSharedPointer<AnalyzerInterface> HobbitsPluginManager::getAnalyzer(const QString &name) const
 {
     return m_analyzers.value(name, QSharedPointer<AnalyzerInterface>());
 }
 
-QSharedPointer<DisplayInterface> PluginManager::getDisplay(const QString &name) const
+QSharedPointer<DisplayInterface> HobbitsPluginManager::getDisplay(const QString &name) const
 {
     return m_displays.value(name, QSharedPointer<DisplayInterface>());
 }
 
-QSharedPointer<ImportExportInterface> PluginManager::getImporterExporter(const QString &name) const
+QSharedPointer<ImportExportInterface> HobbitsPluginManager::getImporterExporter(const QString &name) const
 {
     return m_importerExporters.value(name, QSharedPointer<ImportExportInterface>());
 }
 
-QString PluginManager::getPluginLocation(const QString &name) const
+QString HobbitsPluginManager::getPluginLocation(const QString &name) const
 {
     return m_loadedPluginLocations.value(name);
 }

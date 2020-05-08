@@ -3,7 +3,7 @@
 
 #include "actionwatcher.h"
 #include "analyzerresult.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include <QJsonObject>
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
@@ -17,7 +17,7 @@ class HOBBITSCORESHARED_EXPORT AnalyzerActor : public QObject
     Q_OBJECT
 
 public:
-    explicit AnalyzerActor(PluginActionManager *manager, QSharedPointer<const PluginManager> pluginManager);
+    explicit AnalyzerActor(PluginActionManager *manager, QSharedPointer<const HobbitsPluginManager> pluginManager);
 
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> analyzerFullAct(
             QSharedPointer<AnalyzerInterface> analyzer,
@@ -42,7 +42,7 @@ private:
     QSharedPointer<AnalyzerInterface> m_analyzer;
     QSharedPointer<BitContainer> m_container;
     QJsonObject m_pluginState;
-    QSharedPointer<const PluginManager> m_pluginManager;
+    QSharedPointer<const HobbitsPluginManager> m_pluginManager;
 
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> m_actionWatcher;
 

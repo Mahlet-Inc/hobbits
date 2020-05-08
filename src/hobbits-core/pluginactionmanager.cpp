@@ -2,7 +2,7 @@
 #include "pluginactionmanager.h"
 #include "settingsmanager.h"
 
-PluginActionManager::PluginActionManager(QSharedPointer<const PluginManager> pluginManager) :
+PluginActionManager::PluginActionManager(QSharedPointer<const HobbitsPluginManager> pluginManager) :
     QObject(nullptr),
     m_pluginManager(pluginManager),
     m_operatorActor(new OperatorActor(this, pluginManager)),

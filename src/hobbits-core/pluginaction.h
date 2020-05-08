@@ -4,7 +4,7 @@
 #include "actionwatcher.h"
 #include "analyzeractor.h"
 #include "operatoractor.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include <QJsonObject>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -32,14 +32,14 @@ public:
 
     QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> operatorAct(
             QSharedPointer<OperatorActor> actor,
-            QSharedPointer<const PluginManager> pluginManager,
+            QSharedPointer<const HobbitsPluginManager> pluginManager,
             QList<QSharedPointer<BitContainer>> inputContainers,
             QSharedPointer<BitContainerManager> bitContainerManager,
             QString outputName = "",
             QMap<int, QUuid> outputIdMap = QMap<int, QUuid>()) const;
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> analyzerAct(
             QSharedPointer<AnalyzerActor> actor,
-            QSharedPointer<const PluginManager> pluginManager,
+            QSharedPointer<const HobbitsPluginManager> pluginManager,
             QSharedPointer<BitContainer> container) const;
 
     inline bool operator==(const PluginAction &other) const

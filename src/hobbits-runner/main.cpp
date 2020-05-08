@@ -8,7 +8,7 @@
 #include "hobbitsrunnerinfo.h"
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
 #include "templatefilehandler.h"
 #include <QJsonArray>
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     }
 
     // Initialize some stuff
-    QSharedPointer<PluginManager> pluginManager = QSharedPointer<PluginManager>(new PluginManager);
+    QSharedPointer<HobbitsPluginManager> pluginManager = QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager);
     QSharedPointer<PluginActionManager> pluginActionManager = QSharedPointer<PluginActionManager>(
             new PluginActionManager(
                     pluginManager));

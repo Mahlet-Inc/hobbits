@@ -10,7 +10,7 @@
 #include <QSpacerItem>
 #include <QSpinBox>
 
-PreferencesDialog::PreferencesDialog(QSharedPointer<const PluginManager> pluginManager, QWidget *parent) :
+PreferencesDialog::PreferencesDialog(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PreferencesDialog),
     m_pluginManager(pluginManager)

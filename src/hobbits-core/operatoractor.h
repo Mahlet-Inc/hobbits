@@ -3,7 +3,7 @@
 
 #include "actionwatcher.h"
 #include "bitcontainermanager.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include <QJsonObject>
 #include <QMap>
 #include <QObject>
@@ -18,7 +18,7 @@ class HOBBITSCORESHARED_EXPORT OperatorActor : public QObject
     Q_OBJECT
 
 public:
-    explicit OperatorActor(PluginActionManager *manager, QSharedPointer<const PluginManager> pluginManager);
+    explicit OperatorActor(PluginActionManager *manager, QSharedPointer<const HobbitsPluginManager> pluginManager);
 
     QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> operatorFullAct(
             QSharedPointer<OperatorInterface> op,
@@ -46,7 +46,7 @@ private:
     QSharedPointer<OperatorInterface> m_op;
     QList<QSharedPointer<BitContainer>> m_inputContainers;
     QSharedPointer<BitContainerManager> m_bitContainerManager;
-    QSharedPointer<const PluginManager> m_pluginManager;
+    QSharedPointer<const HobbitsPluginManager> m_pluginManager;
     QString m_outputName;
     QJsonObject m_pluginState;
     QMap<int, QUuid> m_outputIdMap;

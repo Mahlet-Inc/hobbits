@@ -51,6 +51,6 @@ mac {
 }
 
 unix {
-    target.path = /opt/hobbits/plugins/displays
+    target.path = $$(HOME)/.local/share/hobbits/plugins/displays
     INSTALLS += target
 }

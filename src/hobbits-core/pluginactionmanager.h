@@ -8,7 +8,7 @@
 #include "actionwatcher.h"
 #include "analyzeractor.h"
 #include "operatoractor.h"
-#include "pluginmanager.h"
+#include "hobbitspluginmanager.h"
 #include <QSharedPointer>
 
 #include "hobbits-core_global.h"
@@ -18,7 +18,7 @@ class HOBBITSCORESHARED_EXPORT PluginActionManager : public QObject
     Q_OBJECT
 
 public:
-    PluginActionManager(QSharedPointer<const PluginManager> pluginManager);
+    PluginActionManager(QSharedPointer<const HobbitsPluginManager> pluginManager);
 
     struct LineageAction {
         QUuid containerId;
@@ -71,7 +71,7 @@ private:
     void continueLineage();
     void finishLineage();
 
-    QSharedPointer<const PluginManager> m_pluginManager;
+    QSharedPointer<const HobbitsPluginManager> m_pluginManager;
 
     QSharedPointer<OperatorActor> m_operatorActor;
     QSharedPointer<AnalyzerActor> m_analyzerActor;

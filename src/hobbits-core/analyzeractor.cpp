@@ -4,7 +4,7 @@
 #include "pluginactionmanager.h"
 #include "settingsmanager.h"
 
-AnalyzerActor::AnalyzerActor(PluginActionManager *manager, QSharedPointer<const PluginManager> pluginManager) :
+AnalyzerActor::AnalyzerActor(PluginActionManager *manager, QSharedPointer<const HobbitsPluginManager> pluginManager) :
     QObject(),
     m_pluginManager(pluginManager),
     m_manager(manager)

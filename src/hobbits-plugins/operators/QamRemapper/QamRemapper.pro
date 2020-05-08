@@ -52,7 +52,7 @@ mac {
 }
 
 unix {
-    target.path = /opt/hobbits/plugins/operators
+    target.path = $$(HOME)/.local/share/hobbits/plugins/operators
     INSTALLS += target
 }
 
