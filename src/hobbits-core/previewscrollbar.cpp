@@ -195,6 +195,9 @@ void PreviewScrollBar::newContainer()
 
 QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, QSharedPointer<ActionRenderProgress> progress)
 {
+    if (container->bitInfo()->maxFrameWidth() < 8 || container->frames().size() < 1) {
+        return QImage();
+    }
     int width = int(container->bitInfo()->maxFrameWidth() / 8);
     int height = qMin(10000, container->frames().size());
     QImage image(width, height, QImage::Format_ARGB32);
