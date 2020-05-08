@@ -1,3 +1,10 @@
+## [0.31.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.31.0...v0.31.1) (2020-05-08)
+
+
+### Bug Fixes
+
+* preview render crash on small/empty bit containers ([d58ad89](https://github.com/Mahlet-Inc/hobbits/commit/d58ad8963ee71793cf83ded25eb9667f63590e3f))
+
 # [0.31.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.30.2...v0.31.0) (2020-05-04)
 
 
