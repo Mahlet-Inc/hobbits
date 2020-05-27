@@ -258,6 +258,7 @@ void PeakSelector::mouseReleaseEvent(QMouseEvent *event)
 
 void PeakSelector::leaveEvent(QEvent * event)
 {
+    Q_UNUSED(event)
     if (m_disabled) {
         return;
     }

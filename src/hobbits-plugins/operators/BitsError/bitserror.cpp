@@ -188,11 +188,13 @@ bool BitsError::canRecallPluginState(const QJsonObject &pluginState)
 
 int BitsError::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
 int BitsError::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 

@@ -25,10 +25,12 @@ void SkipOp::apply(
 
 qint64 SkipOp::inputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return m_value;
 }
 
 qint64 SkipOp::outputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return 0;
 }

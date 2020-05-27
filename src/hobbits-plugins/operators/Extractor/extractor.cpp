@@ -1,6 +1,5 @@
 #include "extractor.h"
 #include "ui_extractor.h"
-#include "pluginhelper.h"
 #include <QObject>
 
 Extractor::Extractor() :

@@ -60,7 +60,6 @@ SOURCES += \
     pluginactionlineage.cpp \
     pluginactionmanager.cpp \
     plugincallback.cpp \
-    pluginhelper.cpp \
     previewscrollbar.cpp \
     range.cpp \
     rangehighlight.cpp \
@@ -103,7 +102,6 @@ HEADERS += \
     pluginactionlineage.h \
     pluginactionmanager.h \
     plugincallback.h \
-    pluginhelper.h \
     previewscrollbar.h \
     range.h \
     rangehighlight.h \

@@ -47,6 +47,7 @@ QString FileData::getImportLabelForState(QJsonObject pluginState)
 
 QString FileData::getExportLabelForState(QJsonObject pluginState)
 {
+    Q_UNUSED(pluginState)
     return "";
 }
 

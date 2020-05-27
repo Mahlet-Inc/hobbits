@@ -44,6 +44,7 @@ QString HttpData::getImportLabelForState(QJsonObject pluginState)
 
 QString HttpData::getExportLabelForState(QJsonObject pluginState)
 {
+    Q_UNUSED(pluginState)
     return "";
 }
 
