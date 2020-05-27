@@ -1,3 +1,11 @@
+# [0.32.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.31.1...v0.32.0) (2020-05-27)
+
+
+### Features
+
+* add "pre-pad" and "byte-aligned" options to Header Framer ([70f765f](https://github.com/Mahlet-Inc/hobbits/commit/70f765f733bdb2b05aa09306b8fc9c8ba2eeb6a6))
+* add byte-based Take Skip syntax (uppercase letters) for [#43](https://github.com/Mahlet-Inc/hobbits/issues/43) ([f7c74bf](https://github.com/Mahlet-Inc/hobbits/commit/f7c74bfeddecefd2238b3f05725f55827efaebe0))
+
 ## [0.31.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.31.0...v0.31.1) (2020-05-08)
 
 
