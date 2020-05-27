@@ -22,7 +22,7 @@ BitOp::~BitOp()
 
 QList<QSharedPointer<BitOp>> BitOp::parseOps(QString opString)
 {
-    QRegularExpression re("\\K([stozri](\\*|\\d+))");
+    QRegularExpression re("\\K([stozri](\\*|\\d+))", QRegularExpression::CaseInsensitiveOption);
     QRegularExpressionMatchIterator match = re.globalMatch(opString);
 
     QList<QSharedPointer<BitOp>> ops;
@@ -55,6 +55,24 @@ QList<QSharedPointer<BitOp>> BitOp::parseOps(QString opString)
         }
         else if (op.startsWith("i")) {
             ops.append(QSharedPointer<BitOp>(new InvertOp(value)));
+        }
+        else if (op.startsWith("T")) {
+            ops.append(QSharedPointer<BitOp>(new TakeOp(value*8)));
+        }
+        else if (op.startsWith("S")) {
+            ops.append(QSharedPointer<BitOp>(new SkipOp(value*8)));
+        }
+        else if (op.startsWith("O")) {
+            ops.append(QSharedPointer<BitOp>(new OneOp(value*8)));
+        }
+        else if (op.startsWith("Z")) {
+            ops.append(QSharedPointer<BitOp>(new ZeroOp(value*8)));
+        }
+        else if (op.startsWith("R")) {
+            ops.append(QSharedPointer<BitOp>(new ReverseOp(value*8)));
+        }
+        else if (op.startsWith("I")) {
+            ops.append(QSharedPointer<BitOp>(new InvertOp(value*8)));
         }
     }
     return ops;

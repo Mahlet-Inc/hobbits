@@ -46,7 +46,13 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="le_takeSkip"/>
+      <widget class="QLineEdit" name="le_takeSkip">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
