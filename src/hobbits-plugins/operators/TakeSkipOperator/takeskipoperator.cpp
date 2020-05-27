@@ -6,8 +6,29 @@
 #include <QToolTip>
 
 TakeSkipOperator::TakeSkipOperator() :
-    ui(new Ui::TakeSkipOperator())
+    ui(new Ui::TakeSkipOperator()),
+    m_stateHelper(new PluginStateHelper())
 {
+    m_stateHelper->addParameter("take_skip_string", QJsonValue::String, [this](QJsonValue value) {
+        ui->le_takeSkip->setText(value.toString());
+        return true;
+    }, [this]() {
+        return QJsonValue(ui->le_takeSkip->text());
+    });
+
+    m_stateHelper->addParameter("interleaved", QJsonValue::Bool, [this](QJsonValue value) {
+        ui->cb_interleaved->setChecked(value.toBool(false));
+        return true;
+    }, [this]() {
+        return QJsonValue(ui->cb_interleaved->checkState() == Qt::Checked);
+    }, true);
+
+    m_stateHelper->addParameter("frame_based", QJsonValue::Bool, [this](QJsonValue value) {
+        ui->cb_frameBased->setChecked(value.toBool(false));
+        return true;
+    }, [this]() {
+        return QJsonValue(ui->cb_frameBased->checkState() == Qt::Checked);
+    }, true);
 }
 
 QString TakeSkipOperator::getName()
@@ -23,42 +44,17 @@ void TakeSkipOperator::provideCallback(QSharedPointer<PluginCallback> pluginCall
 
 QJsonObject TakeSkipOperator::getStateFromUi()
 {
-    QJsonObject pluginState;
-    pluginState.insert("take_skip_string", ui->le_takeSkip->text());
-    pluginState.insert("interleaved", ui->cb_interleaved->checkState() == Qt::Checked);
-    pluginState.insert("frame_based", ui->cb_frameBased->checkState() == Qt::Checked);
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 bool TakeSkipOperator::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    ui->le_takeSkip->setText(pluginState.value("take_skip_string").toString());
-    if (pluginState.contains("interleaved")) {
-        if (pluginState.value("interleaved").toBool()) {
-            ui->cb_interleaved->setChecked(true);
-        }
-        else {
-            ui->cb_interleaved->setChecked(false);
-        }
-    }
-    if (pluginState.contains("frame_based")) {
-        if (pluginState.value("frame_based").toBool()) {
-            ui->cb_frameBased->setChecked(true);
-        }
-        else {
-            ui->cb_frameBased->setChecked(false);
-        }
-    }
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 bool TakeSkipOperator::canRecallPluginState(const QJsonObject &pluginState)
 {
-    return pluginState.contains("take_skip_string") && pluginState.value("take_skip_string").isString();
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 int TakeSkipOperator::getMinInputContainers(const QJsonObject &pluginState)
