@@ -28,7 +28,6 @@ void HeaderFramer::applyToWidget(QWidget *widget)
     ui->setupUi(widget);
 
     connect(ui->le_header, SIGNAL(textChanged(QString)), this, SLOT(validateHeader(QString)));
-    connect(ui->cb_fixedLength, SIGNAL(stateChanged(int)), this, SLOT(fixedLengthToggled(int)));
 
     connect(ui->pb_add, SIGNAL(pressed()), this, SLOT(addHeader()));
     connect(ui->pb_remove, SIGNAL(pressed()), this, SLOT(removeHeader()));
@@ -37,10 +36,16 @@ void HeaderFramer::applyToWidget(QWidget *widget)
 
     ui->pb_add->setEnabled(false);
     ui->pb_remove->setEnabled(false);
-    ui->sb_frameLength->setEnabled(false);
-    ui->tw_headers->setColumnCount(2);
-    ui->tw_headers->setHorizontalHeaderLabels({"Frame Header", "Frame Length"});
+    ui->tw_headers->setColumnCount(4);
+    ui->tw_headers->setHorizontalHeaderLabels({"Frame Header", "Frame Length", "Pre-pad", "Byte-aligned"});
     ui->sb_frameLength->setMaximum(INT32_MAX);
+
+    ui->sb_prePad->setMinimum(0);
+    ui->sb_prePad->setMaximum(INT32_MAX);
+
+    connect(ui->cb_prePad, SIGNAL(stateChanged(int)), this, SLOT(showSpinBoxes()));
+    connect(ui->cb_fixedLength, SIGNAL(stateChanged(int)), this, SLOT(showSpinBoxes()));
+    showSpinBoxes();
 }
 
 QString HeaderFramer::getHeaderString()
@@ -61,9 +66,24 @@ QString HeaderFramer::getHeaderString()
     return ui->le_header->text();
 }
 
-void HeaderFramer::fixedLengthToggled(int fixed)
+void HeaderFramer::showSpinBoxes()
 {
-    ui->sb_frameLength->setEnabled(fixed == Qt::Checked);
+    if (ui->cb_prePad->isChecked()) {
+        ui->sb_prePad->setVisible(true);
+        ui->cb_prePad->setText("Pre-pad:");
+    }
+    else {
+        ui->sb_prePad->setVisible(false);
+        ui->cb_prePad->setText("Pre-pad");
+    }
+    if (ui->cb_fixedLength->isChecked()) {
+        ui->sb_frameLength->setVisible(true);
+        ui->cb_fixedLength->setText("Fixed Frame Length:");
+    }
+    else {
+        ui->sb_frameLength->setVisible(false);
+        ui->cb_fixedLength->setText("Fixed Frame Length");
+    }
 }
 
 void HeaderFramer::validateHeader(QString header)
@@ -88,6 +108,28 @@ void HeaderFramer::addHeader()
     }
     else {
         ui->tw_headers->setItem(row, 1, new QTableWidgetItem("*"));
+    }
+
+    if (ui->cb_prePad->isChecked()) {
+        auto item = new QTableWidgetItem(ui->sb_prePad->text());
+        item->setData(Qt::UserRole, ui->sb_prePad->value());
+        ui->tw_headers->setItem(row, 2, item);
+    }
+    else {
+        auto item = new QTableWidgetItem("0");
+        item->setData(Qt::UserRole, 0);
+        ui->tw_headers->setItem(row, 2, item);
+    }
+
+    if (ui->cb_byteAlign->isChecked()) {
+        auto item = new QTableWidgetItem("true");
+        item->setData(Qt::UserRole, true);
+        ui->tw_headers->setItem(row, 3, item);
+    }
+    else {
+        auto item = new QTableWidgetItem("false");
+        item->setData(Qt::UserRole, false);
+        ui->tw_headers->setItem(row, 3, item);
     }
 }
 
@@ -149,6 +191,8 @@ QJsonObject HeaderFramer::getStateFromUi()
         QJsonObject headerData;
         headerData.insert("header", ui->tw_headers->item(i, 0)->text());
         headerData.insert("length", ui->tw_headers->item(i, 1)->text());
+        headerData.insert("pre-pad", ui->tw_headers->item(i, 2)->data(Qt::UserRole).toInt());
+        headerData.insert("byte-aligned", ui->tw_headers->item(i, 3)->data(Qt::UserRole).toBool());
         headersArray.append(headerData);
     }
 
@@ -172,6 +216,18 @@ bool HeaderFramer::setPluginStateInUi(const QJsonObject &pluginState)
         QJsonObject headerData = valueRef.toObject();
         ui->tw_headers->setItem(row, 0, new QTableWidgetItem(headerData.value("header").toString()));
         ui->tw_headers->setItem(row, 1, new QTableWidgetItem(headerData.value("length").toString()));
+
+        if (headerData.contains("pre-pad") && headerData.value("pre-pad").isDouble()) {
+            auto item = new QTableWidgetItem(QString("%1").arg(headerData.value("pre-pad").toDouble()));
+            item->setData(Qt::UserRole, headerData.value("pre-pad"));
+            ui->tw_headers->setItem(row, 2, item);
+        }
+        if (headerData.contains("byte-aligned") && headerData.value("byte-aligned").isBool()) {
+            auto item = new QTableWidgetItem(headerData.value("byte-aligned").toBool() ? "true" : "false");
+            item->setData(Qt::UserRole, headerData.value("byte-aligned"));
+            ui->tw_headers->setItem(row, 3, item);
+        }
+
         row++;
     }
 
@@ -188,9 +244,9 @@ int HeaderFramer::getMaxInputContainers(const QJsonObject &pluginState)
     return 1;
 }
 
-bool headerGreaterThan(QPair<QSharedPointer<BitArray>, int> a, QPair<QSharedPointer<BitArray>, int> b)
+bool headerGreaterThan(HeaderFramer::HeaderInfo a, HeaderFramer::HeaderInfo b)
 {
-    return a.first->sizeInBits() > b.first->sizeInBits();
+    return a.headerBits->sizeInBits() > b.headerBits->sizeInBits();
 }
 
 QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
@@ -202,41 +258,48 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     QSharedPointer<OperatorResult> result(new OperatorResult());
 
     if (!canRecallPluginState(recallablePluginState)) {
-        return result;
+        return OperatorResult::error("Invalid parameters given to Header Framer");
     }
 
     if (inputContainers.size() != 1) {
-        return result;
+        return OperatorResult::error(QString("Header Framer requires only 1 input bit container.  Was given %1").arg(inputContainers.size()));
     }
 
-    QList<QPair<QSharedPointer<BitArray>, int>> headers;
+    QList<HeaderInfo> headers;
     QJsonArray headersArray = recallablePluginState.value("headers").toArray();
     for (auto valueRef : headersArray) {
         QJsonObject headerData = valueRef.toObject();
+        HeaderInfo headerInfo = HeaderInfo();
         QStringList parseErrors;
-        QSharedPointer<BitArray> header = BitArray::fromString(headerData.value("header").toString());
+        headerInfo.headerBits = BitArray::fromString(headerData.value("header").toString());
         if (!parseErrors.isEmpty()) {
             result->setPluginState(QJsonObject({QPair<QString, QJsonValue>("error", parseErrors.join("\n"))}));
-            return result;
+            return OperatorResult::error(QString("Invalid Bit Array string in header parameters: '%1'").arg(headerData.value("header").toString()));
         }
         QString lengthString = headerData.value("length").toString();
-        int length;
         if (lengthString == "*") {
-            length = -1;
+            headerInfo.frameLength = -1;
         }
         else {
             bool ok;
-            length = lengthString.toInt(&ok);
+            headerInfo.frameLength = lengthString.toInt(&ok);
             if (!ok) {
-                result->setPluginState(
-                        QJsonObject(
-                                {QPair<QString, QJsonValue>(
-                                        "error",
-                                        QString("Invalid header length value '%1'").arg(lengthString))}));
-                return result;
+                return OperatorResult::error(QString("Invalid header length value '%1'").arg(lengthString));
             }
         }
-        headers.append(QPair<QSharedPointer<BitArray>, int>(header, length));
+        if (headerData.contains("pre-pad") && headerData.value("pre-pad").isDouble()) {
+            headerInfo.prePadLength = headerData.value("pre-pad").toInt();
+        }
+        else {
+            headerInfo.prePadLength = 0;
+        }
+        if (headerData.contains("byte-aligned") && headerData.value("byte-aligned").isBool()) {
+            headerInfo.byteAligned = headerData.value("byte-aligned").toBool();
+        }
+        else {
+            headerInfo.byteAligned = false;
+        }
+        headers.append(headerInfo);
     }
 
     std::sort(headers.begin(), headers.end(), headerGreaterThan);
@@ -252,13 +315,18 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     bool buildingFrame = false;
     for ( ; pos < bits->sizeInBits(); pos++) {
         for (auto headerInfo : headers) {
-            QSharedPointer<BitArray> header = headerInfo.first;
-            if (header->sizeInBits() > bits->sizeInBits() - pos) {
+            if (headerInfo.byteAligned) {
+                if (pos % 8 != 0) {
+                    continue;
+                }
+            }
+            QSharedPointer<BitArray> header = headerInfo.headerBits;
+            if (header->sizeInBits() + headerInfo.prePadLength > bits->sizeInBits() - pos) {
                 break;
             }
             bool match = true;
-            for (qint64 i = 0; i < header->sizeInBits() && pos + i < bits->sizeInBits(); i++) {
-                if (bits->at(pos + i) != header->at(i)) {
+            for (qint64 i = 0; i < header->sizeInBits() && pos + i + headerInfo.prePadLength < bits->sizeInBits(); i++) {
+                if (bits->at(pos + i + headerInfo.prePadLength) != header->at(i)) {
                     match = false;
                     break;
                 }
@@ -272,10 +340,10 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
                     maxFrameWidth = qMax(maxFrameWidth, frames.last().size());
                     outputSize += frames.last().size();
                 }
-                if (headerInfo.second > 0) {
+                if (headerInfo.frameLength > 0) {
                     // This header's frame has a static length, so we can just add the whole frame
                     buildingFrame = false;
-                    qint64 end = pos + headerInfo.second - 1;
+                    qint64 end = pos + headerInfo.frameLength - 1;
                     if (end < bits->sizeInBits()) {
                         frames.append(Frame(bits, pos, end));
                         maxFrameWidth = qMax(maxFrameWidth, frames.last().size());
@@ -286,7 +354,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
                 else {
                     // This header's frame has an open-ended length, so we need to find the start of the next frame before adding it
                     start = pos;
-                    pos = pos + header->sizeInBits() - 1;
+                    pos = pos + header->sizeInBits() - 1 + headerInfo.prePadLength;
                     buildingFrame = true;
                 }
                 break;
