@@ -247,9 +247,10 @@ void TakeSkipOperator::applyToWidget(QWidget *widget)
 void TakeSkipOperator::showHelp()
 {
     QMessageBox msg;
-    msg.setText("TakeSkip Commands");
+    msg.setText("Take Skip Commands");
     QString text = "t - take\ns - skip\nr - take in reverse\ni - invert\no - append a 1\nz - append a 0";
-    text += "\n\nThe character '*' can be used instead of a number to indicate 'all remaining bits'";
+    text += "\n\n Uppercase letters can be used to indicate Bytes instead of bits (e.g. 'T10S4')";
+    text += "\nThe character '*' can be used instead of a number to indicate 'all remaining bits'";
     text += "\nInterleave: apply the operation in a round-robin fashion between multiple input containers.";
     text += "\nFrame-based: apply the operation to each frame of the container independently";
     msg.setInformativeText(text);

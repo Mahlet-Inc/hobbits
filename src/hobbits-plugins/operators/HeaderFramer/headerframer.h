@@ -39,12 +39,19 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
+    struct HeaderInfo {
+        QSharedPointer<BitArray> headerBits;
+        int frameLength;
+        int prePadLength;
+        bool byteAligned;
+    };
+
 private slots:
-    void fixedLengthToggled(int fixed);
     void validateHeader(QString header);
     void addHeader();
     void checkSelectedHeader();
     void removeHeader();
+    void showSpinBoxes();
 
 private:
     Ui::HeaderFramer *ui;
