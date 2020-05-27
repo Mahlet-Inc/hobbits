@@ -10,7 +10,7 @@ steps:
       
   - script: |
       cd $(Build.SourcesDirectory)
-      python3 -m pip install aqtinstall==0.7.1
+      python3 -m pip install aqtinstall
     displayName: 'Install aqtinstall'
 
   - task: NodeTool@0
