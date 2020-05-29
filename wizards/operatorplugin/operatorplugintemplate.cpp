@@ -3,9 +3,24 @@
 #include <QObject>
 
 %{ClassName}::%{ClassName}() :
-    ui(new Ui::%{ClassName}())
+    ui(new Ui::%{ClassName}()),
+    m_stateHelper(new PluginStateHelper())
 {
-
+    // The PluginStateHelper can be used to simplify the setting, getting, and validation
+    // of the plugin state. It can simplify the canRecallPluginState, setPluginStateInUi,
+    // and getStateFromUi methods.
+    // Using PluginStateHelper is completely optional - you can just implement those
+    // methods manually and remove m_stateHelper if desired.
+    m_stateHelper->addParameter("plugin_parameter", QJsonValue::String, [this](QJsonValue value) {
+        // Take the value and apply it to the ui
+        // e.g. ui->parameterLineEdit->setText(value.toString());
+        // Return true if it was able to be set in the ui
+        return true;
+    }, [this]() {
+        // Get the value from the ui
+        // e.g. return QJsonValue(ui->parameterLineEdit->text())
+        return QJsonValue("");
+    });
 }
 
 OperatorInterface* %{ClassName}::createDefaultOperator()
@@ -32,32 +47,17 @@ void %{ClassName}::applyToWidget(QWidget *widget)
 
 bool %{ClassName}::canRecallPluginState(const QJsonObject &pluginState)
 {
-    //if pluginState does not have required fields, return false
-    if(pluginState.isEmpty()==true){
-        return false;
-    }
-
-    return true;
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 bool %{ClassName}::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    // Set the UI fields based on the plugin state
-
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 QJsonObject %{ClassName}::getStateFromUi()
 {
-    QJsonObject pluginState;
-
-    //Pull data from the input fields and input them into pluginState
-
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 int %{ClassName}::getMinInputContainers(const QJsonObject &pluginState)

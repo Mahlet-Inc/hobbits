@@ -9,26 +9,9 @@ TakeSkipOperator::TakeSkipOperator() :
     ui(new Ui::TakeSkipOperator()),
     m_stateHelper(new PluginStateHelper())
 {
-    m_stateHelper->addParameter("take_skip_string", QJsonValue::String, [this](QJsonValue value) {
-        ui->le_takeSkip->setText(value.toString());
-        return true;
-    }, [this]() {
-        return QJsonValue(ui->le_takeSkip->text());
-    });
-
-    m_stateHelper->addParameter("interleaved", QJsonValue::Bool, [this](QJsonValue value) {
-        ui->cb_interleaved->setChecked(value.toBool(false));
-        return true;
-    }, [this]() {
-        return QJsonValue(ui->cb_interleaved->checkState() == Qt::Checked);
-    }, true);
-
-    m_stateHelper->addParameter("frame_based", QJsonValue::Bool, [this](QJsonValue value) {
-        ui->cb_frameBased->setChecked(value.toBool(false));
-        return true;
-    }, [this]() {
-        return QJsonValue(ui->cb_frameBased->checkState() == Qt::Checked);
-    }, true);
+    m_stateHelper->addLineEditStringParameter("take_skip_string", [this](){return ui->le_takeSkip;});
+    m_stateHelper->addCheckBoxBoolParameter("interleaved", [this](){return ui->cb_interleaved;}, true);
+    m_stateHelper->addCheckBoxBoolParameter("frame_based", [this](){return ui->cb_frameBased;}, true);
 }
 
 QString TakeSkipOperator::getName()

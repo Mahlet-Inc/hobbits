@@ -4,6 +4,10 @@
 #include <QVariant>
 #include <QJsonValue>
 #include <QSharedPointer>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QLineEdit>
+#include <QPlainTextEdit>
 #include "hobbits-core_global.h"
 
 class HOBBITSCORESHARED_EXPORT PluginStateHelper
@@ -39,6 +43,22 @@ public:
                       QJsonValue::Type type,
                       const std::function<bool(QJsonValue)> setInUi,
                       const std::function<QJsonValue()> getFromUi,
+                      bool optional=false);
+
+    void addCheckBoxBoolParameter(QString name,
+                      const std::function<QCheckBox*()> checkBoxGetter,
+                      bool optional=false);
+
+    void addSpinBoxIntParameter(QString name,
+                      const std::function<QSpinBox*()> spinBoxGetter,
+                      bool optional=false);
+
+    void addLineEditStringParameter(QString name,
+                      const std::function<QLineEdit*()> lineEditGetter,
+                      bool optional=false);
+
+    void addTextEditStringParameter(QString name,
+                      const std::function<QPlainTextEdit*()> textEditGetter,
                       bool optional=false);
 
     bool validatePluginState(const QJsonObject &pluginState);

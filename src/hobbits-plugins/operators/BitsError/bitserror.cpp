@@ -10,9 +10,34 @@
 #include <stdio.h>
 
 BitsError::BitsError() :
-    ui(new Ui::BitsError())
+    ui(new Ui::BitsError()),
+    m_stateHelper(new PluginStateHelper())
 {
+    m_stateHelper->addParameter("error_coeff", QJsonValue::Double, [this](QJsonValue value) {
+        ui->coeffInput->setText(QString("%1").arg(value.toDouble()));
+        return true;
+    }, [this]() {
+        return QJsonValue(ui->coeffInput->text().toDouble());
+    });
 
+    m_stateHelper->addSpinBoxIntParameter("error_exp", [this](){return ui->expInput;});
+
+    m_stateHelper->addParameter("error_type", QJsonValue::String, [this](QJsonValue value) {
+        if (value.toString() == "periodic") {
+            ui->periodicOpt->setChecked(true);
+        }
+        else {
+            ui->gaussianOpt->setChecked(true);
+        }
+        return true;
+    }, [this]() {
+        if (ui->periodicOpt->isChecked()) {
+            return QJsonValue("periodic");
+        }
+        else {
+            return QJsonValue("gaussian");
+        }
+    });
 }
 
 QString BitsError::getName()
@@ -144,46 +169,17 @@ QSharedPointer<const OperatorResult> BitsError::getPeriodicErrorBits(QSharedPoin
 
 QJsonObject BitsError::getStateFromUi()
 {
-    QJsonObject pluginState;
-
-    pluginState.insert("error_coeff", (ui->coeffInput->text()).toDouble());
-    pluginState.insert("error_exp", (ui->expInput->value()));
-    if (ui->gaussianOpt->isChecked()) {
-        pluginState.insert("error_type", "gaussian");
-    }
-    else {
-        pluginState.insert("error_type", "periodic");
-    }
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 bool BitsError::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    ui->coeffInput->setText(QString("%1").arg(pluginState.value("error_coeff").toDouble()));
-    ui->expInput->setValue(pluginState.value("error_exp").toInt());
-    if (pluginState.value("error_type").toString() == "periodic") {
-        ui->periodicOpt->click();
-    }
-    else {
-        ui->gaussianOpt->click();
-    }
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 bool BitsError::canRecallPluginState(const QJsonObject &pluginState)
 {
-    if (pluginState.contains("error_coeff") && pluginState.value("error_coeff").isDouble()) {
-        if (pluginState.contains("error_exp")) {
-            if ((pluginState.contains("error_type") && pluginState.value("error_type").isString())) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 int BitsError::getMinInputContainers(const QJsonObject &pluginState)

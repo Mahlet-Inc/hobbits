@@ -3,6 +3,7 @@
 
 #include "mathparser.h"
 #include "operatorinterface.h"
+#include "pluginstatehelper.h"
 
 
 namespace Ui
@@ -49,6 +50,7 @@ public slots:
 private:
     Ui::PythonRunner *ui;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<PluginStateHelper> m_stateHelper;
     QString m_outputText;
 };
 

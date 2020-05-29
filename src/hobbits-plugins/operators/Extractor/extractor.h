@@ -3,6 +3,7 @@
 
 #include "operatorinterface.h"
 #include "highlightnavigator.h"
+#include "pluginstatehelper.h"
 
 namespace Ui
 {
@@ -47,6 +48,7 @@ private:
     HighlightNavigator* m_highlightNav;
     QSharedPointer<BitContainerPreview> m_previewContainer;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<PluginStateHelper> m_stateHelper;
 };
 
 #endif // EXTRACTOR_H
