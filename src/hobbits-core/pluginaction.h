@@ -2,7 +2,7 @@
 #define PLUGINACTION_H
 
 #include "actionwatcher.h"
-#include "analyzeractor.h"
+#include "analyzerrunner.h"
 #include "operatoractor.h"
 #include "hobbitspluginmanager.h"
 #include <QJsonObject>

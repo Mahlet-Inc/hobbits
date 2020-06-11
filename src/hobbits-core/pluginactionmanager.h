@@ -49,9 +49,6 @@ public:
 
     void applyLineage(QSharedPointer<LineageAction> lineageAction);
 
-    QSharedPointer<OperatorActor> operatorActor();
-    QSharedPointer<AnalyzerActor> analyzerActor();
-
 private slots:
     void operatorWatcherFinished();
     void analyzerWatcherFinished();
@@ -73,18 +70,16 @@ private:
 
     QSharedPointer<const HobbitsPluginManager> m_pluginManager;
 
-    QSharedPointer<OperatorActor> m_operatorActor;
-    QSharedPointer<AnalyzerActor> m_analyzerActor;
-
     QSharedPointer<LineageAction> m_current;
 
     QStack<QSharedPointer<LineageAction>> m_lineageStack;
 
     QQueue<QSharedPointer<LineageAction>> m_lineageQueue;
 
+    QSharedPointer<PluginActionBatch> m_currentBatch;
+
     QHash<QUuid, QSharedPointer<OperatorRunner>> m_operatorRunners;
     QHash<QUuid, QSharedPointer<AnalyzerRunner>> m_analyzerRunners;
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> m_currAnalyzerWatcher;
 
 };
 
