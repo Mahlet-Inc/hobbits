@@ -2,6 +2,7 @@
 #define %{JS: '%{ClassName}'.toUpperCase()}_H
 
 #include "operatorinterface.h"
+#include "pluginstatehelper.h"
 
 namespace Ui
 {
@@ -40,6 +41,7 @@ public:
 private:
     Ui::%{ClassName} *ui;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<PluginStateHelper> m_stateHelper;
 };
 
 #endif // %{JS: '%{ClassName}'.toUpperCase()}_H

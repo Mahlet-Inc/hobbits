@@ -6,8 +6,12 @@
 #include <QToolTip>
 
 TakeSkipOperator::TakeSkipOperator() :
-    ui(new Ui::TakeSkipOperator())
+    ui(new Ui::TakeSkipOperator()),
+    m_stateHelper(new PluginStateHelper())
 {
+    m_stateHelper->addLineEditStringParameter("take_skip_string", [this](){return ui->le_takeSkip;});
+    m_stateHelper->addCheckBoxBoolParameter("interleaved", [this](){return ui->cb_interleaved;}, true);
+    m_stateHelper->addCheckBoxBoolParameter("frame_based", [this](){return ui->cb_frameBased;}, true);
 }
 
 QString TakeSkipOperator::getName()
@@ -23,42 +27,17 @@ void TakeSkipOperator::provideCallback(QSharedPointer<PluginCallback> pluginCall
 
 QJsonObject TakeSkipOperator::getStateFromUi()
 {
-    QJsonObject pluginState;
-    pluginState.insert("take_skip_string", ui->le_takeSkip->text());
-    pluginState.insert("interleaved", ui->cb_interleaved->checkState() == Qt::Checked);
-    pluginState.insert("frame_based", ui->cb_frameBased->checkState() == Qt::Checked);
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 bool TakeSkipOperator::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    ui->le_takeSkip->setText(pluginState.value("take_skip_string").toString());
-    if (pluginState.contains("interleaved")) {
-        if (pluginState.value("interleaved").toBool()) {
-            ui->cb_interleaved->setChecked(true);
-        }
-        else {
-            ui->cb_interleaved->setChecked(false);
-        }
-    }
-    if (pluginState.contains("frame_based")) {
-        if (pluginState.value("frame_based").toBool()) {
-            ui->cb_frameBased->setChecked(true);
-        }
-        else {
-            ui->cb_frameBased->setChecked(false);
-        }
-    }
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 bool TakeSkipOperator::canRecallPluginState(const QJsonObject &pluginState)
 {
-    return pluginState.contains("take_skip_string") && pluginState.value("take_skip_string").isString();
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 int TakeSkipOperator::getMinInputContainers(const QJsonObject &pluginState)

@@ -43,6 +43,7 @@ QString HexString::getImportLabelForState(QJsonObject pluginState)
 
 QString HexString::getExportLabelForState(QJsonObject pluginState)
 {
+    Q_UNUSED(pluginState)
     return "";
 }
 

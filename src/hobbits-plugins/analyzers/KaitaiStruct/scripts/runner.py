@@ -7,12 +7,28 @@ import os
 
 from kaitaistruct import KaitaiStruct
 
+class OperationCancelled(Exception):
+    """Raised when the operation is cancelled"""
+    pass
+
+class OperatorHandle:
+    def __init__(self):
+        pass
+
+    def check_cancelled(self):
+        if os.path.exists('abort'):
+            raise OperationCancelled("Operation was cancelled")
+
+    def set_progress(self, progress):
+        with open('progress', 'w') as progress_file:
+            json.dump({"progress": progress}, progress_file)
+
 def dumpStruct(s, sections, prefix=""):
     if isinstance(s, list):
         for i, item in enumerate(s):
             label = prefix + "[" + str(i) + "]"
             sections.append({
-                "label": f"{label}",
+                "label": label,
                 "parent": prefix
             })
             dumpStruct(item, sections, label)
@@ -25,7 +41,7 @@ def dumpStruct(s, sections, prefix=""):
                     sections.append({
                         "start": descr["start"],
                         "end": descr["end"],
-                        "label": f"{label}",
+                        "label": label,
                         "parent": prefix
                     })
                     dumpStruct(prop, sections, label)
@@ -46,11 +62,21 @@ if __name__ == "__main__":
     struct_module = importlib.__import__(package_name, fromlist=[class_name])
     Struct = getattr(struct_module, class_name)
 
+    operator_handle = OperatorHandle()
+    operator_handle.check_cancelled()
+    operator_handle.set_progress(5)
+
     target = Struct.from_file(input_filename)
     target._read()
 
+    operator_handle.check_cancelled()
+    operator_handle.set_progress(70)
+
     sections = []
     dumpStruct(target, sections)
+
+    operator_handle.check_cancelled()
+    operator_handle.set_progress(80)
 
     output_json = {
     "sections": sections

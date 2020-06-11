@@ -236,11 +236,13 @@ bool HeaderFramer::setPluginStateInUi(const QJsonObject &pluginState)
 
 int HeaderFramer::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
 int HeaderFramer::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 

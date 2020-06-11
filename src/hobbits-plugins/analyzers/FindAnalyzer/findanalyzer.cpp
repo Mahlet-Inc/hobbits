@@ -1,6 +1,5 @@
 #include "findanalyzer.h"
 #include "ui_findanalyzer.h"
-#include "pluginhelper.h"
 #include "settingsmanager.h"
 
 const QString FIND_COLOR_KEY = "find_color";
@@ -155,13 +154,12 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
             end = end + findBits->sizeInBits() - 1;
         }
 
-        PluginHelper::recordProgress(progressTracker, start, bits->sizeInBits());
+        progressTracker->setProgress(start, bits->sizeInBits());
         if (progressTracker->getCancelled()) {
-            return PluginHelper::analyzerErrorResult("Processing cancelled");
+            return AnalyzerResult::error("Processing cancelled");
         }
     }
 
-    QSharedPointer<AnalyzerResult> analyzerResult = QSharedPointer<AnalyzerResult>(new AnalyzerResult());
     QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
     bitInfo->clearHighlightCategory(FOUND_HIGHLIGHT);
     bitInfo->addHighlights(highlights);
@@ -182,8 +180,5 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
     }
     bitInfo->setMetadata(FOUND_RESULT_LABEL, resultHead);
 
-    analyzerResult->setBitInfo(bitInfo);
-    analyzerResult->setPluginState(recallablePluginState);
-
-    return std::move(analyzerResult);
+    return AnalyzerResult::result(bitInfo, recallablePluginState);
 }

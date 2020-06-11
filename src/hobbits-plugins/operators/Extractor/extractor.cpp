@@ -1,12 +1,31 @@
 #include "extractor.h"
 #include "ui_extractor.h"
-#include "pluginhelper.h"
 #include <QObject>
 
 Extractor::Extractor() :
-    ui(new Ui::Extractor())
+    ui(new Ui::Extractor()),
+    m_stateHelper(new PluginStateHelper())
 {
+    m_stateHelper->addParameter("highlight_category", QJsonValue::String, [this](QJsonValue value) {
+        int category_idx = ui->cb_category->findText(value.toString());
+        if (category_idx < 0) {
+            return false;
+        }
+        ui->cb_category->setCurrentIndex(category_idx);
+        return true;
+    }, [this]() {
+        return ui->cb_category->currentText();
+    });
 
+    m_stateHelper->addParameter("highlight_label", QJsonValue::String, [this](QJsonValue value) {
+        return m_highlightNav->selectRow(value.toString());
+    }, [this]() {
+        return m_highlightNav->currentlySelectedLabel();
+    });
+
+    m_stateHelper->addCheckBoxBoolParameter("extract_before", [this](){return ui->ck_before;});
+    m_stateHelper->addCheckBoxBoolParameter("extract_highlight", [this](){return ui->ck_section;});
+    m_stateHelper->addCheckBoxBoolParameter("extract_after", [this](){return ui->ck_after;});
 }
 
 OperatorInterface* Extractor::createDefaultOperator()
@@ -54,86 +73,17 @@ void Extractor::applyToWidget(QWidget *widget)
 
 bool Extractor::canRecallPluginState(const QJsonObject &pluginState)
 {
-    //if pluginState does not have required fields, return false
-    if(pluginState.isEmpty()==true){
-        return false;
-    }
-
-    if (!(pluginState.contains("highlight_category")
-            && pluginState.contains("highlight_label")
-            && pluginState.value("highlight_category").isString()
-            && pluginState.value("highlight_label").isString()
-            && ((pluginState.contains("extract_before") && pluginState.value("extract_before").isBool())
-                || (pluginState.contains("extract_highlight") && pluginState.value("extract_highlight").isBool())
-                || (pluginState.contains("extract_after") && pluginState.value("extract_after").isBool())))) {
-        return false;
-    }
-
-    return true;
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 bool Extractor::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    if (pluginState.contains("extract_before")) {
-        ui->ck_before->setChecked(pluginState.value("extract_before").toBool());
-    }
-    else {
-        ui->ck_before->setChecked(false);
-    }
-
-    if (pluginState.contains("extract_highlight")) {
-        ui->ck_section->setChecked(pluginState.value("extract_highlight").toBool());
-    }
-    else {
-        ui->ck_section->setChecked(false);
-    }
-
-    if (pluginState.contains("extract_after")) {
-        ui->ck_after->setChecked(pluginState.value("extract_after").toBool());
-    }
-    else {
-        ui->ck_after->setChecked(false);
-    }
-
-    QString category = pluginState.value("highlight_category").toString();
-    int category_idx = ui->cb_category->findText(category);
-    if (category_idx < 0) {
-        return false;
-    }
-    ui->cb_category->setCurrentIndex(category_idx);
-
-    return m_highlightNav->selectRow(pluginState.value("highlight_label").toString());
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 QJsonObject Extractor::getStateFromUi()
 {
-    QJsonObject pluginState;
-
-    QString category = ui->cb_category->currentText();
-    QString label = m_highlightNav->currentlySelectedLabel();
-
-    if (category.isEmpty() || label.isEmpty()) {
-        return pluginState;
-    }
-
-    pluginState.insert("highlight_category", category);
-    pluginState.insert("highlight_label", label);
-
-    if (ui->ck_before->isChecked()) {
-        pluginState.insert("extract_before", true);
-    }
-    if (ui->ck_section->isChecked()) {
-        pluginState.insert("extract_highlight", true);
-    }
-    if (ui->ck_after->isChecked()) {
-        pluginState.insert("extract_after", true);
-    }
-
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 int Extractor::getMinInputContainers(const QJsonObject &pluginState)

@@ -113,11 +113,13 @@ bool QamRemapper::canRecallPluginState(const QJsonObject &pluginState)
 
 int QamRemapper::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
 int QamRemapper::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 

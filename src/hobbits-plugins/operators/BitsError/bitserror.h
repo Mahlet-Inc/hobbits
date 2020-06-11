@@ -2,6 +2,7 @@
 #define BITSERROR_H
 
 #include "operatorinterface.h"
+#include "pluginstatehelper.h"
 
 namespace Ui
 {
@@ -45,6 +46,7 @@ private:
                                                         QSharedPointer<ActionProgress> progressTracker);
     Ui::BitsError *ui;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<PluginStateHelper> m_stateHelper;
 
 };
 

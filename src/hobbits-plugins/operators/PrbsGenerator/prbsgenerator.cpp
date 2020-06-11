@@ -9,9 +9,25 @@
 #include <vector>
 
 PrbsGenerator::PrbsGenerator() :
-    ui(new Ui::PrbsGenerator())
+    ui(new Ui::PrbsGenerator()),
+    m_stateHelper(new PluginStateHelper())
 {
+    m_stateHelper->addLineEditStringParameter("polynomial", [this](){return ui->initseedInput;});
+    m_stateHelper->addLineEditStringParameter("taps", [this](){return ui->tapInput;});
 
+    m_stateHelper->addParameter("bits_wanted", QJsonValue::Double, [this](QJsonValue value) {
+        ui->bitsWantedInput->setText(QString("%1").arg(value.toInt()));
+        return true;
+    }, [this]() {
+        MathParser mp;
+        ParseResult a = mp.parseInput(ui->bitsWantedInput->text());
+        if (a.isValid()) {
+            return QJsonValue(a.getResult());
+        }
+        else {
+            return QJsonValue();
+        }
+    });
 }
 
 /*
@@ -132,55 +148,28 @@ int applyOp(int a, int b, QChar op)
 
 QJsonObject PrbsGenerator::getStateFromUi()
 {
-
-    QJsonObject pluginState;
-
-    pluginState.insert("polynomial", ui->initseedInput->text());
-    pluginState.insert("taps", ui->tapInput->text());
-
-    MathParser mp;
-    ParseResult a = mp.parseInput(ui->bitsWantedInput->text());
-
-    if (a.isValid()) {
-        pluginState.insert("bits_wanted", a.getResult());
-    }
-    else {
-
-    }
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 bool PrbsGenerator::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    ui->initseedInput->setText(pluginState.value("polynomial").toString());
-    ui->tapInput->setText(pluginState.value("taps").toString());
-    ui->bitsWantedInput->setText(QString("%1").arg(pluginState.value("bits_wanted").toInt()));
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 bool PrbsGenerator::canRecallPluginState(const QJsonObject &pluginState)
 {
-    if (pluginState.contains("polynomial") && pluginState.value("polynomial").isString()) {
-        if (pluginState.contains("bits_wanted") && pluginState.value("bits_wanted").isDouble()) {
-            if (pluginState.contains("taps") && pluginState.value("taps").isString()) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 int PrbsGenerator::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 0;
 }
 
 int PrbsGenerator::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 0;
 }
 

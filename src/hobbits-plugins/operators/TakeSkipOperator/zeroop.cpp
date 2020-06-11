@@ -22,10 +22,12 @@ void ZeroOp::apply(
 
 qint64 ZeroOp::inputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return 0;
 }
 
 qint64 ZeroOp::outputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return m_value;
 }

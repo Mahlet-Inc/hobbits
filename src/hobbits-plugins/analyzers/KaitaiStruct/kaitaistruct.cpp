@@ -1,6 +1,5 @@
 #include "kaitaistruct.h"
 #include "ui_kaitaistruct.h"
-#include "pluginhelper.h"
 #include "settingsmanager.h"
 #include <QStandardPaths>
 #include <QFileDialog>
@@ -206,31 +205,35 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     QMetaObject::invokeMethod(this, "clearOutputText", Qt::QueuedConnection);
 
     if (!canRecallPluginState(recallablePluginState)) {
-        return PluginHelper::analyzerErrorResult("Invalid parameters given to plugin");
+        return AnalyzerResult::error("Invalid parameters given to plugin");
     }
+
+    progressTracker->setProgressPercent(2);
 
     QString pythonPath = SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString();
     if (pythonPath.isEmpty()) {
-        return PluginHelper::analyzerErrorResult("A Python path must be specified");
+        return AnalyzerResult::error("A Python path must be specified");
     }
 
     QString kscPath = SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString();
     if (kscPath.isEmpty()) {
-        return PluginHelper::analyzerErrorResult("A Kaitai Struct Compiler path must be specified");
+        return AnalyzerResult::error("A Kaitai Struct Compiler path must be specified");
     }
 
     QTemporaryDir dir;
     if (!dir.isValid()) {
-        return PluginHelper::analyzerErrorResult("Could not allocate a temporary directory");
+        return AnalyzerResult::error("Could not allocate a temporary directory");
     }
 
     QFile inputBitFile(dir.filePath("input_bit_container.bits"));
     QFile outputRangeFile(dir.filePath("parsed_ranges.json"));
     if (!inputBitFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return PluginHelper::analyzerErrorResult("Could not allocate a temporary directory");
+        return AnalyzerResult::error("Could not allocate a temporary directory");
     }
     container->bits()->writeTo(&inputBitFile);
     inputBitFile.close();
+
+    progressTracker->setProgressPercent(10);
 
     QString coreScriptName = dir.filePath("core_script.py");
     QFile::copy(":/kaitaistruct/scripts/runner.py", coreScriptName);
@@ -242,12 +245,18 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     QFile ksy(dir.filePath("custom.ksy"));
     if (!ksy.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return PluginHelper::analyzerErrorResult("Could not open ksy file for writing");
+        return AnalyzerResult::error("Could not open ksy file for writing");
     }
     ksy.write(recallablePluginState.value("katai_struct_yaml").toString().toLocal8Bit());
     ksy.close();
 
+    progressTracker->setProgressPercent(20);
+
+#ifdef Q_OS_WIN
+    QStringList kscAgs = {"/C", kscPath, "--debug", "-t", "python", ksy.fileName()};
+#else
     QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
+#endif
     QProcess kscProcess;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QProcessEnvironment envUpdate;
@@ -257,8 +266,15 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     kscProcess.setStandardErrorFile(errorFile.fileName());
     kscProcess.setStandardOutputFile(stdoutFile.fileName());
     kscProcess.start(kscPath, kscAgs);
+#ifdef Q_OS_WIN
+    kscProcess.start("cmd.exe", kscAgs);
+#else
+    kscProcess.start(kscPath, kscAgs);
+#endif
 
     kscProcess.waitForFinished();
+
+    progressTracker->setProgressPercent(40);
 
     if (errorFile.open(QIODevice::ReadOnly)) {
         QString output = errorFile.readAll();
@@ -306,12 +322,14 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
                 QJsonDocument progressData = QJsonDocument::fromJson((progressFile.readAll()));
                 QJsonObject progressJson = progressData.object();
                 if (progressJson.contains("progress") && progressJson.value("progress").isDouble()) {
-                    int progress = int(progressJson.value("progress").toDouble());
-                    progressTracker->setProgressPercent(progress);
+                    int progress = int(progressJson.value("progress").toDouble()/45.0);
+                    progressTracker->setProgressPercent(40 + progress);
                 }
             }
         }
     }
+
+    progressTracker->setProgressPercent(85);
 
     if (errorFile.open(QIODevice::ReadOnly)) {
         QString output = errorFile.readAll();
@@ -337,17 +355,25 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         stdoutFile.close();
     }
 
+    if (!outputRangeFile.exists()) {
+        QString errorString = "No analysis file was produced - check the Output tab to see if ksc or python produced any errors.";
+        errorString += "\n\nCommon problems to check for:";
+        errorString += "\n- Are you pointing to a valid Python 3 with the kaitaistruct package 0.9 installed?";
+        errorString += "\n- Are you pointing to a valid kaitai-struct-compiler version 0.9?";
+        return AnalyzerResult::error(errorString);
+    }
+
     if (!outputRangeFile.open(QIODevice::ReadOnly)) {
-        return PluginHelper::analyzerErrorResult("Could not open analysis file for reading");
+        return AnalyzerResult::error("Could not open analysis file for reading");
     }
     QJsonDocument outputData = QJsonDocument::fromJson((outputRangeFile.readAll()));
     outputRangeFile.close();
     if (!outputData.isObject()) {
-        return PluginHelper::analyzerErrorResult("Output analysis file has an invalid format");
+        return AnalyzerResult::error("Output analysis file has an invalid format");
     }
     QJsonObject outputObj = outputData.object();
     if (!outputObj.contains("sections") || !outputObj.value("sections").isArray()) {
-        return PluginHelper::analyzerErrorResult("Output analysis file doesn't contain a 'sections' specification");
+        return AnalyzerResult::error("Output analysis file doesn't contain a 'sections' specification");
     }
     QList<RangeHighlight> highlights;
     m_highlightColorIdx = 0;
@@ -424,6 +450,7 @@ RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QP
 void KaitaiStruct::updateOutputText(QString text)
 {
     ui->te_output->appendPlainText(text);
+    ui->tabWidget->setCurrentIndex(1);
 }
 
 void KaitaiStruct::clearOutputText()

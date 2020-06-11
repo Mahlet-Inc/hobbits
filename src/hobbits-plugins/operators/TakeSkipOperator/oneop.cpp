@@ -22,10 +22,12 @@ void OneOp::apply(
 
 qint64 OneOp::inputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return 0;
 }
 
 qint64 OneOp::outputStep(qint64 inputBits) const
 {
+    Q_UNUSED(inputBits)
     return m_value;
 }

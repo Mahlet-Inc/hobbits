@@ -6,7 +6,6 @@
 #include "ui_widthframer.h"
 #include "widthframer.h"
 #include <QVBoxLayout>
-#include "pluginhelper.h"
 
 WidthFramer::WidthFramer() :
     ui(new Ui::WidthFramer()),
@@ -180,10 +179,9 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         const QJsonObject &recallablePluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    QSharedPointer<AnalyzerResult> result(new AnalyzerResult());
 
     if (!canRecallPluginState(recallablePluginState)) {
-        return PluginHelper::analyzerErrorResult("Invalid parameters passed to plugin");
+        return AnalyzerResult::error("Invalid parameters passed to plugin");
     }
 
     qint64 frameWidth = recallablePluginState.value("width").toInt();
@@ -195,19 +193,17 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         qint64 width = qMin(frameWidth - 1, bits->sizeInBits() - i - 1);
         frames.append(Frame(bits, i, i + width));
 
-        PluginHelper::recordProgress(progressTracker, i, bits->sizeInBits());
+        progressTracker->setProgress(i, bits->sizeInBits());
         if (progressTracker->getCancelled()) {
-            return PluginHelper::analyzerErrorResult("Processing cancelled");
+            return AnalyzerResult::error("Processing cancelled");
         }
     }
 
     QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
 
     bitInfo->setFrames(frames);
-    result->setBitInfo(bitInfo);
-    result->setPluginState(recallablePluginState);
 
-    return std::move(result);
+    return AnalyzerResult::result(bitInfo, recallablePluginState);
 }
 
 void WidthFramer::getPeak(QPointF peak)

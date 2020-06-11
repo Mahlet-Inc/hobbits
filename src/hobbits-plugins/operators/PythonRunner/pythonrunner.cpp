@@ -16,9 +16,10 @@
 const QString PYTHON_PATH_KEY = "python_runner_path";
 
 PythonRunner::PythonRunner() :
-    ui(new Ui::PythonRunner())
+    ui(new Ui::PythonRunner()),
+    m_stateHelper(new PluginStateHelper())
 {
-
+    m_stateHelper->addTextEditStringParameter("script", [this](){return ui->te_pythonScript;});
 }
 
 // Return name of operator
@@ -101,41 +102,28 @@ void PythonRunner::openHelpDialog()
 
 QJsonObject PythonRunner::getStateFromUi()
 {
-    QJsonObject pluginState;
-    pluginState.insert("script", ui->te_pythonScript->toPlainText());
-    return pluginState;
+    return m_stateHelper->getPluginStateFromUi();
 }
 
 bool PythonRunner::setPluginStateInUi(const QJsonObject &pluginState)
 {
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    ui->te_pythonScript->setPlainText(pluginState.value("script").toString());
-    return true;
+    return m_stateHelper->applyPluginStateToUi(pluginState);
 }
 
 bool PythonRunner::canRecallPluginState(const QJsonObject &pluginState)
 {
-    // if pluginState does not have required fields, return false
-    if (pluginState.isEmpty() == true) {
-        return false;
-    }
-    if (!(pluginState.contains("script") && pluginState.value("script").isString())) {
-        return false;
-    }
-
-    return true;
+    return m_stateHelper->validatePluginState(pluginState);
 }
 
 int PythonRunner::getMinInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 
 int PythonRunner::getMaxInputContainers(const QJsonObject &pluginState)
 {
+    Q_UNUSED(pluginState)
     return 1;
 }
 

@@ -3,6 +3,7 @@
 
 #include "mathparser.h"
 #include "operatorinterface.h"
+#include "pluginstatehelper.h"
 
 
 namespace Ui
@@ -45,6 +46,7 @@ private slots:
 private:
     Ui::PrbsGenerator *ui;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<PluginStateHelper> m_stateHelper;
 };
 
 #endif // PRBSGENERATOR_H
