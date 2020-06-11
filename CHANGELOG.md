@@ -1,3 +1,11 @@
+## [0.32.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.32.0...v0.32.1) (2020-06-11)
+
+
+### Bug Fixes
+
+* enable Python versions lower than 3.6 to work with kaitai plugin ([fa12a87](https://github.com/Mahlet-Inc/hobbits/commit/fa12a8786d44f4ec900af655dedb1b3305d31f9e))
+* run kaitai-struct-compiler correctly in windows ([8b51480](https://github.com/Mahlet-Inc/hobbits/commit/8b514806a94ff13ff05d2c6e0c7deff86df05f64))
+
 # [0.32.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.31.1...v0.32.0) (2020-05-27)
 
 
