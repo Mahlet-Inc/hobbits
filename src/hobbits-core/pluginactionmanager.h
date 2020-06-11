@@ -6,8 +6,8 @@
 #include <QStack>
 
 #include "actionwatcher.h"
-#include "analyzeractor.h"
-#include "operatoractor.h"
+#include "analyzerrunner.h"
+#include "operatorrunner.h"
 #include "hobbitspluginmanager.h"
 #include <QSharedPointer>
 
@@ -82,7 +82,8 @@ private:
 
     QQueue<QSharedPointer<LineageAction>> m_lineageQueue;
 
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> m_currOperatorWatcher;
+    QHash<QUuid, QSharedPointer<OperatorRunner>> m_operatorRunners;
+    QHash<QUuid, QSharedPointer<AnalyzerRunner>> m_analyzerRunners;
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> m_currAnalyzerWatcher;
 
 };

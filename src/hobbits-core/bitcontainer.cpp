@@ -152,6 +152,11 @@ QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
     return m_actionLineage;
 }
 
+QSharedPointer<PluginActionLineage> BitContainer::getActionLineage()
+{
+    return m_actionLineage;
+}
+
 void BitContainer::setActionLineage(QSharedPointer<const PluginActionLineage> lineage)
 {
     QMutexLocker lock(&m_mutex);

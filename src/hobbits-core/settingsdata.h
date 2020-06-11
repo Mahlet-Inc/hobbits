@@ -51,6 +51,7 @@ public:
     static const QString LAST_IMPORT_EXPORT_PATH_KEY;
     static const QString LAST_CONTAINER_PATH_KEY;
     static const QString PLUGIN_RUNNING_KEY;
+    static const QString PLUGINS_RUNNING_KEY;
 
 private:
     QMap<QString, QVariant> m_privateSettings;

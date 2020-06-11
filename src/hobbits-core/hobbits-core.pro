@@ -34,8 +34,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     actionprogress.cpp \
     actionrenderprogress.cpp \
-    analyzeractor.cpp \
     analyzerresult.cpp \
+    analyzerrunner.cpp \
         bitarray.cpp \
         bitcontainer.cpp \
     bitcontainerlistmodel.cpp \
@@ -53,10 +53,11 @@ SOURCES += \
     hobbitspluginmanager.cpp \
     importexportresult.cpp \
         mathparser.cpp \
-    operatoractor.cpp \
     operatorresult.cpp \
+    operatorrunner.cpp \
     parseresult.cpp \
     pluginaction.cpp \
+    pluginactionbatch.cpp \
     pluginactionlineage.cpp \
     pluginactionmanager.cpp \
     plugincallback.cpp \
@@ -72,9 +73,9 @@ HEADERS += \
     actionprogress.h \
     actionrenderprogress.h \
     actionwatcher.h \
-    analyzeractor.h \
     analyzerinterface.h \
     analyzerresult.h \
+    analyzerrunner.h \
         bitarray.h \
         bitcontainer.h \
     bitcontainerlistmodel.h \
@@ -94,12 +95,13 @@ HEADERS += \
     hobbitspluginmanager.h \
     importexportinterface.h \
     importexportresult.h \
-    operatoractor.h \
         operatorinterface.h \
         mathparser.h \
     operatorresult.h \
+    operatorrunner.h \
     parseresult.h \
     pluginaction.h \
+    pluginactionbatch.h \
     pluginactionlineage.h \
     pluginactionmanager.h \
     plugincallback.h \

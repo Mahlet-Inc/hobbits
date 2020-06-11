@@ -28,6 +28,24 @@ QJsonObject PluginAction::getPluginState() const
     return m_pluginState;
 }
 
+int PluginAction::minPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
+{
+    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
+    if (plugin.isNull()) {
+        return 0;
+    }
+    return plugin->getMinInputContainers(m_pluginState);
+}
+
+int PluginAction::maxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
+{
+    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
+    if (plugin.isNull()) {
+        return 0;
+    }
+    return plugin->getMaxInputContainers(m_pluginState);
+}
+
 QJsonObject PluginAction::serialize() const
 {
     QJsonObject obj;
@@ -70,13 +88,12 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> PluginAction
         QString outputName,
         QMap<int, QUuid> outputIdMap) const
 {
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> nullResult;
     QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
     if (plugin.isNull()) {
-        return nullResult;
+        return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
     }
     if (!plugin->canRecallPluginState(m_pluginState)) {
-        return nullResult;
+        return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
     }
 
     return actor->operatorFullAct(
@@ -93,14 +110,40 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> PluginAction
         QSharedPointer<const HobbitsPluginManager> pluginManager,
         QSharedPointer<BitContainer> container) const
 {
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> nullResult;
     QSharedPointer<AnalyzerInterface> plugin = pluginManager->getAnalyzer(m_pluginName);
     if (plugin.isNull()) {
-        return nullResult;
+        return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
     }
     if (!plugin->canRecallPluginState(m_pluginState)) {
-        return nullResult;
+        return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
     }
 
     return actor->analyzerFullAct(plugin, container, m_pluginState);
+}
+
+
+QSharedPointer<ImportExportResult> PluginAction::importAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget* parent) const
+{
+    QSharedPointer<ImportExportInterface> plugin = pluginManager->getImporterExporter(m_pluginName);
+    if (plugin.isNull()) {
+        return ImportExportResult::error(QString("Plugin '%1' could not be loaded"));
+    }
+    if (!plugin->canImport()) {
+        return ImportExportResult::error(QString("Plugin '%1' can not be used to import data"));
+    }
+
+    return plugin->importBits(m_pluginState, parent);
+}
+
+QSharedPointer<ImportExportResult> PluginAction::exportAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QSharedPointer<BitContainer> container, QWidget* parent) const
+{
+    QSharedPointer<ImportExportInterface> plugin = pluginManager->getImporterExporter(m_pluginName);
+    if (plugin.isNull()) {
+        return ImportExportResult::error(QString("Plugin '%1' could not be loaded"));
+    }
+    if (!plugin->canExport()) {
+        return ImportExportResult::error(QString("Plugin '%1' can not be used to export data"));
+    }
+
+    return plugin->exportBits(container, m_pluginState, parent);
 }

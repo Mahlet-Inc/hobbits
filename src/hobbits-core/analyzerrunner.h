@@ -1,5 +1,5 @@
-#ifndef ANALYZERACTOR_H
-#define ANALYZERACTOR_H
+#ifndef ANALYZERRUNNER_H
+#define ANALYZERRUNNER_H
 
 #include "actionwatcher.h"
 #include "analyzerresult.h"
@@ -10,24 +10,26 @@
 
 #include "hobbits-core_global.h"
 
-class PluginActionManager;
-
-class HOBBITSCORESHARED_EXPORT AnalyzerActor : public QObject
+class HOBBITSCORESHARED_EXPORT AnalyzerRunner : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AnalyzerActor(PluginActionManager *manager, QSharedPointer<const HobbitsPluginManager> pluginManager);
+    static QSharedPointer<AnalyzerRunner> create(
+            QSharedPointer<const HobbitsPluginManager> pluginManager,
+            QSharedPointer<PluginAction> action);
 
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> analyzerFullAct(
-            QSharedPointer<AnalyzerInterface> analyzer,
-            QSharedPointer<BitContainer> container,
-            QJsonObject pluginState = QJsonObject());
+
+    QUuid id() const;
+    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> getWatcher();
+
+    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> run(QSharedPointer<BitContainer> container);
 
 signals:
     void reportError(QString);
+    void finished(QUuid);
+    void finishedFail(QUuid, QString);
 
-public slots:
 private slots:
     void postProcess();
 
@@ -38,15 +40,13 @@ private:
             QJsonObject pluginState,
             QSharedPointer<ActionProgress> progressTracker);
 
-    QFuture<QSharedPointer<const AnalyzerResult>> m_future;
+    QUuid m_id;
+    QSharedPointer<PluginAction> m_action;
     QSharedPointer<AnalyzerInterface> m_analyzer;
+    QString m_pluginFileLocation;
     QSharedPointer<BitContainer> m_container;
-    QJsonObject m_pluginState;
-    QSharedPointer<const HobbitsPluginManager> m_pluginManager;
 
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> m_actionWatcher;
-
-    PluginActionManager *m_manager;
 };
 
-#endif // ANALYZERACTOR_H
+#endif // ANALYZERRUNNER_H

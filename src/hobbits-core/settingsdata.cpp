@@ -25,6 +25,7 @@ const QString SettingsData::LAST_TEMPLATE_PATH_KEY = "last_template_path";
 const QString SettingsData::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_path";
 const QString SettingsData::LAST_CONTAINER_PATH_KEY = "last_container_path";
 const QString SettingsData::PLUGIN_RUNNING_KEY = "plugin_running";
+const QString SettingsData::PLUGINS_RUNNING_KEY = "plugins_running";
 
 SettingsData::SettingsData()
 {

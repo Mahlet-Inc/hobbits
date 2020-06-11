@@ -17,7 +17,9 @@ public:
     enum PluginType {
         Framer = 1 /*Deprecated*/,
         Operator = 2,
-        Analyzer = 3
+        Analyzer = 3,
+        Importer = 4,
+        Exporter = 5
     };
 
     PluginAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
@@ -25,6 +27,9 @@ public:
     PluginType getPluginType() const;
     QString getPluginName() const;
     QJsonObject getPluginState() const;
+
+    int minPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
+    int maxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
 
     QJsonObject serialize() const;
 
@@ -37,10 +42,15 @@ public:
             QSharedPointer<BitContainerManager> bitContainerManager,
             QString outputName = "",
             QMap<int, QUuid> outputIdMap = QMap<int, QUuid>()) const;
+
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> analyzerAct(
             QSharedPointer<AnalyzerActor> actor,
             QSharedPointer<const HobbitsPluginManager> pluginManager,
             QSharedPointer<BitContainer> container) const;
+
+    QSharedPointer<ImportExportResult> importAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget* parent = nullptr) const;
+
+    QSharedPointer<ImportExportResult> exportAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QSharedPointer<BitContainer> container, QWidget* parent = nullptr) const;
 
     inline bool operator==(const PluginAction &other) const
     {
