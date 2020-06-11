@@ -28,7 +28,7 @@ def dumpStruct(s, sections, prefix=""):
         for i, item in enumerate(s):
             label = prefix + "[" + str(i) + "]"
             sections.append({
-                "label": f"{label}",
+                "label": label,
                 "parent": prefix
             })
             dumpStruct(item, sections, label)
@@ -41,7 +41,7 @@ def dumpStruct(s, sections, prefix=""):
                     sections.append({
                         "start": descr["start"],
                         "end": descr["end"],
-                        "label": f"{label}",
+                        "label": label,
                         "parent": prefix
                     })
                     dumpStruct(prop, sections, label)
