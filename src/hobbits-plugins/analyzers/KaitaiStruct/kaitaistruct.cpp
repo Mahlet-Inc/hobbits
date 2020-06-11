@@ -252,7 +252,11 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progressTracker->setProgressPercent(20);
 
+#ifdef Q_OS_WIN
+    QStringList kscAgs = {"/C", kscPath, "--debug", "-t", "python", ksy.fileName()};
+#else
     QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
+#endif
     QProcess kscProcess;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QProcessEnvironment envUpdate;
@@ -262,6 +266,11 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     kscProcess.setStandardErrorFile(errorFile.fileName());
     kscProcess.setStandardOutputFile(stdoutFile.fileName());
     kscProcess.start(kscPath, kscAgs);
+#ifdef Q_OS_WIN
+    kscProcess.start("cmd.exe", kscAgs);
+#else
+    kscProcess.start(kscPath, kscAgs);
+#endif
 
     kscProcess.waitForFinished();
 
@@ -344,6 +353,14 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
                     Q_ARG(QString, "Python stdout:\n" + output + "\n\n"));
         }
         stdoutFile.close();
+    }
+
+    if (!outputRangeFile.exists()) {
+        QString errorString = "No analysis file was produced - check the Output tab to see if ksc or python produced any errors.";
+        errorString += "\n\nCommon problems to check for:";
+        errorString += "\n- Are you pointing to a valid Python 3 with the kaitaistruct package 0.9 installed?";
+        errorString += "\n- Are you pointing to a valid kaitai-struct-compiler version 0.9?";
+        return AnalyzerResult::error(errorString);
     }
 
     if (!outputRangeFile.open(QIODevice::ReadOnly)) {
