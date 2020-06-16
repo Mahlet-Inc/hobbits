@@ -13,6 +13,26 @@ PluginAction::PluginAction(PluginType pluginType, QString pluginName, QJsonObjec
 
 }
 
+static QSharedPointer<PluginAction> analyzerAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Analyzer, pluginName, pluginState));
+}
+
+static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Operator, pluginName, pluginState));
+}
+
+static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Importer, pluginName, pluginState));
+}
+
+static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Exporter, pluginName, pluginState));
+}
+
 PluginAction::PluginType PluginAction::getPluginType() const
 {
     return m_pluginType;
@@ -78,72 +98,4 @@ QSharedPointer<PluginAction> PluginAction::deserialize(QJsonObject data)
     QJsonObject pluginState = data.value("state").toObject();
 
     return QSharedPointer<PluginAction>(new PluginAction(pluginType, pluginName, pluginState));
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> PluginAction::operatorAct(
-        QSharedPointer<OperatorActor> actor,
-        QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QList<QSharedPointer<BitContainer>> inputContainers,
-        QSharedPointer<BitContainerManager> bitContainerManager,
-        QString outputName,
-        QMap<int, QUuid> outputIdMap) const
-{
-    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
-    if (plugin.isNull()) {
-        return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
-    }
-    if (!plugin->canRecallPluginState(m_pluginState)) {
-        return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
-    }
-
-    return actor->operatorFullAct(
-            plugin,
-            inputContainers,
-            bitContainerManager,
-            outputName,
-            m_pluginState,
-            outputIdMap);
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> PluginAction::analyzerAct(
-        QSharedPointer<AnalyzerActor> actor,
-        QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QSharedPointer<BitContainer> container) const
-{
-    QSharedPointer<AnalyzerInterface> plugin = pluginManager->getAnalyzer(m_pluginName);
-    if (plugin.isNull()) {
-        return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
-    }
-    if (!plugin->canRecallPluginState(m_pluginState)) {
-        return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
-    }
-
-    return actor->analyzerFullAct(plugin, container, m_pluginState);
-}
-
-
-QSharedPointer<ImportExportResult> PluginAction::importAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget* parent) const
-{
-    QSharedPointer<ImportExportInterface> plugin = pluginManager->getImporterExporter(m_pluginName);
-    if (plugin.isNull()) {
-        return ImportExportResult::error(QString("Plugin '%1' could not be loaded"));
-    }
-    if (!plugin->canImport()) {
-        return ImportExportResult::error(QString("Plugin '%1' can not be used to import data"));
-    }
-
-    return plugin->importBits(m_pluginState, parent);
-}
-
-QSharedPointer<ImportExportResult> PluginAction::exportAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QSharedPointer<BitContainer> container, QWidget* parent) const
-{
-    QSharedPointer<ImportExportInterface> plugin = pluginManager->getImporterExporter(m_pluginName);
-    if (plugin.isNull()) {
-        return ImportExportResult::error(QString("Plugin '%1' could not be loaded"));
-    }
-    if (!plugin->canExport()) {
-        return ImportExportResult::error(QString("Plugin '%1' can not be used to export data"));
-    }
-
-    return plugin->exportBits(container, m_pluginState, parent);
 }

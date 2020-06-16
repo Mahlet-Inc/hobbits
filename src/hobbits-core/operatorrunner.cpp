@@ -39,7 +39,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
 QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunner::run(QList<QSharedPointer<BitContainer>> inputContainers)
 {
     if (m_actionWatcher->watcher()->future().isRunning()) {
-        emit reportError(QString("Operator runner '%1' is already running").arg(m_id.toString()));
+        emit reportError(m_id, QString("Operator runner is already running"));
         return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
     }
 
@@ -54,11 +54,11 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
         pluginState = m_op->getStateFromUi();
         if (pluginState.isEmpty() || pluginState.contains("error")) {
             if (pluginState.contains("error")) {
-                emit reportError(QString("Plugin '%1' reported an error with its current state: '%2'").arg(
+                emit reportError(m_id, QString("Plugin '%1' reported an error with its current state: '%2'").arg(
                         m_op->getName()).arg(pluginState.value("error").toString()));
             }
             else if (pluginState.isEmpty()) {
-                emit reportError(QString(
+                emit reportError(m_id, QString(
                         "Plugin '%1' is in an invalid state and can't be executed.  Double check the input fields.").arg(
                                          m_op->getName()));
             }
@@ -105,16 +105,16 @@ void OperatorRunner::postProcess()
 
     if (result.isNull()) {
         QString errorString = QString("Plugin '%1' failed to execute.  Double check the input fields.").arg(m_op->getName());
-        emit reportError(errorString);
-        emit finishedFail(m_id, errorString);
+        emit reportError(m_id, errorString);
+        emit finished(m_id);
         return;
     }
 
-    if (result->getPluginState().contains("error")) {
+    if (!result->errorString().isEmpty()) {
         QString errorString = QString("Plugin '%1' reported an error with its processing: %2").arg(m_op->getName()).arg(
-                    result->getPluginState().value("error").toString());
-        emit reportError(errorString);
-        emit finishedFail(m_id, errorString);
+                    result->errorString());
+        emit reportError(m_id, errorString);
+        emit finished(m_id);
         return;
     }
 
@@ -122,7 +122,7 @@ void OperatorRunner::postProcess()
     m_outputContainers = result->getOutputContainers();
 
     // Apply action lineage
-    if (!result->getPluginState().isEmpty()) {
+    if (!result->hasEmptyState()) {
         QSharedPointer<PluginAction> action =
             QSharedPointer<PluginAction>(
                     new PluginAction(

@@ -3,7 +3,6 @@
 
 #include "actionwatcher.h"
 #include "analyzerrunner.h"
-#include "operatoractor.h"
 #include "hobbitspluginmanager.h"
 #include <QJsonObject>
 #include <QtConcurrent/QtConcurrentRun>
@@ -24,6 +23,11 @@ public:
 
     PluginAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
 
+    static QSharedPointer<PluginAction> analyzerAction(QString pluginName, QJsonObject pluginState);
+    static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState);
+    static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState = QJsonObject());
+    static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState = QJsonObject());
+
     PluginType getPluginType() const;
     QString getPluginName() const;
     QJsonObject getPluginState() const;
@@ -34,23 +38,6 @@ public:
     QJsonObject serialize() const;
 
     static QSharedPointer<PluginAction> deserialize(QJsonObject data);
-
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> operatorAct(
-            QSharedPointer<OperatorActor> actor,
-            QSharedPointer<const HobbitsPluginManager> pluginManager,
-            QList<QSharedPointer<BitContainer>> inputContainers,
-            QSharedPointer<BitContainerManager> bitContainerManager,
-            QString outputName = "",
-            QMap<int, QUuid> outputIdMap = QMap<int, QUuid>()) const;
-
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> analyzerAct(
-            QSharedPointer<AnalyzerActor> actor,
-            QSharedPointer<const HobbitsPluginManager> pluginManager,
-            QSharedPointer<BitContainer> container) const;
-
-    QSharedPointer<ImportExportResult> importAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget* parent = nullptr) const;
-
-    QSharedPointer<ImportExportResult> exportAct(QSharedPointer<const HobbitsPluginManager> pluginManager, QSharedPointer<BitContainer> container, QWidget* parent = nullptr) const;
 
     inline bool operator==(const PluginAction &other) const
     {

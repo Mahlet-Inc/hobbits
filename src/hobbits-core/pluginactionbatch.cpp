@@ -73,9 +73,12 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
         QList<QPair<QUuid, int>> inputs;
         for (auto input : currLineage->getInputs()) {
             // The lineage might have inputs that are not included based on the Mode - those inputs are "variables" that
-            // will be selected at batch runtime, so they will be skipped for now
+            // will be selected at batch runtime, so they will be marked with null QUuids
             if (stepMap.contains(input->getPluginAction())) {
                 inputs.append({stepMap.value(input->getPluginAction())->stepId, input->getOutputPosition()});
+            }
+            else {
+                inputs.append({QUuid(), 0});
             }
         }
         stepMap[currLineage->getPluginAction()]->inputs = inputs;

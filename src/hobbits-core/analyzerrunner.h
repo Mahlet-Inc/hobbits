@@ -26,9 +26,8 @@ public:
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> run(QSharedPointer<BitContainer> container);
 
 signals:
-    void reportError(QString);
+    void reportError(QUuid, QString);
     void finished(QUuid);
-    void finishedFail(QUuid, QString);
 
 private slots:
     void postProcess();

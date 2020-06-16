@@ -40,7 +40,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunn
 {
 
     if (m_actionWatcher->watcher()->future().isRunning()) {
-        emit reportError(QString("Analyzer runner '%1' is already running").arg(m_id.toString()));
+        emit reportError(m_id, QString("Analyzer runner is already running"));
         return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
     }
 
@@ -49,11 +49,11 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunn
         pluginState = m_analyzer->getStateFromUi();
         if (pluginState.isEmpty() || pluginState.contains("error")) {
             if (pluginState.contains("error")) {
-                emit reportError(QString("Plugin '%1' reported an error with its current state: '%2'").arg(
+                emit reportError(m_id, QString("Plugin '%1' reported an error with its current state: '%2'").arg(
                         m_analyzer->getName()).arg(pluginState.value("error").toString()));
             }
             else if (pluginState.isEmpty()) {
-                emit reportError(QString(
+                emit reportError(m_id, QString(
                         "Plugin '%1' is in an invalid state and can't be executed.  Double check the input fields.").arg(
                                          m_analyzer->getName()));
             }
@@ -100,16 +100,16 @@ void AnalyzerRunner::postProcess()
     if (result.isNull()) {
         QString errorString = QString("Plugin '%1' failed to execute.  Double check the input fields.").arg(
                     m_analyzer->getName());
-        emit reportError(errorString);
-        emit finishedFail(m_id, errorString);
+        emit reportError(m_id, errorString);
+        emit finished(m_id);
         return;
     }
 
     if (result->getPluginState().contains("error")) {
         QString errorString = QString("Plugin '%1' reported an error with its processing: %2").arg(m_analyzer->getName()).arg(
                     result->getPluginState().value("error").toString());
-        emit reportError(errorString);
-        emit finishedFail(m_id, errorString);
+        emit reportError(m_id, errorString);
+        emit finished(m_id);
         return;
     }
 

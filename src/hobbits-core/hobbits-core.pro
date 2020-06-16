@@ -36,6 +36,7 @@ SOURCES += \
     actionrenderprogress.cpp \
     analyzerresult.cpp \
     analyzerrunner.cpp \
+    batchrunner.cpp \
         bitarray.cpp \
         bitcontainer.cpp \
     bitcontainerlistmodel.cpp \
@@ -47,11 +48,12 @@ SOURCES += \
     displaybasetext.cpp \
     displayhandle.cpp \
     displayhelper.cpp \
+    exportresult.cpp \
         frame.cpp \
     highlightnavigator.cpp \
     hobbitscoreinfo.cpp \
     hobbitspluginmanager.cpp \
-    importexportresult.cpp \
+    importresult.cpp \
         mathparser.cpp \
     operatorresult.cpp \
     operatorrunner.cpp \
@@ -76,6 +78,7 @@ HEADERS += \
     analyzerinterface.h \
     analyzerresult.h \
     analyzerrunner.h \
+    batchrunner.h \
         bitarray.h \
         bitcontainer.h \
     bitcontainerlistmodel.h \
@@ -88,13 +91,14 @@ HEADERS += \
     displayhandle.h \
     displayhelper.h \
     displayinterface.h \
+    exportresult.h \
         frame.h \
     highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     hobbitspluginmanager.h \
     importexportinterface.h \
-    importexportresult.h \
+    importresult.h \
         operatorinterface.h \
         mathparser.h \
     operatorresult.h \
