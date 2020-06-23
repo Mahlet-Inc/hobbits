@@ -17,6 +17,8 @@ public:
                     QList<QSharedPointer<BitContainer>> inputContainers,
                     QList<QSharedPointer<BitContainer>> outputContainers);
 
+    static QSharedPointer<PluginActionLineage> actionlessLineage();
+
     QSharedPointer<PluginActionLineage> setOutputPosition(int outputPosition);
     QSharedPointer<PluginActionLineage> addInput(QSharedPointer<const PluginActionLineage> input);
     QSharedPointer<PluginActionLineage> addOutputGroup(QList<QWeakPointer<const PluginActionLineage>> outputs);
@@ -29,7 +31,8 @@ public:
     QJsonObject serialize() const;
     static QSharedPointer<PluginActionLineage> deserialize(QJsonObject data);
 
-    QList<QSharedPointer<const PluginActionLineage>> getLineage() const;
+    QSharedPointer<const PluginAction> containerSourceAnalyzer() const;
+    QSharedPointer<const PluginAction> containerSourceOperator() const;
 
 private:
     QSharedPointer<const PluginAction> m_pluginAction;

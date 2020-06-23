@@ -13,24 +13,29 @@ PluginAction::PluginAction(PluginType pluginType, QString pluginName, QJsonObjec
 
 }
 
-static QSharedPointer<PluginAction> analyzerAction(QString pluginName, QJsonObject pluginState)
+QSharedPointer<PluginAction> PluginAction::analyzerAction(QString pluginName, QJsonObject pluginState)
 {
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Analyzer, pluginName, pluginState));
 }
 
-static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState)
+QSharedPointer<PluginAction> PluginAction::operatorAction(QString pluginName, QJsonObject pluginState)
 {
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Operator, pluginName, pluginState));
 }
 
-static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState)
+QSharedPointer<PluginAction> PluginAction::importerAction(QString pluginName, QJsonObject pluginState)
 {
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Importer, pluginName, pluginState));
 }
 
-static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState)
+QSharedPointer<PluginAction> PluginAction::exporterAction(QString pluginName, QJsonObject pluginState)
 {
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Exporter, pluginName, pluginState));
+}
+
+QSharedPointer<PluginAction> PluginAction::noAction()
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::NoAction, "No Action", QJsonObject()));
 }
 
 PluginAction::PluginType PluginAction::getPluginType() const

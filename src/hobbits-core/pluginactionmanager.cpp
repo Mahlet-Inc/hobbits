@@ -7,8 +7,12 @@ PluginActionManager::PluginActionManager(QSharedPointer<const HobbitsPluginManag
 {
 }
 
+void PluginActionManager::setContainerManager(QSharedPointer<BitContainerManager> containerManager)
+{
+    m_containerManager = containerManager;
+}
 
-QSharedPointer<AnalyzerRunner> PluginActionManager::runAnalyzer(QSharedPointer<PluginAction> action, QSharedPointer<BitContainer> container)
+QSharedPointer<AnalyzerRunner> PluginActionManager::runAnalyzer(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container)
 {
     auto plugin = m_pluginManager->getAnalyzer(action->getPluginName());
     if (!plugin) {
@@ -18,16 +22,20 @@ QSharedPointer<AnalyzerRunner> PluginActionManager::runAnalyzer(QSharedPointer<P
 
     auto runner = AnalyzerRunner::create(m_pluginManager, action);
 
-    m_operatorRunners.insert(runner->id(), runner);
+    m_analyzerRunners.insert(runner->id(), runner);
     connect(runner.data(), &AnalyzerRunner::reportError, this, &PluginActionManager::relayErrorFromAnalyzer);
     connect(runner.data(), &AnalyzerRunner::finished, this, &PluginActionManager::finishAnalyzer);
+    connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(analyzerProgress(QUuid, int)));
 
     runner->run(container);
+    emit analyzerStarted(runner->id());
 
     return runner;
 }
 
-QSharedPointer<OperatorRunner> PluginActionManager::runOperator(QSharedPointer<PluginAction> action, QList<QSharedPointer<BitContainer>> containers)
+QSharedPointer<OperatorRunner> PluginActionManager::runOperator(
+        QSharedPointer<const PluginAction> action,
+        QList<QSharedPointer<BitContainer>> containers)
 {
     auto plugin = m_pluginManager->getOperator(action->getPluginName());
     if (!plugin) {
@@ -35,34 +43,40 @@ QSharedPointer<OperatorRunner> PluginActionManager::runOperator(QSharedPointer<P
         QPair<QUuid, QSharedPointer<AnalyzerRunner>>();
     }
 
-    auto runner = OperatorRunner::create(m_pluginManager, action);
+    auto runner = OperatorRunner::create(m_pluginManager, m_containerManager, action);
 
     m_operatorRunners.insert(runner->id(), runner);
     connect(runner.data(), &OperatorRunner::reportError, this, &PluginActionManager::relayErrorFromOperator);
     connect(runner.data(), &OperatorRunner::finished, this, &PluginActionManager::finishOperator);
+    connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(operatorProgress(QUuid, int)));
 
     runner->run(containers);
+    emit operatorStarted(runner->id());
 
     return runner;
 }
 
-QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<PluginAction> action)
+QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<const PluginAction> action)
 {
     auto plugin = m_pluginManager->getImporterExporter(action->getPluginName());
     if (!plugin) {
         reportError(QString("Importer plugin named '%1' could not be loaded.").arg(action->getPluginName()));
-        return QSharedPointer<ExportResult>();
+        return QSharedPointer<ImportResult>();
     }
 
     auto result = plugin->importBits(action->getPluginState());
     if (!result->errorString().isEmpty()) {
         reportError(QString("'%1' Error: %2").arg(action->getPluginName()).arg(result->errorString()));
     }
+    else if (!result->hasEmptyState() && !result->getContainer().isNull()) {
+        auto fullAction = PluginAction::importerAction(action->getPluginName(), result->pluginState());
+        PluginActionLineage::recordLineage(fullAction, {}, {result->getContainer()});
+    }
 
     return result;
 }
 
-QSharedPointer<ExportResult> PluginActionManager::runExporter(QSharedPointer<PluginAction> action, QSharedPointer<BitContainer> container)
+QSharedPointer<ExportResult> PluginActionManager::runExporter(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container)
 {
     auto plugin = m_pluginManager->getImporterExporter(action->getPluginName());
     if (!plugin) {
@@ -78,6 +92,20 @@ QSharedPointer<ExportResult> PluginActionManager::runExporter(QSharedPointer<Plu
     return result;
 }
 
+
+void PluginActionManager::cancelById(QUuid id)
+{
+    if (m_analyzerRunners.contains(id)) {
+        m_analyzerRunners.value(id)->getWatcher()->progress()->setCancelled(true);
+    }
+    else if (m_operatorRunners.contains(id)) {
+        m_operatorRunners.value(id)->getWatcher()->progress()->setCancelled(true);
+    }
+    else if (m_batchRunners.contains(id)) {
+        m_batchRunners.value(id)->cancel();
+    }
+}
+
 const QHash<QUuid, QSharedPointer<AnalyzerRunner>> PluginActionManager::runningAnalyzers() const
 {
     return m_analyzerRunners;
@@ -86,6 +114,11 @@ const QHash<QUuid, QSharedPointer<AnalyzerRunner>> PluginActionManager::runningA
 const QHash<QUuid, QSharedPointer<OperatorRunner>> PluginActionManager::runningOperators() const
 {
     return m_operatorRunners;
+}
+
+const QHash<QUuid, QSharedPointer<BatchRunner>> PluginActionManager::runningBatches() const
+{
+    return m_batchRunners;
 }
 
 void PluginActionManager::finishOperator(QUuid id)
@@ -106,6 +139,18 @@ void PluginActionManager::finishAnalyzer(QUuid id)
         disconnect(runner.data(), &AnalyzerRunner::finished, this, &PluginActionManager::finishAnalyzer);
     }
     emit analyzerFinished(id);
+}
+
+void PluginActionManager::finishBatch(QUuid id)
+{
+    auto runner = m_batchRunners.take(id);
+    if (!runner.isNull()) {
+        disconnect(runner.data(), &BatchRunner::finished, this, &PluginActionManager::finishBatch);
+        if (!runner->errorList().isEmpty()) {
+            emit reportError("Batch Process Errors:\n" + runner->errorList().join("\n"));
+        }
+    }
+    emit batchFinished(id);
 }
 
 void PluginActionManager::relayErrorFromOperator(QUuid id, QString errorString)
@@ -136,5 +181,8 @@ void PluginActionManager::runBatch(QSharedPointer<PluginActionBatch> batch, QLis
         }
     }
 
-    m_batches.insert(QUuid::createUuid(), batch);
+    auto runner = BatchRunner::create(batch, containers);
+    m_batchRunners.insert(runner->id(), runner);
+    connect(runner.data(), &BatchRunner::finished, this, &PluginActionManager::finishBatch);
+    runner->run(sharedFromThis());
 }

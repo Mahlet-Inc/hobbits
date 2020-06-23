@@ -17,7 +17,7 @@ class HOBBITSCORESHARED_EXPORT AnalyzerRunner : public QObject
 public:
     static QSharedPointer<AnalyzerRunner> create(
             QSharedPointer<const HobbitsPluginManager> pluginManager,
-            QSharedPointer<PluginAction> action);
+            QSharedPointer<const PluginAction> action);
 
 
     QUuid id() const;
@@ -25,8 +25,11 @@ public:
 
     QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> run(QSharedPointer<BitContainer> container);
 
+    QSharedPointer<BitContainer> container() const;
+
 signals:
     void reportError(QUuid, QString);
+    void progress(QUuid, int);
     void finished(QUuid);
 
 private slots:
@@ -40,7 +43,7 @@ private:
             QSharedPointer<ActionProgress> progressTracker);
 
     QUuid m_id;
-    QSharedPointer<PluginAction> m_action;
+    QSharedPointer<const PluginAction> m_action;
     QSharedPointer<AnalyzerInterface> m_analyzer;
     QString m_pluginFileLocation;
     QSharedPointer<BitContainer> m_container;

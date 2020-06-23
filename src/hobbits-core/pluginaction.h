@@ -18,7 +18,8 @@ public:
         Operator = 2,
         Analyzer = 3,
         Importer = 4,
-        Exporter = 5
+        Exporter = 5,
+        NoAction = 6
     };
 
     PluginAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
@@ -27,6 +28,7 @@ public:
     static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState);
     static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState = QJsonObject());
     static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState = QJsonObject());
+    static QSharedPointer<PluginAction> noAction();
 
     PluginType getPluginType() const;
     QString getPluginName() const;

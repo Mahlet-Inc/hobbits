@@ -24,7 +24,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
         auto currMode = lineageModePair.second;
 
         // If the mode of this lineage is "Inclusive", the ActionStep that produced it will be part of the batch
-        if (currMode | Mode::Inclusive) {
+        if (currMode & Mode::Inclusive) {
             // Multiple PluginActionLineage nodes can refer to different outputs of the same action.
             // We only want one ActionStep per PluginAction
             if (!stepMap.contains(currLineage->getPluginAction())) {
@@ -33,16 +33,22 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
                 stepMap.insert(currLineage->getPluginAction(), actionStep);
             }
         }
+        // make a "bypass" step so that the outputs can reference a single container
+        else if (batchMode & Mode::After) {
+            stageTwoQueue.enqueue(currLineage);
+            auto noActionStep = QSharedPointer<PluginActionBatch::ActionStep>(new PluginActionBatch::ActionStep(QUuid::createUuid(), PluginAction::noAction()));
+            stepMap.insert(currLineage->getPluginAction(), noActionStep);
+        }
 
         // If the mode of this lineage is "Before", the ActionSteps leading to its inputs will be part of the batch
-        if (batchMode | Mode::Before) {
+        if (batchMode & Mode::Before) {
             for (auto input : currLineage->getInputs()) {
                 lineageQueue.append({input, Mode::InclusiveBefore});
             }
         }
 
         // If the mode of this lineage is "After", the ActionSteps leading to its output(s) will be part of the batch
-        if (batchMode | Mode::After) {
+        if (batchMode & Mode::After) {
             for (auto outputSet : currLineage->getOutputs()) {
                 for  (auto output: outputSet) {
                     auto outputRef = output.toStrongRef();
@@ -57,7 +63,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
     // Stage Two: Set Step Inputs
     // Now that every desired ActionStep around the target PluginActionLineage have ids and are indexed,
     // we can iterate through again in order to assign input ids
-    QSet<QSharedPointer<ActionStep>> alreadyAssigned;
+    QSet<QSharedPointer<const PluginAction>> alreadyAssigned;
     while (!stageTwoQueue.isEmpty()) {
         auto currLineage = stageTwoQueue.dequeue();
 
@@ -67,6 +73,13 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
             continue;
         }
         alreadyAssigned.insert(currLineage->getPluginAction());
+
+        // If it's a "no action" step, it will get a null QUuid input
+        if (stepMap[currLineage->getPluginAction()]->action->getPluginType() == PluginAction::NoAction) {
+            // TODO: what if there's a "no action" that isn't in the beginning?
+            stepMap[currLineage->getPluginAction()]->inputs = {{QUuid(), 0}};
+            continue;
+        }
 
         // The prerequisite ActionSteps (via their ids) and the correct output position of those steps (via the lineage
         // outputPosition) provide the information necessary to execute the ActionStep with the correct inputs
@@ -104,7 +117,12 @@ QJsonObject PluginActionBatch::serialize() const
         QJsonArray stepInputs;
         for (auto input : step->inputs) {
             QJsonObject inputObject;
-            inputObject.insert("stepId", input.first.toString());
+            if (input.first.isNull()) {
+                inputObject.insert("stepId", "");
+            }
+            else {
+                inputObject.insert("stepId", input.first.toString());
+            }
             inputObject.insert("outputPosition", input.second);
             stepInputs.append(inputObject);
         }
@@ -159,7 +177,13 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::deserialize(QJsonObject dat
                       && inputObject.value("stepId").isString())) {
                     return nullBatch;
                 }
-                QUuid inputId = QUuid::fromString(inputObject.value("stepId").toString());
+                QUuid inputId;
+                if (inputObject.value("stepId").toString().isEmpty()) {
+                    inputId = QUuid();
+                }
+                else {
+                    inputId = QUuid::fromString(inputObject.value("stepId").toString());
+                }
                 int outputPosition = int(inputObject.value("outputPosition").toDouble());
                 deserializedStep->inputs.append({inputId, outputPosition});
             }
@@ -178,9 +202,19 @@ int PluginActionBatch::getMinRequiredInputs(QSharedPointer<const HobbitsPluginMa
 {
     int inputTotal = 0;
     for (auto step : m_actionSteps) {
+        if (step->action->getPluginType() == PluginAction::NoAction) {
+            inputTotal += 1;
+            continue;
+        }
         int actionInputs = step->action->minPossibleInputs(pluginManager);
-        if (actionInputs > step->inputs.size()) {
-            inputTotal += actionInputs - step->inputs.size();
+        int internalInputs = 0;
+        for (auto input : step->inputs) {
+            if (!input.first.isNull()) {
+                internalInputs++;
+            }
+        }
+        if (actionInputs > internalInputs) {
+            inputTotal += actionInputs - internalInputs;
         }
     }
     return inputTotal;
@@ -191,8 +225,14 @@ int PluginActionBatch::getMaxPossibleInputs(QSharedPointer<const HobbitsPluginMa
     int inputTotal = 0;
     for (auto step : m_actionSteps) {
         int actionInputs = step->action->maxPossibleInputs(pluginManager);
-        if (actionInputs > step->inputs.size()) {
-            inputTotal += actionInputs - step->inputs.size();
+        int internalInputs = 0;
+        for (auto input : step->inputs) {
+            if (!input.first.isNull()) {
+                internalInputs++;
+            }
+        }
+        if (actionInputs > internalInputs) {
+            inputTotal += actionInputs - internalInputs;
         }
     }
     return inputTotal;

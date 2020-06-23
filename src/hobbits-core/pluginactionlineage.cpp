@@ -1,5 +1,6 @@
 #include "pluginactionlineage.h"
 #include <QJsonArray>
+#include <QQueue>
 
 PluginActionLineage::PluginActionLineage(QSharedPointer<const PluginAction> pluginAction) :
     m_pluginAction(pluginAction),
@@ -14,9 +15,16 @@ void PluginActionLineage::recordLineage(
 {
     QList<QWeakPointer<const PluginActionLineage>> outputGroup;
 
+    for (auto input: inputContainers) {
+        if (input->getActionLineage().isNull()) {
+            input->setActionLineage(actionlessLineage());
+        }
+    }
+
     int outputPosition = 0;
     for (auto output: outputContainers) {
-        auto lineage = (new PluginActionLineage(pluginAction))->setOutputPosition(outputPosition++);
+        QSharedPointer<PluginActionLineage> lineage(new PluginActionLineage(pluginAction));
+        lineage->setOutputPosition(outputPosition++);
         for (auto input: inputContainers) {
             lineage->addInput(input->getActionLineage());
         }
@@ -25,24 +33,33 @@ void PluginActionLineage::recordLineage(
     }
 
     for (auto input: inputContainers) {
-        if (input->getActionLineage().isNull()) {
-            continue;
-        }
         input->getActionLineage()->addOutputGroup(outputGroup);
     }
 }
 
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::actionlessLineage()
+{
+    return QSharedPointer<PluginActionLineage>(new PluginActionLineage(PluginAction::noAction()));
+}
+
 QSharedPointer<PluginActionLineage> PluginActionLineage::setOutputPosition(int outputPosition)
 {
-    m_outputPosition = 0;
-    return sharedFromThis();
+    m_outputPosition = outputPosition;
+    return this->sharedFromThis();
 }
 
 QSharedPointer<PluginActionLineage> PluginActionLineage::addInput(
         QSharedPointer<const PluginActionLineage> input)
 {
     m_inputs.append(input);
-    return sharedFromThis();
+    return this->sharedFromThis();
+}
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::addOutputGroup(QList<QWeakPointer<const PluginActionLineage>> outputs)
+{
+    m_outputs.append(outputs);
+    return this->sharedFromThis();
 }
 
 QSharedPointer<const PluginAction> PluginActionLineage::getPluginAction() const
@@ -65,23 +82,29 @@ QList<QList<QWeakPointer<const PluginActionLineage>>> PluginActionLineage::getOu
     return m_outputs;
 }
 
-
-
-QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getLineage() const
+QSharedPointer<const PluginAction> PluginActionLineage::containerSourceAnalyzer() const
 {
-    QList<QSharedPointer<const PluginActionLineage>> lineage;
-    if (!m_parent.isNull()) {
-        lineage = m_parent->getLineage();
+    for (auto input: m_inputs) {
+        if (input->getPluginAction()->getPluginType() == PluginAction::Analyzer) {
+            return input->getPluginAction();
+        }
     }
-    lineage.append(this->sharedFromThis());
-    return lineage;
+
+    return QSharedPointer<const PluginAction>();
 }
 
-int PluginActionLineage::additionalInputCount() const
+QSharedPointer<const PluginAction> PluginActionLineage::containerSourceOperator() const
 {
-    int count = 0;
-    for (auto lineage : getLineage()) {
-        count += lineage->getAdditionalInputs().size();
+    QList<QSharedPointer<const PluginActionLineage>> inputs = getInputs();
+    while (!inputs.isEmpty()) {
+        auto input = inputs.takeFirst();
+        if (input->getPluginAction()->getPluginType() == PluginAction::Operator) {
+            return input->getPluginAction();
+        }
+        else if (input->getPluginAction()->getPluginType() == PluginAction::Analyzer) {
+            inputs.append(input->getInputs());
+        }
     }
-    return count;
+
+    return QSharedPointer<const PluginAction>();
 }

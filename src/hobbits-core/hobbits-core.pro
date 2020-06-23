@@ -68,8 +68,7 @@ SOURCES += \
     range.cpp \
     rangehighlight.cpp \
     settingsdata.cpp \
-    settingsmanager.cpp \
-    templatefilehandler.cpp
+    settingsmanager.cpp
 
 HEADERS += \
     actionprogress.h \
@@ -114,8 +113,7 @@ HEADERS += \
     range.h \
     rangehighlight.h \
     settingsdata.h \
-    settingsmanager.h \
-    templatefilehandler.h
+    settingsmanager.h
 
 DISTFILES +=
 

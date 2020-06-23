@@ -51,7 +51,7 @@ public:
     void setName(QString name);
     bool nameWasSet() const;
 
-    void setActionLineage(QSharedPointer<const PluginActionLineage> lineage);
+    void setActionLineage(QSharedPointer<PluginActionLineage> lineage);
     QSharedPointer<const PluginActionLineage> getActionLineage() const;
     QSharedPointer<PluginActionLineage> getActionLineage();
 

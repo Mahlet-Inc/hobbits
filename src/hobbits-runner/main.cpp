@@ -10,7 +10,6 @@
 #include "pluginactionmanager.h"
 #include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
-#include "templatefilehandler.h"
 #include <QJsonArray>
 
 int main(int argc, char *argv[])
@@ -98,6 +97,7 @@ int main(int argc, char *argv[])
             new PluginActionManager(
                     pluginManager));
 
+
     // Load plugins
     QStringList pluginPaths;
     QStringList warnings;
@@ -153,13 +153,16 @@ int main(int argc, char *argv[])
         for (auto container : targetContainers) {
             bitManager->getTreeModel()->addContainer(container);
         }
+        pluginActionManager->setContainerManager(bitManager);
 
         QObject::connect(
                 pluginActionManager.data(),
                 &PluginActionManager::reportError,
                 [&err, &a, pluginActionManager](QString error) {
             err << "Plugin Action Error: " << error;
-            pluginActionManager->cancelAction();
+            for (auto id : pluginActionManager->runningBatches().keys()) {
+                pluginActionManager->cancelById(id);
+            }
             a.exit(-1);
         });
 
@@ -184,31 +187,27 @@ int main(int argc, char *argv[])
 
         QObject::connect(
                 pluginActionManager.data(),
-                &PluginActionManager::lineageQueueCompleted,
+                &PluginActionManager::batchFinished,
                 [&a]() {
             a.exit();
         });
 
         warnings.clear();
-        auto lineageTree = TemplateFileHandler::loadTemplate(parser.value(templateOption), &warnings);
-        if (lineageTree.isNull()) {
-            err << warnings.join("\n");
+
+        QFile file(parser.value(templateOption));
+        if (!file.open(QIODevice::ReadOnly)) {
+            err << QString("Could not open hobbits batch file '%1'").arg(parser.value(templateOption));
             return -1;
         }
-        else if (!warnings.isEmpty()) {
-            err << warnings.join("\n");
+
+        auto batch = PluginActionBatch::deserialize(QJsonDocument::fromJson(file.readAll()).object());
+
+        if (batch.isNull()) {
+            err << "Failed to load batch file";
+            return -1;
         }
-        QList<QUuid> additionalInputs;
-        for (int i = 1; i < targetContainers.size(); i++) {
-            additionalInputs.append(targetContainers.at(i)->getId());
-        }
-        TemplateFileHandler::applyLineageTree(
-                targetContainers.at(0)->getId(),
-                additionalInputs,
-                lineageTree,
-                QFileInfo(parser.value(templateOption)).fileName().section(".", 0, 0),
-                bitManager,
-                pluginActionManager);
+
+        pluginActionManager->runBatch(batch, targetContainers);
         a.exec();
     }
     else {

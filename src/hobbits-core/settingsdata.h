@@ -47,7 +47,7 @@ public:
     static const QString OPERATOR_DISPLAY_ORDER_KEY;
     static const QString ANALYZER_DISPLAY_ORDER_KEY;
     static const QString DISPLAY_DISPLAY_ORDER_KEY;
-    static const QString LAST_TEMPLATE_PATH_KEY;
+    static const QString LAST_BATCH_PATH_KEY;
     static const QString LAST_IMPORT_EXPORT_PATH_KEY;
     static const QString LAST_CONTAINER_PATH_KEY;
     static const QString PLUGIN_RUNNING_KEY;

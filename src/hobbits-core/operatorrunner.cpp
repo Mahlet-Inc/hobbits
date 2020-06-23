@@ -6,7 +6,8 @@
 
 QSharedPointer<OperatorRunner> OperatorRunner::create(
         QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QSharedPointer<PluginAction> action)
+        QSharedPointer<BitContainerManager> containerManager,
+        QSharedPointer<const PluginAction> action)
 {
     if (action->getPluginType() != PluginAction::Operator) {
         return nullptr;
@@ -22,6 +23,7 @@ QSharedPointer<OperatorRunner> OperatorRunner::create(
     runner->m_op = plugin;
     runner->m_action = action;
     runner->m_pluginFileLocation = pluginManager->getPluginLocation(plugin->getName());
+    runner->m_containerManager = containerManager;
 
     return runner;
 }
@@ -38,7 +40,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
 
 QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunner::run(QList<QSharedPointer<BitContainer>> inputContainers)
 {
-    if (m_actionWatcher->watcher()->future().isRunning()) {
+    if (!m_actionWatcher.isNull() && m_actionWatcher->watcher()->future().isRunning()) {
         emit reportError(m_id, QString("Operator runner is already running"));
         return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
     }
@@ -93,6 +95,9 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
     m_outputContainers.clear();
 
     connect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
+    connect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, [this](int progress) {
+        this->progress(m_id, progress);
+    });
 
     return m_actionWatcher;
 }
@@ -100,6 +105,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
 void OperatorRunner::postProcess()
 {
     disconnect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
+    disconnect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, nullptr, nullptr);
 
     QSharedPointer<const OperatorResult> result = m_actionWatcher->watcher()->future().result();
 
@@ -155,6 +161,16 @@ void OperatorRunner::postProcess()
                 output->setName(containerName);
             }
             number++;
+        }
+    }
+
+    if (!m_containerManager.isNull()) {
+        QModelIndex lastIndex;
+        for (QSharedPointer<BitContainer> output : result->getOutputContainers()) {
+            lastIndex = m_containerManager->getTreeModel()->addContainer(output);
+        }
+        if (lastIndex.isValid()) {
+            m_containerManager->getCurrSelectionModel()->setCurrentIndex(lastIndex, QItemSelectionModel::ClearAndSelect);
         }
     }
 

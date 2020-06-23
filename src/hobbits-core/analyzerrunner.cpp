@@ -6,7 +6,7 @@
 
 QSharedPointer<AnalyzerRunner> AnalyzerRunner::create(
         QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QSharedPointer<PluginAction> action)
+        QSharedPointer<const PluginAction> action)
 {
     if (action->getPluginType() != PluginAction::Analyzer) {
         return nullptr;
@@ -36,10 +36,15 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunn
     return m_actionWatcher;
 }
 
+QSharedPointer<BitContainer> AnalyzerRunner::container() const
+{
+    return m_container;
+}
+
 QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunner::run(QSharedPointer<BitContainer> container)
 {
 
-    if (m_actionWatcher->watcher()->future().isRunning()) {
+    if (!m_actionWatcher.isNull() && m_actionWatcher->watcher()->future().isRunning()) {
         emit reportError(m_id, QString("Analyzer runner is already running"));
         return QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>>();
     }
@@ -87,6 +92,9 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunn
     m_container = container;
 
     connect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
+    connect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, [this](int progress) {
+        this->progress(m_id, progress);
+    });
 
     return m_actionWatcher;
 }
@@ -94,6 +102,7 @@ QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> AnalyzerRunn
 void AnalyzerRunner::postProcess()
 {
     disconnect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
+    disconnect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, nullptr, nullptr);
 
     QSharedPointer<const AnalyzerResult> result = m_actionWatcher->watcher()->future().result();
 
@@ -124,6 +133,8 @@ void AnalyzerRunner::postProcess()
     if (!result->bitInfo().isNull()) {
         m_container->setBitInfo(result->bitInfo());
     }
+
+    emit finished(m_id);
 }
 
 QSharedPointer<const AnalyzerResult> AnalyzerRunner::analyzerCall(
