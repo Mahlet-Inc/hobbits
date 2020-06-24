@@ -9,6 +9,7 @@ class HOBBITSCORESHARED_EXPORT PluginActionBatch : public QEnableSharedFromThis<
 {
 public:
     enum Mode {
+        Null = 0x00,
         Inclusive = 0x01,
         Before = 0x02,
         After = 0x04,
@@ -16,8 +17,14 @@ public:
         InclusiveBefore = 0x03,
         ExclusiveAfter = 0x04,
         InclusiveAfter = 0x05,
+        TraverseModeSegment = 0x0f,
+        IncludeImporters = 0x10,
+        IncludeImporterState = 0x20,
+        IncludeImportersFull = 0x30,
+        ActionModeSegment = 0xf0
     };
-    static QSharedPointer<PluginActionBatch> fromLineage(QSharedPointer<const PluginActionLineage> lineage, Mode batchMode);
+
+    static QSharedPointer<PluginActionBatch> fromLineage(QSharedPointer<const PluginActionLineage> lineage, int batchMode);
 
     class ActionStep {
     public:
@@ -29,6 +36,8 @@ public:
         QSharedPointer<const PluginAction> action;
         QList<QPair<QUuid, int>> inputs;
     };
+
+    static QSharedPointer<ActionStep> createStep(QUuid id, QSharedPointer<const PluginAction> action);
 
     QJsonObject serialize() const;
     static QSharedPointer<PluginActionBatch> deserialize(QJsonObject data);

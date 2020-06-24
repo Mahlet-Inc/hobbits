@@ -16,6 +16,7 @@
 #include "pluginactionlineage.h"
 #include "preferencesdialog.h"
 #include "settingsmanager.h"
+#include "batchcreationdialog.h"
 
 MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget *parent) :
     QMainWindow(parent),
@@ -695,12 +696,6 @@ void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
     if (!result->hasEmptyState() && result->errorString().isEmpty()) {
         this->populateRecentImportsMenu({pluginName, result->pluginState()});
     }
-    if (!result->getContainer().isNull()) {
-        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(result->getContainer());
-        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                addedIndex,
-                QItemSelectionModel::ClearAndSelect);
-    }
 }
 
 void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
@@ -841,7 +836,7 @@ void MainWindow::on_action_Apply_Batch_triggered()
             this,
             tr("Apply Batch"),
             SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Templates (*.hobbits_batch)"));
+            tr("Hobbits Batch Files (*.hobbits_batch)"));
     if (fileName.isEmpty()) {
         return;
     }
@@ -858,25 +853,13 @@ void MainWindow::on_action_Save_Batch_triggered()
         return;
     }
 
-    bool useChildren = false;
-    if (!currContainer()->getChildUuids().isEmpty()) {
-        QMessageBox pickMode;
-        pickMode.setWindowTitle("Select Relevant Batch Actions");
-        pickMode.setText(
-                "Do you want to create a batch of the actions that created the selected container, or the actions that created its children?");
-        pickMode.addButton("Selected Container", QMessageBox::ButtonRole::AcceptRole);
-        QPushButton *children = pickMode.addButton("Its Children", QMessageBox::ButtonRole::RejectRole);
-        pickMode.exec();
-        useChildren = pickMode.clickedButton() == children;
+    auto batchDialog = QSharedPointer<BatchCreationDialog>(new BatchCreationDialog(currContainer(), this));
+
+    if (!batchDialog->exec()) {
+        return;
     }
 
-    QSharedPointer<PluginActionBatch> batch;
-    if (useChildren) {
-        batch = PluginActionBatch::fromLineage(currContainer()->getActionLineage(), PluginActionBatch::ExclusiveAfter);
-    }
-    else {
-        batch = PluginActionBatch::fromLineage(currContainer()->getActionLineage(), PluginActionBatch::InclusiveBefore);
-    }
+    auto batch = PluginActionBatch::fromLineage(currContainer()->getActionLineage(), batchDialog->getSelectedBatchMode());
 
     if (batch.isNull() || batch->actionSteps().isEmpty()) {
         warningMessage(
@@ -890,10 +873,14 @@ void MainWindow::on_action_Save_Batch_triggered()
             tr("Save Batch"),
             SettingsManager::getInstance().getPrivateSetting(
                     SettingsData::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Templates (*.hobbits_batch)"));
+            tr("Hobbits Batch Files (*.hobbits_batch)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
     if (!fileName.endsWith(".hobbits_batch")) {
         fileName += ".hobbits_batch";
     }
+
 
     QFile file(fileName);
     SettingsManager::getInstance().setPrivateSetting(

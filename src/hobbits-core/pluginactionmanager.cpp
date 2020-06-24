@@ -73,6 +73,11 @@ QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<con
         PluginActionLineage::recordLineage(fullAction, {}, {result->getContainer()});
     }
 
+    if (!result->getContainer().isNull() && !m_containerManager.isNull()) {
+        auto index = m_containerManager->getTreeModel()->addContainer(result->getContainer());
+        m_containerManager->getCurrSelectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+    }
+
     return result;
 }
 

@@ -7,14 +7,13 @@ PluginActionBatch::PluginActionBatch(QList<QSharedPointer<const ActionStep>> act
 
 }
 
-QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<const PluginActionLineage> lineage, PluginActionBatch::Mode batchMode)
+QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<const PluginActionLineage> lineage, int batchMode)
 {
-
     // Stage One: Fill Step Map/Index
     // The actions around the target PluginActionLineage can have weird branching and converging dependencies.
     // The steps need to be created and assigned ids before the input step ids can be easily determined
-    QHash<QSharedPointer<const PluginAction>, QSharedPointer<PluginActionBatch::ActionStep>> stepMap;
-    QQueue<QPair<QSharedPointer<const PluginActionLineage>, PluginActionBatch::Mode>> lineageQueue;
+    QHash<QSharedPointer<const PluginAction>, QSharedPointer<ActionStep>> stepMap;
+    QQueue<QPair<QSharedPointer<const PluginActionLineage>, int>> lineageQueue;
     QQueue<QSharedPointer<const PluginActionLineage>> stageTwoQueue;
 
     lineageQueue.enqueue({lineage, batchMode});
@@ -22,6 +21,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
         auto lineageModePair = lineageQueue.dequeue();
         auto currLineage = lineageModePair.first;
         auto currMode = lineageModePair.second;
+        auto currActionMode = currMode & Mode::ActionModeSegment;
 
         // If the mode of this lineage is "Inclusive", the ActionStep that produced it will be part of the batch
         if (currMode & Mode::Inclusive) {
@@ -29,21 +29,33 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
             // We only want one ActionStep per PluginAction
             if (!stepMap.contains(currLineage->getPluginAction())) {
                 stageTwoQueue.enqueue(currLineage);
-                auto actionStep = QSharedPointer<PluginActionBatch::ActionStep>(new PluginActionBatch::ActionStep(QUuid::createUuid(), currLineage->getPluginAction()));
+                auto uuid = QUuid::createUuid();
+                auto action = currLineage->getPluginAction();
+                if (action->getPluginType() == PluginAction::Importer) {
+                    if (currMode & Mode::IncludeImporters) {
+                        if (!(currMode & Mode::IncludeImporterState)) {
+                            action = PluginAction::importerAction(action->getPluginName());
+                        }
+                    }
+                    else {
+                        action = PluginAction::noAction();
+                    }
+                }
+                auto actionStep = createStep(uuid, action);
                 stepMap.insert(currLineage->getPluginAction(), actionStep);
             }
         }
         // make a "bypass" step so that the outputs can reference a single container
         else if (batchMode & Mode::After) {
             stageTwoQueue.enqueue(currLineage);
-            auto noActionStep = QSharedPointer<PluginActionBatch::ActionStep>(new PluginActionBatch::ActionStep(QUuid::createUuid(), PluginAction::noAction()));
+            auto noActionStep = createStep(QUuid::createUuid(), PluginAction::noAction());
             stepMap.insert(currLineage->getPluginAction(), noActionStep);
         }
 
         // If the mode of this lineage is "Before", the ActionSteps leading to its inputs will be part of the batch
         if (batchMode & Mode::Before) {
             for (auto input : currLineage->getInputs()) {
-                lineageQueue.append({input, Mode::InclusiveBefore});
+                lineageQueue.append({input, (Mode::InclusiveBefore | currActionMode)});
             }
         }
 
@@ -53,7 +65,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
                 for  (auto output: outputSet) {
                     auto outputRef = output.toStrongRef();
                     if (!outputRef.isNull()) {
-                        lineageQueue.append({outputRef, Mode::InclusiveAfter});
+                        lineageQueue.append({outputRef, (Mode::InclusiveAfter | currActionMode)});
                     }
                 }
             }
@@ -104,6 +116,12 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
     }
 
     return QSharedPointer<PluginActionBatch>(new PluginActionBatch(constSteps));
+}
+
+
+QSharedPointer<PluginActionBatch::ActionStep> PluginActionBatch::createStep(QUuid id, QSharedPointer<const PluginAction> action)
+{
+    return QSharedPointer<ActionStep>(new ActionStep(id, action));
 }
 
 QJsonObject PluginActionBatch::serialize() const
@@ -161,7 +179,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::deserialize(QJsonObject dat
         }
         QUuid stepId = QUuid::fromString(stepObject.value("id").toString());
 
-        auto deserializedStep = QSharedPointer<ActionStep>(new ActionStep(stepId, pluginAction));
+        auto deserializedStep = createStep(stepId, pluginAction);
         steps.append(deserializedStep);
 
         if (stepObject.contains("inputs")

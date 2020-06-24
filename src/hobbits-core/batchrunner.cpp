@@ -192,9 +192,14 @@ void BatchRunner::checkForRunnableSteps()
             hasNewImports = true;
         }
         else if (step->action->getPluginType() == PluginAction::Exporter) {
-            auto result = m_actionManager->runImporter(step->action);
-            if (!result->errorString().isEmpty()) {
-                m_errorList.append("Export step failed: " + result->errorString());
+            if (stepInputs.size() == 1) {
+                auto result = m_actionManager->runExporter(step->action, stepInputs.at(0));
+                if (!result->errorString().isEmpty()) {
+                    m_errorList.append("Export step failed: " + result->errorString());
+                }
+            }
+            else {
+                m_errorList.append("Export step failed - a single input container is required");
             }
         }
         else if (step->action->getPluginType() == PluginAction::Analyzer) {
