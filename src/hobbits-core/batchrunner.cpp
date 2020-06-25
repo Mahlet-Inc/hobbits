@@ -108,7 +108,7 @@ void BatchRunner::checkFinishedAnalyzer(QUuid id)
 
 void BatchRunner::checkFinishedOperator(QUuid id)
 {
-    auto finished = m_operatorRunners.value(id);
+    auto finished = m_operatorRunners.take(id);
     if (finished.first.isNull()) {
         m_errorList.append(QString("Unexpected operator step ID finished: %1").arg(id.toString()));
     }

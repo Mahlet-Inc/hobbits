@@ -42,7 +42,7 @@ async function runTests() {
             }
             let testOutputPrefix = join(testDir, "testrunoutput.")
             let testOutputGlob = testOutputPrefix+"*"
-            let templateGlob = join(testDir, "*.hobbits_template")
+            let templateGlob = join(testDir, "*.hobbits_batch")
             let templateMatches = glob.sync(templateGlob, {nonull: false})
             if (templateMatches.length < 1) {
                 throw Error(`Failed to find a test template file matching ${templateGlob}`)

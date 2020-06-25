@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
         QObject::connect(
                 pluginActionManager.data(),
                 &PluginActionManager::batchFinished,
-                [&a]() {
+                [&a, &err](QUuid id) {
             a.exit();
         });
 
