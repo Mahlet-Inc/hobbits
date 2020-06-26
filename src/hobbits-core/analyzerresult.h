@@ -19,6 +19,9 @@ public:
     AnalyzerResult* setPluginState(QJsonObject pluginState);
     const QJsonObject getPluginState() const;
 
+    bool hasEmptyState() const;
+    QString errorString() const;
+
     static QSharedPointer<const AnalyzerResult> result(QSharedPointer<BitInfo> bitInfo, QJsonObject pluginState);
     static QSharedPointer<const AnalyzerResult> error(QString error);
 

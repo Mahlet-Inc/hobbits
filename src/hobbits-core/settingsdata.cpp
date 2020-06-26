@@ -21,16 +21,17 @@ const QString SettingsData::ANALYZER_DISPLAY_ORDER_KEY = "Analyzer Display Order
 const QString SettingsData::DISPLAY_DISPLAY_ORDER_KEY = "Display Display Order";
 const QString SettingsData::WINDOW_SIZE_KEY = "window_size";
 const QString SettingsData::WINDOW_POSITION_KEY = "window_position";
-const QString SettingsData::LAST_TEMPLATE_PATH_KEY = "last_template_path";
+const QString SettingsData::LAST_BATCH_PATH_KEY = "last_batch_path";
 const QString SettingsData::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_path";
 const QString SettingsData::LAST_CONTAINER_PATH_KEY = "last_container_path";
 const QString SettingsData::PLUGIN_RUNNING_KEY = "plugin_running";
+const QString SettingsData::PLUGINS_RUNNING_KEY = "plugins_running";
 
 SettingsData::SettingsData()
 {
     m_privateSettings.insert(WINDOW_SIZE_KEY, QSize(640, 480));
     m_privateSettings.insert(WINDOW_POSITION_KEY, QPoint(100, 100));
-    m_privateSettings.insert(LAST_TEMPLATE_PATH_KEY, QDir::homePath());
+    m_privateSettings.insert(LAST_BATCH_PATH_KEY, QDir::homePath());
     m_privateSettings.insert(LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
     m_privateSettings.insert(LAST_CONTAINER_PATH_KEY, QDir::homePath());
 

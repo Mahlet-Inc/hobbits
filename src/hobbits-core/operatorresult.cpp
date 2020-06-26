@@ -27,6 +27,18 @@ const QJsonObject OperatorResult::getPluginState() const
     return m_pluginState;
 }
 
+bool OperatorResult::hasEmptyState() const
+{
+    return m_pluginState.isEmpty();
+}
+
+QString OperatorResult::errorString() const
+{
+    if (m_pluginState.contains("error")) {
+        return m_pluginState.value("error").toString();
+    }
+    return QString();
+}
 
 QSharedPointer<const OperatorResult> OperatorResult::result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState)
 {

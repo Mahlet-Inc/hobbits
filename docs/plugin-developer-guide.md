@@ -100,7 +100,7 @@ The Analyzer and Operator interfaces have several simple methods in common:
 The plugin state contains parameters for how the plugin should run. For example,
 the Take Skip operator plugin will require a "take_skip_string" parameter to
 guide its execution. The state that it passed in can be provided by the plugin's
-own `getStateFromUi` method, or it can come from a saved template that was
+own `getStateFromUi` method, or it can come from a saved batch that was
 generated from a state returned by a plugin result (`OperatorResult` or
 `AnalyzerResult`.) Plugin results will usually just return the state that was
 passed in (e.g. `AnalyzerResult::result(bitInfo, recallablePluginState)`,) but

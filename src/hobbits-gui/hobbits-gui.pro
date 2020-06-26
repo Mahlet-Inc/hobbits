@@ -32,6 +32,7 @@ CONFIG += c++11
 CONFIG -= debug_and_release_target
 
 SOURCES += \
+        batchcreationdialog.cpp \
         containerselectiondialog.cpp \
         hobbitsguiinfo.cpp \
         main.cpp \
@@ -39,12 +40,14 @@ SOURCES += \
         preferencesdialog.cpp
 
 HEADERS += \
+        batchcreationdialog.h \
         containerselectiondialog.h \
         hobbitsguiinfo.h \
         mainwindow.h \
         preferencesdialog.h
 
 FORMS += \
+        batchcreationdialog.ui \
         containerselectiondialog.ui \
         mainwindow.ui \
         preferencesdialog.ui

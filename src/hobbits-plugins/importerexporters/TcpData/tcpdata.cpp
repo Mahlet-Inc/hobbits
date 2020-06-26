@@ -48,9 +48,9 @@ QString TcpData::getExportLabelForState(QJsonObject pluginState)
     return "";
 }
 
-QSharedPointer<ImportExportResult> TcpData::importBits(QJsonObject pluginState, QWidget *parent)
+QSharedPointer<ImportResult> TcpData::importBits(QJsonObject pluginState)
 {
-    QSharedPointer<TcpReceiver> receiver = QSharedPointer<TcpReceiver>(new TcpReceiver(parent));
+    QSharedPointer<TcpReceiver> receiver = QSharedPointer<TcpReceiver>(new TcpReceiver());
     if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
         receiver->setPort(pluginState.value("port").toInt());
         receiver->startListening();
@@ -62,19 +62,18 @@ QSharedPointer<ImportExportResult> TcpData::importBits(QJsonObject pluginState, 
         container->setName("TCP Import");
         QJsonObject state;
         state.insert("port", receiver->getPort());
-        return ImportExportResult::create(container, state);
+        return ImportResult::result(container, state);
     }
     else {
-        return ImportExportResult::error(receiver->getError());
+        return ImportResult::error(receiver->getError());
     }
 }
 
-QSharedPointer<ImportExportResult> TcpData::exportBits(
+QSharedPointer<ExportResult> TcpData::exportBits(
         QSharedPointer<const BitContainer> container,
-        QJsonObject pluginState,
-        QWidget *parent)
+        QJsonObject pluginState)
 {
-    QSharedPointer<TcpSender> sender = QSharedPointer<TcpSender>(new TcpSender(container->bits(), parent));
+    QSharedPointer<TcpSender> sender = QSharedPointer<TcpSender>(new TcpSender(container->bits()));
     if (pluginState.contains("port") && pluginState.value("port").isDouble()
             && pluginState.contains("host") && pluginState.value("host").isString()) {
         sender->setPort(pluginState.value("port").toInt());
@@ -86,9 +85,9 @@ QSharedPointer<ImportExportResult> TcpData::exportBits(
         QJsonObject state;
         state.insert("port", sender->getPort());
         state.insert("host", sender->getHost());
-        return ImportExportResult::create(state);
+        return ExportResult::result(state);
     }
     else {
-        return ImportExportResult::error("Failed to export bits over TCP");
+        return ExportResult::error("Failed to export bits over TCP");
     }
 }

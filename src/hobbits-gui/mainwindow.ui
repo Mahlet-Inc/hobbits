@@ -286,20 +286,18 @@
      <property name="title">
       <string>&amp;Import Bits From</string>
      </property>
-     <addaction name="action"/>
     </widget>
     <widget class="QMenu" name="menu_Export_Bits_To">
      <property name="title">
       <string>&amp;Export Bits To</string>
      </property>
-     <addaction name="action_2"/>
     </widget>
-    <widget class="QMenu" name="menuApply_Recent_Template">
+    <widget class="QMenu" name="menuApply_Recent_Batch">
      <property name="enabled">
       <bool>false</bool>
      </property>
      <property name="title">
-      <string>Apply Recent Template</string>
+      <string>Apply Recent Batch</string>
      </property>
     </widget>
     <widget class="QMenu" name="menuImport_Recent">
@@ -326,9 +324,9 @@
     <addaction name="menuExport_Recent"/>
     <addaction name="menu_Export_Bits_To"/>
     <addaction name="separator"/>
-    <addaction name="menuApply_Recent_Template"/>
-    <addaction name="actionApply_Template"/>
-    <addaction name="action_Export_Template"/>
+    <addaction name="menuApply_Recent_Batch"/>
+    <addaction name="action_Apply_Batch"/>
+    <addaction name="action_Save_Batch"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -352,46 +350,6 @@
    <addaction name="menu_View"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="action_Export_Template">
-   <property name="text">
-    <string>Save &amp;Template...</string>
-   </property>
-  </action>
-  <action name="actionApply_Template">
-   <property name="text">
-    <string>&amp;Apply Template...</string>
-   </property>
-  </action>
-  <action name="action_set_True_Color">
-   <property name="text">
-    <string>Change True Color</string>
-   </property>
-  </action>
-  <action name="action_set_False_Color">
-   <property name="text">
-    <string>Change False Color</string>
-   </property>
-  </action>
-  <action name="actionSet_True_Color">
-   <property name="text">
-    <string>Set &quot;1&quot; Color</string>
-   </property>
-  </action>
-  <action name="actionSet_False_Color">
-   <property name="text">
-    <string>Set &quot;0&quot; Color</string>
-   </property>
-  </action>
-  <action name="actionSet_Match_Color">
-   <property name="text">
-    <string>Match Color...</string>
-   </property>
-  </action>
-  <action name="actionSet_Match_Focus_Color">
-   <property name="text">
-    <string>Match Focus Color...</string>
-   </property>
-  </action>
   <action name="action_About">
    <property name="text">
     <string>&amp;About</string>
@@ -407,39 +365,19 @@
     <string>&amp;Open Container...</string>
    </property>
   </action>
-  <action name="actionManual_Highlight_Color">
-   <property name="text">
-    <string>Manual Highlight Color...</string>
-   </property>
-  </action>
-  <action name="action">
-   <property name="text">
-    <string>...</string>
-   </property>
-  </action>
-  <action name="action_2">
-   <property name="text">
-    <string>...</string>
-   </property>
-  </action>
   <action name="actionPreferences">
    <property name="text">
     <string>Preferences...</string>
    </property>
   </action>
-  <action name="actionblah">
+  <action name="action_Apply_Batch">
    <property name="text">
-    <string>blah</string>
+    <string>&amp;Apply Batch...</string>
    </property>
   </action>
-  <action name="actiona">
+  <action name="action_Save_Batch">
    <property name="text">
-    <string>a</string>
-   </property>
-  </action>
-  <action name="actiona_2">
-   <property name="text">
-    <string>a</string>
+    <string>&amp;Save Batch...</string>
    </property>
   </action>
  </widget>

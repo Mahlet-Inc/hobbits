@@ -4,86 +4,74 @@
 #include <QObject>
 #include <QQueue>
 #include <QStack>
+#include <QHash>
 
 #include "actionwatcher.h"
-#include "analyzeractor.h"
-#include "operatoractor.h"
+#include "analyzerrunner.h"
+#include "operatorrunner.h"
 #include "hobbitspluginmanager.h"
 #include <QSharedPointer>
+#include "pluginactionbatch.h"
+#include "batchrunner.h"
 
 #include "hobbits-core_global.h"
 
-class HOBBITSCORESHARED_EXPORT PluginActionManager : public QObject
+class HOBBITSCORESHARED_EXPORT PluginActionManager : public QObject, public QEnableSharedFromThis<PluginActionManager>
 {
     Q_OBJECT
 
 public:
     PluginActionManager(QSharedPointer<const HobbitsPluginManager> pluginManager);
 
-    struct LineageAction {
-        QUuid containerId;
-        QList<QSharedPointer<const PluginActionLineage>> lineage;
-        QList<QSharedPointer<BitContainer>> inputs;
-        QList<QSharedPointer<BitContainer>> additionalInputs;
-        QSharedPointer<BitContainerManager> bitContainerManager;
-        QString baseName;
-        QMap<int, QUuid> outputIdOverride;
-        QList<QUuid> additionalInputIds;
-        int step;
-        int additionalStep;
-    };
+    void setContainerManager(QSharedPointer<BitContainerManager> containerManager);
 
-    bool isBusy() const;
-    bool hasActiveLineage() const;
+    QSharedPointer<AnalyzerRunner> runAnalyzer(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container);
+    QSharedPointer<OperatorRunner> runOperator(
+            QSharedPointer<const PluginAction> action,
+            QList<QSharedPointer<BitContainer>> containers);
+    QSharedPointer<ImportResult> runImporter(QSharedPointer<const PluginAction> action);
+    QSharedPointer<ExportResult> runExporter(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container);
 
-    bool registerOperatorWatcher(QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> watcher);
-    bool registerAnalyzerWatcher(QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> watcher);
+    const QHash<QUuid, QSharedPointer<AnalyzerRunner>> runningAnalyzers() const;
+    const QHash<QUuid, QSharedPointer<OperatorRunner>> runningOperators() const;
+    const QHash<QUuid, QSharedPointer<BatchRunner>> runningBatches() const;
 
-    void applyLineage(
-            QUuid containerId,
-            QSharedPointer<const PluginActionLineage> lineage,
-            QSharedPointer<BitContainerManager> bitContainerManager,
-            QString baseName,
-            QMap<int, QUuid> outputIdOverride = QMap<int, QUuid>(),
-            QList<QUuid> additionalInputs = QList<QUuid>());
-
-    void applyLineage(QSharedPointer<LineageAction> lineageAction);
-
-    QSharedPointer<OperatorActor> operatorActor();
-    QSharedPointer<AnalyzerActor> analyzerActor();
+    void runBatch(QSharedPointer<PluginActionBatch> batch, QList<QSharedPointer<BitContainer>> containers);
 
 private slots:
-    void operatorWatcherFinished();
-    void analyzerWatcherFinished();
+    void finishOperator(QUuid);
+    void finishAnalyzer(QUuid);
+    void finishBatch(QUuid);
+
+    void relayErrorFromOperator(QUuid, QString);
+    void relayErrorFromAnalyzer(QUuid, QString);
+
 
 public slots:
-    void cancelAction();
+    void cancelById(QUuid);
 
 signals:
-    void actionWatcherStarted();
-    void actionWatcherProgress(int);
-    void actionWatcherFinished();
-    void lineageQueueCompleted();
+    void analyzerStarted(QUuid);
+    void analyzerProgress(QUuid, int);
+    void analyzerFinished(QUuid);
+
+    void operatorStarted(QUuid);
+    void operatorProgress(QUuid, int);
+    void operatorFinished(QUuid);
+
+    void batchFinished(QUuid);
 
     void reportError(QString);
 
 private:
-    void continueLineage();
-    void finishLineage();
 
     QSharedPointer<const HobbitsPluginManager> m_pluginManager;
+    QSharedPointer<BitContainerManager> m_containerManager;
 
-    QSharedPointer<OperatorActor> m_operatorActor;
-    QSharedPointer<AnalyzerActor> m_analyzerActor;
+    QHash<QUuid, QSharedPointer<BatchRunner>> m_batchRunners;
 
-    QSharedPointer<LineageAction> m_current;
-
-    QStack<QSharedPointer<LineageAction>> m_lineageStack;
-
-    QQueue<QSharedPointer<LineageAction>> m_lineageQueue;
-
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> m_currOperatorWatcher;
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> m_currAnalyzerWatcher;
+    QHash<QUuid, QSharedPointer<OperatorRunner>> m_operatorRunners;
+    QHash<QUuid, QSharedPointer<AnalyzerRunner>> m_analyzerRunners;
 
 };
 

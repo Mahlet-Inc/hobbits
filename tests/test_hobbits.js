@@ -6,7 +6,7 @@ const { execFileSync } = require("child_process");
 const glob = require('glob');
 const filecompare = require('filecompare');
 
-const argv = require('yargs').command('* <hobbits_runner>', 'Tests hobbits processing with known input/output files for various templates', (yargs) => {
+const argv = require('yargs').command('* <hobbits_runner>', 'Tests hobbits processing with known input/output files for various batches', (yargs) => {
     yargs.positional('hobbits_runner', {
         describe: 'the path of the hobbits-runner binary you want to test',
         type: 'string'
@@ -42,12 +42,12 @@ async function runTests() {
             }
             let testOutputPrefix = join(testDir, "testrunoutput.")
             let testOutputGlob = testOutputPrefix+"*"
-            let templateGlob = join(testDir, "*.hobbits_template")
-            let templateMatches = glob.sync(templateGlob, {nonull: false})
-            if (templateMatches.length < 1) {
-                throw Error(`Failed to find a test template file matching ${templateGlob}`)
+            let batchGlob = join(testDir, "*.hobbits_batch")
+            let batchMatches = glob.sync(batchGlob, {nonull: false})
+            if (batchMatches.length < 1) {
+                throw Error(`Failed to find a test batch file matching ${batchGlob}`)
             }
-            let template = templateMatches[0]
+            let batch = batchMatches[0]
 
             let testOutputMatches = glob.sync(testOutputGlob, {nonull: false})
             for (let oldOutput of testOutputMatches) {
@@ -56,7 +56,7 @@ async function runTests() {
 
             let args = [
                 'run',
-                '-t', template,
+                '-b', batch,
                 '-o', testOutputPrefix
             ]
 

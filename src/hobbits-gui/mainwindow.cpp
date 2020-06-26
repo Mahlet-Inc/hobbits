@@ -16,7 +16,7 @@
 #include "pluginactionlineage.h"
 #include "preferencesdialog.h"
 #include "settingsmanager.h"
-#include "templatefilehandler.h"
+#include "batchcreationdialog.h"
 
 MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget *parent) :
     QMainWindow(parent),
@@ -25,12 +25,11 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_bitContainerManager(QSharedPointer<BitContainerManager>(new BitContainerManager())),
     m_pluginManager(QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager())),
     m_pluginActionManager(new PluginActionManager(m_pluginManager)),
-    m_pluginActionProgress(new QProgressBar()),
-    m_pluginActionCancel(new QPushButton()),
     m_displayTabsSplitter(new QSplitter(Qt::Horizontal)),
     m_previewScroll(new PreviewScrollBar()),
     m_splitViewMenu(new QMenu("Split View"))
 {
+    m_pluginActionManager->setContainerManager(m_bitContainerManager);
     ui->setupUi(this);
 
     if (!configFilePath.isEmpty()) {
@@ -52,7 +51,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
 
     // More menu initialization
-    populateRecentTemplatesMenu();
+    populateRecentBatchesMenu();
 
     // Configure Bit Container View
     ui->tv_bitContainers->setModel(m_bitContainerManager->getTreeModel().data());
@@ -80,17 +79,33 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     connect(
             m_pluginActionManager.data(),
-            &PluginActionManager::actionWatcherStarted,
+            &PluginActionManager::analyzerStarted,
             this,
             &MainWindow::pluginActionStarted);
     connect(
             m_pluginActionManager.data(),
-            &PluginActionManager::actionWatcherProgress,
+            &PluginActionManager::analyzerProgress,
             this,
             &MainWindow::pluginActionProgress);
     connect(
             m_pluginActionManager.data(),
-            &PluginActionManager::actionWatcherFinished,
+            &PluginActionManager::analyzerFinished,
+            this,
+            &MainWindow::pluginActionFinished);
+
+    connect(
+            m_pluginActionManager.data(),
+            &PluginActionManager::operatorStarted,
+            this,
+            &MainWindow::pluginActionStarted);
+    connect(
+            m_pluginActionManager.data(),
+            &PluginActionManager::operatorProgress,
+            this,
+            &MainWindow::pluginActionProgress);
+    connect(
+            m_pluginActionManager.data(),
+            &PluginActionManager::operatorFinished,
             this,
             &MainWindow::pluginActionFinished);
 
@@ -99,19 +114,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             SIGNAL(reportError(QString)),
             this,
             SLOT(warningMessage(QString)));
-
-    m_pluginActionProgress->setVisible(false);
-    ui->statusBar->addPermanentWidget(m_pluginActionProgress);
-
-    m_pluginActionCancel->setVisible(false);
-    m_pluginActionCancel->setText("Cancel");
-    ui->statusBar->addPermanentWidget(m_pluginActionCancel);
-    connect(
-            m_pluginActionCancel,
-            &QPushButton::pressed,
-            m_pluginActionManager.data(),
-            &PluginActionManager::cancelAction);
-
 
     // Configure display handle and plugin callback
     ui->displayScrollLayout->addWidget(m_previewScroll);
@@ -389,6 +391,10 @@ void MainWindow::importBytes(QByteArray rawBytes, QString name)
 void MainWindow::on_pb_operate_clicked()
 {
     QSharedPointer<OperatorInterface> op = getCurrentOperator();
+    if (op.isNull()) {
+        warningMessage("Current Operator plugin cannot be determined");
+        return;
+    }
     QJsonObject pluginState = op->getStateFromUi();
     this->requestOperatorRun(op->getName(), pluginState);
 }
@@ -585,57 +591,20 @@ void MainWindow::setCurrentBitContainer()
     currBitContainerChanged();
 
     if (!currContainer().isNull()) {
-        // Set the last analyzer plugin settings used on this container
-        if (!currContainer()->getActionLineage().isNull()) {
-            QSet<QString> usedPlugin;
-            auto lineage = currContainer()->getActionLineage()->getLineage();
-            for (int i = lineage.size() - 1; i >= 0; i--) {
-                if (lineage.at(i)->getPluginAction()->getPluginType() == PluginAction::Analyzer) {
-                    QString pluginName = lineage.at(i)->getPluginAction()->getPluginName();
-                    if (usedPlugin.contains(pluginName)) {
-                        break;
-                    }
-                    QJsonObject pluginState = lineage.at(i)->getPluginAction()->getPluginState();
-
-                    auto analyzer = m_pluginManager->getAnalyzer(pluginName);
-                    if (!analyzer.isNull()) {
-                        if (analyzer->setPluginStateInUi(pluginState)) {
-                            usedPlugin.insert(pluginName);
-                        }
-                    }
-                }
-                else {
-                    break;
-                }
-            }
-        }
-
-        // Set the last operator plugin settings used on this container
+        // Set the operator plugin settings used on this container
         if (!currContainer()->getChildUuids().isEmpty()) {
-            QSet<QString> usedPlugin;
-            auto childId = currContainer()->getChildUuids().constEnd();
-            while (childId != currContainer()->getChildUuids().constBegin()) {
-                --childId;
-                auto child = m_bitContainerManager->getTreeModel()->getContainerById(*childId);
-                if (!child.isNull() && !child->getActionLineage().isNull()) {
-                    auto lineage = child->getActionLineage()->getLineage();
-                    for (int i = lineage.size() - 1; i >= 0; i--) {
-                        if (lineage.at(i)->getPluginAction()->getPluginType() == PluginAction::Operator) {
-                            QString pluginName = lineage.at(i)->getPluginAction()->getPluginName();
-                            if (usedPlugin.contains(pluginName)) {
-                                break;
-                            }
-                            QJsonObject pluginState = lineage.at(i)->getPluginAction()->getPluginState();
-
-                            auto op = m_pluginManager->getOperator(pluginName);
-                            if (!op.isNull()) {
-                                if (op->setPluginStateInUi(pluginState)) {
-                                    usedPlugin.insert(pluginName);
-                                }
-                            }
-                            break;
-                        }
-                    }
+            QSet<QString> alreadySet;
+            auto outputs = currContainer()->getActionLineage()->outputOperators();
+            for (int i = outputs.size() - 1; i >= 0; i--) {
+                auto output = outputs.at(i);
+                if (alreadySet.contains(output->getPluginName())) {
+                    continue;
+                }
+                auto op = m_pluginManager->getOperator(output->getPluginName());
+                if (!op.isNull()) {
+                    QJsonObject pluginState = output->getPluginState();
+                    op->setPluginStateInUi(pluginState);
+                    alreadySet.insert(output->getPluginName());
                 }
             }
         }
@@ -664,10 +633,7 @@ void MainWindow::deleteCurrentBitcontainer()
 void MainWindow::requestAnalyzerRun(QString pluginName, QJsonObject pluginState)
 {
     if (!currContainer().isNull()) {
-        QSharedPointer<AnalyzerInterface> plugin = m_pluginManager->getAnalyzer(pluginName);
-        if (!plugin.isNull()) {
-            m_pluginActionManager->analyzerActor()->analyzerFullAct(plugin, currContainer(), pluginState);
-        }
+        m_pluginActionManager->runAnalyzer(PluginAction::analyzerAction(pluginName, pluginState), currContainer());
     }
 }
 
@@ -710,30 +676,19 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject pluginState)
                 }
             }
 
-            m_pluginActionManager->operatorActor()->operatorFullAct(
-                    plugin,
-                    inputContainers,
-                    m_bitContainerManager,
-                    QString());
+            m_pluginActionManager->runOperator(PluginAction::operatorAction(pluginName, pluginState), inputContainers);
         }
     }
 }
 
 void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
 {
-    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
-    auto result = plugin->importBits(pluginState, this);
+    auto result = m_pluginActionManager->runImporter(PluginAction::importerAction(pluginName, pluginState));
     if (result.isNull()) {
         return;
     }
-    if (!result->getPluginState().isEmpty() && !result->getPluginState().contains("error")) {
-        this->populateRecentImportsMenu({plugin->getName(), result->getPluginState()});
-    }
-    if (!result->getContainer().isNull()) {
-        QModelIndex addedIndex = this->m_bitContainerManager->getTreeModel()->addContainer(result->getContainer());
-        this->m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-                addedIndex,
-                QItemSelectionModel::ClearAndSelect);
+    if (!result->hasEmptyState() && result->errorString().isEmpty()) {
+        this->populateRecentImportsMenu({pluginName, result->pluginState()});
     }
 }
 
@@ -743,20 +698,20 @@ void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
         warningMessage("Cannot export without a selected bit container");
         return;
     }
-    QSharedPointer<ImportExportInterface> plugin = m_pluginManager->getImporterExporter(pluginName);
-    auto result = plugin->exportBits(currContainer(), pluginState, this);
-    if (!result->getPluginState().isEmpty() && !result->getPluginState().contains("error")) {
-        this->populateRecentExportsMenu({plugin->getName(), result->getPluginState()});
+    auto result = m_pluginActionManager->runExporter(PluginAction::exporterAction(pluginName, pluginState), currContainer());
+    if (!result->hasEmptyState() && result->errorString().isEmpty()) {
+        this->populateRecentExportsMenu({pluginName, result->pluginState()});
     }
 }
 
 void MainWindow::on_pb_analyze_clicked()
 {
-    if (!currContainer().isNull()) {
-        m_pluginActionManager->analyzerActor()->analyzerFullAct(
-                m_analyzerMap.value(ui->analyzerTabs->currentIndex(), QSharedPointer<AnalyzerInterface>()),
-                currContainer());
+    auto plugin = m_analyzerMap.value(ui->analyzerTabs->currentIndex(), QSharedPointer<AnalyzerInterface>());
+    if (plugin.isNull()) {
+        warningMessage("Current Analyzer plugin cannot be determined");
+        return;
     }
+    requestAnalyzerRun(plugin->getName(), plugin->getStateFromUi());
 }
 
 void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
@@ -869,167 +824,168 @@ void MainWindow::on_actionOpen_Container_triggered()
     }
 }
 
-void MainWindow::on_action_Export_Template_triggered()
+void MainWindow::on_action_Apply_Batch_triggered()
 {
-    if (currContainer().isNull() || (currContainer()->getActionLineage().isNull()
-                                     && currContainer()->getChildUuids().isEmpty())) {
-        warningMessage(
-                "You must first select a bit container with children or a history of plugin operations in order to save a template.",
-                "Cannot Save Template");
-        return;
-    }
-
-    bool useChildren = false;
-    if (currContainer()->getActionLineage().isNull()) {
-        useChildren = true;
-    }
-    else if (currContainer()->getChildUuids().isEmpty()) {
-        useChildren = false;
-    }
-    else {
-        QMessageBox pickMode;
-        pickMode.setWindowTitle("Select template type");
-        pickMode.setText(
-                "Do you want to create a template for the actions that created the selected container, or for the actions that created its children?");
-        pickMode.addButton("Selected Container", QMessageBox::ButtonRole::AcceptRole);
-        QPushButton *children = pickMode.addButton("Its Children", QMessageBox::ButtonRole::RejectRole);
-        pickMode.exec();
-        useChildren = pickMode.clickedButton() == children;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Template"),
-            SettingsManager::getInstance().getPrivateSetting(
-                    SettingsData::LAST_TEMPLATE_PATH_KEY).toString(),
-            tr("Hobbits Templates (*.hobbits_template)"));
-    if (!fileName.endsWith(".hobbits_template")) {
-        fileName += ".hobbits_template";
-    }
-
-    QList<QSharedPointer<const PluginActionLineage>> lineages;
-    if (useChildren) {
-        QQueue<QUuid> containers;
-        containers.append(currContainer()->getId());
-        while (!containers.isEmpty()) {
-            QUuid id = containers.takeFirst();
-            QSharedPointer<BitContainer> container = m_bitContainerManager->getTreeModel()->getContainerById(
-                    id);
-            if (container.isNull()) {
-                continue;
-            }
-            if (container->getChildUuids().isEmpty()) {
-                lineages.append(container->getActionLineage());
-            }
-            else {
-                containers.append(container->getChildUuids());
-            }
-        }
-    }
-    else {
-        lineages.append(currContainer()->getActionLineage());
-    }
-
-    QStringList warnings;
-    if (TemplateFileHandler::writeTemplate(fileName, lineages, &warnings)) {
-        populateRecentTemplatesMenu(fileName);
-        if (!warnings.isEmpty()) {
-            warningMessage(warnings.join("\n\n"), "Failed to Export Template");
-        }
-    }
-    else if (!warnings.isEmpty()) {
-        warningMessage(warnings.join("\n\n"));
-    }
-}
-
-void MainWindow::applyTemplateToCurrentContainer(QString fileName)
-{
-    QStringList warnings;
-    auto lineageTree = TemplateFileHandler::loadTemplate(fileName, &warnings);
-    if (lineageTree.isNull()) {
-        warningMessage(warnings.join("\n\n"), "Failed to Apply Template");
-        return;
-    }
-    else if (!warnings.isEmpty()) {
-        warningMessage(warnings.join("\n\n"));
-    }
-
-    QFileInfo fileInfo(fileName);
-    QString templateName = fileInfo.fileName().section(".", 0, 0);
-    QList<QUuid> additionalInputs;
-    if (lineageTree->additionalInputCount() > 0) {
-        ContainerSelectionDialog *selectionDialog = new ContainerSelectionDialog(m_bitContainerManager, this);
-        selectionDialog->setMessage(
-                QString("Select %1 additional inputs for the provided template").arg(
-                        lineageTree->
-                        additionalInputCount()));
-        if (!selectionDialog->exec()) {
-            return;
-        }
-        auto additionals = selectionDialog->getSelected();
-        if (additionals.size() != lineageTree->additionalInputCount()) {
-            warningMessage(
-                    QString("You must select between %1 input containers (%2 selected)")
-                    .arg(lineageTree->additionalInputCount()).arg(additionals.size()),
-                    "Invalid Input Count");
-            return;
-        }
-        for (auto additional : additionals) {
-            additionalInputs.append(additional->getId());
-        }
-    }
-    TemplateFileHandler::applyLineageTree(
-            currContainer()->getId(),
-            additionalInputs,
-            lineageTree,
-            templateName,
-            m_bitContainerManager,
-            m_pluginActionManager);
-}
-
-void MainWindow::on_actionApply_Template_triggered()
-{
-    if (currContainer().isNull()) {
-        warningMessage(
-                "You must first select a bit container to apply the template to.",
-                "Cannot Apply Template");
-        return;
-    }
-
     QString fileName = QFileDialog::getOpenFileName(
             this,
-            tr("Apply Template"),
-            SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_TEMPLATE_PATH_KEY).toString(),
-            tr("Hobbits Templates (*.hobbits_template)"));
+            tr("Apply Batch"),
+            SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_BATCH_PATH_KEY).toString(),
+            tr("Hobbits Batch Files (*.hobbits_batch)"));
     if (fileName.isEmpty()) {
         return;
     }
 
-    applyTemplateToCurrentContainer(fileName);
+    applyBatchFile(fileName);
 }
 
-void MainWindow::pluginActionStarted()
+void MainWindow::on_action_Save_Batch_triggered()
 {
-    ui->pb_analyze->setEnabled(false);
-    ui->pb_operate->setEnabled(false);
-    m_pluginActionProgress->setValue(0);
-    m_pluginActionProgress->setVisible(true);
-    m_pluginActionCancel->setVisible(true);
+    if (currContainer().isNull() || currContainer()->getActionLineage().isNull()) {
+        warningMessage(
+                "You must first select a bit container with children or a history of plugin operations in order to save a batch.",
+                "Cannot Save Batch");
+        return;
+    }
+
+    auto batchDialog = QSharedPointer<BatchCreationDialog>(new BatchCreationDialog(currContainer(), this));
+
+    if (!batchDialog->exec()) {
+        return;
+    }
+
+    auto batch = PluginActionBatch::fromLineage(currContainer()->getActionLineage(), batchDialog->getSelectedBatchMode());
+
+    if (batch.isNull() || batch->actionSteps().isEmpty()) {
+        warningMessage(
+                "A valid batch could not be created from the container's relevant actions",
+                "Cannot Save Batch");
+        return;
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(
+            this,
+            tr("Save Batch"),
+            SettingsManager::getInstance().getPrivateSetting(
+                    SettingsData::LAST_BATCH_PATH_KEY).toString(),
+            tr("Hobbits Batch Files (*.hobbits_batch)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
+    if (!fileName.endsWith(".hobbits_batch")) {
+        fileName += ".hobbits_batch";
+    }
+
+
+    QFile file(fileName);
+    SettingsManager::getInstance().setPrivateSetting(
+            SettingsData::LAST_BATCH_PATH_KEY,
+            QFileInfo(file).dir().path());
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        warningMessage(
+                QString("Could not open file '%1' for writing").arg(fileName),
+                "Cannot Save Batch");
+        return;
+    }
+
+    QJsonDocument json(batch->serialize());
+    file.write(json.toJson());
 }
 
-void MainWindow::pluginActionFinished()
+void MainWindow::applyBatchFile(QString fileName)
 {
-    ui->pb_analyze->setEnabled(true);
-    ui->pb_operate->setEnabled(true);
-    m_pluginActionProgress->setVisible(false);
-    m_pluginActionCancel->setVisible(false);
+    QFile file(fileName);
+    SettingsManager::getInstance().setPrivateSetting(
+            SettingsData::LAST_BATCH_PATH_KEY,
+            QFileInfo(file).dir().path());
 
-    sendBitContainerPreview();
+    if (!file.open(QIODevice::ReadOnly)) {
+        warningMessage(QString("Could not open hobbits batch file '%1'").arg(fileName));
+        return;
+    }
+
+    auto batch = PluginActionBatch::deserialize(QJsonDocument::fromJson(file.readAll()).object());
+
+    if (batch.isNull()) {
+        warningMessage(QString("Format of hobbits batch file could not be read '%1'").arg(fileName));
+        return;
+    }
+
+    int requiredInputs = batch->getMinRequiredInputs(m_pluginManager);
+    int maxInputs = batch->getMaxPossibleInputs(m_pluginManager);
+
+    QList<QSharedPointer<BitContainer>> inputs;
+    if (requiredInputs == 1 && !currContainer().isNull()) {
+        inputs.append(currContainer());
+    }
+    else if (requiredInputs > 0) {
+        auto selectionDialog = QSharedPointer<ContainerSelectionDialog>(new ContainerSelectionDialog(m_bitContainerManager, this));
+        if (requiredInputs == maxInputs) {
+            selectionDialog->setMessage(QString("Select %1 inputs for the batch").arg(requiredInputs));
+        }
+        else {
+            selectionDialog->setMessage(QString("Select between %1 and %2 inputs for the batch").arg(requiredInputs).arg(maxInputs));
+        }
+        if (!selectionDialog->exec()) {
+            return;
+        }
+        inputs = selectionDialog->getSelected();
+        if (inputs.size() < requiredInputs) {
+            warningMessage(
+                    QString("You must select at least %1 input containers (%2 selected)")
+                    .arg(requiredInputs).arg(inputs.size()),
+                    "Invalid Input Count");
+            return;
+        }
+        else if (inputs.size() > maxInputs) {
+            warningMessage(
+                    QString("You must select at most %1 input containers (%2 selected)")
+                    .arg(maxInputs).arg(inputs.size()),
+                    "Invalid Input Count");
+            return;
+        }
+    }
+
+    populateRecentBatchesMenu(fileName);
+    m_pluginActionManager->runBatch(batch, inputs);
 }
 
-void MainWindow::pluginActionProgress(int progress)
+void MainWindow::pluginActionStarted(QUuid id)
 {
-    m_pluginActionProgress->setValue(progress);
+    auto progress = new PluginProgress;
+    progress->id = id;
+    progress->progressBar = new QProgressBar;
+    progress->cancelButton = new QPushButton("Cancel");
+
+    ui->statusBar->addPermanentWidget(progress->progressBar);
+    ui->statusBar->addPermanentWidget(progress->cancelButton);
+
+    connect(progress->cancelButton, &QPushButton::pressed, [this, progress]() {
+        progress->cancelButton->setDisabled(true);
+        this->m_pluginActionManager->cancelById(progress->id);
+    });
+
+    m_pluginProgress.insert(id, progress);
+}
+
+void MainWindow::pluginActionFinished(QUuid id)
+{
+    if (!m_pluginProgress.contains(id)) {
+        return;
+    }
+    auto progress = m_pluginProgress.value(id);
+    progress->progressBar->deleteLater();
+    progress->cancelButton->deleteLater();
+    m_pluginProgress.remove(id);
+    delete progress;
+}
+
+void MainWindow::pluginActionProgress(QUuid id, int progress)
+{
+    if (!m_pluginProgress.contains(id)) {
+        return;
+    }
+    m_pluginProgress.value(id)->progressBar->setValue(progress);
 }
 
 void MainWindow::on_action_About_triggered()
@@ -1053,9 +1009,9 @@ void MainWindow::on_actionPreferences_triggered()
     dialog.exec();
 }
 
-void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
+void MainWindow::populateRecentBatchesMenu(QString addition, QString removal)
 {
-    QString key = "recently_used_templates";
+    QString key = "recently_used_batches";
 
     QStringList recentlyUsed;
     QVariant currentSetting = SettingsManager::getInstance().getPrivateSetting(key);
@@ -1076,16 +1032,16 @@ void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
 
     SettingsManager::getInstance().setPrivateSetting(key, recentlyUsed);
 
-    ui->menuApply_Recent_Template->clear();
-    for (QString templateFile : recentlyUsed) {
-        ui->menuApply_Recent_Template->addAction(
-                templateFile,
-                [this, templateFile]() {
-            this->applyTemplateToCurrentContainer(templateFile);
+    ui->menuApply_Recent_Batch->clear();
+    for (QString batchFile : recentlyUsed) {
+        ui->menuApply_Recent_Batch->addAction(
+                batchFile,
+                [this, batchFile]() {
+            this->applyBatchFile(batchFile);
         });
     }
 
-    ui->menuApply_Recent_Template->setEnabled(recentlyUsed.length() > 0);
+    ui->menuApply_Recent_Batch->setEnabled(recentlyUsed.length() > 0);
 }
 
 

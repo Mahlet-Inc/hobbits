@@ -13,6 +13,31 @@ PluginAction::PluginAction(PluginType pluginType, QString pluginName, QJsonObjec
 
 }
 
+QSharedPointer<PluginAction> PluginAction::analyzerAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Analyzer, pluginName, pluginState));
+}
+
+QSharedPointer<PluginAction> PluginAction::operatorAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Operator, pluginName, pluginState));
+}
+
+QSharedPointer<PluginAction> PluginAction::importerAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Importer, pluginName, pluginState));
+}
+
+QSharedPointer<PluginAction> PluginAction::exporterAction(QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Exporter, pluginName, pluginState));
+}
+
+QSharedPointer<PluginAction> PluginAction::noAction()
+{
+    return QSharedPointer<PluginAction>(new PluginAction(PluginAction::NoAction, "No Action", QJsonObject()));
+}
+
 PluginAction::PluginType PluginAction::getPluginType() const
 {
     return m_pluginType;
@@ -26,6 +51,24 @@ QString PluginAction::getPluginName() const
 QJsonObject PluginAction::getPluginState() const
 {
     return m_pluginState;
+}
+
+int PluginAction::minPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
+{
+    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
+    if (plugin.isNull()) {
+        return 0;
+    }
+    return plugin->getMinInputContainers(m_pluginState);
+}
+
+int PluginAction::maxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
+{
+    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
+    if (plugin.isNull()) {
+        return 0;
+    }
+    return plugin->getMaxInputContainers(m_pluginState);
 }
 
 QJsonObject PluginAction::serialize() const
@@ -60,47 +103,4 @@ QSharedPointer<PluginAction> PluginAction::deserialize(QJsonObject data)
     QJsonObject pluginState = data.value("state").toObject();
 
     return QSharedPointer<PluginAction>(new PluginAction(pluginType, pluginName, pluginState));
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> PluginAction::operatorAct(
-        QSharedPointer<OperatorActor> actor,
-        QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QList<QSharedPointer<BitContainer>> inputContainers,
-        QSharedPointer<BitContainerManager> bitContainerManager,
-        QString outputName,
-        QMap<int, QUuid> outputIdMap) const
-{
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> nullResult;
-    QSharedPointer<OperatorInterface> plugin = pluginManager->getOperator(m_pluginName);
-    if (plugin.isNull()) {
-        return nullResult;
-    }
-    if (!plugin->canRecallPluginState(m_pluginState)) {
-        return nullResult;
-    }
-
-    return actor->operatorFullAct(
-            plugin,
-            inputContainers,
-            bitContainerManager,
-            outputName,
-            m_pluginState,
-            outputIdMap);
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> PluginAction::analyzerAct(
-        QSharedPointer<AnalyzerActor> actor,
-        QSharedPointer<const HobbitsPluginManager> pluginManager,
-        QSharedPointer<BitContainer> container) const
-{
-    QSharedPointer<ActionWatcher<QSharedPointer<const AnalyzerResult>>> nullResult;
-    QSharedPointer<AnalyzerInterface> plugin = pluginManager->getAnalyzer(m_pluginName);
-    if (plugin.isNull()) {
-        return nullResult;
-    }
-    if (!plugin->canRecallPluginState(m_pluginState)) {
-        return nullResult;
-    }
-
-    return actor->analyzerFullAct(plugin, container, m_pluginState);
 }
