@@ -27,6 +27,11 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(inputFileOption);
 
+    QCommandLineOption batchFileOption(
+        QStringList() << "b" << "batch",
+            QCoreApplication::translate("main", "Batch file to immediately run on application startup"),
+            QCoreApplication::translate("main", "file"));
+    parser.addOption(batchFileOption);
 
     QCommandLineOption extraPluginPathOption(
         QStringList() << "p" << "extra-plugin-path",
@@ -77,6 +82,10 @@ int main(int argc, char *argv[])
         if (parser.isSet(inputFileOption)) {
             w.importBitfile(parser.value(inputFileOption));
         }
+    }
+
+    if (parser.isSet(batchFileOption)) {
+        w.applyBatchFile(parser.value(batchFileOption));
     }
 
     return a.exec();
