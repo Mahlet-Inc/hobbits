@@ -20,6 +20,9 @@ public:
     OperatorResult* setPluginState(QJsonObject pluginState);
     const QJsonObject getPluginState() const;
 
+    bool hasEmptyState() const;
+    QString errorString() const;
+
     static QSharedPointer<const OperatorResult> result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState);
     static QSharedPointer<const OperatorResult> error(QString error);
 

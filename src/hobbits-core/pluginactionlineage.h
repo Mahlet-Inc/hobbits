@@ -12,53 +12,32 @@ private:
     PluginActionLineage(QSharedPointer<const PluginAction> pluginAction);
 
 public:
-    class TreeNode
-    {
-public:
-        QSharedPointer<const PluginActionLineage> lineage;
-        QList<QSharedPointer<TreeNode>> children;
+    static void recordLineage(
+                    QSharedPointer<const PluginAction> pluginAction,
+                    QList<QSharedPointer<BitContainer>> inputContainers,
+                    QList<QSharedPointer<BitContainer>> outputContainers);
 
-        int additionalInputCount()
-        {
-            int count = 0;
-            if (!lineage.isNull()) {
-                count += lineage->additionalInputCount();
-            }
-            for (auto child : children) {
-                count += child->additionalInputCount();
-            }
-            return count;
-        }
+    static QSharedPointer<PluginActionLineage> actionlessLineage();
 
-    };
-
-    static QSharedPointer<PluginActionLineage> create(QSharedPointer<const PluginAction> pluginAction);
-    static QSharedPointer<const PluginActionLineage> fromLineage(
-            QSharedPointer<const PluginActionLineage> lineage,
-            int offset = 0,
-            int length = -1);
-
-    static QSharedPointer<TreeNode> mergeIntoTree(QList<QSharedPointer<const PluginActionLineage>> branchingLineages);
-
-    QSharedPointer<PluginActionLineage> setParent(QSharedPointer<const PluginActionLineage> parent);
-    QSharedPointer<PluginActionLineage> setOutputPos(int outputPosition);
-    QSharedPointer<PluginActionLineage> addAdditionalInput(QSharedPointer<const PluginActionLineage>);
+    QSharedPointer<PluginActionLineage> setOutputPosition(int outputPosition);
+    QSharedPointer<PluginActionLineage> addInput(QSharedPointer<const PluginActionLineage> input);
+    QSharedPointer<PluginActionLineage> addOutputGroup(QList<QWeakPointer<const PluginActionLineage>> outputs);
 
     QSharedPointer<const PluginAction> getPluginAction() const;
     int getOutputPosition() const;
-    QList<QSharedPointer<const PluginActionLineage>> getAdditionalInputs() const;
+    QList<QSharedPointer<const PluginActionLineage>> getInputs() const;
+    QList<QList<QWeakPointer<const PluginActionLineage>>> getOutputs() const;
 
     QJsonObject serialize() const;
     static QSharedPointer<PluginActionLineage> deserialize(QJsonObject data);
 
-    QList<QSharedPointer<const PluginActionLineage>> getLineage() const;
-    int additionalInputCount() const;
+    QList<QSharedPointer<const PluginAction>> outputOperators() const;
 
 private:
     QSharedPointer<const PluginAction> m_pluginAction;
+    QList<QSharedPointer<const PluginActionLineage>> m_inputs;
+    QList<QList<QWeakPointer<const PluginActionLineage>>> m_outputs;
     int m_outputPosition;
-    QSharedPointer<const PluginActionLineage> m_parent;
-    QList<QSharedPointer<const PluginActionLineage>> m_additionalInputs;
 };
 
 #endif // PLUGINACTIONLINEAGE_H

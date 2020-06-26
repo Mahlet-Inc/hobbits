@@ -34,8 +34,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     actionprogress.cpp \
     actionrenderprogress.cpp \
-    analyzeractor.cpp \
     analyzerresult.cpp \
+    analyzerrunner.cpp \
+    batchrunner.cpp \
         bitarray.cpp \
         bitcontainer.cpp \
     bitcontainerlistmodel.cpp \
@@ -47,16 +48,18 @@ SOURCES += \
     displaybasetext.cpp \
     displayhandle.cpp \
     displayhelper.cpp \
+    exportresult.cpp \
         frame.cpp \
     highlightnavigator.cpp \
     hobbitscoreinfo.cpp \
     hobbitspluginmanager.cpp \
-    importexportresult.cpp \
+    importresult.cpp \
         mathparser.cpp \
-    operatoractor.cpp \
     operatorresult.cpp \
+    operatorrunner.cpp \
     parseresult.cpp \
     pluginaction.cpp \
+    pluginactionbatch.cpp \
     pluginactionlineage.cpp \
     pluginactionmanager.cpp \
     plugincallback.cpp \
@@ -65,16 +68,16 @@ SOURCES += \
     range.cpp \
     rangehighlight.cpp \
     settingsdata.cpp \
-    settingsmanager.cpp \
-    templatefilehandler.cpp
+    settingsmanager.cpp
 
 HEADERS += \
     actionprogress.h \
     actionrenderprogress.h \
     actionwatcher.h \
-    analyzeractor.h \
     analyzerinterface.h \
     analyzerresult.h \
+    analyzerrunner.h \
+    batchrunner.h \
         bitarray.h \
         bitcontainer.h \
     bitcontainerlistmodel.h \
@@ -87,19 +90,21 @@ HEADERS += \
     displayhandle.h \
     displayhelper.h \
     displayinterface.h \
+    exportresult.h \
         frame.h \
     highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     hobbitspluginmanager.h \
     importexportinterface.h \
-    importexportresult.h \
-    operatoractor.h \
+    importresult.h \
         operatorinterface.h \
         mathparser.h \
     operatorresult.h \
+    operatorrunner.h \
     parseresult.h \
     pluginaction.h \
+    pluginactionbatch.h \
     pluginactionlineage.h \
     pluginactionmanager.h \
     plugincallback.h \
@@ -108,8 +113,7 @@ HEADERS += \
     range.h \
     rangehighlight.h \
     settingsdata.h \
-    settingsmanager.h \
-    templatefilehandler.h
+    settingsmanager.h
 
 DISTFILES +=
 

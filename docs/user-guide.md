@@ -104,13 +104,21 @@ Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
 For example, if you want to open a file as bits, selecting the `File Data`
 import plugin will let you select a file and then load it in as a Bit Container.
 
+## Batch Execution
+
+Sequences of operator, analyzer, and importer actions can be saved as "batches"
+that can be executed all at once. You can create a batch by selecting either
+the container that starts the sequence or the container that ends the sequence
+and then navigating to `File->Save Batch...`. The saved batch can later be
+executed via `File->Apply Batch...`.
+
 ## Command line execution
 
 When running Hobbits from the command line, a variety of configuration and
 data loading options are provided. Simply run it with the `--help` option to see
 which options are available.
 
-The hobbits-runner program can be used to apply a saved Hobbits template to an
+The hobbits-runner program can be used to apply a saved Hobbits batch to an
 input file without needing to open the GUI.
 
 ## Plugin loading

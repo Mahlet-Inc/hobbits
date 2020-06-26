@@ -51,8 +51,9 @@ public:
     void setName(QString name);
     bool nameWasSet() const;
 
-    void setActionLineage(QSharedPointer<const PluginActionLineage> lineage);
+    void setActionLineage(QSharedPointer<PluginActionLineage> lineage);
     QSharedPointer<const PluginActionLineage> getActionLineage() const;
+    QSharedPointer<PluginActionLineage> getActionLineage();
 
     bool isRootContainer() const;
     QList<QUuid> getChildUuids() const;
@@ -75,7 +76,7 @@ private:
     QSharedPointer<BitArray> m_bits;
     QSharedPointer<BitInfo> m_bitInfo;
 
-    QSharedPointer<const PluginActionLineage> m_actionLineage;
+    QSharedPointer<PluginActionLineage> m_actionLineage;
 
     QUuid m_id;
     QList<QUuid> m_children;

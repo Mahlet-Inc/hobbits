@@ -13,7 +13,7 @@ class HexString : public QObject, ImportExportInterface
 public:
     HexString();
 
-    ~HexString();
+    ~HexString() override;
 
     ImportExportInterface* createDefaultImporterExporter() override;
 
@@ -25,11 +25,10 @@ public:
     QString getImportLabelForState(QJsonObject pluginState) override;
     QString getExportLabelForState(QJsonObject pluginState) override;
 
-    QSharedPointer<ImportExportResult> importBits(QJsonObject pluginState, QWidget *parent) override;
-    QSharedPointer<ImportExportResult> exportBits(
+    QSharedPointer<ImportResult> importBits(QJsonObject pluginState) override;
+    QSharedPointer<ExportResult> exportBits(
             QSharedPointer<const BitContainer> container,
-            QJsonObject pluginState,
-            QWidget *parent) override;
+            QJsonObject pluginState) override;
 
 private:
 };

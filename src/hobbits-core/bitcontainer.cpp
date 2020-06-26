@@ -11,6 +11,7 @@ BitContainer::BitContainer(QObject *parent) :
     m_id(QUuid::createUuid())
 {
     setBitInfo(QSharedPointer<BitInfo>(new BitInfo()));
+    setActionLineage(PluginActionLineage::actionlessLineage());
 }
 
 void BitContainer::setBits(QByteArray bytes, qint64 bitLen, QSharedPointer<BitInfo> bitInfo)
@@ -152,7 +153,12 @@ QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
     return m_actionLineage;
 }
 
-void BitContainer::setActionLineage(QSharedPointer<const PluginActionLineage> lineage)
+QSharedPointer<PluginActionLineage> BitContainer::getActionLineage()
+{
+    return m_actionLineage;
+}
+
+void BitContainer::setActionLineage(QSharedPointer<PluginActionLineage> lineage)
 {
     QMutexLocker lock(&m_mutex);
     m_actionLineage = lineage;

@@ -27,6 +27,19 @@ const QJsonObject AnalyzerResult::getPluginState() const
     return m_pluginState;
 }
 
+bool AnalyzerResult::hasEmptyState() const
+{
+    return m_pluginState.isEmpty();
+}
+
+QString AnalyzerResult::errorString() const
+{
+    if (m_pluginState.contains("error")) {
+        return m_pluginState.value("error").toString();
+    }
+    return QString();
+}
+
 QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, QJsonObject pluginState)
 {
 

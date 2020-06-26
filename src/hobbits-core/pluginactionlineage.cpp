@@ -1,5 +1,6 @@
 #include "pluginactionlineage.h"
 #include <QJsonArray>
+#include <QQueue>
 
 PluginActionLineage::PluginActionLineage(QSharedPointer<const PluginAction> pluginAction) :
     m_pluginAction(pluginAction),
@@ -7,108 +8,58 @@ PluginActionLineage::PluginActionLineage(QSharedPointer<const PluginAction> plug
 {
 }
 
-QSharedPointer<PluginActionLineage> PluginActionLineage::create(QSharedPointer<const PluginAction> pluginAction)
+void PluginActionLineage::recordLineage(
+        QSharedPointer<const PluginAction> pluginAction,
+        QList<QSharedPointer<BitContainer>> inputContainers,
+        QList<QSharedPointer<BitContainer>> outputContainers)
 {
-    return QSharedPointer<PluginActionLineage>(new PluginActionLineage(pluginAction));
-}
+    QList<QWeakPointer<const PluginActionLineage>> outputGroup;
 
-QSharedPointer<const PluginActionLineage> PluginActionLineage::fromLineage(
-        QSharedPointer<const PluginActionLineage> lineage,
-        int offset,
-        int length)
-{
-    QList<QSharedPointer<const PluginActionLineage>> lineageParts = lineage->getLineage();
-    int lastIndex = lineageParts.size();
-    if (length >= 0) {
-        lastIndex = offset + length;
-    }
-    QSharedPointer<const PluginActionLineage> lastOne;
-    for ( ; offset < lineageParts.size() && offset < lastIndex; offset++) {
-        QSharedPointer<PluginActionLineage> l = PluginActionLineage::create(lineageParts.at(offset)->getPluginAction());
-        if (!lastOne.isNull()) {
-            l->setParent(lastOne);
-            l->setOutputPos(lineageParts.at(offset)->getOutputPosition());
-        }
-        lastOne = l;
-    }
-
-    return lastOne;
-}
-
-QSharedPointer<PluginActionLineage::TreeNode> PluginActionLineage::mergeIntoTree(
-        QList<QSharedPointer<const PluginActionLineage>> branchingLineages)
-{
-
-    QSharedPointer<PluginActionLineage::TreeNode> node = QSharedPointer<PluginActionLineage::TreeNode>(
-            new PluginActionLineage::TreeNode());
-
-    if (branchingLineages.size() == 1) {
-        node->lineage = branchingLineages.at(0);
-        return node;
-    }
-
-    QMultiHash<PluginAction, QSharedPointer<const PluginActionLineage>> childBranches;
-    for (int i = 0; i < branchingLineages.size(); i++) {
-        auto singleLineage = branchingLineages.at(i)->getLineage();
-        auto firstAction = *singleLineage.at(0)->getPluginAction().data();
-        childBranches.insert(firstAction, branchingLineages.at(i));
-    }
-
-    if (childBranches.uniqueKeys().size() == 1) {
-        // find the depth of the common lineage
-        int sharedLength = 0;
-        bool shared = true;
-        QSet<PluginAction> actions;
-        while (shared) {
-            sharedLength++;
-            actions.clear();
-            for (auto lineage : branchingLineages) {
-                auto singleLineage = lineage->getLineage();
-                if (singleLineage.size() <= sharedLength) {
-                    shared = false;
-                    break;
-                }
-                actions.insert(*singleLineage.at(sharedLength)->getPluginAction().data());
-                if (actions.size() > 1) {
-                    shared = false;
-                    break;
-                }
-            }
-        }
-
-        node->lineage = PluginActionLineage::fromLineage(branchingLineages.at(0), 0, sharedLength);
-        QList<QSharedPointer<const PluginActionLineage>> childList;
-        for (auto lineage : branchingLineages) {
-            childList.append(PluginActionLineage::fromLineage(lineage, sharedLength));
-        }
-        node->children.append(PluginActionLineage::mergeIntoTree(childList));
-    }
-    else {
-        for (PluginAction key : childBranches.uniqueKeys()) {
-            node->children.append(PluginActionLineage::mergeIntoTree(childBranches.values(key)));
+    for (auto input: inputContainers) {
+        if (input->getActionLineage().isNull()) {
+            input->setActionLineage(actionlessLineage());
         }
     }
 
-    return node;
+    int outputPosition = 0;
+    for (auto output: outputContainers) {
+        QSharedPointer<PluginActionLineage> lineage(new PluginActionLineage(pluginAction));
+        lineage->setOutputPosition(outputPosition++);
+        for (auto input: inputContainers) {
+            lineage->addInput(input->getActionLineage());
+        }
+        output->setActionLineage(lineage);
+        outputGroup.append(lineage.toWeakRef());
+    }
+
+    for (auto input: inputContainers) {
+        input->getActionLineage()->addOutputGroup(outputGroup);
+    }
 }
 
-QSharedPointer<PluginActionLineage> PluginActionLineage::setParent(QSharedPointer<const PluginActionLineage> parent)
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::actionlessLineage()
 {
-    m_parent = parent;
-    return sharedFromThis();
+    return QSharedPointer<PluginActionLineage>(new PluginActionLineage(PluginAction::noAction()));
 }
 
-QSharedPointer<PluginActionLineage> PluginActionLineage::addAdditionalInput(
-        QSharedPointer<const PluginActionLineage> inputLineage)
-{
-    m_additionalInputs.append(inputLineage);
-    return sharedFromThis();
-}
-
-QSharedPointer<PluginActionLineage> PluginActionLineage::setOutputPos(int outputPosition)
+QSharedPointer<PluginActionLineage> PluginActionLineage::setOutputPosition(int outputPosition)
 {
     m_outputPosition = outputPosition;
-    return sharedFromThis();
+    return this->sharedFromThis();
+}
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::addInput(
+        QSharedPointer<const PluginActionLineage> input)
+{
+    m_inputs.append(input);
+    return this->sharedFromThis();
+}
+
+QSharedPointer<PluginActionLineage> PluginActionLineage::addOutputGroup(QList<QWeakPointer<const PluginActionLineage>> outputs)
+{
+    m_outputs.append(outputs);
+    return this->sharedFromThis();
 }
 
 QSharedPointer<const PluginAction> PluginActionLineage::getPluginAction() const
@@ -121,99 +72,31 @@ int PluginActionLineage::getOutputPosition() const
     return m_outputPosition;
 }
 
-QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getAdditionalInputs() const
+QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getInputs() const
 {
-    return m_additionalInputs;
+    return m_inputs;
 }
 
-QJsonObject PluginActionLineage::serialize() const
+QList<QList<QWeakPointer<const PluginActionLineage>>> PluginActionLineage::getOutputs() const
 {
-    QJsonObject obj;
-    QJsonArray actions;
-    for (auto action : getLineage()) {
-        QJsonObject actionObject;
-        actionObject.insert("action", action->m_pluginAction->serialize());
-        actionObject.insert("outputPosition", action->m_outputPosition);
-        QJsonArray additionalInputs;
-        for (auto input : m_additionalInputs) {
-            if (input.isNull()) {
-                additionalInputs.append(QJsonObject());
-            }
-            else {
-                additionalInputs.append(input->serialize());
-            }
-        }
-        actionObject.insert("additionalInputs", additionalInputs);
-        actions.append(actionObject);
-    }
-    obj.insert("actions", actions);
-    return obj;
+    return m_outputs;
 }
 
-QSharedPointer<PluginActionLineage> PluginActionLineage::deserialize(QJsonObject data)
+QList<QSharedPointer<const PluginAction>> PluginActionLineage::outputOperators() const
 {
-    QSharedPointer<PluginActionLineage> nullLineage;
-
-    if (!(data.contains("actions")
-          && data.value("actions").isArray())) {
-        return nullLineage;
-    }
-
-    QSharedPointer<PluginActionLineage> lineage;
-    for (auto action : data.value("actions").toArray()) {
-        if (!action.isObject()) {
-            return nullLineage;
+    QList<QSharedPointer<const PluginAction>> outputs;
+    for (auto outputGroup: getOutputs()){
+        if (outputGroup.size() < 1) {
+            continue;
         }
-        QJsonObject actionObject = action.toObject();
-        if (!(actionObject.contains("action")
-              && actionObject.value("action").isObject()
-              && actionObject.contains("outputPosition")
-              && actionObject.value("outputPosition").isDouble())) {
-            return nullLineage;
+        auto output = outputGroup.at(0).toStrongRef();
+        if (output.isNull()) {
+            continue;
         }
-        QSharedPointer<PluginAction> pluginAction = PluginAction::deserialize(actionObject.value("action").toObject());
-        if (pluginAction.isNull()) {
-            return nullLineage;
-        }
-        int outputPosition = int(actionObject.value("outputPosition").toDouble());
-
-        lineage = PluginActionLineage::create(pluginAction)->setParent(lineage)->setOutputPos(outputPosition);
-
-        if (actionObject.contains("additionalInputs")
-            && actionObject.value("additionalInputs").isArray()) {
-            for (auto additional : actionObject.value("additionalInputs").toArray()) {
-                if (!additional.isObject()) {
-                    return nullLineage;
-                }
-                QJsonObject additionalObject = additional.toObject();
-                if (additionalObject.size() == 0) {
-                    lineage->addAdditionalInput(QSharedPointer<PluginActionLineage>());
-                }
-                else {
-                    lineage->addAdditionalInput(PluginActionLineage::deserialize(additionalObject));
-                }
-            }
+        if (output->getPluginAction()->getPluginType() == PluginAction::Operator) {
+            outputs.append(output->getPluginAction());
         }
     }
 
-    return lineage;
-}
-
-QList<QSharedPointer<const PluginActionLineage>> PluginActionLineage::getLineage() const
-{
-    QList<QSharedPointer<const PluginActionLineage>> lineage;
-    if (!m_parent.isNull()) {
-        lineage = m_parent->getLineage();
-    }
-    lineage.append(this->sharedFromThis());
-    return lineage;
-}
-
-int PluginActionLineage::additionalInputCount() const
-{
-    int count = 0;
-    for (auto lineage : getLineage()) {
-        count += lineage->getAdditionalInputs().size();
-    }
-    return count;
+    return outputs;
 }

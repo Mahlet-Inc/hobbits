@@ -47,20 +47,20 @@ QString HexString::getExportLabelForState(QJsonObject pluginState)
     return "";
 }
 
-QSharedPointer<ImportExportResult> HexString::importBits(QJsonObject pluginState, QWidget *parent)
+QSharedPointer<ImportResult> HexString::importBits(QJsonObject pluginState)
 {
     QSharedPointer<BitContainer> container;
 
-    auto importer = QSharedPointer<HexStringImporter>(new HexStringImporter(parent));
+    auto importer = QSharedPointer<HexStringImporter>(new HexStringImporter());
 
     if (pluginState.contains("filename")) {
         QString fileName = pluginState.value("filename").toString();
         importer->importFromFile(fileName);
         if (importer->getContainer().isNull()) {
-            return ImportExportResult::error(QString("Failed to import hex string data from: '%1'").arg(fileName));
+            return ImportResult::error(QString("Failed to import hex string data from: '%1'").arg(fileName));
         }
         else {
-            return ImportExportResult::create(importer->getContainer(), pluginState);
+            return ImportResult::result(importer->getContainer(), pluginState);
         }
     }
 
@@ -68,13 +68,13 @@ QSharedPointer<ImportExportResult> HexString::importBits(QJsonObject pluginState
         if (!importer->getFileName().isEmpty()) {
             pluginState.insert("filename", importer->getFileName());
         }
-        return ImportExportResult::create(importer->getContainer(), pluginState);
+        return ImportResult::result(importer->getContainer(), pluginState);
     }
 
-    return ImportExportResult::nullResult();
+    return ImportResult::nullResult();
 }
 
-QSharedPointer<ImportExportResult> HexString::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState, QWidget *parent)
+QSharedPointer<ExportResult> HexString::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState)
 {
     QString fileName;
 
@@ -83,7 +83,7 @@ QSharedPointer<ImportExportResult> HexString::exportBits(QSharedPointer<const Bi
     }
     else {
         fileName = QFileDialog::getSaveFileName(
-                parent,
+                nullptr,
                 tr("Export Bits"),
                 SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_IMPORT_EXPORT_PATH_KEY).toString(),
                 tr("All Files (*)"));
@@ -94,7 +94,7 @@ QSharedPointer<ImportExportResult> HexString::exportBits(QSharedPointer<const Bi
     pluginState.insert("filename", fileName);
 
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        ImportExportResult::error(QString("Failed to open export file: '%1'").arg(fileName));
+        ExportResult::error(QString("Failed to open export file: '%1'").arg(fileName));
     }
     SettingsManager::getInstance().setPrivateSetting(
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
@@ -105,5 +105,5 @@ QSharedPointer<ImportExportResult> HexString::exportBits(QSharedPointer<const Bi
     file.write(bytes.data());
     file.close();
 
-    return ImportExportResult::create(pluginState);
+    return ExportResult::result(pluginState);
 }

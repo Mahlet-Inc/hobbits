@@ -39,15 +39,14 @@ QString %{ClassName}::getExportLabelForState(QJsonObject pluginState)
     return "";
 }
 
-QSharedPointer<ImportExportResult> %{ClassName}::importBits(QJsonObject pluginState, QWidget *parent)
+QSharedPointer<ImportResult> %{ClassName}::importBits(QJsonObject pluginState)
 {
-    return ImportExportResult::nullResult();
+    return ImportResult::error("Import not implemented");
 }
 
-QSharedPointer<ImportExportResult> %{ClassName}::exportBits(
+QSharedPointer<ExportResult> %{ClassName}::exportBits(
     QSharedPointer<const BitContainer> container,
-    QJsonObject pluginState,
-    QWidget *parent)
+    QJsonObject pluginState)
 {
-    return ImportExportResult::nullResult();
+    return ExportResult::error("Export not implemented");
 }
