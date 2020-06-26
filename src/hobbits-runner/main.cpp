@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument(
             "mode",
             "The mode to run in\
-'run': applies a given template to input data - requires a template parameter");
+'run': applies a given batch to input data - requires a batch parameter");
 
     QCommandLineOption inputFileOption(
         QStringList() << "i" << "input",
@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(inputFileOption);
 
-    QCommandLineOption templateOption(
-        QStringList() << "t" << "template",
-            QCoreApplication::translate("main", "Template file to use for processing"),
+    QCommandLineOption batchOption(
+        QStringList() << "b" << "batch",
+            QCoreApplication::translate("main", "Batch file to use for processing"),
             QCoreApplication::translate("main", "file"));
-    parser.addOption(templateOption);
+    parser.addOption(batchOption);
 
     QCommandLineOption outputPrefixOption(
         QStringList() << "o" << "output",
@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
     // Run
     QString mode = parser.positionalArguments().at(0);
     if (mode == "run") {
-        if (!parser.isSet(templateOption) || !parser.isSet(inputFileOption)) {
-            err << "Error: Cannot run in 'run' mode without a template and input specified" << endl;
+        if (!parser.isSet(batchOption) || !parser.isSet(inputFileOption)) {
+            err << "Error: Cannot run in 'run' mode without a batch and input specified" << endl;
             err << parser.helpText() << endl;
             return -1;
         }
@@ -194,9 +194,9 @@ int main(int argc, char *argv[])
 
         warnings.clear();
 
-        QFile file(parser.value(templateOption));
+        QFile file(parser.value(batchOption));
         if (!file.open(QIODevice::ReadOnly)) {
-            err << QString("Could not open hobbits batch file '%1'").arg(parser.value(templateOption));
+            err << QString("Could not open hobbits batch file '%1'").arg(parser.value(batchOption));
             return -1;
         }
 

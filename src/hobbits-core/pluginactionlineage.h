@@ -31,8 +31,7 @@ public:
     QJsonObject serialize() const;
     static QSharedPointer<PluginActionLineage> deserialize(QJsonObject data);
 
-    QSharedPointer<const PluginAction> containerSourceAnalyzer() const;
-    QSharedPointer<const PluginAction> containerSourceOperator() const;
+    QList<QSharedPointer<const PluginAction>> outputOperators() const;
 
 private:
     QSharedPointer<const PluginAction> m_pluginAction;

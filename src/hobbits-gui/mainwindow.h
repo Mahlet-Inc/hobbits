@@ -98,7 +98,7 @@ private slots:
                                   const std::function<void(QString, QJsonObject)> triggerAction,
                                   QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(),
                                   QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
-    void populateRecentTemplatesMenu(QString addition = QString(), QString removal = QString());
+    void populateRecentBatchesMenu(QString addition = QString(), QString removal = QString());
 
     void setupSplitViewMenu();
 

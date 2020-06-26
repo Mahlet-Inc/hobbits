@@ -82,29 +82,21 @@ QList<QList<QWeakPointer<const PluginActionLineage>>> PluginActionLineage::getOu
     return m_outputs;
 }
 
-QSharedPointer<const PluginAction> PluginActionLineage::containerSourceAnalyzer() const
+QList<QSharedPointer<const PluginAction>> PluginActionLineage::outputOperators() const
 {
-    for (auto input: m_inputs) {
-        if (input->getPluginAction()->getPluginType() == PluginAction::Analyzer) {
-            return input->getPluginAction();
+    QList<QSharedPointer<const PluginAction>> outputs;
+    for (auto outputGroup: getOutputs()){
+        if (outputGroup.size() < 1) {
+            continue;
+        }
+        auto output = outputGroup.at(0).toStrongRef();
+        if (output.isNull()) {
+            continue;
+        }
+        if (output->getPluginAction()->getPluginType() == PluginAction::Operator) {
+            outputs.append(output->getPluginAction());
         }
     }
 
-    return QSharedPointer<const PluginAction>();
-}
-
-QSharedPointer<const PluginAction> PluginActionLineage::containerSourceOperator() const
-{
-    QList<QSharedPointer<const PluginActionLineage>> inputs = getInputs();
-    while (!inputs.isEmpty()) {
-        auto input = inputs.takeFirst();
-        if (input->getPluginAction()->getPluginType() == PluginAction::Operator) {
-            return input->getPluginAction();
-        }
-        else if (input->getPluginAction()->getPluginType() == PluginAction::Analyzer) {
-            inputs.append(input->getInputs());
-        }
-    }
-
-    return QSharedPointer<const PluginAction>();
+    return outputs;
 }

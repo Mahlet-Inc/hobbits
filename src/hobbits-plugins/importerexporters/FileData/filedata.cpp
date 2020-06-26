@@ -1,5 +1,4 @@
 #include "filedata.h"
-#include "importbitswizard.h"
 #include "settingsmanager.h"
 #include "ui_filedata.h"
 #include <QFileDialog>

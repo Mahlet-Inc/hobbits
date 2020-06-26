@@ -115,11 +115,11 @@ Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
  - TCP Data: import bits by listening for TCP data on a specified port, or
    export bits to a TCP server at a specified address
 
-## Templates
+## Batches
 
 When a user develops a sequence of operations that they want to perform
-frequently, they can save it as a "Template" and perform it later with a single
-step. Templates can also be used to process bits on the command line with the
+frequently, they can save it as a "Batch" and perform it later with a single
+step. Batches can also be used to process bits on the command line with the
 hobbits-runner CLI.
 
 ## Technical Architecture

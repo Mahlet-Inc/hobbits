@@ -51,7 +51,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
 
     // More menu initialization
-    populateRecentTemplatesMenu();
+    populateRecentBatchesMenu();
 
     // Configure Bit Container View
     ui->tv_bitContainers->setModel(m_bitContainerManager->getTreeModel().data());
@@ -591,26 +591,20 @@ void MainWindow::setCurrentBitContainer()
     currBitContainerChanged();
 
     if (!currContainer().isNull()) {
-        // Set the last analyzer plugin settings used on this container
-        if (!currContainer()->getActionLineage().isNull()) {
-            auto source = currContainer()->getActionLineage()->containerSourceAnalyzer();
-            if (!source.isNull()) {
-                auto analyzer = m_pluginManager->getAnalyzer(source->getPluginName());
-                if (!analyzer.isNull()) {
-                    QJsonObject pluginState = source->getPluginState();
-                    analyzer->setPluginStateInUi(pluginState);
-                }
-            }
-        }
-
-        // Set the last operator plugin settings used on this container
+        // Set the operator plugin settings used on this container
         if (!currContainer()->getChildUuids().isEmpty()) {
-            auto source = currContainer()->getActionLineage()->containerSourceOperator();
-            if (!source.isNull()) {
-                auto op = m_pluginManager->getOperator(source->getPluginName());
+            QSet<QString> alreadySet;
+            auto outputs = currContainer()->getActionLineage()->outputOperators();
+            for (int i = outputs.size() - 1; i >= 0; i--) {
+                auto output = outputs.at(i);
+                if (alreadySet.contains(output->getPluginName())) {
+                    continue;
+                }
+                auto op = m_pluginManager->getOperator(output->getPluginName());
                 if (!op.isNull()) {
-                    QJsonObject pluginState = source->getPluginState();
+                    QJsonObject pluginState = output->getPluginState();
                     op->setPluginStateInUi(pluginState);
+                    alreadySet.insert(output->getPluginName());
                 }
             }
         }
@@ -952,6 +946,7 @@ void MainWindow::applyBatchFile(QString fileName)
         }
     }
 
+    populateRecentBatchesMenu(fileName);
     m_pluginActionManager->runBatch(batch, inputs);
 }
 
@@ -1014,9 +1009,9 @@ void MainWindow::on_actionPreferences_triggered()
     dialog.exec();
 }
 
-void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
+void MainWindow::populateRecentBatchesMenu(QString addition, QString removal)
 {
-    QString key = "recently_used_templates";
+    QString key = "recently_used_batches";
 
     QStringList recentlyUsed;
     QVariant currentSetting = SettingsManager::getInstance().getPrivateSetting(key);
@@ -1038,11 +1033,11 @@ void MainWindow::populateRecentTemplatesMenu(QString addition, QString removal)
     SettingsManager::getInstance().setPrivateSetting(key, recentlyUsed);
 
     ui->menuApply_Recent_Batch->clear();
-    for (QString templateFile : recentlyUsed) {
+    for (QString batchFile : recentlyUsed) {
         ui->menuApply_Recent_Batch->addAction(
-                templateFile,
-                [this, templateFile]() {
-            this->applyBatchFile(templateFile);
+                batchFile,
+                [this, batchFile]() {
+            this->applyBatchFile(batchFile);
         });
     }
 
