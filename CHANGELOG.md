@@ -1,3 +1,11 @@
+# [0.33.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.32.1...v0.33.0) (2020-06-26)
+
+
+### Features
+
+* add windows bat file for wizard installation for [#49](https://github.com/Mahlet-Inc/hobbits/issues/49) [#50](https://github.com/Mahlet-Inc/hobbits/issues/50) ([199570f](https://github.com/Mahlet-Inc/hobbits/commit/199570f99b9adc1afa87c4e0692b1826a085a465))
+* redesigned plugin action management, replacing "templates" with "batches"; resolves [#15](https://github.com/Mahlet-Inc/hobbits/issues/15) ([#51](https://github.com/Mahlet-Inc/hobbits/issues/51)) ([78da500](https://github.com/Mahlet-Inc/hobbits/commit/78da500359d2405d2a6f95fc5c7d4a7da7e2246c))
+
 ## [0.32.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.32.0...v0.32.1) (2020-06-11)
 
 
