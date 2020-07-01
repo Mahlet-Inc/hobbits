@@ -1,3 +1,13 @@
+# [0.34.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.33.0...v0.34.0) (2020-07-01)
+
+
+### Features
+
+* add a "delete all containers" action ([56b77f4](https://github.com/Mahlet-Inc/hobbits/commit/56b77f47d33f5b163df1b6f77ddc6ad6ca9c7202))
+* add deinterleaving to the take skip plugin ([f04f6a1](https://github.com/Mahlet-Inc/hobbits/commit/f04f6a1c9874bc7466d900d57bc14e3c0fcf83c5))
+* add repeats and state saving to hex string import manual mode ([6d2ae1f](https://github.com/Mahlet-Inc/hobbits/commit/6d2ae1f7a967056f0b4add58c637f63a9a0ff1ac))
+* save window dock state and size between runs ([a90fe45](https://github.com/Mahlet-Inc/hobbits/commit/a90fe450efea072fb570b8d919f357524854f256))
+
 # [0.33.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.32.1...v0.33.0) (2020-06-26)
 
 
