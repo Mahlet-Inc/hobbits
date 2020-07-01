@@ -22,6 +22,7 @@ public:
     QSharedPointer<QItemSelectionModel> getCurrSelectionModel();
 
     void deleteCurrentContainer();
+    void deleteAllContainers();
 
 private slots:
     void manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);

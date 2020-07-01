@@ -175,6 +175,14 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
     }
 }
 
+
+void BitContainerTreeModel::removeAllContainers()
+{
+    beginRemoveRows(QModelIndex(), 0, rowCount()-1);
+    m_containerMap.clear();
+    endRemoveRows();
+}
+
 QSharedPointer<BitContainer> BitContainerTreeModel::getContainer(const QModelIndex &index) const
 {
     if (!index.isValid()) {

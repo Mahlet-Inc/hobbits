@@ -18,6 +18,8 @@
 #include "settingsmanager.h"
 #include "batchcreationdialog.h"
 
+const int MAINWINDOW_STATE_VERSION = 1;
+
 MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -37,6 +39,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     }
     resize(SettingsManager::getInstance().getPrivateSetting(SettingsData::WINDOW_SIZE_KEY).toSize());
     move(SettingsManager::getInstance().getPrivateSetting(SettingsData::WINDOW_POSITION_KEY).toPoint());
+    restoreState(SettingsManager::getInstance().getPrivateSetting(SettingsData::WINDOW_STATE_KEY).toByteArray(), MAINWINDOW_STATE_VERSION);
 
     // Populate View Menu
     ui->menu_View->addAction(ui->dock_bitContainerSelect->toggleViewAction());
@@ -69,6 +72,19 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
             &QPushButton::pressed,
             this,
             &MainWindow::deleteCurrentBitcontainer);
+
+    QMenu *containersMenu = new QMenu(this);
+    containersMenu->addAction(tr("Remove Current Bit Container..."), [this]() {
+        this->deleteCurrentBitcontainer();
+    });
+    containersMenu->addAction(tr("Remove All Bit Containers..."), [this]() {
+        this->deleteAllBitContainers();
+    });
+    ui->tb_containersMenu->setMenu(containersMenu);
+    ui->tb_containersMenu->setPopupMode(QToolButton::InstantPopup);
+
+    connect(ui->tb_containersMenu, &QPushButton::pressed, [this]() {
+    });
 
     // Configure Plugin Action Management
     connect(
@@ -172,6 +188,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     SettingsManager::getInstance().setPrivateSetting(SettingsData::WINDOW_SIZE_KEY, size());
     SettingsManager::getInstance().setPrivateSetting(SettingsData::WINDOW_POSITION_KEY, pos());
+    SettingsManager::getInstance().setPrivateSetting(SettingsData::WINDOW_STATE_KEY, saveState(MAINWINDOW_STATE_VERSION));
 
     QStringList sizesAsStrings;
     for (int splitSize : m_displayTabsSplitter->sizes()) {
@@ -626,8 +643,23 @@ void MainWindow::deleteCurrentBitcontainer()
 
         ui->tb_removeBitContainer->setEnabled(false);
         m_bitContainerManager->deleteCurrentContainer();
-        //activateBitContainer();
     }
+}
+
+void MainWindow::deleteAllBitContainers()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(
+            this,
+            "Delete Bits Confirmation",
+            QString("Are you sure you want to delete all bit containers?"),
+            QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) {
+        return;
+    }
+
+    ui->tb_removeBitContainer->setEnabled(false);
+    m_bitContainerManager->deleteAllContainers();
 }
 
 void MainWindow::requestAnalyzerRun(QString pluginName, QJsonObject pluginState)

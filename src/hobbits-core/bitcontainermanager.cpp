@@ -62,3 +62,8 @@ void BitContainerManager::deleteCurrentContainer()
     }
     m_bitContainerTreeModel->removeContainer(index);
 }
+
+void BitContainerManager::deleteAllContainers()
+{
+    m_bitContainerTreeModel->removeAllContainers();
+}
