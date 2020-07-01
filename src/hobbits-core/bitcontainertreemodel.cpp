@@ -136,6 +136,8 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     endInsertRows();
     connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
+    emit containerAdded(bitContainer);
+
     return this->index(row, 0, parentIndex);
 }
 

@@ -12,6 +12,23 @@ TakeSkipOperator::TakeSkipOperator() :
     m_stateHelper->addLineEditStringParameter("take_skip_string", [this](){return ui->le_takeSkip;});
     m_stateHelper->addCheckBoxBoolParameter("interleaved", [this](){return ui->cb_interleaved;}, true);
     m_stateHelper->addCheckBoxBoolParameter("frame_based", [this](){return ui->cb_frameBased;}, true);
+    m_stateHelper->addSpinBoxIntParameter("deinterleave_channels", [this](){return ui->sb_deinterleave;}, true);
+}
+
+void TakeSkipOperator::interleaveSelectionChanged()
+{
+    ui->cb_deinterleaved->setEnabled(!ui->cb_interleaved->isChecked());
+    ui->cb_interleaved->setEnabled(!ui->cb_deinterleaved->isChecked());
+    ui->sb_deinterleave->setVisible(ui->cb_deinterleaved->isChecked());
+
+    if (ui->cb_deinterleaved->isChecked()) {
+        ui->sb_deinterleave->setRange(2, 100);
+        ui->sb_deinterleave->setValue(2);
+    }
+    else {
+        ui->sb_deinterleave->setRange(1, 1);
+        ui->sb_deinterleave->setValue(1);
+    }
 }
 
 QString TakeSkipOperator::getName()
@@ -130,11 +147,20 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         outputBufferSize = LLONG_MAX;
     }
 
-    QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputBufferSize));
+    int outputCount = 1;
+    if (recallablePluginState.contains("deinterleave_channels") && recallablePluginState.value("deinterleave_channels").toInt() > 1) {
+        outputCount = recallablePluginState.value("deinterleave_channels").toInt();
+    }
+    QList<OutputHandle> outputs;
+    QHash<QSharedPointer<BitArray>, QVector<Range>> outputFrames;
+    for (int i = 0; i < outputCount; i++) {
+        OutputHandle handle;
+        handle.idx = 0;
+        handle.bits = QSharedPointer<BitArray>(new BitArray(outputBufferSize));
+        outputs.append(handle);
+    }
 
-    qint64 outputIdx = 0;
     int lastPercent = 0;
-    QVector<Range> outputFrames;
 
     for (int currFrame = 0; currFrame < frameCount; currFrame++) {
         qint64 bitsProcessed = 0;
@@ -143,23 +169,32 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
             inputs[i].second = 0;
         }
 
-        qint64 frameStart = outputIdx;
-
         while (true) {
             for (int i = 0; i < inputs.size(); i++) {
-                Frame inputBits = inputs.at(i).first.at(currFrame);
-                qint64 inputIdx = inputs.at(i).second;
-                qint64 start = inputIdx;
-                for (QSharedPointer<BitOp> op : ops) {
-                    op->apply(inputBits, outputBits, inputIdx, outputIdx);
-                }
-                if (inputIdx >= inputBits.size()) {
-                    // We've reached the end of this input, so we should finish
-                    reachedEnd = true;
-                }
+                for (int k = 0; k < outputs.size(); k++) {
+                    auto outputBits = outputs.at(k).bits;
+                    qint64 outputIdx = outputs.at(k).idx;
+                    qint64 outStart = outputIdx;
 
-                bitsProcessed += inputIdx - start;
-                inputs[i].second = inputIdx;
+                    Frame inputBits = inputs.at(i).first.at(currFrame);
+                    qint64 inputIdx = inputs.at(i).second;
+                    qint64 start = inputIdx;
+                    for (QSharedPointer<BitOp> op : ops) {
+                        op->apply(inputBits, outputBits, inputIdx, outputIdx);
+                    }
+                    if (inputIdx >= inputBits.size()) {
+                        // We've reached the end of this input, so we should finish
+                        reachedEnd = true;
+                    }
+
+                    if (outputIdx > outStart) {
+                        outputs[k].frames.append(Range(outStart, outputIdx - 1));
+                        outputs[k].idx = outputIdx;
+                    }
+
+                    bitsProcessed += inputIdx - start;
+                    inputs[i].second = inputIdx;
+                }
             }
             if (reachedEnd) {
                 break;
@@ -179,24 +214,35 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                 return QSharedPointer<const OperatorResult>(cancelled);
             }
         }
-        outputFrames.append(Range(frameStart, outputIdx - 1));
     }
 
-    outputBits->resize(outputIdx);
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBits(outputBits);
-    if (frameBased) {
-        bitContainer->bitInfo()->setFrames(outputFrames);
+    QList<QSharedPointer<BitContainer>> outputContainers;
+    int outputNum = 0;
+    for (auto output: outputs) {
+        output.bits->resize(output.idx);
+        auto outputContainer = QSharedPointer<BitContainer>(new BitContainer());
+        outputContainers.append(outputContainer);
+        outputContainer->setBits(output.bits);
+        if (frameBased) {
+            outputContainer->bitInfo()->setFrames(output.frames);
+        }
+        if (inputContainers.size() > 1) {
+            outputContainer->setName(QString("%1 Interleave").arg(recallablePluginState.value("take_skip_string").toString()));
+        }
+        else if (outputs.size() > 1) {
+            outputContainer->setName(QString("%1 Deinterleave[%2] <- %3")
+                                     .arg(recallablePluginState.value("take_skip_string").toString())
+                                     .arg(outputNum)
+                                     .arg(inputContainers.at(0)->name()));
+        }
+        else {
+            outputContainer->setName(QString("%1 <- %2")
+                                    .arg(recallablePluginState.value("take_skip_string").toString())
+                                    .arg(inputContainers.at(0)->name()));
+        }
+        outputNum++;
     }
-    if (inputContainers.size() > 1) {
-        bitContainer->setName(QString("%1 Interleave").arg(recallablePluginState.value("take_skip_string").toString()));
-    }
-    else {
-        bitContainer->setName(QString("%1 <- %2")
-                                .arg(recallablePluginState.value("take_skip_string").toString())
-                                .arg(inputContainers.at(0)->name()));
-    }
-    return OperatorResult::result({ bitContainer }, recallablePluginState);
+    return OperatorResult::result(outputContainers, recallablePluginState);
 }
 
 void TakeSkipOperator::previewBits(QSharedPointer<BitContainerPreview> container)
@@ -221,6 +267,10 @@ void TakeSkipOperator::applyToWidget(QWidget *widget)
     ui->setupUi(widget);
     connect(ui->btnInfo, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(ui->le_takeSkip, SIGNAL(returnPressed()), this, SLOT(requestRun()));
+
+    connect(ui->cb_interleaved, SIGNAL(toggled(bool)), this, SLOT(interleaveSelectionChanged()));
+    connect(ui->cb_deinterleaved, SIGNAL(toggled(bool)), this, SLOT(interleaveSelectionChanged()));
+    ui->sb_deinterleave->setVisible(false);
 }
 
 void TakeSkipOperator::showHelp()

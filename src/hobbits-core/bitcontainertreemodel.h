@@ -37,6 +37,8 @@ public:
     QSharedPointer<BitContainer> getContainerById(QUuid id) const;
 
 signals:
+    void containerAdded(QSharedPointer<BitContainer> bitContainer);
+
 public slots:
     void updateAll();
 

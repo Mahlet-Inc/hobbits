@@ -29,6 +29,7 @@ private slots:
 
 signals:
     void currSelectionChanged(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
+    void containerAdded(QSharedPointer<BitContainer>);
 
 private:
     QSharedPointer<BitContainerTreeModel> m_bitContainerTreeModel;

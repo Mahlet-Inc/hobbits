@@ -18,6 +18,13 @@ class TakeSkipOperator : public QObject, OperatorInterface
 public:
     TakeSkipOperator();
 
+    class OutputHandle {
+    public:
+        qint64 idx;
+        QSharedPointer<BitArray> bits;
+        QVector<Range> frames;
+    };
+
     QString getName() override;
     OperatorInterface* createDefaultOperator() override;
     void applyToWidget(QWidget *widget) override;
@@ -38,6 +45,7 @@ public:
 private slots:
     void showHelp();
     void requestRun();
+    void interleaveSelectionChanged();
 
 private:
     Ui::TakeSkipOperator *ui;
