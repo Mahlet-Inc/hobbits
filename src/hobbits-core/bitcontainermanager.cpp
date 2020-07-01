@@ -11,6 +11,12 @@ BitContainerManager::BitContainerManager(QObject *parent) :
             SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
             this,
             SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)));
+
+    connect(
+                m_bitContainerTreeModel.data(),
+                SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
+                this,
+                SIGNAL(containerAdded(QSharedPointer<BitContainer>)));
 }
 
 void BitContainerManager::manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -61,4 +67,9 @@ void BitContainerManager::deleteCurrentContainer()
         return;
     }
     m_bitContainerTreeModel->removeContainer(index);
+}
+
+void BitContainerManager::deleteAllContainers()
+{
+    m_bitContainerTreeModel->removeAllContainers();
 }

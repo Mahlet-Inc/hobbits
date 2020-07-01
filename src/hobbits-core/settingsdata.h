@@ -42,6 +42,7 @@ public:
     static const QString HIGHLIGHT_5_COLOR_KEY;
     static const QString WINDOW_SIZE_KEY;
     static const QString WINDOW_POSITION_KEY;
+    static const QString WINDOW_STATE_KEY;
     static const QString PLUGIN_PATH_KEY;
     static const QString PLUGIN_BLACKLIST_KEY;
     static const QString OPERATOR_DISPLAY_ORDER_KEY;

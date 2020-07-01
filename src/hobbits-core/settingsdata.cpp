@@ -21,6 +21,7 @@ const QString SettingsData::ANALYZER_DISPLAY_ORDER_KEY = "Analyzer Display Order
 const QString SettingsData::DISPLAY_DISPLAY_ORDER_KEY = "Display Display Order";
 const QString SettingsData::WINDOW_SIZE_KEY = "window_size";
 const QString SettingsData::WINDOW_POSITION_KEY = "window_position";
+const QString SettingsData::WINDOW_STATE_KEY = "window_state";
 const QString SettingsData::LAST_BATCH_PATH_KEY = "last_batch_path";
 const QString SettingsData::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_path";
 const QString SettingsData::LAST_CONTAINER_PATH_KEY = "last_container_path";

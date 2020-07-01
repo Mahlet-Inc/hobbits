@@ -30,12 +30,15 @@ public:
 
     QModelIndex addContainer(QSharedPointer<BitContainer> bitContainer);
     void removeContainer(const QModelIndex &index);
+    void removeAllContainers();
     QSharedPointer<BitContainer> getContainer(const QModelIndex &index) const;
 
     QList<QSharedPointer<BitContainer>> getContainers() const;
     QSharedPointer<BitContainer> getContainerById(QUuid id) const;
 
 signals:
+    void containerAdded(QSharedPointer<BitContainer> bitContainer);
+
 public slots:
     void updateAll();
 

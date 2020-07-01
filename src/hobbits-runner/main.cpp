@@ -174,11 +174,8 @@ int main(int argc, char *argv[])
         int outputNumber = 1;
         QObject::connect(
                 bitManager.data(),
-                &BitContainerManager::currSelectionChanged,
-                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected) {
-            Q_UNUSED(selected)
-            Q_UNUSED(deselected)
-            auto container = bitManager->getCurrentContainer();
+                &BitContainerManager::containerAdded,
+                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> container) {
             QFile output(QString("%1%2").arg(outputPrefix).arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
             container->bits()->writeTo(&output);

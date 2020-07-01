@@ -59,6 +59,7 @@ public slots:
     void currBitContainerChanged();
     void setCurrentBitContainer();
     void deleteCurrentBitcontainer();
+    void deleteAllBitContainers();
 
     void setHoverBit(bool hovering, int bitOffset, int frameOffset);
 

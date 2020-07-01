@@ -72,6 +72,26 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="cb_deinterleaved">
+       <property name="text">
+        <string>Deinterleave</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="sb_deinterleave">
+       <property name="suffix">
+        <string> channels</string>
+       </property>
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="cb_interleaved">
        <property name="text">
         <string>Interleave</string>

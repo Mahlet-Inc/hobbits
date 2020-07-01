@@ -38,6 +38,14 @@ QString HexString::getImportLabelForState(QJsonObject pluginState)
         QString fileName = pluginState.value("filename").toString();
         return QString("Import hex from %1").arg(fileName);
     }
+    else if (pluginState.contains("hex_string")) {
+        QString hexString = pluginState.value("hex_string").toString();
+        if (hexString.size() > 16) {
+            hexString.truncate(12);
+            hexString += "...";
+        }
+        return QString("Import hex '%1'").arg(hexString);
+    }
     return "";
 }
 
@@ -63,10 +71,28 @@ QSharedPointer<ImportResult> HexString::importBits(QJsonObject pluginState)
             return ImportResult::result(importer->getContainer(), pluginState);
         }
     }
+    else if (pluginState.contains("hex_string")) {
+        QString hexString = pluginState.value("hex_string").toString();
+        int repeats = 1;
+        if (pluginState.contains("repeats")) {
+            repeats = pluginState.value("repeats").toInt();
+        }
+        importer->importFromHexString(hexString, repeats);
+        if (importer->getContainer().isNull()) {
+            return ImportResult::error(QString("Failed to import hex string data from: '%1'").arg(hexString));
+        }
+        else {
+            return ImportResult::result(importer->getContainer(), pluginState);
+        }
+    }
 
     if (importer->exec()) {
         if (!importer->getFileName().isEmpty()) {
             pluginState.insert("filename", importer->getFileName());
+        }
+        else if (!importer->getHexString().isEmpty()) {
+            pluginState.insert("hex_string", importer->getHexString());
+            pluginState.insert("repeats", importer->getRepeats());
         }
         return ImportResult::result(importer->getContainer(), pluginState);
     }

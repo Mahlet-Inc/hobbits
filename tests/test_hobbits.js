@@ -36,9 +36,10 @@ async function runTests() {
             if (inputMatches.length < 1) {
                 throw Error(`Failed to find input files matching pattern ${inputGlob}!`)
             }
-            let output = join(testDir, "output.bits")
-            if (!existsSync(output)) {
-                throw Error(`Failed to find output.bits!`)
+            let outputGlob = join(testDir, "output.bits*")
+            let outputMatches = glob.sync(outputGlob, {nonull: false})
+            if (outputMatches.length < 1) {
+                throw Error(`Failed to find output files matching pattern ${outputGlob}!`)
             }
             let testOutputPrefix = join(testDir, "testrunoutput.")
             let testOutputGlob = testOutputPrefix+"*"
@@ -72,19 +73,39 @@ async function runTests() {
             if (testOutputMatches.length < 1) {
                 throw Error(`Failed to find an output file matching ${testOutputGlob}`)
             }
-            // we only care about the last output
-            let testOutput = testOutputMatches[0];
+            let testOutputs = {}
+            let max = -1;
+            let lastOutput = testOutputMatches[0]
             for (let outputFile of testOutputMatches) {
-                let currVal = parseInt(testOutput.split(".")[1]);
                 let thisVal = parseInt(outputFile.split(".")[1]);
-                if (thisVal > currVal) {
-                    testOutput = outputFile;
+                if (thisVal > max) {
+                    lastOutput = outputFile;
+                }
+                testOutputs[thisVal] = outputFile
+            }
+
+    
+            let match = false
+            let outputIndexedGlob = join(testDir, "output.bits.*")
+            let outputIndexedMatches = glob.sync(outputIndexedGlob, {nonull: false})
+            if (outputIndexedMatches.length < 1) {
+                match = await new Promise((resolve, reject) => {
+                    filecompare(outputMatches[0], lastOutput, isEqual => resolve(isEqual))
+                })
+            }
+            else {
+                for (let outputFile of outputIndexedMatches) {
+                    let key = parseInt(outputFile.split(".")[2]);
+                    match = await new Promise((resolve, reject) => {
+                        filecompare(outputFile, testOutputs[key], isEqual => resolve(isEqual))
+                    })
+                    if (!match) {
+                        break;
+                    }
                 }
             }
-    
-            let match = await new Promise((resolve, reject) => {
-                filecompare(output, testOutput, isEqual => resolve(isEqual))
-            })
+            
+            
     
             if (match) {
                 successes++;

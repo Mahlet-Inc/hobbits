@@ -122,6 +122,9 @@
     <layout class="QVBoxLayout" name="verticalLayout_10">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QToolButton" name="tb_removeBitContainer">
          <property name="enabled">
@@ -133,6 +136,19 @@
          <property name="icon">
           <iconset resource="icons.qrc">
            <normaloff>:/hobbitsgui/images/icons/trash.png</normaloff>:/hobbitsgui/images/icons/trash.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="tb_containersMenu">
+         <property name="minimumSize">
+          <size>
+           <width>28</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>

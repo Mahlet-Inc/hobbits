@@ -136,6 +136,8 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     endInsertRows();
     connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
+    emit containerAdded(bitContainer);
+
     return this->index(row, 0, parentIndex);
 }
 
@@ -173,6 +175,14 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
         beginInsertRows(QModelIndex(), 0, rowCount() - 1);
         endInsertRows();
     }
+}
+
+
+void BitContainerTreeModel::removeAllContainers()
+{
+    beginRemoveRows(QModelIndex(), 0, rowCount()-1);
+    m_containerMap.clear();
+    endRemoveRows();
 }
 
 QSharedPointer<BitContainer> BitContainerTreeModel::getContainer(const QModelIndex &index) const
