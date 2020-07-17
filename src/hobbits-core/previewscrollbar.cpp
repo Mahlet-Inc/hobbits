@@ -198,8 +198,9 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     if (container->bitInfo()->maxFrameWidth() < 8 || container->frames().size() < 1) {
         return QImage();
     }
+    auto frames = container->frames();
     int width = int(container->bitInfo()->maxFrameWidth() / 8);
-    int height = qMin(10000, container->frames().size());
+    int height = qMin(10000, frames.size());
     QImage image(width, height, QImage::Format_ARGB32);
     image.fill(qRgb(50, 50, 90));
     QPainter imagePainter(&image);
@@ -209,15 +210,15 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     int hue = c.hue();
     int saturation = c.saturation();
     int chunkHeight = qMax(50, qMin(10000, 5000000/width));
-    int chunkSize = qMin(container->frames().size(), chunkHeight);
-    double chunkHeightRatio = double(chunkSize)/double(container->frames().size());
+    int chunkSize = qMin(frames.size(), chunkHeight);
+    double chunkHeightRatio = double(chunkSize)/double(frames.size());
     double targetChunkHeight = chunkHeightRatio * height;
     QImage bufferChunk(width, chunkSize, QImage::Format_ARGB32);
-    for (int frame = 0; frame < container->frames().size(); frame += chunkSize) {
+    for (int frame = 0; frame < frames.size(); frame += chunkSize) {
         bufferChunk.fill(qRgb(0, 0, 0));
         int offset = 0;
-        for (; offset < chunkSize && offset + frame < container->frames().size(); offset++) {
-            Frame f = container->frames().at(offset + frame);
+        for (; offset < chunkSize && offset + frame < frames.size(); offset++) {
+            Frame f = frames.at(offset + frame);
             qint64 byteOffset = f.start()/8;
             for (int i = 0; i < f.size()/8 && byteOffset + i < container->bits()->sizeInBytes(); i++) {
                 char byteValue = container->bits()->byteAt(byteOffset + i);
