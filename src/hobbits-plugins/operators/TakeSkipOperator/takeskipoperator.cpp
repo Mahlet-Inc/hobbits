@@ -270,7 +270,7 @@ void TakeSkipOperator::applyToWidget(QWidget *widget)
 
     connect(ui->cb_interleaved, SIGNAL(toggled(bool)), this, SLOT(interleaveSelectionChanged()));
     connect(ui->cb_deinterleaved, SIGNAL(toggled(bool)), this, SLOT(interleaveSelectionChanged()));
-    ui->sb_deinterleave->setVisible(false);
+    interleaveSelectionChanged();
 }
 
 void TakeSkipOperator::showHelp()
