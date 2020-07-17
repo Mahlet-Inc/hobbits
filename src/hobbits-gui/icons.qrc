@@ -3,5 +3,6 @@
         <file>images/icons/trash.png</file>
         <file>images/icons/HobbitsRingSmall.png</file>
         <file>images/icons/mahlet.bits</file>
+        <file>images/icons/menu.png</file>
     </qresource>
 </RCC>
