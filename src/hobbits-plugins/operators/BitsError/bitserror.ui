@@ -50,7 +50,7 @@
         <string>Periodic</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -63,6 +63,9 @@
        </property>
        <property name="text">
         <string>Gaussian</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -97,6 +100,12 @@
      </item>
      <item>
       <widget class="QLineEdit" name="coeffInput">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>42</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>11</pointsize>
@@ -121,6 +130,12 @@
      </item>
      <item>
       <widget class="QSpinBox" name="expInput">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>42</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>11</pointsize>
@@ -131,6 +146,9 @@
        </property>
        <property name="maximum">
         <number>-1</number>
+       </property>
+       <property name="value">
+        <number>-4</number>
        </property>
       </widget>
      </item>
