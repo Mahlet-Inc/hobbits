@@ -1,3 +1,12 @@
+## [0.34.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.34.0...v0.34.1) (2020-07-17)
+
+
+### Bug Fixes
+
+* fix bugs and improve performance in Bit Error plugin ([e988e7c](https://github.com/Mahlet-Inc/hobbits/commit/e988e7c36aa4e38093ee2624939aa82e5f516293))
+* improve stability of preview scrollbar a little bit ([7783a67](https://github.com/Mahlet-Inc/hobbits/commit/7783a67fe4f53a63b651185bc9a15ef9d50940e6))
+* properly initialize de/interleave controls in Take Skip plugin ([50a295a](https://github.com/Mahlet-Inc/hobbits/commit/50a295a9b6093a9ced52c69be8307145f4c1af60))
+
 # [0.34.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.33.0...v0.34.0) (2020-07-01)
 
 
