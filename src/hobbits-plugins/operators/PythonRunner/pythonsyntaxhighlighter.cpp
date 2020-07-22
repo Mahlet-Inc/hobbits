@@ -41,15 +41,15 @@ PythonSyntaxHighlighter::PythonSyntaxHighlighter(QTextDocument *parent) :
 
 void PythonSyntaxHighlighter::initializeRules()
 {
-    foreach(QString currKeyword, keywords)
+    for (QString currKeyword : keywords)
     {
         rules.append(HighlightingRule(QString("\\b%1\\b").arg(currKeyword), 0, basicStyles.value("keyword")));
     }
-    foreach(QString currOperator, operators)
+    for (QString currOperator : operators)
     {
         rules.append(HighlightingRule(QString("%1").arg(currOperator), 0, basicStyles.value("operator")));
     }
-    foreach(QString currBrace, braces)
+    for (QString currBrace : braces)
     {
         rules.append(HighlightingRule(QString("%1").arg(currBrace), 0, basicStyles.value("brace")));
     }
@@ -87,7 +87,7 @@ void PythonSyntaxHighlighter::initializeRules()
 
 void PythonSyntaxHighlighter::highlightBlock(const QString &text)
 {
-    foreach(HighlightingRule currRule, rules)
+    for (HighlightingRule currRule : rules)
     {
         int idx = currRule.pattern.indexIn(text, 0);
         while (idx >= 0) {

@@ -25,7 +25,7 @@ class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
     // this lets OperatorActor set the container's ID when necessary
     friend class OperatorActor;
 
-public slots:
+public Q_SLOTS:
     void setBits(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
     void setBits(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
     void setBits(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
@@ -83,7 +83,7 @@ private:
     QList<QUuid> m_parents;
     QMutex m_mutex;
 
-signals:
+Q_SIGNALS:
     void changed();
 };
 

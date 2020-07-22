@@ -23,7 +23,7 @@ public:
     void setMetadata(QString key, QVariant value);
     void clearHighlightCategory(QString category);
 
-signals:
+Q_SIGNALS:
     void changed();
 
 private:

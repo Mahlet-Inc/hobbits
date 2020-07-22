@@ -21,7 +21,7 @@ public:
     void setProgress(int completed, int required);
     void setProgress(double completed, double required);
 
-signals:
+Q_SIGNALS:
     void progressPercentChanged(int);
 
 protected:

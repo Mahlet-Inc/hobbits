@@ -10,6 +10,7 @@
 #include <QStandardPaths>
 
 #include "pythonsyntaxhighlighter.h"
+#include "embeddedpythoninterpreter.h"
 
 #include "settingsmanager.h"
 
@@ -152,19 +153,6 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
         return nullResult;
     }
 
-    QFile inputBitFile(dir.filePath("input_bit_container.json"));
-    QFile outputBitFile(dir.filePath("output_bit_container.json"));
-    if (!inputBitFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return nullResult;
-    }
-    inputBitFile.write(inputContainers.at(0)->serializeJson().toJson());
-    inputBitFile.close();
-
-    QString coreScriptName = dir.filePath("core_script.py");
-    QFile::copy(":/pythonrunner/scripts/runner.py", coreScriptName);
-    QFile coreScriptFile(coreScriptName);
-    coreScriptFile.setPermissions(QFile::ReadOwner | QFile::ExeOwner | QFile::WriteOwner);
-
     QFile userScriptFile(dir.filePath("user_script.py"));
     if (!userScriptFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return nullResult;
@@ -172,74 +160,26 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     userScriptFile.write(recallablePluginState.value("script").toString().toLatin1());
     userScriptFile.close();
 
-    QFile errorFile(dir.filePath("error.log"));
-    QFile stdoutFile(dir.filePath("stdout.log"));
+    auto interpreter = QSharedPointer<EmbeddedPythonInterpreter>(new EmbeddedPythonInterpreter());
 
-    QStringList args = {coreScriptFile.fileName(), inputBitFile.fileName(), outputBitFile.fileName()};
-    QProcess pythonProcess;
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QProcessEnvironment envUpdate;
-    envUpdate.insert("PATH", env.value("PATH"));
-    pythonProcess.setProcessEnvironment(envUpdate);
-    pythonProcess.setWorkingDirectory(dir.path());
-    pythonProcess.setStandardErrorFile(errorFile.fileName());
-    pythonProcess.setStandardOutputFile(stdoutFile.fileName());
-    pythonProcess.start(pythonPath, args);
+    auto outputBits = QSharedPointer<BitArray>(new BitArray());
+    interpreter->runScript(userScriptFile.fileName(), inputContainers.at(0)->bits(), outputBits);
 
-    bool hasCancelled = false;
-    while (!pythonProcess.waitForFinished(250)) {
-        if (progressTracker->getCancelled() && !hasCancelled) {
-            QFile abortFile(dir.filePath("abort"));
-            abortFile.open(QIODevice::WriteOnly);
-            abortFile.close();
-            hasCancelled = true;
-        }
-        QFile progressFile(dir.filePath("progress"));
-        if (progressFile.exists()) {
-            if (progressFile.open(QIODevice::ReadOnly)) {
-                QJsonDocument progressData = QJsonDocument::fromJson((progressFile.readAll()));
-                QJsonObject progressJson = progressData.object();
-                if (progressJson.contains("progress") && progressJson.value("progress").isDouble()) {
-                    int progress = int(progressJson.value("progress").toDouble());
-                    progressTracker->setProgressPercent(progress);
-                }
-            }
+    QString output = interpreter->readErrors();
+    if (!output.isEmpty()) {
+        QMetaObject::invokeMethod(
+                this,
+                "updateOutputText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, "Python stderr:\n" + output + "\n\n"));
+        if (outputBits->sizeInBits() < 1) {
+            return OperatorResult::error("Errors encountered during execution");
         }
     }
 
-    if (errorFile.open(QIODevice::ReadOnly)) {
-        QString output = errorFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "Python stderr:\n" + output + "\n\n"));
-        }
-        errorFile.close();
-    }
-
-    if (stdoutFile.open(QIODevice::ReadOnly)) {
-        QString output = stdoutFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "Python stdout:\n" + output + "\n\n"));
-        }
-        stdoutFile.close();
-    }
-
-    if (!outputBitFile.open(QIODevice::ReadOnly)) {
-        return nullResult;
-    }
-    QJsonDocument outputData = QJsonDocument::fromJson((outputBitFile.readAll()));
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-
-    outputContainer->deserializeJson(outputData);
+    outputContainer->setBits(outputBits);
     outputContainer->setName(QString("python <- %1").arg(inputContainers.at(0)->name()));
-    outputBitFile.close();
 
     return OperatorResult::result({outputContainer}, recallablePluginState);
 }

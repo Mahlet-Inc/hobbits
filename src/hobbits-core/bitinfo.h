@@ -40,7 +40,7 @@ public:
     friend QDataStream& operator<<(QDataStream&, const BitInfo&);
     friend QDataStream& operator>>(QDataStream&, BitInfo&);
 
-signals:
+Q_SIGNALS:
     void changed();
 
 private:

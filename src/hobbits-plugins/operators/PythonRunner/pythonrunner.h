@@ -40,7 +40,7 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
-public slots:
+public Q_SLOTS:
     void openPythonPathDialog();
     void openHelpDialog();
 

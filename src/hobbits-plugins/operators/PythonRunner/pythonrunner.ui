@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>947</width>
-    <height>335</height>
+    <width>1577</width>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,13 +76,12 @@
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>
        <property name="plainText">
-        <string>def operate_on_bits(input_container, output_container, operator_handle):
-  output_container.set_length(input_container.length)
-  for i in range(0, input_container.length):
-    output_container.set_at(i, input_container.at(i))
-    if i % 256 == 0:
-      operator_handle.check_cancelled()
-      operator_handle.set_progress(i/input_container.length*100)</string>
+        <string>import hobbitsexecutioncontext as hx
+
+def process_bits():
+  hx.resize_out(hx.in_size())
+  for i in range(0, hx.in_size()):
+    hx.set_out(i, hx.in_at(i))</string>
        </property>
       </widget>
      </item>
