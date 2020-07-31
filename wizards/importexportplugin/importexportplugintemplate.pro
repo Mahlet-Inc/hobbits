@@ -45,6 +45,6 @@ unix:{
 }
 
 unix {
-    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
+    target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
     INSTALLS += target
 }

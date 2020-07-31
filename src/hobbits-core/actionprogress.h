@@ -13,9 +13,11 @@ class HOBBITSCORESHARED_EXPORT ActionProgress : public QObject
 public:
     ActionProgress(QObject *parent = nullptr);
 
+    bool getCancelled();
+
+public Q_SLOTS:
     void setProgressPercent(int progressPercent);
     void setCancelled(bool cancelled);
-    bool getCancelled();
 
     void setProgress(qint64 completed, qint64 required);
     void setProgress(int completed, int required);

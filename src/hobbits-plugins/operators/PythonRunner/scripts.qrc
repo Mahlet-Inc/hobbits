@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/pythonrunner">
-        <file>scripts/runner.py</file>
-    </qresource>
-</RCC>

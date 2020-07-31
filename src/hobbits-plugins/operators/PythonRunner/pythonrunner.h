@@ -5,11 +5,9 @@
 #include "operatorinterface.h"
 #include "pluginstatehelper.h"
 
-
 namespace Ui
 {
 class PythonRunner;
-
 }
 
 class PythonRunner : public QObject, OperatorInterface

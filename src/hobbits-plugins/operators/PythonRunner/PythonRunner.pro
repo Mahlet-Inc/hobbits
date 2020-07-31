@@ -16,9 +16,6 @@ DEFINES += PYTHONRUNNER_LIBRARY
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
 
-# For conflict with Python.h "slots" usage
-CONFIG += no_keywords
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -31,22 +28,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES +=         pythonrunner.cpp \
-    embeddedpythoninterpreter.cpp \
     pythonsyntaxhighlighter.cpp
 
 HEADERS +=         pythonrunner.h \
-    embeddedpythoninterpreter.h \
-    hobbitsexecutioncontext.h \
     pythonsyntaxhighlighter.h
 
 FORMS +=        pythonrunner.ui
 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-LIBS += -lpython3.7m
-
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+LIBS += -L$$OUT_PWD/../../../hobbits-python/ -lhobbits-python
+INCLUDEPATH += $$PWD/../../../hobbits-python
+DEPENDPATH += $$PWD/../../../hobbits-python
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
@@ -59,11 +55,10 @@ mac {
 }
 
 unix {
-    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/operators
+    target.path = $$(HOME)/.local/share/hobbits/plugins/operators
     INSTALLS += target
 }
 
-DISTFILES +=     
+DISTFILES +=
 
-RESOURCES += \
-    scripts.qrc
+RESOURCES +=
