@@ -117,7 +117,10 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     userScriptFile.close();
 
     auto outputBits = QSharedPointer<BitArray>(new BitArray());
-    auto watcher = HobbitsPython::getInstance().runProcessScript(userScriptFile.fileName(), inputContainers.at(0)->bits(), outputBits, progressTracker);
+    auto pyRequest = PythonRequest::create(userScriptFile.fileName())->setFunctionName("process_bits");
+    pyRequest->addArg(PythonArg::constBitArray(inputContainers.at(0)->bits()));
+    pyRequest->addArg(PythonArg::bitArray(outputBits));
+    auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, progressTracker);
     watcher->watcher()->future().waitForFinished();
     auto result = watcher->result();
 

@@ -5,19 +5,16 @@
 #include <python3.7m/Python.h>
 #include <python3.7m/structmember.h>
 
+#include "pythonrequest.h"
 #include "pythonresult.h"
 #include "actionprogress.h"
 #include "bitarray.h"
+#include "pythonarg.h"
 
 class PythonInterpreter
 {
 public:
-    static QSharedPointer<PythonResult> runProcessScript(
-            QString scriptPath,
-            QSharedPointer<const BitArray> inputBitArray,
-            QSharedPointer<BitArray> outputBitArray,
-            QSharedPointer<ActionProgress> progress);
-
+    static QSharedPointer<PythonResult> runProcessScript(QSharedPointer<PythonRequest> request);
 
 private:
     PythonInterpreter() {}
@@ -25,9 +22,7 @@ private:
     static PyObject* callFunction(PyObject* module, const char* name, PyObject* args = nullptr);
 
     static PyObject* hobbitsTypeWrapper(PyObject* hobbitsModule, const char* typeName, void *toWrap);
-    static PyObject* bitArray(PyObject* hobbitsModule, QSharedPointer<BitArray> bitArray);
-    static PyObject* immutableBitArray(PyObject* hobbitsModule, QSharedPointer<const BitArray> bitArray);
-    static PyObject* actionProgress(PyObject* hobbitsModule, QSharedPointer<ActionProgress> progress);
+    static PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg);
 
     static QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors = QStringList());
 };

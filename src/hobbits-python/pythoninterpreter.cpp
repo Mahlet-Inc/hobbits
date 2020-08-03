@@ -1,21 +1,26 @@
 #include "pythoninterpreter.h"
 #include <QTemporaryDir>
+#include <QMutex>
 
 #include "py_hobbits.h"
 
+static QMutex mutex;
 static bool hobbitsAppended;
-QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QString scriptPath, QSharedPointer<const BitArray> inputBitArray, QSharedPointer<BitArray> outputBitArray, QSharedPointer<ActionProgress> progress)
+QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<PythonRequest> request)
 {
+    QMutexLocker lock(&mutex);
+
     QTemporaryDir temp("HobbitsPythonXXXXXX");
 
     QFile stderrFile(temp.filePath("stderr.log"));
     QFile stdoutFile(temp.filePath("stdout.log"));
     QStringList errors;
 
-    QFile::copy(scriptPath, temp.filePath("thescript.py"));
+    QFile::copy(request->scriptName(), temp.filePath("thescript.py"));
 
     if (!hobbitsAppended) {
         if (PyImport_AppendInittab("hobbits", &PyInit_hobbits) == -1) {
+            errors.append("Failed PyImport_AppendInittab with 'hobbits' module");
             return PythonResult::result(errors);
         }
         hobbitsAppended = true;
@@ -28,6 +33,10 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QString scriptP
     PyRun_SimpleString(QString("sys.stderr = open('%1', 'w', buffering=1 )").arg(stderrFile.fileName()).toStdString().c_str());
     PyRun_SimpleString(QString("sys.stdout = open('%1', 'w', buffering=1 )").arg(stdoutFile.fileName()).toStdString().c_str());
     PyRun_SimpleString(QString("sys.path.append('%1')").arg(temp.path()).toStdString().c_str());
+
+    for (QString extension : request->pathExtensions()) {
+        PyRun_SimpleString(QString("sys.path.append('%1')").arg(extension).toStdString().c_str());
+    }
 
     // Import hobbits module
     PyObject* hobbitsModule = PyImport_ImportModule("hobbits");
@@ -49,16 +58,43 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QString scriptP
         return finalize(stdoutFile, stderrFile, errors);
     }
 
-    // Run the process_bits method in the custom script
-    PyObject *inBits = immutableBitArray(hobbitsModule, inputBitArray);
-    PyObject *outBits = bitArray(hobbitsModule, outputBitArray);
-    PyObject *aProg = actionProgress(hobbitsModule, progress);
-    PyObject *args = Py_BuildValue("OOO", inBits, outBits, aProg);
-    PyObject *result = callFunction(scriptModule, "process_bits", args);
-    Py_XDECREF(result);
-    Py_XDECREF(args);
-    Py_XDECREF(inBits);
-    Py_XDECREF(outBits);
+    if (!request->functionName().isEmpty()) {
+        // Collect and build the arguments
+        PyObject *args = nullptr;
+        if (request->args().size() > 0) {
+            args = PyTuple_New(request->args().size());
+            if (args == nullptr) {
+                errors.append("Failed to create a tuple for function arguments");
+                Py_XDECREF(hobbitsModule);
+                Py_XDECREF(scriptModule);
+                return finalize(stdoutFile, stderrFile, errors);
+            }
+            for (int i = 0; i < request->args().size(); i++) {
+                PyObject* arg = parseArg(hobbitsModule, request->args().at(i));
+                if (arg == nullptr) {
+                    errors.append(QString("Failed to parse arg %1").arg(i));
+                    Py_XDECREF(args);
+                    Py_XDECREF(hobbitsModule);
+                    Py_XDECREF(scriptModule);
+                    return finalize(stdoutFile, stderrFile, errors);
+                }
+                int setCode = PyTuple_SetItem(args, i, arg);
+                if (setCode != 0) {
+                    PyErr_Print();
+                    errors.append(QString("Failed to set arg %1 in position").arg(i));
+                    Py_XDECREF(args);
+                    Py_XDECREF(hobbitsModule);
+                    Py_XDECREF(scriptModule);
+                    return finalize(stdoutFile, stderrFile, errors);
+                }
+            }
+        }
+
+        // Run the function
+        PyObject *result = callFunction(scriptModule, request->functionName().toStdString().c_str(), args);
+        Py_XDECREF(result);
+        Py_XDECREF(args);
+    }
 
     // Cleanup
     Py_XDECREF(hobbitsModule);
@@ -94,19 +130,18 @@ PyObject *PythonInterpreter::hobbitsTypeWrapper(PyObject *hobbitsModule, const c
     return instance;
 }
 
-PyObject *PythonInterpreter::bitArray(PyObject *hobbitsModule, QSharedPointer<BitArray> bitArray)
+PyObject *PythonInterpreter::parseArg(PyObject *hobbitsModule, PythonArg *arg)
 {
-    return hobbitsTypeWrapper(hobbitsModule, "BitArray", static_cast<void*>(bitArray.data()));
-}
-
-PyObject *PythonInterpreter::immutableBitArray(PyObject *hobbitsModule, QSharedPointer<const BitArray> bitArray)
-{
-    return hobbitsTypeWrapper(hobbitsModule, "ImmutableBitArray", const_cast<void*>(static_cast<const void*>(bitArray.data())));
-}
-
-PyObject *PythonInterpreter::actionProgress(PyObject *hobbitsModule, QSharedPointer<ActionProgress> progress)
-{
-    return hobbitsTypeWrapper(hobbitsModule, "ActionProgress", static_cast<void*>(progress.data()));
+    if (arg->m_type == PythonArg::HobbitsWrapper) {
+        auto obj = hobbitsTypeWrapper(hobbitsModule, arg->m_wrapType.toStdString().c_str(), arg->m_pointer);
+        if (!obj) {
+            return nullptr;
+        }
+        return Py_BuildValue(arg->m_argSymbol.toStdString().c_str(), obj);
+    }
+    else {
+        return nullptr;
+    }
 }
 
 QSharedPointer<PythonResult> PythonInterpreter::finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors)

@@ -4,8 +4,6 @@
 
 HobbitsPython::HobbitsPython()
 {
-    m_pool.setMaxThreadCount(1);
-    m_pool.setExpiryTimeout(-1);
 }
 
 HobbitsPython& HobbitsPython::getInstance()
@@ -15,24 +13,30 @@ HobbitsPython& HobbitsPython::getInstance()
 }
 
 QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(
-        QString scriptPath,
-        QSharedPointer<const BitArray> inputBitArray,
-        QSharedPointer<BitArray> outputBitArray,
-        QSharedPointer<ActionProgress> progress)
+        QSharedPointer<PythonRequest> request,
+        bool includeActionProgressArg)
 {
-    QMutexLocker lock(&m_mutex);
+    if (includeActionProgressArg) {
+        return runProcessScript(request, QSharedPointer<ActionProgress>(new ActionProgress()));
+    }
+    else {
+        return runProcessScript(request, QSharedPointer<ActionProgress>());
+    }
+}
 
+QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(QSharedPointer<PythonRequest> request, QSharedPointer<ActionProgress> progress)
+{
     if (progress.isNull()) {
         progress = QSharedPointer<ActionProgress>(new ActionProgress());
     }
+    else {
+        request->addArg(PythonArg::actionProgress(progress));
+    }
 
     auto future = QtConcurrent::run(
-            &m_pool,
+            QThreadPool::globalInstance(),
             PythonInterpreter::runProcessScript,
-            scriptPath,
-            inputBitArray,
-            outputBitArray,
-            progress);
+            request);
 
     QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> watcher(
             new ActionWatcher<QSharedPointer<PythonResult>>(future, progress));

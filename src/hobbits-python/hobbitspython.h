@@ -7,8 +7,7 @@
 #include "pythonresult.h"
 #include "actionwatcher.h"
 #include "bitarray.h"
-
-class PythonInterpreter;
+#include "pythonrequest.h"
 
 #include "hobbits-python_global.h"
 class HOBBITSPYTHONSHARED_EXPORT HobbitsPython : public QObject
@@ -19,15 +18,15 @@ public:
     static HobbitsPython& getInstance();
 
     QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
-            QString scriptPath,
-            QSharedPointer<const BitArray> inputBitArray,
-            QSharedPointer<BitArray> outputBitArray,
-            QSharedPointer<ActionProgress> progress = QSharedPointer<ActionProgress>());
+            QSharedPointer<PythonRequest> request,
+            bool includeActionProgressArg = true);
+
+    QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
+            QSharedPointer<PythonRequest> request,
+            QSharedPointer<ActionProgress> progress);
 
 private:
     HobbitsPython();
-    QMutex m_mutex;
-    QThreadPool m_pool;
 };
 
 #endif // HOBBITSPYTHON_H

@@ -28,7 +28,9 @@ SOURCES += \
         py_actionprogress.cpp \
         py_bitarray.cpp \
         py_hobbits.cpp \
+        pythonarg.cpp \
         pythoninterpreter.cpp \
+        pythonrequest.cpp \
         pythonresult.cpp
 
 HEADERS += \
@@ -37,7 +39,9 @@ HEADERS += \
         py_actionprogress.h \
         py_bitarray.h \
         py_hobbits.h \
+        pythonarg.h \
         pythoninterpreter.h \
+        pythonrequest.h \
         pythonresult.h
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
