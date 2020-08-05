@@ -43,3 +43,24 @@ QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::run
 
     return watcher;
 }
+
+void HobbitsPython::recursiveDirCopy(QString src, QString dest)
+{
+    QDir srcDir(src);
+    if (!srcDir.exists()) {
+        return;
+    }
+
+    QDir destDir(dest);
+    if (!destDir.exists()) {
+        destDir.mkpath(".");
+    }
+
+    for (QString subDir : srcDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        recursiveDirCopy(srcDir.filePath(subDir), destDir.filePath(subDir));
+    }
+
+    for (QString file : srcDir.entryList(QDir::Files)) {
+        QFile::copy(srcDir.filePath(file), destDir.filePath(file));
+    }
+}

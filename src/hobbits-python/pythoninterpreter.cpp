@@ -139,6 +139,9 @@ PyObject *PythonInterpreter::parseArg(PyObject *hobbitsModule, PythonArg *arg)
         }
         return Py_BuildValue(arg->m_argSymbol.toStdString().c_str(), obj);
     }
+    else if (arg->m_type == PythonArg::String) {
+        return Py_BuildValue(arg->m_argSymbol.toStdString().c_str(), arg->m_stringData.toStdString().c_str());
+    }
     else {
         return nullptr;
     }

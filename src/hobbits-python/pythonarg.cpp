@@ -35,3 +35,12 @@ PythonArg *PythonArg::actionProgress(QSharedPointer<ActionProgress> progress)
     arg->m_pointer = progress.data();
     return arg;
 }
+
+PythonArg *PythonArg::qString(QString s)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::String;
+    arg->m_argSymbol = "s";
+    arg->m_stringData = s;
+    return arg;
+}

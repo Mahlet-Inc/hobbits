@@ -25,6 +25,9 @@ public:
             QSharedPointer<PythonRequest> request,
             QSharedPointer<ActionProgress> progress);
 
+    // copying dependencies from a resource into a temp folder might be used in many python run staging scenarios
+    static void recursiveDirCopy(QString src, QString dest);
+
 private:
     HobbitsPython();
 };
