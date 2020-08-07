@@ -4,11 +4,15 @@
 
 
 static struct PyModuleDef HobbitsModuleDef = {
-    PyModuleDef_HEAD_INIT,
-    .m_name = "hobbits",   /* name of module */
-    .m_doc = nullptr, /* module documentation, may be NULL */
-    .m_size = 0,       /* size of per-interpreter state of the module,
-                        or -1 if the module keeps state in global variables. */
+    PyModuleDef_HEAD_INIT, // PyModuleDef_Base m_base;
+    "hobbits", // const char* m_name;
+    nullptr, // const char* m_doc;
+    0, // Py_ssize_t m_size;
+    nullptr, // PyMethodDef *m_methods;
+    nullptr, // struct PyModuleDef_Slot* m_slots;
+    nullptr, // traverseproc m_traverse;
+    nullptr, // inquiry m_clear;
+    nullptr, // freefunc m_free;
 };
 
 PyObject* PyInit_hobbits(void){
