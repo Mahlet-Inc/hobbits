@@ -76,11 +76,11 @@ static PyMethodDef PyActionProgress_methods[] = {
     { "is_cancelled", PyCFunction(PyActionProgress_is_cancelled), METH_NOARGS, nullptr },
     { "set_progress_percent", PyCFunction(PyActionProgress_set_progress_percent), METH_VARARGS, nullptr },
     { "set_progress", PyCFunction(PyActionProgress_set_progress), METH_VARARGS, nullptr },
-    {nullptr}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 static PyMemberDef PyActionProgress_members[] = {
-    {nullptr}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 extern PyTypeObject PyActionProgress = {

@@ -105,22 +105,22 @@ static PyMethodDef BitArrayPy_methods[] = {
     { "at", PyCFunction(BitArrayPy_at), METH_VARARGS, nullptr },
     { "resize", PyCFunction(BitArrayPy_resize), METH_VARARGS, nullptr },
     { "set", PyCFunction(BitArrayPy_set), METH_VARARGS, nullptr },
-    {NULL}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 static PyMethodDef ImmutableBitArrayPy_methods[] = {
     { "size", PyCFunction(BitArrayPy_size), METH_NOARGS, nullptr },
     { "at", PyCFunction(BitArrayPy_at), METH_VARARGS, nullptr },
-    {NULL}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 
 static PyMemberDef ImmutableBitArrayPy_members[] = {
-    {nullptr}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 static PyMemberDef BitArrayPy_members[] = {
-    {nullptr}  /* Sentinel */
+    {}  /* Sentinel */
 };
 
 extern PyTypeObject PyBitArray = {
