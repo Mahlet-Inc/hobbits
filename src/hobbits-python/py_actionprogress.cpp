@@ -1,7 +1,7 @@
 #include "py_actionprogress.h"
 #include "actionprogress.h"
 
-#include <python3.7m/structmember.h>
+#include <structmember.h>
 
 #define PROGRESS(X) static_cast<ActionProgress*>(PyCapsule_GetPointer(X, nullptr))
 

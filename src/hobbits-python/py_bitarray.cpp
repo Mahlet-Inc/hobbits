@@ -2,7 +2,7 @@
 #include "bitarray.h"
 #include <QSharedPointer>
 
-#include <python3.7m/structmember.h>
+#include <structmember.h>
 
 #define BITS(X) static_cast<BitArray*>(PyCapsule_GetPointer(X, nullptr))
 
