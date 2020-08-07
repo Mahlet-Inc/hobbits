@@ -17,10 +17,6 @@ CONFIG += no_keywords
 
 DEFINES += HOBBITSPYTHON_LIBRARY
 
-!contains(DEFINES, HOBBITS_PYTHON_LIB_VERSION.*) {
-    DEFINES += "HOBBITS_PYTHON_LIB_VERSION=\"\\\"Spam, Spam, Eggs, and Spam Version\\\"\""
-}
-
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
@@ -45,10 +41,13 @@ HEADERS += \
         pythonresult.h
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-LIBS += -lpython3.7m
-
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
+
+unix {
+    CONFIG *= link_pkgconfig
+    PKGCONFIG += python3
+}
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=

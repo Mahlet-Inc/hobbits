@@ -2,7 +2,7 @@
 #define PY_HOBBITS_H
 
 #define PY_SSIZE_T_CLEAN
-#include <python3.7m/Python.h>
+#include <Python.h>
 
 extern "C" {
 

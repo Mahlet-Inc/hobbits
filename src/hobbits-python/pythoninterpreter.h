@@ -2,8 +2,8 @@
 #define PYTHONINTERPRETER_H
 
 #define PY_SSIZE_T_CLEAN
-#include <python3.7m/Python.h>
-#include <python3.7m/structmember.h>
+#include <Python.h>
+#include <structmember.h>
 
 #include "pythonrequest.h"
 #include "pythonresult.h"

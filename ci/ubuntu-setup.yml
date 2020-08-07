@@ -7,6 +7,11 @@ steps:
 
   - script: sudo apt-get install fftw3-dev
     displayName: 'Install FFTW3'
+
+
+  - task: UsePythonVersion@0 
+    inputs:
+      versionSpec: '3.8'
       
   - script: |
       cd $(Build.SourcesDirectory)
