@@ -49,6 +49,12 @@ unix {
     PKGCONFIG += python3
 }
 
+win32 {
+    PYPATH = $$system(python3 -c \"import os; import sys; print(f\'{sys.prefix}{os.path.sep}include{os.path.sep}python{sys.version_info.major}.{sys.version_info.minor}{sys.abiflags}\')\")
+    LIBS += -lpython3
+    INCLUDEPATH += $$PYPATH
+}
+
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"

@@ -10,7 +10,7 @@ steps:
 
   - task: UsePythonVersion@0 
     inputs:
-      versionSpec: '3.8'
+      versionSpec: '3.7'
 
   - task: NodeTool@0
     inputs:
@@ -66,6 +66,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
+      cp $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.*dylib hobbits.app/Contents/Frameworks
       mkdir -p hobbits.app/Contents/Frameworks/QtNetwork.framework/Versions/5/
       cd hobbits.app/Contents/Frameworks/QtNetwork.framework
       cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/Resources Versions/5/
@@ -76,6 +77,7 @@ steps:
       ln -s 5 Current
       cd $(Build.SourcesDirectory)/src/hobbits-gui
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
+      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-python.1.dylib @rpath/libhobbits-python.1.dylib $@ {} \;
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
       tar cvzf hobbits_mac_release.tgz hobbits.app
