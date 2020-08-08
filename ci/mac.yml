@@ -8,9 +8,8 @@ steps:
   - script: brew install pkg-config
     displayName: 'Install pkg-config'
 
-  - task: UsePythonVersion@0 
-    inputs:
-      versionSpec: '3.7'
+  - script: brew install python@3.7
+    displayName: 'Install python'
 
   - task: NodeTool@0
     inputs:
