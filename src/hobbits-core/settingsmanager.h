@@ -20,6 +20,9 @@ public:
     SettingsData getAll() const;
     void setAll(const SettingsData &data);
 
+    QVariant getTransientSetting(const QString &key);
+    void setTransientSetting(const QString &key, const QVariant &value);
+
     QVariant getPrivateSetting(const QString &key);
     void setPrivateSetting(const QString &key, const QVariant &value);
 

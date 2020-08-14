@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+requires(defined(HOBBITS_PYPATH, var))
+
 QT       -= gui
 
 TARGET = hobbits-python
@@ -45,14 +47,16 @@ INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
 
 unix {
-    CONFIG *= link_pkgconfig
-    PKGCONFIG += python3
+    LIBS += $$system(pkg-config --with-path=$$HOBBITS_PYPATH/lib/pkgconfig --define-prefix --libs python3-embed)
+    PY_INC = $$system(pkg-config --with-path=$$HOBBITS_PYPATH/lib/pkgconfig --define-prefix --cflags python3-embed)
+    PY_INC = $$str_member($$PY_INC, 2, -1)
+    INCLUDEPATH += $$PY_INC
+    DEPENDPATH += $$PY_INC
 }
 
 win32 {
-    PYPATH = $$system(python3 -c \"import os; import sys; print(f\'{sys.prefix}{os.path.sep}include{os.path.sep}python{sys.version_info.major}.{sys.version_info.minor}{sys.abiflags}\')\")
-    LIBS += -lpython3
-    INCLUDEPATH += $$PYPATH
+    LIBS += -L$$HOBBITS_PYPATH/bin -lpython3
+    INCLUDEPATH += $$HOBBITS_PYPATH/include
 }
 
 unix:!mac {

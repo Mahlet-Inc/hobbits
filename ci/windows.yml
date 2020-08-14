@@ -11,6 +11,16 @@ steps:
       versionSpec: '12.x'
 
   - bash: |
+      BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python3 -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
+      curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
+      unzip hobbits_python.zip
+      rm -fv hobbits_python.zip
+      mv ${PYTHON_ARTIFACT} hobbits_python
+    env:
+      PYTHON_ARTIFACT: python_windows_2019
+    displayName: 'Get hobbits python artifact'
+
+  - bash: |
       rm .releaserc.json
       cp ci/justversion.releaserc.json .releaserc.json
       npm ci
@@ -48,7 +58,7 @@ steps:
       cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
       set /p QMAKE_VERSION_ARGS= <qmake_args
-      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS%
+      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS% HOBBITS_PYPATH=$(Build.SourcesDirectory)\hobbits_python
     displayName: 'Run qmake'
 
   - script: |
@@ -80,6 +90,7 @@ steps:
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libEGL.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libGLSv2.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\opengl32sw.dll release\
+      forfiles /p $(Build.SourcesDirectory)\hobbits_python /m * /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release "
     displayName: 'Collect release files'
   
   - task: ArchiveFiles@2

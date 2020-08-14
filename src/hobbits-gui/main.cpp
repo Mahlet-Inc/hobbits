@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QStyle>
+#include "settingsmanager.h"
 #ifdef Q_OS_UNIX
 #include <iostream>
 #include <unistd.h>
@@ -46,6 +47,12 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(configFilePathOption);
 
+    QCommandLineOption pythonHomeOption(
+        QStringList() << "python-home",
+            QCoreApplication::translate("main", "The python home path (must have binary compatibility with the built-in hobbits python capabilities)"),
+            QCoreApplication::translate("main", "path"));
+    parser.addOption(pythonHomeOption);
+
     parser.process(a);
 
     QByteArray pipedInData;
@@ -69,6 +76,10 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(configFilePathOption)) {
         configFilePath = parser.value(configFilePathOption);
+    }
+
+    if (parser.isSet(pythonHomeOption)) {
+        SettingsManager::getInstance().setTransientSetting(SettingsData::PYTHON_HOME_KEY, parser.value(pythonHomeOption));
     }
 
     MainWindow w(extraPluginPath, configFilePath);

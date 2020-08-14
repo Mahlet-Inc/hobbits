@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QPoint>
 #include <QSize>
+#include <QCoreApplication>
 
 const QString SettingsData::ONE_COLOR_KEY = "1-Bit Color";
 const QString SettingsData::ZERO_COLOR_KEY = "0-Bit Color";
@@ -27,9 +28,17 @@ const QString SettingsData::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_pa
 const QString SettingsData::LAST_CONTAINER_PATH_KEY = "last_container_path";
 const QString SettingsData::PLUGIN_RUNNING_KEY = "plugin_running";
 const QString SettingsData::PLUGINS_RUNNING_KEY = "plugins_running";
+const QString SettingsData::PYTHON_HOME_KEY = "python_home_dir";
 
 SettingsData::SettingsData()
 {
+#ifdef Q_OS_UNIX
+    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"../python").canonicalPath());
+#endif
+#ifdef Q_OS_WIN
+    m_transientSettings.insert(PYTHON_HOME_KEY, QCoreApplication::applicationDirPath());
+#endif
+
     m_privateSettings.insert(WINDOW_SIZE_KEY, QSize(640, 480));
     m_privateSettings.insert(WINDOW_POSITION_KEY, QPoint(100, 100));
     m_privateSettings.insert(LAST_BATCH_PATH_KEY, QDir::homePath());
@@ -57,6 +66,7 @@ SettingsData::SettingsData()
             ANALYZER_DISPLAY_ORDER_KEY,
             QStringList({ "Find", "Width Framer", "Flexible Framer" }));
     m_pluginLoaderSettings.insert(DISPLAY_DISPLAY_ORDER_KEY, QStringList({"Bit Raster", "Hex", "Binary", "ASCII"}));
+
 }
 
 SettingsData::SettingsData(const SettingsData &other)
@@ -76,6 +86,17 @@ SettingsData& SettingsData::operator=(const SettingsData &other)
         m_pluginLoaderSettings = other.m_pluginLoaderSettings;
     }
     return *this;
+}
+
+QVariant SettingsData::getTransientSetting(const QString &key, const QVariant &defaultValue)
+{
+    return m_transientSettings.value(key, defaultValue);
+}
+
+void SettingsData::setTransientSetting(const QString &key, const QVariant &value)
+{
+    m_transientSettings.remove(key);
+    m_transientSettings.insert(key, value);
 }
 
 QList<QString> SettingsData::getPrivateSettingKeys() const

@@ -15,6 +15,9 @@ public:
 
     SettingsData& operator=(const SettingsData&);
 
+    QVariant getTransientSetting(const QString &key, const QVariant &defaultValue = QVariant());
+    void setTransientSetting(const QString &key, const QVariant &value);
+
     QList<QString> getPrivateSettingKeys() const;
     QVariant getPrivateSetting(const QString &key, const QVariant &defaultValue = QVariant());
     void setPrivateSetting(const QString &key, const QVariant &value);
@@ -53,8 +56,10 @@ public:
     static const QString LAST_CONTAINER_PATH_KEY;
     static const QString PLUGIN_RUNNING_KEY;
     static const QString PLUGINS_RUNNING_KEY;
+    static const QString PYTHON_HOME_KEY;
 
 private:
+    QMap<QString, QVariant> m_transientSettings;
     QMap<QString, QVariant> m_privateSettings;
     QMap<QString, QVariant> m_uiSettings;
     QMap<QString, QVariant> m_pluginLoaderSettings;

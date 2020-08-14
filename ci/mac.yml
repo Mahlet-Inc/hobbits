@@ -8,12 +8,26 @@ steps:
   - script: brew install pkg-config
     displayName: 'Install pkg-config'
 
-  - script: brew install python@3.7
-    displayName: 'Install python'
+  - task: UsePythonVersion@0 
+    inputs:
+      versionSpec: '3.x'
 
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
+    
+  - bash: |
+      BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python3 -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
+      curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
+      unzip hobbits_python.zip
+      rm -fv hobbits_python.zip
+      mv ${PYTHON_ARTIFACT} hobbits_python
+      cd hobbits_python
+      tar xvf ${PYTHON_ARTIFACT}.tgz
+      rm -fv ${PYTHON_ARTIFACT}.tgz
+    env:
+      PYTHON_ARTIFACT: python_macos_1014
+    displayName: 'Get hobbits python artifact'
 
   - bash: |
       rm .releaserc.json
@@ -29,11 +43,11 @@ steps:
       
   - script: |
       cd $(Build.SourcesDirectory)
-      python -m pip install aqtinstall
+      python3 -m pip install aqtinstall
     displayName: 'Install aqtinstall'
 
   - script: | 
-      python -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
+      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.14.1'
 
   - bash: |
@@ -44,7 +58,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args)
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
     displayName: 'Run qmake'
 
   - script: |
@@ -66,6 +80,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
       cp $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.*dylib hobbits.app/Contents/Frameworks
+      cp -r $(Build.SourcesDirectory)/hobbits_python hobbits.app/Contents/Frameworks/python
       mkdir -p hobbits.app/Contents/Frameworks/QtNetwork.framework/Versions/5/
       cd hobbits.app/Contents/Frameworks/QtNetwork.framework
       cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/Resources Versions/5/

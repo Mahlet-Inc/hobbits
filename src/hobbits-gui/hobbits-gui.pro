@@ -53,22 +53,36 @@ FORMS += \
         preferencesdialog.ui
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
 
-LIBS += -L$$OUT_PWD/../hobbits-python/ -lhobbits-python
-INCLUDEPATH += $$PWD/../hobbits-python
-DEPENDPATH += $$PWD/../hobbits-python
+defined(HOBBITS_PYPATH, var) {
+    LIBS += -L$$OUT_PWD/../hobbits-python/ -lhobbits-python
+    INCLUDEPATH += $$PWD/../hobbits-python
+    DEPENDPATH += $$PWD/../hobbits-python
+
+    unix {
+        LIBS += $$system(pkg-config --with-path=$$HOBBITS_PYPATH/lib/pkgconfig --define-prefix --libs python3-embed)
+        PY_INC = $$system(pkg-config --with-path=$$HOBBITS_PYPATH/lib/pkgconfig --define-prefix --cflags python3-embed)
+        PY_INC = $$str_member($$PY_INC, 2, -1)
+        INCLUDEPATH += $$PY_INC
+        DEPENDPATH += $$PY_INC
+    }
+
+    win32 {
+        LIBS += -L$$HOBBITS_PYPATH/bin -lpython3
+        INCLUDEPATH += $$HOBBITS_PYPATH/include
+    }
+}
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN/../python/lib:\$$ORIGIN\'"
 }
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks:@executable_path/../Frameworks/python/lib\'"
 }
 
 RESOURCES += \

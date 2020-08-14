@@ -133,7 +133,7 @@ extern PyTypeObject PyBitArray = {
     /* Methods to implement standard operations */
 
     destructor(BitArrayPy_dealloc), // destructor tp_dealloc;
-    nullptr, // printfunc tp_print;
+    0, // Py_ssize_t tp_vectorcall_offset;
     nullptr, // getattrfunc tp_getattr;
     nullptr, // setattrfunc tp_setattr;
     nullptr, // PyAsyncMethods *tp_as_async; /* formerly known as tp_compare (Python 2) or tp_reserved (Python 3) */
@@ -203,7 +203,9 @@ extern PyTypeObject PyBitArray = {
     /* Type attribute cache version tag. Added in version 2.6 */
     0, // unsigned int tp_version_tag;
 
-    nullptr // destructor tp_finalize;
+    nullptr, // destructor tp_finalize;
+    nullptr, // vectorcallfunc tp_vectorcall;
+    // Py_DEPRECATED(3.8) int (*tp_print)(PyObject *, FILE *, int);
 };
 
 extern PyTypeObject PyImmutableBitArray = {
@@ -216,7 +218,7 @@ extern PyTypeObject PyImmutableBitArray = {
     /* Methods to implement standard operations */
 
     destructor(BitArrayPy_dealloc), // destructor tp_dealloc;
-    nullptr, // printfunc tp_print;
+    0, // Py_ssize_t tp_vectorcall_offset;
     nullptr, // getattrfunc tp_getattr;
     nullptr, // setattrfunc tp_setattr;
     nullptr, // PyAsyncMethods *tp_as_async; /* formerly known as tp_compare (Python 2) or tp_reserved (Python 3) */
@@ -286,5 +288,7 @@ extern PyTypeObject PyImmutableBitArray = {
     /* Type attribute cache version tag. Added in version 2.6 */
     0, // unsigned int tp_version_tag;
 
-    nullptr // destructor tp_finalize;
+    nullptr, // destructor tp_finalize;
+    nullptr, // vectorcallfunc tp_vectorcall;
+    // Py_DEPRECATED(3.8) int (*tp_print)(PyObject *, FILE *, int);
 };

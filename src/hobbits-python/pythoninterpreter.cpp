@@ -1,7 +1,7 @@
 #include "pythoninterpreter.h"
 #include <QTemporaryDir>
 #include <QMutex>
-
+#include "settingsmanager.h"
 #include "py_hobbits.h"
 
 static QMutex mutex;
@@ -26,7 +26,21 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<
         hobbitsAppended = true;
     }
 
-    Py_InitializeEx(0);
+    PyStatus status;
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+
+    std::wstring wsPyHome = SettingsManager::getInstance().getTransientSetting(SettingsData::PYTHON_HOME_KEY).toString().toStdWString();
+    QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
+    wcscpy(pyHome.data(), wsPyHome.c_str());
+    config.home = pyHome.data();
+
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        errors.append(QString("Failed Py_InitializeFromConfig - is there a valid python at '%1'?").arg(QString::fromStdWString(wsPyHome)));
+        return PythonResult::result(errors);
+    }
+
 
     // Setup path and output files
     PyRun_SimpleString("import sys");

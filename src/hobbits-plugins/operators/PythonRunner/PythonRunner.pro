@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+requires(defined(HOBBITS_PYPATH, var))
+
 QT       += widgets
 
 QT       -= gui
