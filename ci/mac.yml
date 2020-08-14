@@ -26,7 +26,7 @@ steps:
       cd hobbits_python
       tar xvf ${PYTHON_ARTIFACT}.tgz
       rm -fv ${PYTHON_ARTIFACT}.tgz
-      ls -l $(Build.SourcesDirectory)\hobbits_python
+      ls -l $(Build.SourcesDirectory)/hobbits_python
     env:
       PYTHON_ARTIFACT: python_macos_1014
     displayName: 'Get hobbits python artifact'
