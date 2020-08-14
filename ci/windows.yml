@@ -17,10 +17,13 @@ steps:
       unzip hobbits_python.zip
       rm -fv hobbits_python.zip
       mv ${PYTHON_ARTIFACT} hobbits_python
-      ls -l $(Build.SourcesDirectory)/hobbits_python
     env:
       PYTHON_ARTIFACT: python_windows_2019
     displayName: 'Get hobbits python artifact'
+  
+  - script: |
+      dir $(Build.SourcesDirectory)\hobbits_python
+    displayName: 'Show hobbits python directory'
 
   - bash: |
       rm .releaserc.json
