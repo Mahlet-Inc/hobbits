@@ -18,6 +18,7 @@ steps:
     
   - bash: |
       BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python3 -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
+      echo "Build ID: ${BUILD_ID}"
       curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
       unzip hobbits_python.zip
       rm -fv hobbits_python.zip
@@ -25,6 +26,7 @@ steps:
       cd hobbits_python
       tar xvf ${PYTHON_ARTIFACT}.tgz
       rm -fv ${PYTHON_ARTIFACT}.tgz
+      ls -l $(Build.SourcesDirectory)\hobbits_python
     env:
       PYTHON_ARTIFACT: python_macos_1014
     displayName: 'Get hobbits python artifact'
@@ -58,7 +60,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python -d
     displayName: 'Run qmake'
 
   - script: |
