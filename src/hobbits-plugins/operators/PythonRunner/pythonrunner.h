@@ -39,7 +39,6 @@ public:
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
 public Q_SLOTS:
-    void openPythonPathDialog();
     void openHelpDialog();
 
     void updateOutputText(QString);

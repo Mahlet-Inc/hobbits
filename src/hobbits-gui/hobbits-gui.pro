@@ -61,18 +61,7 @@ defined(HOBBITS_PYPATH, var) {
     INCLUDEPATH += $$PWD/../hobbits-python
     DEPENDPATH += $$PWD/../hobbits-python
 
-    unix {
-        LIBS += $$system(export PKG_CONFIG_PATH=$$HOBBITS_PYPATH/lib/pkgconfig; pkg-config --define-prefix --libs python3-embed)
-        PY_INC = $$system(export PKG_CONFIG_PATH=$$HOBBITS_PYPATH/lib/pkgconfig; pkg-config --define-prefix --cflags python3-embed)
-        PY_INC = $$str_member($$PY_INC, 2, -1)
-        INCLUDEPATH += $$PY_INC
-        DEPENDPATH += $$PY_INC
-    }
-
-    win32 {
-        LIBS += -L$$HOBBITS_PYPATH/bin -lpython3
-        INCLUDEPATH += $$HOBBITS_PYPATH/include
-    }
+    include($$PWD/../hobbits-python/python-link.pri)
 }
 
 unix:!mac {

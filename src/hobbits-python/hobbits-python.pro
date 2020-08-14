@@ -46,22 +46,11 @@ LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
 
-unix {
-    LIBS += $$system(export PKG_CONFIG_PATH=$$HOBBITS_PYPATH/lib/pkgconfig; pkg-config --define-prefix --libs python3-embed)
-    PY_INC = $$system(export PKG_CONFIG_PATH=$$HOBBITS_PYPATH/lib/pkgconfig; pkg-config --define-prefix --cflags python3-embed)
-    PY_INC = $$str_member($$PY_INC, 2, -1)
-    INCLUDEPATH += $$PY_INC
-    DEPENDPATH += $$PY_INC
-}
-
-win32 {
-    LIBS += -L$$HOBBITS_PYPATH/bin -lpython3
-    INCLUDEPATH += $$HOBBITS_PYPATH/include
-}
+include(python-link.pri)
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../python/lib:\$$ORIGIN\'"
 }
 
 headers.files   += $$HEADERS

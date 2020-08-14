@@ -81,7 +81,7 @@ steps:
       cp --preserve=links /usr/local/lib64/libfftw3.so* release/lib
       cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
       cd release
-      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins
+      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins python
     displayName: 'Collect and package release files'
   
   - bash: |
