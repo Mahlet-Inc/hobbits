@@ -71,7 +71,7 @@ unix:!mac {
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks:@executable_path/../Frameworks/python/lib\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks;@executable_path/../Frameworks/python/lib\'"
 }
 
 RESOURCES += \
