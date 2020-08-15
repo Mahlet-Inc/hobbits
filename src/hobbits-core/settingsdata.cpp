@@ -32,15 +32,22 @@ const QString SettingsData::PYTHON_HOME_KEY = "python_home_dir";
 
 SettingsData::SettingsData()
 {
+    QString pythonHome;
 #ifdef Q_OS_LINUX
-    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"/../python").canonicalPath());
+    pythonHome = QCoreApplication::applicationDirPath()+"/../python";
 #endif
 #ifdef Q_OS_MACOS
-    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"/../Frameworks/python").canonicalPath());
+    pythonHome = QCoreApplication::applicationDirPath()+"/../Frameworks/python";
 #endif
 #ifdef Q_OS_WIN
-    m_transientSettings.insert(PYTHON_HOME_KEY, QCoreApplication::applicationDirPath());
+    pythonHome = QCoreApplication::applicationDirPath();
 #endif
+    QString pythonHomeCanonical = QDir(pythonHome).canonicalPath();
+    // The canonical path will be empty if it doesn't exist, so we'll fall back on the base path for easier debugging
+    if (!pythonHomeCanonical.isEmpty()) {
+        pythonHome = pythonHomeCanonical;
+    }
+    m_transientSettings.insert(PYTHON_HOME_KEY, pythonHome);
 
     m_privateSettings.insert(WINDOW_SIZE_KEY, QSize(640, 480));
     m_privateSettings.insert(WINDOW_POSITION_KEY, QPoint(100, 100));
