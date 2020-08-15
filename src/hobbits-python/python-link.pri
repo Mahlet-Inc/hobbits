@@ -1,4 +1,4 @@
-unix!mac {
+unix:!mac {
     PY_LIB = $$files($$HOBBITS_PYPATH/lib/*.*.so)
     PY_LIB = $$first(PY_LIB)
     PY_LIB = $$basename(PY_LIB)
