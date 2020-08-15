@@ -32,8 +32,11 @@ const QString SettingsData::PYTHON_HOME_KEY = "python_home_dir";
 
 SettingsData::SettingsData()
 {
-#ifdef Q_OS_UNIX
-    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"../python").canonicalPath());
+#ifdef Q_OS_LINUX
+    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"/../python").canonicalPath());
+#endif
+#ifdef Q_OS_MACOS
+    m_transientSettings.insert(PYTHON_HOME_KEY, QDir(QCoreApplication::applicationDirPath()+"/../Frameworks/python").canonicalPath());
 #endif
 #ifdef Q_OS_WIN
     m_transientSettings.insert(PYTHON_HOME_KEY, QCoreApplication::applicationDirPath());
