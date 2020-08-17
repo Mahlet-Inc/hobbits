@@ -8,6 +8,9 @@ steps:
   - script: brew install pkg-config
     displayName: 'Install pkg-config'
 
+  - script: brew install gettext
+    displayName: 'Install gettext'
+
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.x'
@@ -96,8 +99,15 @@ steps:
       cd $(Build.SourcesDirectory)/src/hobbits-gui
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-python.1.dylib @rpath/libhobbits-python.1.dylib $@ {} \;
+
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
+      cp /usr/local/opt/gettext/lib/libintl.8.dylib hobbits.app/Contents/Frameworks/
+      install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @rpath/libintl.8.dylib hobbits.app/Contents/Frameworks/python/lib/libpython3.8.dylib
+
+      PY_DYLIB_PATH=`otool -l hobbits.app/Contents/Frameworks/libhobbits-python.dylib | grep libpython3.8.dylib | awk '{print $2}'`
+      find hobbits.app \( -name "*.dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change $PY_DYLIB_PATH @rpath/python/lib/libpython3.8.dylib $@ {} \;
+
       tar cvzf hobbits_mac_release.tgz hobbits.app
     displayName: 'Create mac app bundle'
 
