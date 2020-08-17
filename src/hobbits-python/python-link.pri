@@ -23,6 +23,6 @@ mac {
 }
 
 win32 {
-    LIBS += -L$$HOBBITS_PYPATH/bin -lpython3
+    LIBS += -L$$HOBBITS_PYPATH/bin -lpython38
     INCLUDEPATH += $$HOBBITS_PYPATH/include
 }
