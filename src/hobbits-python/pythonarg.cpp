@@ -6,6 +6,31 @@ PythonArg::PythonArg()
 
 }
 
+QString PythonArg::stringData() const
+{
+    return m_stringData;
+}
+
+void *PythonArg::pointer() const
+{
+    return m_pointer;
+}
+
+QString PythonArg::wrapType() const
+{
+    return m_wrapType;
+}
+
+QString PythonArg::argSymbol() const
+{
+    return m_argSymbol;
+}
+
+PythonArg::Type PythonArg::type() const
+{
+    return m_type;
+}
+
 PythonArg* PythonArg::bitArray(QSharedPointer<BitArray> bitArray)
 {
     PythonArg *arg = new PythonArg();

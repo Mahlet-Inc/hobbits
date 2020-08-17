@@ -9,20 +9,24 @@
 class HOBBITSPYTHONSHARED_EXPORT PythonArg
 {
 public:
+    enum Type {
+        HobbitsWrapper = 0x1,
+        String = 0x2
+    };
+
     static PythonArg* bitArray(QSharedPointer<BitArray> bitArray);
     static PythonArg* constBitArray(QSharedPointer<const BitArray> bitArray);
     static PythonArg* actionProgress(QSharedPointer<ActionProgress> progress);
     static PythonArg* qString(QString s);
 
-    friend class PythonInterpreter;
+    Type type() const;
+    QString argSymbol() const;
+    QString wrapType() const;
+    void *pointer() const;
+    QString stringData() const;
 
 private:
     PythonArg();
-
-    enum Type {
-        HobbitsWrapper = 0x1,
-        String = 0x2
-    };
 
     Type m_type;
     QString m_argSymbol;

@@ -1,8 +1,17 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include <structmember.h>
+
 #include "pythoninterpreter.h"
 #include <QTemporaryDir>
 #include <QMutex>
 #include "settingsmanager.h"
 #include "py_hobbits.h"
+
+PyObject* callFunction(PyObject* module, const char* name, PyObject* args = nullptr);
+PyObject* hobbitsTypeWrapper(PyObject* hobbitsModule, const char* typeName, void *toWrap);
+PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg);
+QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors = QStringList());
 
 static QMutex mutex;
 static bool hobbitsAppended;
@@ -117,7 +126,7 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<
     return finalize(stdoutFile, stderrFile, errors);
 }
 
-PyObject* PythonInterpreter::callFunction(PyObject *module, const char *name, PyObject *args)
+PyObject* callFunction(PyObject *module, const char *name, PyObject *args)
 {
     PyObject* func = PyObject_GetAttrString(module, name);
     PyObject *result = nullptr;
@@ -134,7 +143,7 @@ PyObject* PythonInterpreter::callFunction(PyObject *module, const char *name, Py
     return result;
 }
 
-PyObject *PythonInterpreter::hobbitsTypeWrapper(PyObject *hobbitsModule, const char *typeName, void *toWrap)
+PyObject* hobbitsTypeWrapper(PyObject *hobbitsModule, const char *typeName, void *toWrap)
 {
     PyObject* type = PyObject_GetAttrString(hobbitsModule, typeName);
     PyObject* capsule = PyCapsule_New(toWrap, nullptr, nullptr);
@@ -144,24 +153,24 @@ PyObject *PythonInterpreter::hobbitsTypeWrapper(PyObject *hobbitsModule, const c
     return instance;
 }
 
-PyObject *PythonInterpreter::parseArg(PyObject *hobbitsModule, PythonArg *arg)
+PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
 {
-    if (arg->m_type == PythonArg::HobbitsWrapper) {
-        auto obj = hobbitsTypeWrapper(hobbitsModule, arg->m_wrapType.toStdString().c_str(), arg->m_pointer);
+    if (arg->type() == PythonArg::HobbitsWrapper) {
+        auto obj = hobbitsTypeWrapper(hobbitsModule, arg->wrapType().toStdString().c_str(), arg->pointer());
         if (!obj) {
             return nullptr;
         }
-        return Py_BuildValue(arg->m_argSymbol.toStdString().c_str(), obj);
+        return Py_BuildValue(arg->argSymbol().toStdString().c_str(), obj);
     }
-    else if (arg->m_type == PythonArg::String) {
-        return Py_BuildValue(arg->m_argSymbol.toStdString().c_str(), arg->m_stringData.toStdString().c_str());
+    else if (arg->type() == PythonArg::String) {
+        return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->stringData().toStdString().c_str());
     }
     else {
         return nullptr;
     }
 }
 
-QSharedPointer<PythonResult> PythonInterpreter::finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors)
+QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors)
 {
     if (Py_FinalizeEx() != 0) {
         errors.append("Error encountered in Py_FinalizeEx()");
