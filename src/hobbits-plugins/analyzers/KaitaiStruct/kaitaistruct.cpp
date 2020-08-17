@@ -271,11 +271,11 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     auto result = watcher->result();
 
     QString output = "";
-    if (!result->stdout().isEmpty()) {
-        output += "Python stdout:\n" + result->stdout() + "\n\n";
+    if (!result->getStdOut().isEmpty()) {
+        output += "Python stdout:\n" + result->getStdOut() + "\n\n";
     }
-    if (!result->stderr().isEmpty()) {
-        output += "Python stderr:\n" + result->stderr() + "\n\n";
+    if (!result->getStdErr().isEmpty()) {
+        output += "Python stderr:\n" + result->getStdErr() + "\n\n";
     }
     if (!result->errors().isEmpty()) {
         output += "Other errors:\n" + result->errors().join("\n") + "\n\n";

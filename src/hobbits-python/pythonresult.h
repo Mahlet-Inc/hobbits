@@ -13,8 +13,8 @@ public:
     static QSharedPointer<PythonResult> result(QStringList errors);
     static QSharedPointer<PythonResult> result(QFile &stdoutFile, QFile &stderrFile, QStringList errors);
 
-    QString stdout() const;
-    QString stderr() const;
+    QString getStdOut() const;
+    QString getStdErr() const;
     QStringList errors() const;
 
 private:

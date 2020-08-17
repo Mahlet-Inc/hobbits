@@ -10,12 +10,12 @@ QStringList PythonResult::errors() const
     return m_errors;
 }
 
-QString PythonResult::stderr() const
+QString PythonResult::getStdErr() const
 {
     return m_stderr;
 }
 
-QString PythonResult::stdout() const
+QString PythonResult::getStdOut() const
 {
     return m_stdout;
 }
