@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 requires(defined(HOBBITS_PYPATH, var))
+message(HOBBITS_PYPATH: $$HOBBITS_PYPATH)
 
 QT       -= gui
 

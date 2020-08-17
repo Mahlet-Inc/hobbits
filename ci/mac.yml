@@ -83,6 +83,8 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
       cp $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.*dylib hobbits.app/Contents/Frameworks
       cp -r $(Build.SourcesDirectory)/hobbits_python hobbits.app/Contents/Frameworks/python
+      find hobbits.app/Contents/Frameworks/python/lib -name "*.dylib*" -type f -exec chmod +x {} \;
+      chmod +x hobbits.app/Contents/Frameworks/python/bin/*
       mkdir -p hobbits.app/Contents/Frameworks/QtNetwork.framework/Versions/5/
       cd hobbits.app/Contents/Frameworks/QtNetwork.framework
       cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/Resources Versions/5/
