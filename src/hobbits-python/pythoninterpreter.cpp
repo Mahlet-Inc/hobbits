@@ -19,7 +19,7 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<
 {
     QMutexLocker lock(&mutex);
 
-    QTemporaryDir temp("HobbitsPythonXXXXXX");
+    QTemporaryDir temp(QDir::temp().absoluteFilePath("HobbitsPythonXXXXXX"));
 
     QFile stderrFile(temp.filePath("stderr.log"));
     QFile stdoutFile(temp.filePath("stdout.log"));
