@@ -57,6 +57,9 @@ INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
 
 defined(HOBBITS_PYPATH, var) {
+    message(Building hobbits-gui with python support...)
+    DEFINES += HAS_EMBEDDED_PYTHON
+
     LIBS += -L$$OUT_PWD/../hobbits-python/ -lhobbits-python
     INCLUDEPATH += $$PWD/../hobbits-python
     DEPENDPATH += $$PWD/../hobbits-python

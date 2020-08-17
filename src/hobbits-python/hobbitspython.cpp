@@ -12,6 +12,16 @@ HobbitsPython& HobbitsPython::getInstance()
     return instance;
 }
 
+QString HobbitsPython::pythonVersion()
+{
+#ifdef PYTHON_LINK_LIB
+    QString version = PYTHON_LINK_LIB;
+#else
+    QString version = "Unknown Version";
+#endif
+    return version;
+}
+
 QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(
         QSharedPointer<PythonRequest> request,
         bool includeActionProgressArg)

@@ -223,7 +223,6 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     kscProcess.setWorkingDirectory(dir.path());
     kscProcess.setStandardErrorFile(errorFile.fileName());
     kscProcess.setStandardOutputFile(stdoutFile.fileName());
-    kscProcess.start(kscPath, kscAgs);
 #ifdef Q_OS_WIN
     kscProcess.start("cmd.exe", kscAgs);
 #else

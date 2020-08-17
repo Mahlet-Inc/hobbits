@@ -1020,16 +1020,23 @@ void MainWindow::pluginActionProgress(QUuid id, int progress)
     m_pluginProgress.value(id)->progressBar->setValue(progress);
 }
 
+#ifdef HAS_EMBEDDED_PYTHON
+#include "hobbitspython.h"
+#endif
+
 void MainWindow::on_action_About_triggered()
 {
     QString coreLibVersion = HobbitsCoreInfo::getLibVersion();
     QString guiVersion = HobbitsGuiInfo::getGuiVersion();
 
+    QString info =  QString("Hobbits GUI Version: %1\nHobbits Core Version: %2").arg(guiVersion).arg(coreLibVersion);
+#ifdef HAS_EMBEDDED_PYTHON
+    info += QString("\nIntegrated Python: %1").arg(HobbitsPython::pythonVersion());
+#endif
+
     QMessageBox msg;
     msg.setWindowTitle("About Hobbits");
-    msg.setText(
-            QString("Hobbits GUI Version: %1\nHobbits Core Version: %2").arg(guiVersion).arg(
-                    coreLibVersion));
+    msg.setText(info);
     msg.setDefaultButton(QMessageBox::Ok);
     msg.setIconPixmap(QIcon(":/hobbitsgui/images/icons/HobbitsRingSmall.png").pixmap(64, 64));
     msg.exec();

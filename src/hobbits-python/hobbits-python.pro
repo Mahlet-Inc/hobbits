@@ -50,6 +50,26 @@ DEPENDPATH += $$PWD/../hobbits-core
 include(python-link.pri)
 
 unix:!mac {
+    PY_LIB = $$files($$HOBBITS_PYPATH/lib/*.*.so)
+    PY_LIB = $$first(PY_LIB)
+    PY_LIB = $$basename(PY_LIB)
+}
+
+mac {
+    PY_LIB = $$files($$HOBBITS_PYPATH/lib/*.*.dylib)
+    PY_LIB = $$first(PY_LIB)
+    PY_LIB = $$basename(PY_LIB)
+}
+
+win32 {
+    PY_LIB = $$files($$HOBBITS_PYPATH/lib/*.lib)
+    PY_LIB = $$first(PY_LIB)
+    PY_LIB = $$basename(PY_LIB)
+}
+
+DEFINES += "PYTHON_LINK_LIB=\"\\\"$$PY_LIB\\\"\""
+
+unix:!mac {
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../python/lib:\$$ORIGIN\'"
 }
