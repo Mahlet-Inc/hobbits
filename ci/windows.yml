@@ -86,6 +86,7 @@ steps:
       forfiles /p $(Build.SourcesDirectory)\src\hobbits-plugins\operators\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release\plugins\operators\ "
       forfiles /p $(Build.BinariesDirectory)\Qt\Tools\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\release "
       xcopy $(Build.SourcesDirectory)\src\hobbits-core\hobbits-core.dll release\
+      xcopy $(Build.SourcesDirectory)\src\hobbits-python\hobbits-python.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms release\platforms /i
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Concurrent.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Core.dll release\
