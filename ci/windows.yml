@@ -96,7 +96,7 @@ steps:
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libEGL.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libGLSv2.dll release\
       xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\opengl32sw.dll release\
-      xcopy /s /e /f $(Build.SourcesDirectory)\hobbits_python\bin $(Build.BinariesDirectory)\release\ "
+      xcopy /s /e /f $(Build.SourcesDirectory)\hobbits_python\bin $(Build.BinariesDirectory)\release\
     displayName: 'Collect release files'
   
   - task: ArchiveFiles@2
