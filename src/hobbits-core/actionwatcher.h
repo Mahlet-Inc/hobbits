@@ -6,10 +6,8 @@
 #include <QFutureWatcher>
 #include <QObject>
 
-#include "hobbits-core_global.h"
-
 template<class T>
-class HOBBITSCORESHARED_EXPORT ActionWatcher
+class Q_DECL_EXPORT ActionWatcher
 {
 public:
     explicit ActionWatcher(QFuture<T> future, QSharedPointer<ActionProgress> progress) :

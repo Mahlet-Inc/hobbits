@@ -8,8 +8,8 @@
 #include <QProcessEnvironment>
 #include <QJsonArray>
 #include <QDirIterator>
+#include "hobbitspython.h"
 
-const QString PYTHON_PATH_KEY = "python_runner_path";
 const QString KAITAI_PATH_KEY = "kaitai_struct_compiler_path";
 const QString KSY_PATH_KEY = "ksy_directory_path";
 const QString KAITAI_STRUCT_CATEGORY = "kaitai_struct";
@@ -87,26 +87,8 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
 
     ui->pb_loadKsy->setMenu(m_loadKsyMenu);
 
-    connect(ui->tb_choosePython, SIGNAL(pressed()), this, SLOT(openPythonPathDialog()));
     connect(ui->tb_chooseKsc, SIGNAL(pressed()), this, SLOT(openKscPathDialog()));
-    ui->le_python->setText(SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString());
     ui->le_ksc->setText(SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString());
-
-    // Auto-locate if empty
-    if (ui->le_python->text().isEmpty()) {
-        QString pythonPath = QStandardPaths::findExecutable("python3");
-        if (!pythonPath.isEmpty()) {
-            ui->le_python->setText(pythonPath);
-            SettingsManager::getInstance().setPrivateSetting(PYTHON_PATH_KEY, pythonPath);
-        }
-        else {
-            pythonPath = QStandardPaths::findExecutable("python");
-            if (!pythonPath.isEmpty()) {
-                ui->le_python->setText(pythonPath);
-                SettingsManager::getInstance().setPrivateSetting(PYTHON_PATH_KEY, pythonPath);
-            }
-        }
-    }
 
     m_highlightNav = new HighlightNavigator(widget);
     ui->layout_nav->addWidget(m_highlightNav);
@@ -116,20 +98,6 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
     m_highlightNav->setPluginCallback(m_pluginCallback);
     m_highlightNav->setHighlightCategory(KAITAI_STRUCT_CATEGORY);
     m_highlightNav->setShouldHighlightSelection(true);
-}
-
-void KaitaiStruct::openPythonPathDialog()
-{
-    QString fileName = QFileDialog::getOpenFileName(
-            nullptr,
-            tr("Select Python"),
-            SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString(),
-            tr("Python (python*)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
-    ui->le_python->setText(fileName);
-    SettingsManager::getInstance().setPrivateSetting(PYTHON_PATH_KEY, fileName);
 }
 
 void KaitaiStruct::openKscPathDialog()
@@ -210,11 +178,6 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progressTracker->setProgressPercent(2);
 
-    QString pythonPath = SettingsManager::getInstance().getPrivateSetting(PYTHON_PATH_KEY).toString();
-    if (pythonPath.isEmpty()) {
-        return AnalyzerResult::error("A Python path must be specified");
-    }
-
     QString kscPath = SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString();
     if (kscPath.isEmpty()) {
         return AnalyzerResult::error("A Kaitai Struct Compiler path must be specified");
@@ -234,11 +197,6 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     inputBitFile.close();
 
     progressTracker->setProgressPercent(10);
-
-    QString coreScriptName = dir.filePath("core_script.py");
-    QFile::copy(":/kaitaistruct/scripts/runner.py", coreScriptName);
-    QFile coreScriptFile(coreScriptName);
-    coreScriptFile.setPermissions(QFile::ReadOwner | QFile::ExeOwner | QFile::WriteOwner);
 
     QFile errorFile(dir.filePath("error.log"));
     QFile stdoutFile(dir.filePath("stdout.log"));
@@ -265,7 +223,6 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     kscProcess.setWorkingDirectory(dir.path());
     kscProcess.setStandardErrorFile(errorFile.fileName());
     kscProcess.setStandardOutputFile(stdoutFile.fileName());
-    kscProcess.start(kscPath, kscAgs);
 #ifdef Q_OS_WIN
     kscProcess.start("cmd.exe", kscAgs);
 #else
@@ -300,60 +257,37 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         stdoutFile.close();
     }
 
-    QStringList pythonArgs = {coreScriptFile.fileName(), inputBitFile.fileName(), outputRangeFile.fileName()};
-    QProcess pythonProcess;
-    pythonProcess.setProcessEnvironment(envUpdate);
-    pythonProcess.setWorkingDirectory(dir.path());
-    pythonProcess.setStandardErrorFile(errorFile.fileName());
-    pythonProcess.setStandardOutputFile(stdoutFile.fileName());
-    pythonProcess.start(pythonPath, pythonArgs);
 
-    bool hasCancelled = false;
-    while (!pythonProcess.waitForFinished(250)) {
-        if (progressTracker->getCancelled() && !hasCancelled) {
-            QFile abortFile(dir.filePath("abort"));
-            abortFile.open(QIODevice::WriteOnly);
-            abortFile.close();
-            hasCancelled = true;
-        }
-        QFile progressFile(dir.filePath("progress"));
-        if (progressFile.exists()) {
-            if (progressFile.open(QIODevice::ReadOnly)) {
-                QJsonDocument progressData = QJsonDocument::fromJson((progressFile.readAll()));
-                QJsonObject progressJson = progressData.object();
-                if (progressJson.contains("progress") && progressJson.value("progress").isDouble()) {
-                    int progress = int(progressJson.value("progress").toDouble()/45.0);
-                    progressTracker->setProgressPercent(40 + progress);
-                }
-            }
-        }
+    QString pyDepDir = dir.filePath("pydeps");
+    HobbitsPython::recursiveDirCopy(":/kaitaistruct/scripts/dependencies", pyDepDir);
+
+    auto pyRequest = PythonRequest::create(":/kaitaistruct/scripts/runner.py")->setFunctionName("parse_data");
+    pyRequest->addPathExtension(pyDepDir);
+    pyRequest->addArg(PythonArg::qString(inputBitFile.fileName()));
+    pyRequest->addArg(PythonArg::qString(outputRangeFile.fileName()));
+    auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, true);
+    watcher->watcher()->future().waitForFinished();
+    auto result = watcher->result();
+
+    QString output = "";
+    if (!result->getStdOut().isEmpty()) {
+        output += "Python stdout:\n" + result->getStdOut() + "\n\n";
+    }
+    if (!result->getStdErr().isEmpty()) {
+        output += "Python stderr:\n" + result->getStdErr() + "\n\n";
+    }
+    if (!result->errors().isEmpty()) {
+        output += "Other errors:\n" + result->errors().join("\n") + "\n\n";
+    }
+    if (!output.isEmpty()) {
+        QMetaObject::invokeMethod(
+                this,
+                "updateOutputText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, output));
     }
 
     progressTracker->setProgressPercent(85);
-
-    if (errorFile.open(QIODevice::ReadOnly)) {
-        QString output = errorFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "Python stderr:\n" + output + "\n\n"));
-        }
-        errorFile.close();
-    }
-
-    if (stdoutFile.open(QIODevice::ReadOnly)) {
-        QString output = stdoutFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "Python stdout:\n" + output + "\n\n"));
-        }
-        stdoutFile.close();
-    }
 
     if (!outputRangeFile.exists()) {
         QString errorString = "No analysis file was produced - check the Output tab to see if ksc or python produced any errors.";

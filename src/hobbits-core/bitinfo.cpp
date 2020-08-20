@@ -42,6 +42,14 @@ void BitInfo::setFrames(QVector<Range> frames)
     initFrames();
 }
 
+void BitInfo::setFramesFromInfo(QSharedPointer<BitInfo> frameSource)
+{
+    m_mutex.lock();
+    m_ranges = frameSource->m_ranges;
+    m_mutex.unlock();
+    initFrames();
+}
+
 qint64 BitInfo::maxFrameWidth() const
 {
     return m_maxFrameWidth;

@@ -30,7 +30,7 @@ public:
     QScrollBar* getVScroll();
     QScrollBar* getHScroll();
 
-signals:
+Q_SIGNALS:
     void newBitContainer();
     void newOffsets(int bitOffset, int frameOffset);
     void newBitHover(bool, int, int);
@@ -38,13 +38,13 @@ signals:
 
     void containerChanged();
 
-public slots:
+public Q_SLOTS:
     void setOffsets(int bitOffset, int frameOffset);
     void setBitHover(bool hovering, int bitOffset, int frameOffset);
     void setFocusDisplays(QSet<DisplayInterface*> focusDisplays);
     void bitContainerSelected();
 
-private slots:
+private Q_SLOTS:
     void offsetChanged();
 
 private:

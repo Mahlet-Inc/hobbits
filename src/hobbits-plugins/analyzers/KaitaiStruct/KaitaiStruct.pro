@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+requires(defined(HOBBITS_PYPATH, var))
+
 QT       += widgets
 
 QT       -= gui
@@ -39,9 +41,12 @@ RESOURCES += \
     kaitaiscripts.qrc
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+LIBS += -L$$OUT_PWD/../../../hobbits-python/ -lhobbits-python
+INCLUDEPATH += $$PWD/../../../hobbits-python
+DEPENDPATH += $$PWD/../../../hobbits-python
 
 unix:!mac{
     QMAKE_LFLAGS_RPATH=

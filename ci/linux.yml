@@ -2,10 +2,28 @@ parameters:
   - name: artifactName
     type: string
     default: linux_release
+  - name: pythonArtifact
+    type: string
+    default: python_linux
 
 steps:
   - checkout: self
     persistCredentials: true
+
+  - bash: |
+      BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
+      echo "Build ID: ${BUILD_ID}"
+      curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
+      unzip hobbits_python.zip
+      rm -fv hobbits_python.zip
+      mv ${PYTHON_ARTIFACT} hobbits_python
+      cd hobbits_python
+      tar xvf ${PYTHON_ARTIFACT}.tgz
+      rm -fv ${PYTHON_ARTIFACT}.tgz
+      ls -l $(Build.SourcesDirectory)/hobbits_python
+    env:
+      PYTHON_ARTIFACT: ${{ parameters.pythonArtifact }}
+    displayName: 'Get hobbits python artifact'
 
   - bash: |
       rm .releaserc.json
@@ -23,7 +41,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $QMAKE_BIN $(cat qmake_args)
+      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python -d
     displayName: 'Run qmake'
 
   - script: |
@@ -41,6 +59,8 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
+      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
+      cp `ldd $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so | grep libpython | awk '{print $3}'` release/lib
       cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
       cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* release/lib
@@ -59,8 +79,11 @@ steps:
       cp --preserve=links /usr/lib/libfftw3.so* release/lib
       cp --preserve=links /usr/local/lib/libfftw3.so* release/lib
       cp --preserve=links /usr/local/lib64/libfftw3.so* release/lib
+      cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
+      find release/python -name "*.so*" -type f -exec chmod +x {} \;
+      chmod +x release/python/bin/*
       cd release
-      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins
+      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins python
     displayName: 'Collect and package release files'
   
   - bash: |

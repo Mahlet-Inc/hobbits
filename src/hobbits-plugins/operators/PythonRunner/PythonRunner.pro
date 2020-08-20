@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+requires(defined(HOBBITS_PYPATH, var))
+
 QT       += widgets
 
 QT       -= gui
@@ -37,9 +39,12 @@ FORMS +=        pythonrunner.ui
 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+LIBS += -L$$OUT_PWD/../../../hobbits-python/ -lhobbits-python
+INCLUDEPATH += $$PWD/../../../hobbits-python
+DEPENDPATH += $$PWD/../../../hobbits-python
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
@@ -52,11 +57,10 @@ mac {
 }
 
 unix {
-    target.path = target.path = $$(HOME)/.local/share/hobbits/plugins/operators
+    target.path = $$(HOME)/.local/share/hobbits/plugins/operators
     INSTALLS += target
 }
 
-DISTFILES +=     
+DISTFILES +=
 
-RESOURCES += \
-    scripts.qrc
+RESOURCES +=

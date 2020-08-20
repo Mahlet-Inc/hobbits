@@ -7,23 +7,7 @@ import os
 
 from kaitaistruct import KaitaiStruct
 
-class OperationCancelled(Exception):
-    """Raised when the operation is cancelled"""
-    pass
-
-class OperatorHandle:
-    def __init__(self):
-        pass
-
-    def check_cancelled(self):
-        if os.path.exists('abort'):
-            raise OperationCancelled("Operation was cancelled")
-
-    def set_progress(self, progress):
-        with open('progress', 'w') as progress_file:
-            json.dump({"progress": progress}, progress_file)
-
-def dumpStruct(s, sections, prefix=""):
+def dump_struct(s, sections, prefix=""):
     if isinstance(s, list):
         for i, item in enumerate(s):
             label = prefix + "[" + str(i) + "]"
@@ -31,7 +15,7 @@ def dumpStruct(s, sections, prefix=""):
                 "label": label,
                 "parent": prefix
             })
-            dumpStruct(item, sections, label)
+            dump_struct(item, sections, label)
     elif isinstance(s, KaitaiStruct):
         if hasattr(s, "_debug"):
             for name, descr in s._debug.items():
@@ -44,39 +28,33 @@ def dumpStruct(s, sections, prefix=""):
                         "label": label,
                         "parent": prefix
                     })
-                    dumpStruct(prop, sections, label)
+                    dump_struct(prop, sections, label)
 
-if __name__ == "__main__":
-    input_filename = sys.argv[1]
-    output_filename = sys.argv[2]
-
-    scripts = glob.glob('*.py')
-    
-    module_file = ""
-    for script in scripts:
-        if script != os.path.basename(__file__):
-            module_file = script
-            break
+def parse_data(input_filename, output_filename, action_progress):
+    # locate the compiled struct module
+    scripts = glob.glob(os.path.join(os.path.dirname(input_filename), '*.py'))
+    if len(scripts) < 1:
+        raise FileNotFoundError('Could not find the expected python kaitai parser - did the kaitai struct compiler fail?')
+    module_file = os.path.basename(scripts[0])
+    sys.path.append(os.path.dirname(scripts[0]))
     package_name = os.path.splitext(module_file)[0]
     class_name = package_name.capitalize()
     struct_module = importlib.__import__(package_name, fromlist=[class_name])
     Struct = getattr(struct_module, class_name)
 
-    operator_handle = OperatorHandle()
-    operator_handle.check_cancelled()
-    operator_handle.set_progress(5)
+    action_progress.set_progress_percent(5)
 
+    # parse the input data
     target = Struct.from_file(input_filename)
     target._read()
 
-    operator_handle.check_cancelled()
-    operator_handle.set_progress(70)
+    action_progress.set_progress_percent(70)
 
+    # write the parser result to the output
     sections = []
-    dumpStruct(target, sections)
+    dump_struct(target, sections)
 
-    operator_handle.check_cancelled()
-    operator_handle.set_progress(80)
+    action_progress.set_progress_percent(80)
 
     output_json = {
     "sections": sections

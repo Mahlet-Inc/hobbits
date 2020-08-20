@@ -36,10 +36,10 @@ public:
     QList<QSharedPointer<BitContainer>> getContainers() const;
     QSharedPointer<BitContainer> getContainerById(QUuid id) const;
 
-signals:
+Q_SIGNALS:
     void containerAdded(QSharedPointer<BitContainer> bitContainer);
 
-public slots:
+public Q_SLOTS:
     void updateAll();
 
 private:

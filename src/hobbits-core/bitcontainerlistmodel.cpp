@@ -1,5 +1,6 @@
 #include "bitcontainerlistmodel.h"
 #include "displayhelper.h"
+#include <QPixmap>
 
 BitContainerListModel::BitContainerListModel(QObject *parent) :
     QAbstractListModel(parent)

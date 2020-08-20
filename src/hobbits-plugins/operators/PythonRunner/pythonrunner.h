@@ -5,11 +5,9 @@
 #include "operatorinterface.h"
 #include "pluginstatehelper.h"
 
-
 namespace Ui
 {
 class PythonRunner;
-
 }
 
 class PythonRunner : public QObject, OperatorInterface
@@ -40,8 +38,7 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
 
-public slots:
-    void openPythonPathDialog();
+public Q_SLOTS:
     void openHelpDialog();
 
     void updateOutputText(QString);
@@ -52,6 +49,7 @@ private:
     QSharedPointer<PluginCallback> m_pluginCallback;
     QSharedPointer<PluginStateHelper> m_stateHelper;
     QString m_outputText;
+    bool m_hasUi;
 };
 
 #endif // PYTHONRUNNER_H

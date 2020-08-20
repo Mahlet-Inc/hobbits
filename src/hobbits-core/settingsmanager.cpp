@@ -114,6 +114,16 @@ void SettingsManager::setAll(const SettingsData &data)
     writeSettings();
 }
 
+QVariant SettingsManager::getTransientSetting(const QString &key)
+{
+    return m_data.getTransientSetting(key);
+}
+
+void SettingsManager::setTransientSetting(const QString &key, const QVariant &value)
+{
+    m_data.setTransientSetting(key, value);
+}
+
 QVariant SettingsManager::getPrivateSetting(const QString &key)
 {
     readSettings();

@@ -22,6 +22,7 @@ public:
 
     void setBits(QSharedPointer<const BitArray> bits);
     void setFrames(QVector<Range> frames);
+    void setFramesFromInfo(QSharedPointer<BitInfo> frameSource);
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
     void setMetadata(QString key, QVariant value);
@@ -40,7 +41,7 @@ public:
     friend QDataStream& operator<<(QDataStream&, const BitInfo&);
     friend QDataStream& operator>>(QDataStream&, BitInfo&);
 
-signals:
+Q_SIGNALS:
     void changed();
 
 private:

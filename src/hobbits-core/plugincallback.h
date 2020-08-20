@@ -15,12 +15,12 @@ public:
 
     QSharedPointer<DisplayHandle> getDisplayHandle();
 
-signals:
+Q_SIGNALS:
     void operatorRunRequested(QString pluginName, QJsonObject pluginState);
     void analyzerRunRequested(QString pluginName, QJsonObject pluginState);
     void operatorStateChanged(QString pluginName);
 
-public slots:
+public Q_SLOTS:
     void sendOperatorStateChanged(QString pluginName);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState = QJsonObject());
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState = QJsonObject());

@@ -37,7 +37,6 @@ public:
             QSharedPointer<ActionProgress> progressTracker) override;
 
 private slots:
-    void openPythonPathDialog();
     void openKscPathDialog();
     void updateOutputText(QString text);
     void clearOutputText();

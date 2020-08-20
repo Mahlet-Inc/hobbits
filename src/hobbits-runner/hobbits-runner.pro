@@ -31,12 +31,23 @@ LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../hobbits-core
 DEPENDPATH += $$PWD/../hobbits-core
 
+defined(HOBBITS_PYPATH, var) {
+    message(Building hobbits-gui with python support...)
+    DEFINES += HAS_EMBEDDED_PYTHON
+
+    LIBS += -L$$OUT_PWD/../hobbits-python/ -lhobbits-python
+    INCLUDEPATH += $$PWD/../hobbits-python
+    DEPENDPATH += $$PWD/../hobbits-python
+
+    include($$PWD/../hobbits-python/python-link.pri)
+}
+
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN/../python/lib:\$$ORIGIN\'"
 }
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks,-rpath,@executable_path/../Frameworks/python/lib\'"
 }
