@@ -26,6 +26,8 @@ SOURCES += \
         hobbitspython.cpp \
         py_actionprogress.cpp \
         py_bitarray.cpp \
+        py_bitcontainer.cpp \
+        py_bitinfo.cpp \
         py_hobbits.cpp \
         pythonarg.cpp \
         pythoninterpreter.cpp \
@@ -37,6 +39,8 @@ HEADERS += \
         hobbits-python_global.h  \
         py_actionprogress.h \
         py_bitarray.h \
+        py_bitcontainer.h \
+        py_bitinfo.h \
         py_hobbits.h \
         pythonarg.h \
         pythoninterpreter.h \

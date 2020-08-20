@@ -6,11 +6,13 @@ const { execFileSync } = require("child_process");
 const glob = require('glob');
 const filecompare = require('filecompare');
 
-const argv = require('yargs').command('* <hobbits_runner>', 'Tests hobbits processing with known input/output files for various batches', (yargs) => {
+const argv = require('yargs').command('* <hobbits_runner> [python_home]', 'Tests hobbits processing with known input/output files for various batches', (yargs) => {
     yargs.positional('hobbits_runner', {
         describe: 'the path of the hobbits-runner binary you want to test',
         type: 'string'
-    });
+    }).positional('python_home', {
+        describe: 'optional PYTHONHOME path to pass to hobbits_runner'
+    })
 }).help().alias('help', 'h').argv;
 
 
@@ -60,6 +62,11 @@ async function runTests() {
                 '-b', batch,
                 '-o', testOutputPrefix
             ]
+
+            if (argv.python_home) {
+                args.push('--python-home')
+                args.push(argv.python_home)
+            }
 
             inputMatches.sort()
             inputMatches.forEach(input => {

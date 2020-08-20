@@ -22,6 +22,7 @@ public:
 
     void setBits(QSharedPointer<const BitArray> bits);
     void setFrames(QVector<Range> frames);
+    void setFramesFromInfo(QSharedPointer<BitInfo> frameSource);
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
     void setMetadata(QString key, QVariant value);

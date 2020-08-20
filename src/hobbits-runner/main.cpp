@@ -12,6 +12,10 @@
 #include "settingsmanager.h"
 #include <QJsonArray>
 
+#ifdef HAS_EMBEDDED_PYTHON
+#include "hobbitspython.h"
+#endif
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -19,11 +23,15 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Hobbits Runner");
     QCoreApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());
 
+    QString description = "Command-line interface for bitstream analysis and processing";
+#ifdef HAS_EMBEDDED_PYTHON
+    description += QString("(built with embedded python support from %1)").arg(HobbitsPython::pythonVersion());
+#endif
+
     QCommandLineParser parser;
-    parser.setApplicationDescription("Command-line interface for bitstream analysis and processing");
+    parser.setApplicationDescription(description);
     parser.addHelpOption();
     parser.addVersionOption();
-
 
     parser.addPositionalArgument(
             "mode",
@@ -64,6 +72,12 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(configFilePathOption);
 
+    QCommandLineOption pythonHomePathOption(
+        QStringList() << "python-home",
+            QCoreApplication::translate("main", "Override the default embedded python location"),
+            QCoreApplication::translate("main", "path"));
+    parser.addOption(pythonHomePathOption);
+
     parser.process(a);
 
     QTextStream out(stdout);
@@ -89,6 +103,11 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(configFilePathOption)) {
         SettingsManager::getInstance().setConfigFilePath(parser.value(configFilePathOption));
+    }
+
+    if (parser.isSet(pythonHomePathOption)) {
+        SettingsManager::getInstance().setTransientSetting(SettingsData::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
+        err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << endl;
     }
 
     // Initialize some stuff

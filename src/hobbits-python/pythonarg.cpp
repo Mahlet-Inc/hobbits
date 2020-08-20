@@ -61,6 +61,46 @@ PythonArg *PythonArg::actionProgress(QSharedPointer<ActionProgress> progress)
     return arg;
 }
 
+PythonArg *PythonArg::bitContainer(QSharedPointer<BitContainer> container)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::HobbitsWrapper;
+    arg->m_wrapType = "BitContainer";
+    arg->m_argSymbol = "O";
+    arg->m_pointer = container.data();
+    return arg;
+}
+
+PythonArg *PythonArg::constBitContainer(QSharedPointer<const BitContainer> container)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::HobbitsWrapper;
+    arg->m_wrapType = "ImmutableBitContainer";
+    arg->m_argSymbol = "O";
+    arg->m_pointer = const_cast<BitContainer*>(container.data());
+    return arg;
+}
+
+PythonArg *PythonArg::bitInfo(QSharedPointer<BitInfo> info)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::HobbitsWrapper;
+    arg->m_wrapType = "BitInfo";
+    arg->m_argSymbol = "O";
+    arg->m_pointer = info.data();
+    return arg;
+}
+
+PythonArg *PythonArg::constBitInfo(QSharedPointer<const BitInfo> info)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::HobbitsWrapper;
+    arg->m_wrapType = "ImmutableBitInfo";
+    arg->m_argSymbol = "O";
+    arg->m_pointer = const_cast<BitInfo*>(info.data());
+    return arg;
+}
+
 PythonArg *PythonArg::qString(QString s)
 {
     PythonArg *arg = new PythonArg();

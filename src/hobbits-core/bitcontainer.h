@@ -3,12 +3,9 @@
 
 #include "frame.h"
 
-#include <QBitArray>
-#include <QColor>
 #include <QJsonDocument>
 #include <QMap>
 #include <QObject>
-#include <QPixmap>
 #include <QSharedPointer>
 #include <QUuid>
 #include "bitinfo.h"
@@ -17,6 +14,9 @@
 
 class PluginActionLineage;
 class PluginAction;
+
+class QColor;
+class QPixmap;
 
 class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {

@@ -194,6 +194,9 @@ void DisplayBase::drawHighlights(
     if (m_displayHandle->getContainer().isNull()) {
         return;
     }
+    if (frameOffset < 0 || bitOffset < 0) {
+        return;
+    }
 
     painter->setPen(Qt::transparent);
     for (QString category: m_displayHandle->getContainer()->bitInfo()->highlightCategories()) {

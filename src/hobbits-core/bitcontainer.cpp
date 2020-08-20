@@ -3,6 +3,8 @@
 #include "settingsmanager.h"
 #include <QBuffer>
 #include <QDebug>
+#include <QColor>
+#include <QPixmap>
 
 BitContainer::BitContainer(QObject *parent) :
     QObject(parent),

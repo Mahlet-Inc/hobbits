@@ -49,6 +49,7 @@ private:
     QSharedPointer<PluginCallback> m_pluginCallback;
     QSharedPointer<PluginStateHelper> m_stateHelper;
     QString m_outputText;
+    bool m_hasUi;
 };
 
 #endif // PYTHONRUNNER_H

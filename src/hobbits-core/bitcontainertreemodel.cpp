@@ -1,5 +1,6 @@
 #include "bitcontainertreemodel.h"
 #include "displayhelper.h"
+#include <QPixmap>
 
 BitContainerTreeModel::BitContainerTreeModel(QObject *parent) :
     QAbstractItemModel(parent)

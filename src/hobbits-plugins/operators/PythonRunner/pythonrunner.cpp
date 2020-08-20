@@ -16,7 +16,8 @@
 
 PythonRunner::PythonRunner() :
     ui(new Ui::PythonRunner()),
-    m_stateHelper(new PluginStateHelper())
+    m_stateHelper(new PluginStateHelper()),
+    m_hasUi(false)
 {
     m_stateHelper->addTextEditStringParameter("script", [this](){return ui->te_pythonScript;});
 }
@@ -36,6 +37,7 @@ void PythonRunner::provideCallback(QSharedPointer<PluginCallback> pluginCallback
 void PythonRunner::applyToWidget(QWidget *widget)
 {
     ui->setupUi(widget);
+    m_hasUi = true;
 
     ui->te_pluginOutput->hide();
 
@@ -117,9 +119,11 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     userScriptFile.close();
 
     auto outputBits = QSharedPointer<BitArray>(new BitArray());
+    auto outputInfo = QSharedPointer<BitInfo>(new BitInfo());
     auto pyRequest = PythonRequest::create(userScriptFile.fileName())->setFunctionName("process_bits");
-    pyRequest->addArg(PythonArg::constBitArray(inputContainers.at(0)->bits()));
+    pyRequest->addArg(PythonArg::constBitContainer(inputContainers.at(0)));
     pyRequest->addArg(PythonArg::bitArray(outputBits));
+    pyRequest->addArg(PythonArg::bitInfo(outputInfo));
     auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, progressTracker);
     watcher->watcher()->future().waitForFinished();
     auto result = watcher->result();
@@ -144,6 +148,8 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
 
     QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
     outputContainer->setBits(outputBits);
+    outputInfo->setFramesFromInfo(outputContainer->bitInfo());
+    outputContainer->setBitInfo(outputInfo);
     outputContainer->setName(QString("python <- %1").arg(inputContainers.at(0)->name()));
 
     return OperatorResult::result({outputContainer}, recallablePluginState);
@@ -161,12 +167,16 @@ OperatorInterface* PythonRunner::createDefaultOperator()
 
 void PythonRunner::updateOutputText(QString text)
 {
-    ui->te_pluginOutput->appendPlainText(text);
-    ui->te_pluginOutput->show();
+    if (m_hasUi) {
+        ui->te_pluginOutput->appendPlainText(text);
+        ui->te_pluginOutput->show();
+    }
 }
 
 void PythonRunner::clearOutputText()
 {
-    ui->te_pluginOutput->hide();
-    ui->te_pluginOutput->clear();
+    if (m_hasUi) {
+        ui->te_pluginOutput->hide();
+        ui->te_pluginOutput->clear();
+    }
 }

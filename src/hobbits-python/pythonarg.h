@@ -2,8 +2,8 @@
 #define PYTHONARG_H
 
 #include <QString>
-#include "bitarray.h"
 #include "actionprogress.h"
+#include "bitcontainer.h"
 #include "hobbits-python_global.h"
 
 class HOBBITSPYTHONSHARED_EXPORT PythonArg
@@ -17,6 +17,10 @@ public:
     static PythonArg* bitArray(QSharedPointer<BitArray> bitArray);
     static PythonArg* constBitArray(QSharedPointer<const BitArray> bitArray);
     static PythonArg* actionProgress(QSharedPointer<ActionProgress> progress);
+    static PythonArg* bitContainer(QSharedPointer<BitContainer> container);
+    static PythonArg* constBitContainer(QSharedPointer<const BitContainer> container);
+    static PythonArg* bitInfo(QSharedPointer<BitInfo> info);
+    static PythonArg* constBitInfo(QSharedPointer<const BitInfo> info);
     static PythonArg* qString(QString s);
 
     Type type() const;

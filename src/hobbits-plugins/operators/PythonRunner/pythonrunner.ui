@@ -48,15 +48,17 @@
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>
        <property name="plainText">
-        <string>
-def process_bits(input, output, progress):
-  output.resize(input.size())
-  for i in range(0, input.size()):
-    output.set(i, not input.at(i))
+        <string># example of inverting and highlighting
+def process_bits(input, output_bits, output_info, progress):
+  if input.bits.size() &gt; 3000:
+    output_info.add_highlight(&quot;python&quot;, &quot;mychunk&quot;, 20, 3000)
+  output_bits.resize(input.bits.size())
+  for i in range(0, input.bits.size()):
+    output_bits.set(i, not input.bits.at(i))
     
     if progress.is_cancelled():
       return
-    progress.set_progress(i, input.size())</string>
+    progress.set_progress(i, input.bits.size())</string>
        </property>
       </widget>
      </item>

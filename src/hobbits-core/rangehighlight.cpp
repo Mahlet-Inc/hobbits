@@ -1,10 +1,11 @@
 #include "rangehighlight.h"
+#include <QColor>
 
 RangeHighlight::RangeHighlight(QString category, QString label, Range range, QColor color, QList<RangeHighlight> children) :
     m_category(category),
     m_label(label),
     m_range(range),
-    m_color(color),
+    m_color(color.rgba()),
     m_children(children)
 {
 
@@ -13,7 +14,7 @@ RangeHighlight::RangeHighlight(QString category, QString label, Range range, QCo
 RangeHighlight::RangeHighlight(QString category, QString label, QList<RangeHighlight> children, QColor color) :
     m_category(category),
     m_label(label),
-    m_color(color),
+    m_color(color.rgba()),
     m_children(children)
 {
     std::sort(m_children.begin(), m_children.end());
@@ -21,6 +22,11 @@ RangeHighlight::RangeHighlight(QString category, QString label, QList<RangeHighl
         return;
     }
     m_range = Range(m_children.first().range().start(), m_children.last().range().end());
+}
+
+RangeHighlight RangeHighlight::simple(QString category, QString label, Range range, unsigned int color)
+{
+    return RangeHighlight(category, label, range, QColor::fromRgba(color));
 }
 
 bool operator<(const RangeHighlight &a, const RangeHighlight &b)
@@ -43,9 +49,14 @@ Range RangeHighlight::range() const
     return m_range;
 }
 
-QColor RangeHighlight::color() const
+unsigned int RangeHighlight::rgbaColor() const
 {
     return m_color;
+}
+
+QColor RangeHighlight::color() const
+{
+    return QColor::fromRgba(m_color);
 }
 
 QList<RangeHighlight> RangeHighlight::children() const
@@ -81,10 +92,12 @@ QDataStream& operator>>(QDataStream& stream, RangeHighlight& highlight)
     QString version;
     stream >> version;
     if (version == VERSION_1 || version == VERSION_2) {
+        QColor c;
         stream >> highlight.m_category;
         stream >> highlight.m_label;
         stream >> highlight.m_range;
-        stream >> highlight.m_color;
+        stream >> c;
+        highlight.m_color = c.rgba();
         if (version == VERSION_2) {
             stream >> highlight.m_children;
         }

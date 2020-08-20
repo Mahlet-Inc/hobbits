@@ -172,6 +172,8 @@ PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
 
 QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors)
 {
+    PyRun_SimpleString("sys.stderr.close()");
+    PyRun_SimpleString("sys.stdout.close()");
     if (Py_FinalizeEx() != 0) {
         errors.append("Error encountered in Py_FinalizeEx()");
     }

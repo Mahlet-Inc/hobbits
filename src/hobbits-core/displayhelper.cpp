@@ -1,5 +1,6 @@
 #include "displayhelper.h"
 #include "settingsmanager.h"
+#include <QPixmap>
 
 QImage DisplayHelper::getBitRasterImage(QSharedPointer<const BitContainer> bits, qint64 x, qint64 y, int w, int h)
 {
