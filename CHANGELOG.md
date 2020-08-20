@@ -1,3 +1,10 @@
+# [0.35.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.34.1...v0.35.0) (2020-08-20)
+
+
+### Features
+
+* embed python into hobbits with a limited API for [#23](https://github.com/Mahlet-Inc/hobbits/issues/23) ([2f4ef03](https://github.com/Mahlet-Inc/hobbits/commit/2f4ef03fcb9f62dc96eec960e5d1c8a038cb6f96))
+
 ## [0.34.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.34.0...v0.34.1) (2020-07-17)
 
 
