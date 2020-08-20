@@ -1,10 +1,12 @@
 #include "py_bitinfo.h"
 #include "bitinfo.h"
 #include <QSharedPointer>
+#include <string>
 
 #include <structmember.h>
 
 #define BITINFO(X) static_cast<BitInfo*>(PyCapsule_GetPointer(X, nullptr))
+#define C_TEXT(X) const_cast<char*>(X)
 
 typedef struct {
     PyObject_HEAD
@@ -40,7 +42,7 @@ static int BitInfoPy_init(BitInfoPyObj *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
-static char* addHighlightKwargs[] = {"category", "label", "start", "end", "color", nullptr};
+static char* addHighlightKwargs[] = {C_TEXT("category"), C_TEXT("label"), C_TEXT("start"), C_TEXT("end"), C_TEXT("color"), nullptr};
 static PyObject* BitInfoPy_add_highlight(BitInfoPyObj *self, PyObject *args, PyObject *kwds)
 {
     char *category;
@@ -68,7 +70,7 @@ static PyObject* buildRangeHighlight(RangeHighlight highlight) {
                          "color", highlight.rgbaColor());
 }
 
-static char* getHighlightsKwargs[] = {"category", nullptr};
+static char* getHighlightsKwargs[] = {C_TEXT("category"), nullptr};
 static PyObject* BitInfoPy_get_highlights(BitInfoPyObj *self, PyObject *args, PyObject *kwds)
 {
     char *category;
