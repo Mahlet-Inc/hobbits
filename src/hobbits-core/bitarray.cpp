@@ -189,6 +189,22 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize) const
     return word;
 }
 
+qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize) const
+{
+    qint64 val = static_cast<qint64>(getWordValue(bitOffset, wordBitSize));
+    if (wordBitSize == 64) {
+        return val;
+    }
+    qint64 signBit = 1 << (wordBitSize-1);
+    if (signBit & val) {
+        auto r = (val - signBit) - signBit;
+        return r;
+    }
+    else {
+        return val;
+    }
+}
+
 bool BitArray::loadCacheAt(qint64 i) const
 {
     QMutexLocker lock(&m_cacheMutex);
