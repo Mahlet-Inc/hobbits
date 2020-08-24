@@ -2,12 +2,23 @@
 #define SPECTROGRAMWIDGET_H
 
 #include "displaybase.h"
+#include "fftw3.h"
 
 class SpectrogramWidget : public DisplayBase
 {
     Q_OBJECT
 
 public:
+    enum WordFormat {
+        Unsigned = 1,
+        TwosComplement = 2
+    };
+
+    enum DataType {
+        Real = 1,
+        RealComplexInterleaved = 2
+    };
+
     SpectrogramWidget(
             QSharedPointer<DisplayHandle> displayHandle,
             DisplayInterface *pluginRef,
@@ -18,12 +29,17 @@ public:
 
 public slots:
     void setScale(int);
-    void setStride(int);
-    void setFftSizeFactor(int);
+    void setOverlap(int);
+    void setFftSize(int);
     void setWordSize(int);
+    void setWordFormat(int);
+    void setDataType(int);
+    void setSensitivity(double);
 
 private:
-    QList<QVector<double>> computeStft(int wordSize, int windowSize, int stride, int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container);
+    int bitStride();
+    void fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container);
+    QList<QVector<double>> computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container);
     void prepareHeaders();
 
     int m_scale;
@@ -31,8 +47,12 @@ private:
     bool m_showColumnOffsets;
 
     int m_wordSize;
-    int m_stride;
-    int m_fftSizeFactor;
+    int m_overlap;
+    int m_fftSize;
+    WordFormat m_wordFormat;
+    DataType m_dataType;
+
+    double m_sensitivity;
 
     QPoint m_displayOffset;
     QSize m_headerFontSize;

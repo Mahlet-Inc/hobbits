@@ -37,10 +37,16 @@ void Spectrogram::initialize(QSharedPointer<DisplayHandle> displayHandle)
 
         connect(m_controlsWidget, &SpectrogramControls::wordSizeSet,
                 m_displayWidget, &SpectrogramWidget::setWordSize);
-        connect(m_controlsWidget, &SpectrogramControls::strideSet,
-                m_displayWidget, &SpectrogramWidget::setStride);
-        connect(m_controlsWidget, &SpectrogramControls::fftFactorSet,
-                m_displayWidget, &SpectrogramWidget::setFftSizeFactor);
+        connect(m_controlsWidget, &SpectrogramControls::overlapSet,
+                m_displayWidget, &SpectrogramWidget::setOverlap);
+        connect(m_controlsWidget, &SpectrogramControls::fftSizeSet,
+                m_displayWidget, &SpectrogramWidget::setFftSize);
+        connect(m_controlsWidget, &SpectrogramControls::wordFormatSet,
+                m_displayWidget, &SpectrogramWidget::setWordFormat);
+        connect(m_controlsWidget, &SpectrogramControls::dataTypeSet,
+                m_displayWidget, &SpectrogramWidget::setDataType);
+        connect(m_controlsWidget, &SpectrogramControls::sensitivitySet,
+                m_displayWidget, &SpectrogramWidget::setSensitivity);
 
         m_controlsWidget->sendCurrentValues();
     }

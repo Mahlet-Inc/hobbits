@@ -18,14 +18,19 @@ public:
 
 signals:
     void wordSizeSet(int);
-    void strideSet(int);
-    void fftFactorSet(int);
+    void overlapSet(int);
+    void fftSizeSet(int);
+    void wordFormatSet(int);
+    void dataTypeSet(int);
+    void sensitivitySet(double);
 
 private slots:
-    void on_sb_stride_valueChanged(int val);
-    void on_sb_fftFactor_valueChanged(int val);
+    void on_cb_wordFormat_currentIndexChanged(int index);
+    void on_cb_dataType_currentIndexChanged(int index);
 
-    void calculateFftSize();
+    void on_horizontalSlider_valueChanged(int value);
+
+    void on_hs_sensitivity_valueChanged(int value);
 
 private:
     Ui::SpectrogramControls *ui;

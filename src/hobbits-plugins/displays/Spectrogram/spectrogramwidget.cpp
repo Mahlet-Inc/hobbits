@@ -5,6 +5,7 @@
 #include "displayhelper.h"
 #include "fftw3.h"
 #include <QtMath>
+#include <QMouseEvent>
 #include "settingsmanager.h"
 
 #include <QDebug>
@@ -18,8 +19,11 @@ SpectrogramWidget::SpectrogramWidget(
     m_showFrameOffsets(false),
     m_showColumnOffsets(false),
     m_wordSize(8),
-    m_stride(512),
-    m_fftSizeFactor(4),
+    m_overlap(4),
+    m_fftSize(2048),
+    m_wordFormat(TwosComplement),
+    m_dataType(Real),
+    m_sensitivity(1.0),
     m_displayOffset(0, 0),
     m_headerFontSize(0, 0)
 {
@@ -39,20 +43,18 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     int displayWidth = (this->width() - m_displayOffset.x()) / m_scale;
     int displayHeight = (this->height() - m_displayOffset.y()) / m_scale;
 
-    int fftSize = m_stride*m_fftSizeFactor;
-
     qint64 bitOffset = m_displayHandle->getContainer()->frames().at(frameOffset).start();
-    auto spectrums = computeStft(m_wordSize, fftSize, m_stride, displayHeight, bitOffset, m_displayHandle->getContainer());
+    auto spectrums = computeStft(displayHeight, bitOffset, m_displayHandle->getContainer());
 
     QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
     qreal hue = c.hueF();
     qreal saturation = c.saturationF();
-    QImage raster(fftSize/2, displayHeight, QImage::Format_ARGB32);
+    QImage raster(m_fftSize/2, displayHeight, QImage::Format_ARGB32);
     raster.fill(qRgba(0x00, 0x00, 0x00, 0xff));
     for (int y = 0; y < spectrums.size(); y++) {
         auto spectrum = spectrums.at(y);
-        for (int x = 0; x < fftSize/2  && x < spectrum.size(); x++) {
-            qreal lightness = spectrum.at(x);
+        for (int x = 0; x < m_fftSize/2  && x < spectrum.size(); x++) {
+            qreal lightness = qBound(0.0, spectrum.at(x)*m_sensitivity, 1.0);
             c.setHslF(hue, saturation, lightness);
             raster.setPixel(x, y, c.rgba());
         }
@@ -60,11 +62,36 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
-    painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth, displayHeight), raster);
+    painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth*m_scale, displayHeight*m_scale), raster);
 }
 
 void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
-    sendHoverUpdate(event, 1, 1, 1, 1, QPoint(0, 0));
+    if (m_displayHandle->getContainer().isNull()) {
+        emit bitHover(false, 0, 0);
+        return;
+    }
+
+
+    int y = (event->y() - m_displayOffset.y())/m_scale;
+    if (y < 0) {
+        emit bitHover(false, 0, 0);
+        return;
+    }
+    int baseFrameOffset = m_displayHandle->getFrameOffset();
+    if (baseFrameOffset < 0 || baseFrameOffset > m_displayHandle->getContainer()->frames().size()) {
+        emit bitHover(false, 0, 0);
+        return;
+    }
+    qint64 baseBitOffset = m_displayHandle->getContainer()->frames().at(baseFrameOffset).start();
+    int bitsPerY = bitStride();
+    qint64 bitOffset = y * bitsPerY + baseBitOffset;
+    if (bitOffset >= m_displayHandle->getContainer()->bits()->sizeInBits()) {
+        emit bitHover(false, 0, 0);
+        return;
+    }
+    int frameOffset = m_displayHandle->getContainer()->bitInfo()->frameOffsetContaining(Range(bitOffset, bitOffset));
+
+    emit bitHover(event, 0, frameOffset);
 }
 
 void SpectrogramWidget::setScale(int val)
@@ -73,15 +100,15 @@ void SpectrogramWidget::setScale(int val)
     adjustScrollbars();
 }
 
-void SpectrogramWidget::setStride(int val)
+void SpectrogramWidget::setOverlap(int val)
 {
-    m_stride = val;
+    m_overlap = val;
     repaint();
 }
 
-void SpectrogramWidget::setFftSizeFactor(int val)
+void SpectrogramWidget::setFftSize(int val)
 {
-    m_fftSizeFactor = val;
+    m_fftSize = val;
     repaint();
 }
 
@@ -91,51 +118,106 @@ void SpectrogramWidget::setWordSize(int val)
     repaint();
 }
 
-QList<QVector<double>> SpectrogramWidget::computeStft(int wordSize, int windowSize, int stride, int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container)
+void SpectrogramWidget::setWordFormat(int val)
+{
+    m_wordFormat = static_cast<WordFormat>(val);
+    repaint();
+}
+
+void SpectrogramWidget::setDataType(int val)
+{
+    m_dataType = static_cast<DataType>(val);
+    repaint();
+}
+
+void SpectrogramWidget::setSensitivity(double val)
+{
+    m_sensitivity = val;
+    repaint();
+}
+
+int SpectrogramWidget::bitStride()
+{
+    int strideBits = m_fftSize;
+    if (m_overlap > 0) {
+        strideBits = m_fftSize / m_overlap;
+    }
+    strideBits *= m_wordSize;
+    return strideBits;
+}
+
+void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container)
+{
+    quint64 maxWordValue = 1;
+    maxWordValue <<= (m_wordSize - 1);
+    double wordInverse = 1.0 / double(maxWordValue);
+    int sampleSize = m_wordSize;
+    bool withComplex = (m_dataType == RealComplexInterleaved);
+    if (withComplex) {
+        sampleSize *= 2;
+    }
+    for (int i = 0; i < sampleCount; i++) {
+        qint64 offset = bitOffset + i*sampleSize;
+        if (offset+sampleSize >= container->bits()->sizeInBits()) {
+            buffer[i][0] = 0.0;
+            buffer[i][1] = 0.0;
+            continue;
+        }
+        if (m_wordFormat == TwosComplement) {
+            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize)) * wordInverse;
+        }
+        else {
+            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize)) * wordInverse;
+        }
+        if (withComplex) {
+            if (m_wordFormat == TwosComplement) {
+                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize)) * wordInverse;
+            }
+            else {
+                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize)) * wordInverse;
+            }
+        }
+        else {
+            buffer[i][1] = 0.0;
+        }
+    }
+}
+
+QList<QVector<double>> SpectrogramWidget::computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container)
 {
     QList<QVector<double>> spectrums;
-    if (wordSize > 64 || wordSize < 1) {
+    if (m_wordSize > 64 || m_wordSize < 1) {
         return spectrums;
     }
 
-    int sampleCount = maxSpectrums*stride + windowSize;
-    double *samples = new double[sampleCount];
-    int actualSamples = 0;
-    quint64 maxWordValue = 1;
-    maxWordValue <<= (wordSize - 1);
-    double wordInverse = 1.0 / double(maxWordValue);
-    for (int i = 0; i < sampleCount; i++) {
-        qint64 offset = bitOffset + i*wordSize;
-        if (offset+wordSize >= container->bits()->sizeInBits()) {
-            break;
-        }
-        samples[i] = double(container->bits()->getWordValueTwosComplement(offset, wordSize)) * wordInverse;
-        actualSamples++;
-    }
+    fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(m_fftSize)));
+    fftw_complex *fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(m_fftSize)));
+    fftw_plan plan = fftw_plan_dft_1d(m_fftSize, fftIn, fftOut, FFTW_FORWARD, FFTW_ESTIMATE);
 
-    fftw_complex *fft_out = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(windowSize)));
-    double *currSamples = samples;
-    fftw_plan plan = fftw_plan_dft_r2c_1d(windowSize, currSamples, fft_out, FFTW_ESTIMATE);
+    double outputFactor = 2.0 / double(m_fftSize);
 
-    double outputFactor = 2.0 / double(windowSize);
+    int fftBits = m_fftSize*m_wordSize;
+    int strideBits = bitStride();
 
     for (int i = 0; i < maxSpectrums; i++) {
-        if ((currSamples-samples) + windowSize >= actualSamples) {
+        if (bitOffset + fftBits >= container->bits()->sizeInBits()) {
             break;
         }
-        fftw_execute_dft_r2c(plan, currSamples, fft_out);
+        fillSamples(fftIn, m_fftSize, bitOffset, container);
+        fftw_execute_dft(plan, fftIn, fftOut);
 
-        QVector<double> spectrum(windowSize/2);
-        for (int n = 0; n < windowSize/2; n++) {
-            spectrum[n] = qMin(1.0, (fft_out[n][0] * fft_out[n][0] * outputFactor) + (fft_out[n][1] * fft_out[n][1] * outputFactor));
+        QVector<double> spectrum(m_fftSize/2);
+        for (int n = 0; n < m_fftSize/2; n++) {
+            spectrum[n] = (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
         }
         spectrums.append(spectrum);
-        currSamples += stride;
+        bitOffset += strideBits;
     }
 
     fftw_destroy_plan(plan);
-    fftw_free(fft_out);
-    delete[] samples;
+
+    fftw_free(fftIn);
+    fftw_free(fftOut);
 
     return spectrums;
 }
