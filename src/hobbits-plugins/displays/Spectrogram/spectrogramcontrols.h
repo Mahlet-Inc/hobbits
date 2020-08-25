@@ -27,9 +27,6 @@ signals:
 private slots:
     void on_cb_wordFormat_currentIndexChanged(int index);
     void on_cb_dataType_currentIndexChanged(int index);
-
-    void on_horizontalSlider_valueChanged(int value);
-
     void on_hs_sensitivity_valueChanged(int value);
 
 private:
