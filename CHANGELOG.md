@@ -1,3 +1,10 @@
+# [0.36.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.35.0...v0.36.0) (2020-08-25)
+
+
+### Features
+
+* add simple spectrogram display ([88db8e7](https://github.com/Mahlet-Inc/hobbits/commit/88db8e7b320ee42c68abeddd54f45613ce1ef6ff))
+
 # [0.35.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.34.1...v0.35.0) (2020-08-20)
 
 
