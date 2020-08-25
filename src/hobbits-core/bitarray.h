@@ -31,6 +31,7 @@ public:
     qint64 sizeInBits() const;
     qint64 sizeInBytes() const;
     quint64 getWordValue(qint64 bitOffset, int wordBitSize) const;
+    qint64 getWordValueTwosComplement(qint64 bitOffset, int wordBitSize) const;
 
     void resize(qint64 sizeInBits);
 
