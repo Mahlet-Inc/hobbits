@@ -18,6 +18,7 @@ const QString KAITAI_RESULT_LABEL = "kaitai_struct_result_label";
 KaitaiStruct::KaitaiStruct() :
     ui(new Ui::KaitaiStruct()),
     m_loadKsyMenu(nullptr),
+    m_loadKsyPyMenu(nullptr),
     m_highlightNav(nullptr)
 {
 }
@@ -25,6 +26,7 @@ KaitaiStruct::KaitaiStruct() :
 KaitaiStruct::~KaitaiStruct()
 {
     delete m_loadKsyMenu;
+    delete m_loadKsyPyMenu;
     delete ui;
 }
 
@@ -68,7 +70,7 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
         ui->te_ksy->setPlainText(ksyFile.readAll());
     });
 
-    QDirIterator it(":/kaitaistruct/ksy", QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator it(":/kaitaidata/ksy", QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
         QDir category = it.next();
         QMenu* menu = m_loadKsyMenu->addMenu(category.dirName());
@@ -83,9 +85,23 @@ void KaitaiStruct::applyToWidget(QWidget *widget)
         }
     }
 
+    m_loadKsyPyMenu = new QMenu();
+    QDirIterator itPy(":/kaitaidata/ksy_py", QDir::Dirs | QDir::NoDotAndDotDot);
+    while (itPy.hasNext()) {
+        QDir category = itPy.next();
+        QMenu* menu = m_loadKsyPyMenu->addMenu(category.dirName());
+        for (QFileInfo ksyFileInfo :category.entryInfoList(QDir::Files)) {
+            menu->addAction(ksyFileInfo.baseName(), [this, ksyFileInfo]() {
+                m_selectedPrecompiledFile = ksyFileInfo.filePath();
+                ui->pb_selectPrecompiled->setText("Parse as: "+ ksyFileInfo.baseName());
+            });
+        }
+    }
+
     ui->setupUi(widget);
 
     ui->pb_loadKsy->setMenu(m_loadKsyMenu);
+    ui->pb_selectPrecompiled->setMenu(m_loadKsyPyMenu);
 
     connect(ui->tb_chooseKsc, SIGNAL(pressed()), this, SLOT(openKscPathDialog()));
     ui->le_ksc->setText(SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString());
@@ -178,11 +194,6 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progressTracker->setProgressPercent(2);
 
-    QString kscPath = SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString();
-    if (kscPath.isEmpty()) {
-        return AnalyzerResult::error("A Kaitai Struct Compiler path must be specified");
-    }
-
     QTemporaryDir dir;
     if (!dir.isValid()) {
         return AnalyzerResult::error("Could not allocate a temporary directory");
@@ -198,64 +209,78 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progressTracker->setProgressPercent(10);
 
-    QFile errorFile(dir.filePath("error.log"));
-    QFile stdoutFile(dir.filePath("stdout.log"));
+    if (ui->tabExecOptions->currentWidget() == ui->tab_custom) {
+        QString kscPath = SettingsManager::getInstance().getPrivateSetting(KAITAI_PATH_KEY).toString();
+        if (kscPath.isEmpty()) {
+            return AnalyzerResult::error("A Kaitai Struct Compiler path must be specified");
+        }
 
-    QFile ksy(dir.filePath("custom.ksy"));
-    if (!ksy.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return AnalyzerResult::error("Could not open ksy file for writing");
+        QFile errorFile(dir.filePath("error.log"));
+        QFile stdoutFile(dir.filePath("stdout.log"));
+
+        QFile ksy(dir.filePath("custom.ksy"));
+        if (!ksy.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
+            return AnalyzerResult::error("Could not open ksy file for writing");
+        }
+        ksy.write(recallablePluginState.value("katai_struct_yaml").toString().toLocal8Bit());
+        ksy.close();
+
+        progressTracker->setProgressPercent(20);
+
+    #ifdef Q_OS_WIN
+        QStringList kscAgs = {"/C", kscPath, "--debug", "-t", "python", ksy.fileName()};
+    #else
+        QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
+    #endif
+        QProcess kscProcess;
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        QProcessEnvironment envUpdate;
+        envUpdate.insert("PATH", env.value("PATH"));
+        kscProcess.setProcessEnvironment(envUpdate);
+        kscProcess.setWorkingDirectory(dir.path());
+        kscProcess.setStandardErrorFile(errorFile.fileName());
+        kscProcess.setStandardOutputFile(stdoutFile.fileName());
+    #ifdef Q_OS_WIN
+        kscProcess.start("cmd.exe", kscAgs);
+    #else
+        kscProcess.start(kscPath, kscAgs);
+    #endif
+
+        kscProcess.waitForFinished();
+
+        if (errorFile.open(QIODevice::ReadOnly)) {
+            QString output = errorFile.readAll();
+            if (!output.isEmpty()) {
+                QMetaObject::invokeMethod(
+                        this,
+                        "updateOutputText",
+                        Qt::QueuedConnection,
+                        Q_ARG(QString, "kaitai-stuct-compiler stderr:\n" + output + "\n\n"));
+            }
+            errorFile.close();
+        }
+
+        if (stdoutFile.open(QIODevice::ReadOnly)) {
+            QString output = stdoutFile.readAll();
+            if (!output.isEmpty()) {
+                QMetaObject::invokeMethod(
+                        this,
+                        "updateOutputText",
+                        Qt::QueuedConnection,
+                        Q_ARG(QString, "kaitai-stuct-compiler stdout:\n" + output + "\n\n"));
+            }
+            stdoutFile.close();
+        }
     }
-    ksy.write(recallablePluginState.value("katai_struct_yaml").toString().toLocal8Bit());
-    ksy.close();
-
-    progressTracker->setProgressPercent(20);
-
-#ifdef Q_OS_WIN
-    QStringList kscAgs = {"/C", kscPath, "--debug", "-t", "python", ksy.fileName()};
-#else
-    QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
-#endif
-    QProcess kscProcess;
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QProcessEnvironment envUpdate;
-    envUpdate.insert("PATH", env.value("PATH"));
-    kscProcess.setProcessEnvironment(envUpdate);
-    kscProcess.setWorkingDirectory(dir.path());
-    kscProcess.setStandardErrorFile(errorFile.fileName());
-    kscProcess.setStandardOutputFile(stdoutFile.fileName());
-#ifdef Q_OS_WIN
-    kscProcess.start("cmd.exe", kscAgs);
-#else
-    kscProcess.start(kscPath, kscAgs);
-#endif
-
-    kscProcess.waitForFinished();
+    else {
+        if (m_selectedPrecompiledFile.isEmpty()) {
+            return AnalyzerResult::error("A precompiled struct must be specified");
+        }
+        QFileInfo info(m_selectedPrecompiledFile);
+        QFile::copy(m_selectedPrecompiledFile, dir.filePath(info.fileName()));
+    }
 
     progressTracker->setProgressPercent(40);
-
-    if (errorFile.open(QIODevice::ReadOnly)) {
-        QString output = errorFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "kaitai-stuct-compiler stderr:\n" + output + "\n\n"));
-        }
-        errorFile.close();
-    }
-
-    if (stdoutFile.open(QIODevice::ReadOnly)) {
-        QString output = stdoutFile.readAll();
-        if (!output.isEmpty()) {
-            QMetaObject::invokeMethod(
-                    this,
-                    "updateOutputText",
-                    Qt::QueuedConnection,
-                    Q_ARG(QString, "kaitai-stuct-compiler stdout:\n" + output + "\n\n"));
-        }
-        stdoutFile.close();
-    }
 
 
     QString pyDepDir = dir.filePath("pydeps");
