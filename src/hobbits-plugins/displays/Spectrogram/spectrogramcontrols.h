@@ -29,6 +29,8 @@ private slots:
     void on_cb_dataType_currentIndexChanged(int index);
     void on_hs_sensitivity_valueChanged(int value);
 
+    void on_cb_endianness_currentIndexChanged(int index);
+
 private:
     Ui::SpectrogramControls *ui;
 };

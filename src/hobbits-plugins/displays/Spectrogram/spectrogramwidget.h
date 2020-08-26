@@ -10,8 +10,10 @@ class SpectrogramWidget : public DisplayBase
 
 public:
     enum WordFormat {
-        Unsigned = 1,
-        TwosComplement = 2
+        Unsigned = 0x00,
+        TwosComplement = 0x01,
+        BigEndian = 0x00,
+        LittleEndian = 0x10
     };
 
     enum DataType {
@@ -49,7 +51,7 @@ private:
     int m_wordSize;
     int m_overlap;
     int m_fftSize;
-    WordFormat m_wordFormat;
+    int m_wordFormat;
     DataType m_dataType;
 
     double m_sensitivity;

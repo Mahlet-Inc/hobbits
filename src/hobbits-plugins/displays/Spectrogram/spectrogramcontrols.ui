@@ -40,6 +40,9 @@
       <widget class="QComboBox" name="cb_wordFormat"/>
      </item>
      <item>
+      <widget class="QComboBox" name="cb_endianness"/>
+     </item>
+     <item>
       <widget class="QComboBox" name="cb_dataType"/>
      </item>
      <item>

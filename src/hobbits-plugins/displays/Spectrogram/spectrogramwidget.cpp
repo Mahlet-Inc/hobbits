@@ -120,7 +120,7 @@ void SpectrogramWidget::setWordSize(int val)
 
 void SpectrogramWidget::setWordFormat(int val)
 {
-    m_wordFormat = static_cast<WordFormat>(val);
+    m_wordFormat = val;
     repaint();
 }
 
@@ -156,6 +156,7 @@ void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint6
     if (withComplex) {
         sampleSize *= 2;
     }
+    bool littleEndian = (m_wordFormat & LittleEndian);
     for (int i = 0; i < sampleCount; i++) {
         qint64 offset = bitOffset + i*sampleSize;
         if (offset+sampleSize >= container->bits()->sizeInBits()) {
@@ -163,18 +164,18 @@ void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint6
             buffer[i][1] = 0.0;
             continue;
         }
-        if (m_wordFormat == TwosComplement) {
-            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize)) * wordInverse;
+        if (m_wordFormat & TwosComplement) {
+            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize, littleEndian)) * wordInverse;
         }
         else {
-            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize)) * wordInverse;
+            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize, littleEndian)) * wordInverse;
         }
         if (withComplex) {
-            if (m_wordFormat == TwosComplement) {
-                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize)) * wordInverse;
+            if (m_wordFormat & TwosComplement) {
+                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
             }
             else {
-                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize)) * wordInverse;
+                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
             }
         }
         else {

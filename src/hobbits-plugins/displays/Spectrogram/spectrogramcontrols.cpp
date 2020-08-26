@@ -11,6 +11,9 @@ SpectrogramControls::SpectrogramControls() :
     ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramWidget::Unsigned);
     ui->cb_wordFormat->addItem("Two's Complement", SpectrogramWidget::TwosComplement);
 
+    ui->cb_endianness->addItem("Big Endian", SpectrogramWidget::BigEndian);
+    ui->cb_endianness->addItem("Little Endian", SpectrogramWidget::LittleEndian);
+
     ui->cb_dataType->addItem("Real", SpectrogramWidget::Real);
     ui->cb_dataType->addItem("Real and Complex Interleaved", SpectrogramWidget::RealComplexInterleaved);
 
@@ -24,13 +27,18 @@ void SpectrogramControls::sendCurrentValues()
     emit wordSizeSet(ui->sb_wordSize->value());
     emit overlapSet(ui->sb_overlap->value());
     emit fftSizeSet(ui->sb_fftSize->value());
-    emit wordFormatSet(ui->cb_wordFormat->currentData().toInt());
+    emit wordFormatSet(ui->cb_wordFormat->currentData().toInt() | ui->cb_endianness->currentData().toInt());
     emit dataTypeSet(ui->cb_dataType->currentData().toInt());
 }
 
 void SpectrogramControls::on_cb_wordFormat_currentIndexChanged(int index)
 {
-    emit wordFormatSet(ui->cb_wordFormat->itemData(index).toInt());
+    emit wordFormatSet(ui->cb_wordFormat->itemData(index).toInt() | ui->cb_endianness->currentData().toInt());
+}
+
+void SpectrogramControls::on_cb_endianness_currentIndexChanged(int index)
+{
+    emit wordFormatSet(ui->cb_wordFormat->currentData().toInt() | ui->cb_endianness->itemData(index).toInt());
 }
 
 void SpectrogramControls::on_cb_dataType_currentIndexChanged(int index)
@@ -51,3 +59,4 @@ void SpectrogramControls::on_hs_sensitivity_valueChanged(int value)
     }
     emit sensitivitySet(sensitivity);
 }
+
