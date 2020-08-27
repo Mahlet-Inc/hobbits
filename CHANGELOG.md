@@ -1,3 +1,12 @@
+# [0.37.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.36.0...v0.37.0) (2020-08-27)
+
+
+### Features
+
+* add endianness controls to spectrogram ([d950d6d](https://github.com/Mahlet-Inc/hobbits/commit/d950d6df8def428ddbf67112c35bb8696eeebcc0))
+* add time and frequency axes to spectrogram ([b4ed14d](https://github.com/Mahlet-Inc/hobbits/commit/b4ed14de0226d47778fb55e6a18af4c2200d56a4))
+* include pre-compiled formats in kaitai struct plugin ([e7b21db](https://github.com/Mahlet-Inc/hobbits/commit/e7b21db12ba440dc1fcb5d9c5f9041ba0ca9a364))
+
 # [0.36.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.35.0...v0.36.0) (2020-08-25)
 
 
