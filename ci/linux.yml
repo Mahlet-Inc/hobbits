@@ -75,10 +75,7 @@ steps:
       cp --preserve=links $QT_LIB_DIR/libQt5Widgets.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5XcbQpa.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* release/lib
-      cp --preserve=links /usr/lib64/libfftw3.so* release/lib
-      cp --preserve=links /usr/lib/libfftw3.so* release/lib
-      cp --preserve=links /usr/local/lib/libfftw3.so* release/lib
-      cp --preserve=links /usr/local/lib64/libfftw3.so* release/lib
+      cp --preserve=links `ldd $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/WidthFramer/libWidthFramer.so | grep libfftw3 | awk '{print $3}' | sed 's/\.[0-9+]$/\*/'` release/lib
       cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
       find release/python -name "*.so*" -type f -exec chmod +x {} \;
       chmod +x release/python/bin/*
