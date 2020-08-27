@@ -7,6 +7,7 @@
 #include <QtMath>
 #include <QMouseEvent>
 #include "settingsmanager.h"
+#include <QTime>
 
 #include <QDebug>
 
@@ -17,7 +18,7 @@ SpectrogramWidget::SpectrogramWidget(
     DisplayBase(displayHandle, pluginRef, parent),
     m_scale(1),
     m_showFrameOffsets(false),
-    m_showColumnOffsets(false),
+    m_showColumnOffsets(true),
     m_wordSize(8),
     m_overlap(4),
     m_fftSize(2048),
@@ -39,11 +40,101 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frames().size()) {
         return;
     }
+    qint64 bitOffset = m_displayHandle->getContainer()->frames().at(frameOffset).start();
+
+    prepareHeaders();
 
     int displayWidth = (this->width() - m_displayOffset.x()) / m_scale;
     int displayHeight = (this->height() - m_displayOffset.y()) / m_scale;
 
-    qint64 bitOffset = m_displayHandle->getContainer()->frames().at(frameOffset).start();
+    QFont font = QFont("monospace", 10);
+    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+
+    QPainter painter(this);
+    if (m_showFrameOffsets) {
+        painter.fillRect(0, 0, m_displayOffset.x(), height(), Qt::lightGray);
+    }
+    if (m_showColumnOffsets) {
+        painter.fillRect(0, 0, width(), m_displayOffset.y(), Qt::lightGray);
+    }
+    painter.save();
+    if (m_showFrameOffsets) {
+        qint64 sampleOffset = bitOffset / m_wordSize;
+        if (m_dataType == RealComplexInterleaved) {
+            sampleOffset /= 2;
+        }
+        int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
+        for (int i = 0; i <= displayHeight; i += increment) {
+            if (increment <= 0) {
+                break;
+            }
+            int yOffset = -2;
+
+            if (increment > 1) {
+                yOffset = -1 * qRound(double(m_headerFontSize.height() - m_scale) / 2.0);
+                painter.fillRect(
+                        m_displayOffset.x() - m_headerFontSize.width() / 2,
+                        m_displayOffset.y() + (i * m_scale),
+                        m_headerFontSize.width() / 2,
+                        m_scale,
+                        Qt::darkGray);
+            }
+
+            qint64 sample = i * m_fftSize;
+            if (m_overlap > 1) {
+                sample /= m_overlap;
+            }
+            sample += sampleOffset;
+
+            painter.setPen(Qt::darkGray);
+            painter.setFont(font);
+            painter.drawText(
+                    m_headerFontSize.width() / 2,
+                    m_displayOffset.y() + (i * m_scale) + yOffset,
+                    m_displayOffset.x() - m_headerFontSize.width(),
+                    m_headerFontSize.height(),
+                    Qt::AlignRight | Qt::AlignTop,
+                    timeString(sample));
+        }
+    }
+    painter.restore();
+    painter.save();
+    if (m_showColumnOffsets) {
+        int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
+        for (int i = 0; i < displayWidth; i += increment) {
+            if (increment <= 0) {
+                break;
+            }
+
+            int yOffset = -2;
+
+            double percent = double(i) / double(displayWidth);
+            double freq = percent * m_sampleRate / 2.0;
+            QStringList units = {"Hz", "kHz", "MHz", "GHz", "THz"};
+            int unitIndex = 0;
+            while (freq >= 1000.0 && unitIndex + 1 < units.size()) {
+                unitIndex++;
+                freq /= 1000.0;
+            }
+
+
+            painter.save();
+            painter.rotate(-90);
+            painter.setPen(Qt::darkGray);
+            painter.setFont(font);
+            painter.drawText(
+                    -1 * m_displayOffset.y() + m_headerFontSize.width() / 2,
+                    m_displayOffset.x() + i * m_scale + yOffset,
+                    m_displayOffset.y() - m_headerFontSize.width(),
+                    m_headerFontSize.height(),
+                    Qt::AlignLeft,
+                    QString("%1 %2").arg(freq, 0, 'f', 2).arg(units.at(unitIndex)));
+            painter.restore();
+        }
+    }
+    painter.restore();
+
+
     auto spectrums = computeStft(displayHeight, bitOffset, m_displayHandle->getContainer());
 
     QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
@@ -60,7 +151,6 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
         }
     }
 
-    QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth*m_scale, displayHeight*m_scale), raster);
 }
@@ -120,7 +210,7 @@ void SpectrogramWidget::setWordSize(int val)
 
 void SpectrogramWidget::setWordFormat(int val)
 {
-    m_wordFormat = static_cast<WordFormat>(val);
+    m_wordFormat = val;
     repaint();
 }
 
@@ -133,6 +223,19 @@ void SpectrogramWidget::setDataType(int val)
 void SpectrogramWidget::setSensitivity(double val)
 {
     m_sensitivity = val;
+    repaint();
+}
+
+void SpectrogramWidget::setSampleRate(double val)
+{
+    m_sampleRate = val;
+    repaint();
+}
+
+void SpectrogramWidget::setShowHeaders(bool val)
+{
+    m_showFrameOffsets = val;
+    m_showColumnOffsets = val;
     repaint();
 }
 
@@ -156,6 +259,7 @@ void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint6
     if (withComplex) {
         sampleSize *= 2;
     }
+    bool littleEndian = (m_wordFormat & LittleEndian);
     for (int i = 0; i < sampleCount; i++) {
         qint64 offset = bitOffset + i*sampleSize;
         if (offset+sampleSize >= container->bits()->sizeInBits()) {
@@ -163,18 +267,18 @@ void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint6
             buffer[i][1] = 0.0;
             continue;
         }
-        if (m_wordFormat == TwosComplement) {
-            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize)) * wordInverse;
+        if (m_wordFormat & TwosComplement) {
+            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize, littleEndian)) * wordInverse;
         }
         else {
-            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize)) * wordInverse;
+            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize, littleEndian)) * wordInverse;
         }
         if (withComplex) {
-            if (m_wordFormat == TwosComplement) {
-                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize)) * wordInverse;
+            if (m_wordFormat & TwosComplement) {
+                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
             }
             else {
-                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize)) * wordInverse;
+                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
             }
         }
         else {
@@ -238,8 +342,7 @@ void SpectrogramWidget::prepareHeaders()
     m_headerFontSize.setHeight(fontHeight);
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->frames().size();
-        int maxChars = qFloor(log10(totalFrames)) + 1;
+        int maxChars = 12;
         m_displayOffset.setX(qRound(fontWidth * (maxChars + 1.5)));
     }
     else {
@@ -247,12 +350,38 @@ void SpectrogramWidget::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        int maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
-        int maxChars = qFloor(log10(maxWidth)) + 1;
+        int maxChars = 10;
         m_displayOffset.setY(fontWidth * (maxChars + 1));
     }
     else {
         m_displayOffset.setY(0);
+    }
+}
+
+QString SpectrogramWidget::timeString(qint64 sample)
+{
+    double seconds = double(sample) / double(m_sampleRate);
+    if (seconds < 1.0e-4) {
+        int ns = int(seconds * 1.0e9);
+        return QString("%1 ns").arg(ns);
+    }
+    else if (seconds < 1.0) {
+        double ms = seconds * 1.0e3;
+        return QString("%1 ms").arg(ms, 0, 'f', 3);
+    }
+    else if (seconds < 60.0) {
+        return QString("%1 s").arg(seconds, 0, 'f', 3);
+    }
+    else {
+        int ms = int(qRound(seconds * 1.0e3));
+        int s = ms / 1000;
+        int m = s / 60;
+        int h = m / 60;
+        return QString("%1:%2:%3.%4")
+                .arg(h)
+                .arg(m % 60, 2, 10, QChar('0'))
+                .arg(s % 60, 2, 10, QChar('0'))
+                .arg((ms % 1000) / 10, 2, 10, QChar('0'));
     }
 }
 

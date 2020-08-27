@@ -10,8 +10,10 @@ class SpectrogramWidget : public DisplayBase
 
 public:
     enum WordFormat {
-        Unsigned = 1,
-        TwosComplement = 2
+        Unsigned = 0x00,
+        TwosComplement = 0x01,
+        BigEndian = 0x00,
+        LittleEndian = 0x10
     };
 
     enum DataType {
@@ -35,12 +37,15 @@ public slots:
     void setWordFormat(int);
     void setDataType(int);
     void setSensitivity(double);
+    void setSampleRate(double);
+    void setShowHeaders(bool);
 
 private:
     int bitStride();
     void fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container);
     QList<QVector<double>> computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container);
     void prepareHeaders();
+    QString timeString(qint64 sample);
 
     int m_scale;
     bool m_showFrameOffsets;
@@ -49,10 +54,11 @@ private:
     int m_wordSize;
     int m_overlap;
     int m_fftSize;
-    WordFormat m_wordFormat;
+    int m_wordFormat;
     DataType m_dataType;
 
     double m_sensitivity;
+    double m_sampleRate;
 
     QPoint m_displayOffset;
     QSize m_headerFontSize;

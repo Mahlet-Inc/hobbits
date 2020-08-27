@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>876</width>
+    <width>1174</width>
     <height>106</height>
    </rect>
   </property>
@@ -40,7 +40,36 @@
       <widget class="QComboBox" name="cb_wordFormat"/>
      </item>
      <item>
+      <widget class="QComboBox" name="cb_endianness"/>
+     </item>
+     <item>
       <widget class="QComboBox" name="cb_dataType"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Sample Rate:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="sb_sampleRate">
+       <property name="suffix">
+        <string/>
+       </property>
+       <property name="minimum">
+        <double>0.010000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>100000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>8000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cb_rateUnits"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -134,6 +163,13 @@
        </property>
        <property name="invertedAppearance">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="ck_showHeaders">
+       <property name="text">
+        <string>Show Headers</string>
        </property>
       </widget>
      </item>

@@ -47,9 +47,11 @@ private:
 
     Ui::KaitaiStruct *ui;
     QMenu* m_loadKsyMenu;
+    QMenu* m_loadKsyPyMenu;
     HighlightNavigator* m_highlightNav;
     QSharedPointer<BitContainerPreview> m_previewContainer;
     QSharedPointer<PluginCallback> m_pluginCallback;
+    QString m_selectedPrecompiledFile;
 
 };
 

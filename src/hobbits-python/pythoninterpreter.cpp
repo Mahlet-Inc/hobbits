@@ -115,6 +115,9 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<
 
         // Run the function
         PyObject *result = callFunction(scriptModule, request->functionName().toStdString().c_str(), args);
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+        }
         Py_XDECREF(result);
         Py_XDECREF(args);
     }

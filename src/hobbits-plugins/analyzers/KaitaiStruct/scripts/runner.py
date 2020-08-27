@@ -9,6 +9,7 @@ from kaitaistruct import KaitaiStruct
 
 def dump_struct(s, sections, prefix=""):
     if isinstance(s, list):
+        print("list")
         for i, item in enumerate(s):
             label = prefix + "[" + str(i) + "]"
             sections.append({
@@ -17,6 +18,7 @@ def dump_struct(s, sections, prefix=""):
             })
             dump_struct(item, sections, label)
     elif isinstance(s, KaitaiStruct):
+        print("ks")
         if hasattr(s, "_debug"):
             for name, descr in s._debug.items():
                 prop = getattr(s, name)
@@ -49,6 +51,8 @@ def parse_data(input_filename, output_filename, action_progress):
     target._read()
 
     action_progress.set_progress_percent(70)
+
+    print(vars(target))
 
     # write the parser result to the output
     sections = []

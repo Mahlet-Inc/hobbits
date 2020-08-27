@@ -13,6 +13,14 @@ static char INVERSE_BIT_MASKS[8] = {
     0x7f, -65, -33, -17, -9, -5, -3, -2
 };
 
+static quint64 BYTE_MASKS[8] = {
+    0xff00000000000000, 0x00ff000000000000, 0x0000ff0000000000, 0x000000ff00000000, 0x00000000ff000000, 0x0000000000ff0000, 0x000000000000ff00, 0x00000000000000ff
+};
+
+static quint64 INVERSE_BYTE_MASKS[8] = {
+    0x00000000000000ff, 0x000000000000ff00, 0x0000000000ff0000, 0x00000000ff000000, 0x000000ff00000000, 0x0000ff0000000000, 0x00ff000000000000, 0xff00000000000000
+};
+
 #define CACHE_CHUNK_BYTE_SIZE (10 * 1000 * 1000)
 #define CACHE_CHUNK_BIT_SIZE (CACHE_CHUNK_BYTE_SIZE * 8)
 #define MAX_ACTIVE_CACHE_CHUNKS 5
@@ -178,7 +186,7 @@ char BitArray::byteAt(qint64 i) const
     return m_dataCaches[cacheIdx][index];
 }
 
-quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize) const
+quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
     quint64 word = 0;
     for (qint64 i = 0; i < wordBitSize; i++) {
@@ -186,12 +194,20 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize) const
             word += 1 << (wordBitSize - i - 1);
         }
     }
+    if (littleEndian && wordBitSize % 8 == 0) {
+        quint64 buffer = 0;
+        int bytes = wordBitSize/8;
+        for (int i = 0; i < bytes; i++) {
+            buffer += (word & INVERSE_BYTE_MASKS[i]) << ((bytes-1-i*2)*8);
+        }
+        word = buffer;
+    }
     return word;
 }
 
-qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize) const
+qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
-    qint64 val = static_cast<qint64>(getWordValue(bitOffset, wordBitSize));
+    qint64 val = static_cast<qint64>(getWordValue(bitOffset, wordBitSize, littleEndian));
     if (wordBitSize == 64) {
         return val;
     }

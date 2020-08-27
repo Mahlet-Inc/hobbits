@@ -38,7 +38,8 @@ FORMS +=        kaitaistruct.ui
 DISTFILES +=
 
 RESOURCES += \
-    kaitaiscripts.qrc
+    kaitaiscripts.qrc \
+    kaitaidata.qrc
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../../../hobbits-core
