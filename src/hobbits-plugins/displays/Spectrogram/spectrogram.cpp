@@ -47,6 +47,10 @@ void Spectrogram::initialize(QSharedPointer<DisplayHandle> displayHandle)
                 m_displayWidget, &SpectrogramWidget::setDataType);
         connect(m_controlsWidget, &SpectrogramControls::sensitivitySet,
                 m_displayWidget, &SpectrogramWidget::setSensitivity);
+        connect(m_controlsWidget, &SpectrogramControls::sampleRateSet,
+                m_displayWidget, &SpectrogramWidget::setSampleRate);
+        connect(m_controlsWidget, &SpectrogramControls::headersShowSet,
+                m_displayWidget, &SpectrogramWidget::setShowHeaders);
 
         m_controlsWidget->sendCurrentValues();
     }

@@ -37,12 +37,15 @@ public slots:
     void setWordFormat(int);
     void setDataType(int);
     void setSensitivity(double);
+    void setSampleRate(double);
+    void setShowHeaders(bool);
 
 private:
     int bitStride();
     void fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container);
     QList<QVector<double>> computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container);
     void prepareHeaders();
+    QString timeString(qint64 sample);
 
     int m_scale;
     bool m_showFrameOffsets;
@@ -55,6 +58,7 @@ private:
     DataType m_dataType;
 
     double m_sensitivity;
+    double m_sampleRate;
 
     QPoint m_displayOffset;
     QSize m_headerFontSize;
