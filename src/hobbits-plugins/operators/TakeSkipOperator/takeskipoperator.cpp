@@ -188,7 +188,9 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                     }
 
                     if (outputIdx > outStart) {
-                        outputs[k].frames.append(Range(outStart, outputIdx - 1));
+                        if (frameBased) {
+                            outputs[k].frames.append(Range(outStart, outputIdx - 1));
+                        }
                         outputs[k].idx = outputIdx;
                     }
 

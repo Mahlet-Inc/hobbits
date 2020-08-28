@@ -14,6 +14,14 @@
 class HOBBITSCORESHARED_EXPORT BitArray
 {
 public:
+    enum CopyMode {
+        Copy = 0,
+        Invert = 1,
+        Xor = 2,
+        And = 3,
+        Or = 4
+    };
+
     BitArray();
     BitArray(qint64 sizeInBits);
     BitArray(QByteArray bytes, qint64 sizeInBits);
@@ -37,6 +45,8 @@ public:
 
     void set(qint64 i, bool value);
 
+    qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = CopyMode::Copy) const;
+
     qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
     void writeTo(QIODevice *outputStream) const;
 
@@ -51,7 +61,7 @@ private:
     void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
     void reinitializeCache();
     void deleteCache();
-    bool loadCacheAt(qint64 bitIndex) const;
+    void loadCacheAt(qint64 bitIndex) const;
     void syncCacheToFile() const;
 
     mutable QTemporaryFile m_dataFile;

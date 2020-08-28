@@ -12,11 +12,9 @@ void InvertOp::apply(
         qint64 &inputIdx,
         qint64 &outputIdx)
 {
-    for (int i = 0; i < m_value && inputIdx < inputFrame.size(); i++) {
-        outputBits->set(outputIdx, !inputFrame.at(inputIdx));
-        inputIdx++;
-        outputIdx++;
-    }
+    qint64 taken = inputFrame.copyBits(inputIdx, outputBits.data(), outputIdx, m_value, BitArray::Invert);
+    inputIdx += taken;
+    outputIdx += taken;
 }
 
 qint64 InvertOp::inputStep(qint64 inputBits) const

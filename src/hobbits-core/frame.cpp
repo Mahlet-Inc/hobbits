@@ -30,3 +30,13 @@ bool Frame::at(qint64 i) const
             QStringLiteral("Index %1 is not valid").arg(i).toLocal8Bit().data());
     return m_bits->at(this->start() + i);
 }
+
+qint64 Frame::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode) const
+{
+    return m_bits->copyBits(bitOffset + start(), dest, destBitOffset, qMin(maxBits, size() - bitOffset), copyMode);
+}
+
+QSharedPointer<const BitArray> Frame::bits() const
+{
+    return m_bits;
+}
