@@ -235,17 +235,18 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEnd
 
 qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
-    qint64 val = static_cast<qint64>(getWordValue(bitOffset, wordBitSize, littleEndian));
+    quint64 uVal = getWordValue(bitOffset, wordBitSize, littleEndian);
+    qint64 *val = reinterpret_cast<qint64*>(&uVal);
     if (wordBitSize == 64) {
-        return val;
+        return *val;
     }
     qint64 signBit = 1 << (wordBitSize-1);
-    if (signBit & val) {
-        auto r = (val - signBit) - signBit;
+    if (signBit & *val) {
+        auto r = (*val - signBit) - signBit;
         return r;
     }
     else {
-        return val;
+        return *val;
     }
 }
 

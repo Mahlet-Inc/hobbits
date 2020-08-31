@@ -16,6 +16,7 @@ SpectrogramControls::SpectrogramControls() :
 
     ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramWidget::Unsigned);
     ui->cb_wordFormat->addItem("Two's Complement", SpectrogramWidget::TwosComplement);
+    ui->cb_wordFormat->addItem("IEEE 754 Floating Point", SpectrogramWidget::IEEE_754);
 
     ui->cb_endianness->addItem("Big Endian", SpectrogramWidget::BigEndian);
     ui->cb_endianness->addItem("Little Endian", SpectrogramWidget::LittleEndian);

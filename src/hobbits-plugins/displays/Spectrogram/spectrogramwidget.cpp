@@ -11,6 +11,16 @@
 
 #include <QDebug>
 
+#ifdef Q_OS_UNIX
+#define bswap32(X) __builtin_bswap32((X))
+#define bswap64(X) __builtin_bswap64((X))
+#endif
+#ifdef Q_OS_WIN
+#include <stdlib.h>
+#define bswap32(X) _byteswap_uint32((X))
+#define bswap64(X) _byteswap_uint64((X))
+#endif
+
 SpectrogramWidget::SpectrogramWidget(
         QSharedPointer<DisplayHandle> displayHandle,
         DisplayInterface *pluginRef,
@@ -249,8 +259,86 @@ int SpectrogramWidget::bitStride()
     return strideBits;
 }
 
+static double dBuffer[20000];
+static double fBuffer[20000];
+
 void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container)
 {
+    if (m_wordFormat & IEEE_754) {
+        if (m_wordSize == 32 && sampleCount <= 20000) {
+            qint64 maxBytes = sampleCount * 4;
+            if (m_dataType == RealComplexInterleaved) {
+                maxBytes *= 2;
+            }
+            qint64 samples = container->bits()->readBytes(reinterpret_cast<char*>(fBuffer), bitOffset / 8, maxBytes);
+            samples /= 4;
+
+            if (!(m_wordFormat & LittleEndian)) {
+                quint32* endianBuff = reinterpret_cast<quint32*>(fBuffer);
+                for (int i = 0; i < samples; i++) {
+                    endianBuff[i] = bswap32(endianBuff[i]);
+                }
+            }
+
+            if (m_dataType == RealComplexInterleaved) {
+                for (int i = 0; i < samples/2; i++) {
+                    buffer[i][0] = double(fBuffer[i*2]);
+                    buffer[i][1] = double(fBuffer[i*2 + 1]);
+                }
+            }
+            else {
+                for (int i = 0; i < samples; i++) {
+                    buffer[i][0] = double(fBuffer[i]);
+                    buffer[i][1] = 0.0;
+                }
+            }
+            for (qint64 i = samples; i < sampleCount; i++) {
+                buffer[i][0] = 0.0;
+                buffer[i][1] = 0.0;
+            }
+        }
+        else if (m_wordSize == 64 && sampleCount <= 20000) {
+            qint64 maxBytes = sampleCount * 8;
+            if (m_dataType == RealComplexInterleaved) {
+                maxBytes *= 2;
+            }
+            qint64 samples = container->bits()->readBytes(reinterpret_cast<char*>(dBuffer), bitOffset / 8, maxBytes);
+            samples /= 8;
+
+            if (!(m_wordFormat & LittleEndian)) {
+                quint64* endianBuff = reinterpret_cast<quint64*>(dBuffer);
+                for (int i = 0; i < samples; i++) {
+                    endianBuff[i] = bswap64(endianBuff[i]);
+                }
+            }
+
+            if (m_dataType == RealComplexInterleaved) {
+                for (int i = 0; i < samples/2; i++) {
+                    buffer[i][0] = dBuffer[i*2];
+                    buffer[i][1] = dBuffer[i*2 + 1];
+                }
+            }
+            else {
+                for (int i = 0; i < samples; i++) {
+                    buffer[i][0] = dBuffer[i];
+                    buffer[i][1] = 0.0;
+                }
+            }
+            for (qint64 i = samples; i < sampleCount; i++) {
+                buffer[i][0] = 0.0;
+                buffer[i][1] = 0.0;
+            }
+        }
+        else {
+            for (int i = 0; i < sampleCount; i++) {
+                buffer[i][0] = 0.0;
+                buffer[i][1] = 0.0;
+            }
+        }
+        return;
+    }
+
+
     quint64 maxWordValue = 1;
     maxWordValue <<= (m_wordSize - 1);
     double wordInverse = 1.0 / double(maxWordValue);
@@ -298,6 +386,11 @@ QList<QVector<double>> SpectrogramWidget::computeStft(int maxSpectrums, qint64 b
     fftw_complex *fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(m_fftSize)));
     fftw_plan plan = fftw_plan_dft_1d(m_fftSize, fftIn, fftOut, FFTW_FORWARD, FFTW_ESTIMATE);
 
+    QVector<double> hanningWindow(m_fftSize);
+    for (int i = 0; i < m_fftSize; i++) {
+        hanningWindow[i] = 0.5*(1.0-cos(2.0*M_PI*i/double(m_fftSize-1.0)));
+    }
+
     double outputFactor = 2.0 / double(m_fftSize);
 
     int fftBits = m_fftSize*m_wordSize;
@@ -308,6 +401,10 @@ QList<QVector<double>> SpectrogramWidget::computeStft(int maxSpectrums, qint64 b
             break;
         }
         fillSamples(fftIn, m_fftSize, bitOffset, container);
+        for (int i = 0; i < m_fftSize; i++) {
+            fftIn[i][0] *= hanningWindow[i];
+            fftIn[i][1] *= hanningWindow[i];
+        }
         fftw_execute_dft(plan, fftIn, fftOut);
 
         QVector<double> spectrum(m_fftSize/2);
