@@ -9,13 +9,6 @@ class SpectrogramWidget : public DisplayBase
     Q_OBJECT
 
 public:
-    enum WordFormat {
-        Unsigned = 0x00,
-        TwosComplement = 0x01,
-        BigEndian = 0x00,
-        LittleEndian = 0x10
-    };
-
     enum DataType {
         Real = 1,
         RealComplexInterleaved = 2

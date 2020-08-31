@@ -21,7 +21,7 @@ public:
     QSharedPointer<BitInfo> copyMetadata() const;
 
     void setBits(QSharedPointer<const BitArray> bits);
-    void setFrames(QVector<Range> frames);
+    void setFrames(QList<Range> frames);
     void setFramesFromInfo(QSharedPointer<BitInfo> frameSource);
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
@@ -29,7 +29,7 @@ public:
     void clearHighlightCategory(QString category);
 
     qint64 maxFrameWidth() const;
-    QVector<Frame> frames() const;
+    QList<Frame> frames() const;
     QList<RangeHighlight> highlights(QString category) const;
     QList<RangeHighlight> highlights(QString category, QString label) const;
     QList<QString> highlightCategories() const;
@@ -49,8 +49,8 @@ private:
 
     QSharedPointer<const BitArray> m_bits;
     qint64 m_maxFrameWidth;
-    QVector<Range> m_ranges;
-    QVector<Frame> m_frames;
+    QList<Range> m_ranges;
+    QList<Frame> m_frames;
     QHash<QString, QList<RangeHighlight>> m_rangeHighlights;
     QVariantHash m_metadata;
     QMutex m_mutex;

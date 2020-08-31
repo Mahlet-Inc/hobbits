@@ -39,7 +39,7 @@ public:
     QSharedPointer<const BitInfo> bitInfo() const;
     QSharedPointer<BitInfo> bitInfo();
 
-    QVector<Frame> frames() const;
+    QList<Frame> frames() const;
     qint64 maxFrameWidth() const;
 
     void addHighlight(RangeHighlight highlight);

@@ -41,7 +41,7 @@ void BitContainer::setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo
     if (bitInfo.isNull()) {
         // Initialize frames
         qint64 frameWidth = 256;
-        QVector<Range> frames;
+        QList<Range> frames;
         for (qint64 i = 0; i < m_bits->sizeInBits(); i += frameWidth) {
             qint64 width = qMin(frameWidth - 1, m_bits->sizeInBits() - i - 1);
             frames.append(Range(i, i + width));
@@ -91,10 +91,10 @@ QSharedPointer<BitInfo> BitContainer::bitInfo()
     return m_bitInfo;
 }
 
-QVector<Frame> BitContainer::frames() const
+QList<Frame> BitContainer::frames() const
 {
     if (m_bitInfo.isNull()) {
-        return QVector<Frame>();
+        return QList<Frame>();
     }
     else {
         return m_bitInfo->frames();

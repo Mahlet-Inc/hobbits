@@ -385,7 +385,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     }
 
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(outputSize));
-    QVector<Range> outputFrames;
+    QList<Range> outputFrames;
     int outputIndex = 0;
     for (Frame frame : frames) {
         for (qint64 i = 0; i < frame.size(); i++) {

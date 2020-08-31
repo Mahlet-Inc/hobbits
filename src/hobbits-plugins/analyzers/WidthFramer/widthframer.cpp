@@ -185,7 +185,7 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
     }
 
     qint64 frameWidth = recallablePluginState.value("width").toInt();
-    QVector<Range> frames;
+    QList<Range> frames;
 
     QSharedPointer<const BitArray> bits = container->bits();
 

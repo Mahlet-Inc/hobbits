@@ -34,7 +34,7 @@ void BitInfo::setBits(QSharedPointer<const BitArray> bits)
     initFrames();
 }
 
-void BitInfo::setFrames(QVector<Range> frames)
+void BitInfo::setFrames(QList<Range> frames)
 {
     m_mutex.lock();
     m_ranges = frames;
@@ -110,7 +110,7 @@ void BitInfo::clearHighlightCategory(QString category)
     }
 }
 
-QVector<Frame> BitInfo::frames() const
+QList<Frame> BitInfo::frames() const
 {
     return m_frames;
 }

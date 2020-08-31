@@ -93,7 +93,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     bool frameBased =
         (recallablePluginState.contains("frame_based") && recallablePluginState.value("frame_based").toBool());
     int frameCount = inputContainers.at(0)->frames().size();
-    QList<QPair<QVector<Frame>, qint64>> inputs;
+    QList<QPair<QList<Frame>, qint64>> inputs;
     for (auto inputContainer : inputContainers) {
         if (frameBased) {
             frameCount = qMin(frameCount, inputContainer->frames().size());

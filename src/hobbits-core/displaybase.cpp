@@ -338,7 +338,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Next Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
+        QList<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.y() + 1; i < frames.size(); i++) {
             if (frames.at(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
@@ -350,7 +350,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Previous Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
+        QList<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.y() - 1; i >= 0; i--) {
             if (frames.at(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
@@ -361,7 +361,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Next Constant(ish) Column"),
             [this, frame]() {
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
+        QList<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() + 1; i < frame.size(); i++) {
             bool value = frame.at(i);
             bool constantish = true;
@@ -384,7 +384,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Previous Constant(ish) Column"),
             [this, frame]() {
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
+        QList<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() - 1; i >= 0; i--) {
             bool value = frame.at(i);
             bool constantish = true;
