@@ -2,26 +2,14 @@
 #define SPECTROGRAMWIDGET_H
 
 #include "displaybase.h"
-#include "fftw3.h"
+#include "spectrogramrenderer.h"
+#include <QThread>
 
 class SpectrogramWidget : public DisplayBase
 {
     Q_OBJECT
 
 public:
-    enum WordFormat {
-        Unsigned = 0x00,
-        TwosComplement = 0x01,
-        BigEndian = 0x00,
-        LittleEndian = 0x10,
-        IEEE_754 = 0x80
-    };
-
-    enum DataType {
-        Real = 1,
-        RealComplexInterleaved = 2
-    };
-
     SpectrogramWidget(
             QSharedPointer<DisplayHandle> displayHandle,
             DisplayInterface *pluginRef,
@@ -42,9 +30,6 @@ public slots:
     void setShowHeaders(bool);
 
 private:
-    int bitStride();
-    void fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container);
-    QList<QVector<double>> computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container);
     void prepareHeaders();
     QString timeString(qint64 sample);
 
@@ -52,17 +37,13 @@ private:
     bool m_showFrameOffsets;
     bool m_showColumnOffsets;
 
-    int m_wordSize;
-    int m_overlap;
-    int m_fftSize;
-    int m_wordFormat;
-    DataType m_dataType;
-
-    double m_sensitivity;
-    double m_sampleRate;
-
     QPoint m_displayOffset;
     QSize m_headerFontSize;
+
+    QList<QVector<double>> m_spectrums;
+    QImage m_spectrogram;
+
+    SpectrogramRenderer * m_renderer;
 
 protected slots:
     void adjustScrollbars() override;

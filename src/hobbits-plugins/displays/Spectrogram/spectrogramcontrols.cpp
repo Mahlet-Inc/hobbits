@@ -1,6 +1,6 @@
 #include "spectrogramcontrols.h"
 #include "ui_spectrogramcontrols.h"
-#include "spectrogramwidget.h"
+#include "spectrogramrenderer.h"
 
 
 SpectrogramControls::SpectrogramControls() :
@@ -14,15 +14,15 @@ SpectrogramControls::SpectrogramControls() :
     ui->cb_rateUnits->addItem("GHz", 1000000000.0);
     ui->cb_rateUnits->addItem("THz", 1000000000000.0);
 
-    ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramWidget::Unsigned);
-    ui->cb_wordFormat->addItem("Two's Complement", SpectrogramWidget::TwosComplement);
-    ui->cb_wordFormat->addItem("IEEE 754 Floating Point", SpectrogramWidget::IEEE_754);
+    ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramRenderer::Unsigned);
+    ui->cb_wordFormat->addItem("Two's Complement", SpectrogramRenderer::TwosComplement);
+    ui->cb_wordFormat->addItem("IEEE 754 Floating Point", SpectrogramRenderer::IEEE_754);
 
-    ui->cb_endianness->addItem("Big Endian", SpectrogramWidget::BigEndian);
-    ui->cb_endianness->addItem("Little Endian", SpectrogramWidget::LittleEndian);
+    ui->cb_endianness->addItem("Big Endian", SpectrogramRenderer::BigEndian);
+    ui->cb_endianness->addItem("Little Endian", SpectrogramRenderer::LittleEndian);
 
-    ui->cb_dataType->addItem("Real", SpectrogramWidget::Real);
-    ui->cb_dataType->addItem("Real and Complex Interleaved", SpectrogramWidget::RealComplexInterleaved);
+    ui->cb_dataType->addItem("Real", SpectrogramRenderer::Real);
+    ui->cb_dataType->addItem("Real and Complex Interleaved", SpectrogramRenderer::RealComplexInterleaved);
 
     connect(ui->sb_wordSize, SIGNAL(valueChanged(int)), this, SIGNAL(wordSizeSet(int)));
     connect(ui->sb_fftSize, SIGNAL(valueChanged(int)), this, SIGNAL(fftSizeSet(int)));

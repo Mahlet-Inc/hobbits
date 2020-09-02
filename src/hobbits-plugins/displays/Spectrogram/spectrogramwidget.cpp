@@ -11,15 +11,6 @@
 
 #include <QDebug>
 
-#ifdef Q_OS_UNIX
-#define bswap32(X) __builtin_bswap32((X))
-#define bswap64(X) __builtin_bswap64((X))
-#endif
-#ifdef Q_OS_WIN
-#include <stdlib.h>
-#define bswap32(X) _byteswap_uint32((X))
-#define bswap64(X) _byteswap_uint64((X))
-#endif
 
 SpectrogramWidget::SpectrogramWidget(
         QSharedPointer<DisplayHandle> displayHandle,
@@ -29,16 +20,15 @@ SpectrogramWidget::SpectrogramWidget(
     m_scale(1),
     m_showFrameOffsets(false),
     m_showColumnOffsets(true),
-    m_wordSize(8),
-    m_overlap(4),
-    m_fftSize(2048),
-    m_wordFormat(TwosComplement),
-    m_dataType(Real),
-    m_sensitivity(1.0),
     m_displayOffset(0, 0),
-    m_headerFontSize(0, 0)
+    m_headerFontSize(0, 0),
+    m_renderer(new SpectrogramRenderer(this))
 {
-
+    connect(m_renderer, &SpectrogramRenderer::spectrumsChanged, [this](const QList<QVector<double>> &s, const QImage &img) {
+        m_spectrogram = img;
+        m_spectrums = s;
+        repaint();
+    });
 }
 
 void SpectrogramWidget::paintEvent(QPaintEvent*) {
@@ -46,16 +36,21 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
         return;
     }
 
+    m_renderer->setContainer(m_displayHandle->getContainer());
+
     int frameOffset = m_displayHandle->getFrameOffset();
     if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frames().size()) {
         return;
     }
     qint64 bitOffset = m_displayHandle->getContainer()->frames().at(frameOffset).start();
+    m_renderer->setBitOffset(bitOffset);
 
     prepareHeaders();
 
     int displayWidth = (this->width() - m_displayOffset.x()) / m_scale;
     int displayHeight = (this->height() - m_displayOffset.y()) / m_scale;
+
+    m_renderer->setMaxSpectrums(displayHeight);
 
     QFont font = QFont("monospace", 10);
     font.setStyleStrategy(QFont::ForceIntegerMetrics);
@@ -69,8 +64,8 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     }
     painter.save();
     if (m_showFrameOffsets) {
-        qint64 sampleOffset = bitOffset / m_wordSize;
-        if (m_dataType == RealComplexInterleaved) {
+        qint64 sampleOffset = bitOffset / m_renderer->wordSize();
+        if (m_renderer->dataType() == SpectrogramRenderer::RealComplexInterleaved) {
             sampleOffset /= 2;
         }
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
@@ -90,9 +85,9 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                         Qt::darkGray);
             }
 
-            qint64 sample = i * m_fftSize;
-            if (m_overlap > 1) {
-                sample /= m_overlap;
+            qint64 sample = i * m_renderer->fftSize();
+            if (m_renderer->overlap() > 1) {
+                sample /= m_renderer->overlap();
             }
             sample += sampleOffset;
 
@@ -119,7 +114,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
             int yOffset = -2;
 
             double percent = double(i) / double(displayWidth);
-            double freq = percent * m_sampleRate / 2.0;
+            double freq = percent * m_renderer->sampleRate() / 2.0;
             QStringList units = {"Hz", "kHz", "MHz", "GHz", "THz"};
             int unitIndex = 0;
             while (freq >= 1000.0 && unitIndex + 1 < units.size()) {
@@ -145,24 +140,24 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     painter.restore();
 
 
-    auto spectrums = computeStft(displayHeight, bitOffset, m_displayHandle->getContainer());
+//    auto spectrums = computeStft(displayHeight, bitOffset, m_displayHandle->getContainer());
 
-    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
-    qreal hue = c.hueF();
-    qreal saturation = c.saturationF();
-    QImage raster(m_fftSize/2, displayHeight, QImage::Format_ARGB32);
-    raster.fill(qRgba(0x00, 0x00, 0x00, 0xff));
-    for (int y = 0; y < spectrums.size(); y++) {
-        auto spectrum = spectrums.at(y);
-        for (int x = 0; x < m_fftSize/2  && x < spectrum.size(); x++) {
-            qreal lightness = qBound(0.0, spectrum.at(x)*m_sensitivity, 1.0);
-            c.setHslF(hue, saturation, lightness);
-            raster.setPixel(x, y, c.rgba());
-        }
-    }
+//    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
+//    qreal hue = c.hueF();
+//    qreal saturation = c.saturationF();
+//    QImage raster(m_fftSize/2, displayHeight, QImage::Format_ARGB32);
+//    raster.fill(qRgba(0x00, 0x00, 0x00, 0xff));
+//    for (int y = 0; y < spectrums.size(); y++) {
+//        auto spectrum = spectrums.at(y);
+//        for (int x = 0; x < m_fftSize/2  && x < spectrum.size(); x++) {
+//            qreal lightness = qBound(0.0, spectrum.at(x)*m_sensitivity, 1.0);
+//            c.setHslF(hue, saturation, lightness);
+//            raster.setPixel(x, y, c.rgba());
+//        }
+//    }
 
     painter.setRenderHint(QPainter::Antialiasing, false);
-    painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth*m_scale, displayHeight*m_scale), raster);
+    painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth*m_scale, displayHeight*m_scale), m_spectrogram);
 }
 
 void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
@@ -183,7 +178,7 @@ void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
         return;
     }
     qint64 baseBitOffset = m_displayHandle->getContainer()->frames().at(baseFrameOffset).start();
-    int bitsPerY = bitStride();
+    int bitsPerY = m_renderer->bitStride();
     qint64 bitOffset = y * bitsPerY + baseBitOffset;
     if (bitOffset >= m_displayHandle->getContainer()->bits()->sizeInBits()) {
         emit bitHover(false, 0, 0);
@@ -202,44 +197,37 @@ void SpectrogramWidget::setScale(int val)
 
 void SpectrogramWidget::setOverlap(int val)
 {
-    m_overlap = val;
-    repaint();
+    m_renderer->setOverlap(val);
 }
 
 void SpectrogramWidget::setFftSize(int val)
 {
-    m_fftSize = val;
-    repaint();
+    m_renderer->setFftSize(val);
 }
 
 void SpectrogramWidget::setWordSize(int val)
 {
-    m_wordSize = val;
-    repaint();
+    m_renderer->setWordSize(val);
 }
 
 void SpectrogramWidget::setWordFormat(int val)
 {
-    m_wordFormat = val;
-    repaint();
+    m_renderer->setWordFormat(val);
 }
 
 void SpectrogramWidget::setDataType(int val)
 {
-    m_dataType = static_cast<DataType>(val);
-    repaint();
+    m_renderer->setDataType(static_cast<SpectrogramRenderer::DataType>(val));
 }
 
 void SpectrogramWidget::setSensitivity(double val)
 {
-    m_sensitivity = val;
-    repaint();
+    m_renderer->setSensitivity(val);
 }
 
 void SpectrogramWidget::setSampleRate(double val)
 {
-    m_sampleRate = val;
-    repaint();
+    m_renderer->setSampleRate(val);
 }
 
 void SpectrogramWidget::setShowHeaders(bool val)
@@ -247,180 +235,6 @@ void SpectrogramWidget::setShowHeaders(bool val)
     m_showFrameOffsets = val;
     m_showColumnOffsets = val;
     repaint();
-}
-
-int SpectrogramWidget::bitStride()
-{
-    int strideBits = m_fftSize;
-    if (m_overlap > 0) {
-        strideBits = m_fftSize / m_overlap;
-    }
-    strideBits *= m_wordSize;
-    return strideBits;
-}
-
-static double dBuffer[20000];
-static double fBuffer[20000];
-
-void SpectrogramWidget::fillSamples(fftw_complex* buffer, int sampleCount, qint64 bitOffset, QSharedPointer<BitContainer> container)
-{
-    if (m_wordFormat & IEEE_754) {
-        if (m_wordSize == 32 && sampleCount <= 20000) {
-            qint64 maxBytes = sampleCount * 4;
-            if (m_dataType == RealComplexInterleaved) {
-                maxBytes *= 2;
-            }
-            qint64 samples = container->bits()->readBytes(reinterpret_cast<char*>(fBuffer), bitOffset / 8, maxBytes);
-            samples /= 4;
-
-            if (!(m_wordFormat & LittleEndian)) {
-                quint32* endianBuff = reinterpret_cast<quint32*>(fBuffer);
-                for (int i = 0; i < samples; i++) {
-                    endianBuff[i] = bswap32(endianBuff[i]);
-                }
-            }
-
-            if (m_dataType == RealComplexInterleaved) {
-                for (int i = 0; i < samples/2; i++) {
-                    buffer[i][0] = double(fBuffer[i*2]);
-                    buffer[i][1] = double(fBuffer[i*2 + 1]);
-                }
-            }
-            else {
-                for (int i = 0; i < samples; i++) {
-                    buffer[i][0] = double(fBuffer[i]);
-                    buffer[i][1] = 0.0;
-                }
-            }
-            for (qint64 i = samples; i < sampleCount; i++) {
-                buffer[i][0] = 0.0;
-                buffer[i][1] = 0.0;
-            }
-        }
-        else if (m_wordSize == 64 && sampleCount <= 20000) {
-            qint64 maxBytes = sampleCount * 8;
-            if (m_dataType == RealComplexInterleaved) {
-                maxBytes *= 2;
-            }
-            qint64 samples = container->bits()->readBytes(reinterpret_cast<char*>(dBuffer), bitOffset / 8, maxBytes);
-            samples /= 8;
-
-            if (!(m_wordFormat & LittleEndian)) {
-                quint64* endianBuff = reinterpret_cast<quint64*>(dBuffer);
-                for (int i = 0; i < samples; i++) {
-                    endianBuff[i] = bswap64(endianBuff[i]);
-                }
-            }
-
-            if (m_dataType == RealComplexInterleaved) {
-                for (int i = 0; i < samples/2; i++) {
-                    buffer[i][0] = dBuffer[i*2];
-                    buffer[i][1] = dBuffer[i*2 + 1];
-                }
-            }
-            else {
-                for (int i = 0; i < samples; i++) {
-                    buffer[i][0] = dBuffer[i];
-                    buffer[i][1] = 0.0;
-                }
-            }
-            for (qint64 i = samples; i < sampleCount; i++) {
-                buffer[i][0] = 0.0;
-                buffer[i][1] = 0.0;
-            }
-        }
-        else {
-            for (int i = 0; i < sampleCount; i++) {
-                buffer[i][0] = 0.0;
-                buffer[i][1] = 0.0;
-            }
-        }
-        return;
-    }
-
-
-    quint64 maxWordValue = 1;
-    maxWordValue <<= (m_wordSize - 1);
-    double wordInverse = 1.0 / double(maxWordValue);
-    int sampleSize = m_wordSize;
-    bool withComplex = (m_dataType == RealComplexInterleaved);
-    if (withComplex) {
-        sampleSize *= 2;
-    }
-    bool littleEndian = (m_wordFormat & LittleEndian);
-    for (int i = 0; i < sampleCount; i++) {
-        qint64 offset = bitOffset + i*sampleSize;
-        if (offset+sampleSize >= container->bits()->sizeInBits()) {
-            buffer[i][0] = 0.0;
-            buffer[i][1] = 0.0;
-            continue;
-        }
-        if (m_wordFormat & TwosComplement) {
-            buffer[i][0] = double(container->bits()->getWordValueTwosComplement(offset, m_wordSize, littleEndian)) * wordInverse;
-        }
-        else {
-            buffer[i][0] = double(container->bits()->getWordValue(offset, m_wordSize, littleEndian)) * wordInverse;
-        }
-        if (withComplex) {
-            if (m_wordFormat & TwosComplement) {
-                buffer[i][1] = double(container->bits()->getWordValueTwosComplement(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
-            }
-            else {
-                buffer[i][1] = double(container->bits()->getWordValue(offset + m_wordSize, m_wordSize, littleEndian)) * wordInverse;
-            }
-        }
-        else {
-            buffer[i][1] = 0.0;
-        }
-    }
-}
-
-QList<QVector<double>> SpectrogramWidget::computeStft(int maxSpectrums, qint64 bitOffset, QSharedPointer<BitContainer> container)
-{
-    QList<QVector<double>> spectrums;
-    if (m_wordSize > 64 || m_wordSize < 1) {
-        return spectrums;
-    }
-
-    fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(m_fftSize)));
-    fftw_complex *fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(m_fftSize)));
-    fftw_plan plan = fftw_plan_dft_1d(m_fftSize, fftIn, fftOut, FFTW_FORWARD, FFTW_ESTIMATE);
-
-    QVector<double> hanningWindow(m_fftSize);
-    for (int i = 0; i < m_fftSize; i++) {
-        hanningWindow[i] = 0.5*(1.0-cos(2.0*M_PI*i/double(m_fftSize-1.0)));
-    }
-
-    double outputFactor = 2.0 / double(m_fftSize);
-
-    int fftBits = m_fftSize*m_wordSize;
-    int strideBits = bitStride();
-
-    for (int i = 0; i < maxSpectrums; i++) {
-        if (bitOffset + fftBits >= container->bits()->sizeInBits()) {
-            break;
-        }
-        fillSamples(fftIn, m_fftSize, bitOffset, container);
-        for (int i = 0; i < m_fftSize; i++) {
-            fftIn[i][0] *= hanningWindow[i];
-            fftIn[i][1] *= hanningWindow[i];
-        }
-        fftw_execute_dft(plan, fftIn, fftOut);
-
-        QVector<double> spectrum(m_fftSize/2);
-        for (int n = 0; n < m_fftSize/2; n++) {
-            spectrum[n] = (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
-        }
-        spectrums.append(spectrum);
-        bitOffset += strideBits;
-    }
-
-    fftw_destroy_plan(plan);
-
-    fftw_free(fftIn);
-    fftw_free(fftOut);
-
-    return spectrums;
 }
 
 void SpectrogramWidget::prepareHeaders()
@@ -457,7 +271,7 @@ void SpectrogramWidget::prepareHeaders()
 
 QString SpectrogramWidget::timeString(qint64 sample)
 {
-    double seconds = double(sample) / double(m_sampleRate);
+    double seconds = double(sample) / double(m_renderer->sampleRate());
     if (seconds < 1.0e-4) {
         int ns = int(seconds * 1.0e9);
         return QString("%1 ns").arg(ns);
