@@ -32,10 +32,10 @@ QImage DisplayHelper::getBitRasterImage(const BitContainer * const bits, qint64 
     }
 
     for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= bits->frames().size()) {
+        if (i + frameOffset >= bits->frameCount()) {
             break;
         }
-        Frame frame = bits->frames().at(int(i + frameOffset));
+        Frame frame = bits->frameAt(int(i + frameOffset));
 
         for (int ii = 0; ii < w; ii++) {
             if (ii + bitOffset >= frame.size()) {
@@ -70,10 +70,10 @@ QImage DisplayHelper::getByteRasterImage(const BitContainer * const bits, qint64
     int hue = c.hue();
     int saturation = c.saturation();
     for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= bits->frames().size()) {
+        if (i + frameOffset >= bits->frameCount()) {
             break;
         }
-        Frame frame = bits->frames().at(int(i + frameOffset));
+        Frame frame = bits->frameAt(int(i + frameOffset));
 
         for (int ii = 0; ii < w * 8; ii += 8) {
             if (ii + bitOffset + 8 >= frame.size()) {

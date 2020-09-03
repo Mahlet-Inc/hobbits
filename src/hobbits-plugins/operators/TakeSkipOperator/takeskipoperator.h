@@ -22,7 +22,7 @@ public:
     public:
         qint64 idx;
         QSharedPointer<BitArray> bits;
-        QList<Range> frames;
+        QSharedPointer<RangeSequence> frames;
     };
 
     QString getName() override;

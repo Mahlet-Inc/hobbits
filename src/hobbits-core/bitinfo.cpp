@@ -3,7 +3,7 @@
 
 BitInfo::BitInfo(QObject *parent) :
     QObject(parent),
-    m_maxFrameWidth(0)
+    m_rangeSequence(new RangeSequence())
 {
 
 }
@@ -11,7 +11,7 @@ BitInfo::BitInfo(QObject *parent) :
 BitInfo::BitInfo(QSharedPointer<const BitArray> bits, QObject *parent) :
     QObject(parent),
     m_bits(bits),
-    m_maxFrameWidth(0)
+    m_rangeSequence(new RangeSequence())
 {
 
 }
@@ -20,7 +20,7 @@ BitInfo::BitInfo(QSharedPointer<const BitArray> bits, QObject *parent) :
 QSharedPointer<BitInfo> BitInfo::copyMetadata() const
 {
     auto copy = new BitInfo();
-    copy->m_ranges = m_ranges;
+    copy->m_rangeSequence = RangeSequence::fromOther(m_rangeSequence);
     copy->m_metadata = m_metadata;
     copy->m_rangeHighlights = m_rangeHighlights;
     return QSharedPointer<BitInfo>(copy);
@@ -31,28 +31,20 @@ void BitInfo::setBits(QSharedPointer<const BitArray> bits)
     m_mutex.lock();
     m_bits = bits;
     m_mutex.unlock();
-    initFrames();
 }
 
-void BitInfo::setFrames(QList<Range> frames)
+void BitInfo::setFrames(QSharedPointer<RangeSequence> frames)
 {
     m_mutex.lock();
-    m_ranges = frames;
+    m_rangeSequence = frames;
     m_mutex.unlock();
-    initFrames();
 }
 
 void BitInfo::setFramesFromInfo(QSharedPointer<BitInfo> frameSource)
 {
     m_mutex.lock();
-    m_ranges = frameSource->m_ranges;
+    m_rangeSequence = RangeSequence::fromOther(frameSource->m_rangeSequence);
     m_mutex.unlock();
-    initFrames();
-}
-
-qint64 BitInfo::maxFrameWidth() const
-{
-    return m_maxFrameWidth;
 }
 
 void BitInfo::addHighlight(RangeHighlight highlight)
@@ -110,9 +102,24 @@ void BitInfo::clearHighlightCategory(QString category)
     }
 }
 
-QList<Frame> BitInfo::frames() const
+qint64 BitInfo::maxFrameWidth() const
 {
-    return m_frames;
+    return m_rangeSequence->getMaxSize();
+}
+
+Frame BitInfo::frameAt(qint64 i) const
+{
+    return Frame(m_bits, m_rangeSequence->at(i));
+}
+
+qint64 BitInfo::frameCount() const
+{
+    return m_rangeSequence->size();
+}
+
+QSharedPointer<const RangeSequence> BitInfo::frames() const
+{
+    return m_rangeSequence;
 }
 
 QList<RangeHighlight> BitInfo::highlights(QString category) const
@@ -151,104 +158,19 @@ QVariant BitInfo::metadata(QString key) const
     return m_metadata.value(key);
 }
 
-void BitInfo::initFrames()
+qint64 BitInfo::frameOffsetContaining(qint64 value, Range indexBounds) const
 {
-    m_mutex.lock();
-    m_maxFrameWidth = 0;
-    m_frames.clear();
-
-    if (m_bits.isNull()) {
-        for (Range range: m_ranges) {
-            m_maxFrameWidth = qMax(range.size(), m_maxFrameWidth);
-        }
-    }
-    else {
-        for (Range range: m_ranges) {
-            if (range.start() >= m_bits->sizeInBits()) {
-                break;
-            }
-            if (range.end() >= m_bits->sizeInBits()) {
-                range = Range(range.start(), m_bits->sizeInBits() - 1);
-            }
-            m_frames.push_back(Frame(m_bits, range));
-            m_maxFrameWidth = qMax(range.size(), m_maxFrameWidth);
-        }
-    }
-    m_mutex.unlock();
-    emit changed();
-}
-
-int BitInfo::frameOffsetContaining(Range target, Range frameRange) const
-{
-    if (frames().isEmpty()) {
-        return -1;
-    }
-    if (!frameRange.isNull()) {
-        if (frameRange.end() > frames().size() || frameRange.start() < 0) {
-            return -1;
-        }
-    }
-    else {
-        frameRange = Range(0, frames().size() - 1);
-    }
-
-    if (frameRange.size() < 50) {
-        for (qint64 i = frameRange.start(); i <= frameRange.end(); i++) {
-            unsigned int compare = target.compare(frames().at(int(i)));
-            if (compare & Frame::Overlapping) {
-                return int(i);
-            }
-        }
-        return -1;
-    }
-
-    qint64 offset = frameRange.start() + frameRange.size() / 2;
-    qint64 index = offset;
-    int countdown = 7;
-    qint64 lowNo = frameRange.start() - 1;
-    while (true) {
-        unsigned int compare = target.compare(frames().at(int(index)));
-
-        if (compare & Frame::Overlapping) {
-            if (index > lowNo + 1) {
-                int earlierIndex = frameOffsetContaining(target, Range(lowNo + 1, index - 1));
-                if (earlierIndex >= 0) {
-                    return earlierIndex;
-                }
-            }
-            return int(index);
-        }
-
-        if (countdown < 1) {
-            return -1;
-        }
-
-        offset /= 2;
-        if (offset < 1) {
-            offset = 1;
-            countdown--;
-        }
-
-        if (compare & Frame::Before) {
-            index += offset;
-        }
-        else if (compare & Frame::After) {
-            index -= offset;
-        }
-
-        if (index < frameRange.start() || index > frameRange.end()) {
-            return -1;
-        }
-    }
+    return m_rangeSequence->indexOf(value, indexBounds);
 }
 
 
 const QString VERSION_1 = "BitInfo v1";
 QDataStream& operator<<(QDataStream& stream, const BitInfo& bitInfo)
 {
+    //TODO: Serialization for range sequence
     stream << VERSION_1;
-    stream << bitInfo.m_ranges;
-    stream << bitInfo.m_maxFrameWidth;
+    //stream << bitInfo.m_ranges;
+    //stream << bitInfo.m_maxFrameWidth;
     stream << bitInfo.m_metadata;
     stream << bitInfo.m_rangeHighlights;
     return stream;
@@ -256,11 +178,12 @@ QDataStream& operator<<(QDataStream& stream, const BitInfo& bitInfo)
 
 QDataStream& operator>>(QDataStream& stream, BitInfo& bitInfo)
 {
+    stream.setStatus(QDataStream::Status::ReadCorruptData);
     QString version;
     stream >> version;
     if (version == VERSION_1) {
-        stream >> bitInfo.m_ranges;
-        stream >> bitInfo.m_maxFrameWidth;
+        //stream >> bitInfo.m_ranges;
+        //stream >> bitInfo.m_maxFrameWidth;
         stream >> bitInfo.m_metadata;
         stream >> bitInfo.m_rangeHighlights;
         return stream;

@@ -45,7 +45,7 @@ void ByteRasterWidget::paintEvent(QPaintEvent*)
     if (m_showFrameOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
-            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->frames().size()) {
+            if (i + m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->frameCount()) {
                 break;
             }
 
@@ -162,7 +162,7 @@ void ByteRasterWidget::prepareHeaders()
     m_headerFontSize.setHeight(fontHeight);
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->frames().size();
+        int totalFrames = m_displayHandle->getContainer()->frameCount();
         int maxChars = qFloor(log10(totalFrames)) + 1;
         m_displayOffset.setX(qRound(fontWidth * (maxChars + 1.5)));
     }

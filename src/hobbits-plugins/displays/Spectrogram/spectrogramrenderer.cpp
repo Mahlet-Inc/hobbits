@@ -360,6 +360,9 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         if (renderer->m_renderDirty) {
             renderer->m_rendering = false;
             renderer->m_mutex.unlock();
+            fftw_destroy_plan(plan);
+            fftw_free(fftIn);
+            fftw_free(fftOut);
             QTimer::singleShot(10, renderer, [renderer]() {
                 renderer->setDirty();
             });

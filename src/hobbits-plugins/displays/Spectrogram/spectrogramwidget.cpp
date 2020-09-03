@@ -39,10 +39,10 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     m_renderer->setContainer(m_displayHandle->getContainer());
 
     int frameOffset = m_displayHandle->getFrameOffset();
-    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frames().size()) {
+    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->bitInfo()->frames()->size()) {
         return;
     }
-    qint64 bitOffset = m_displayHandle->getContainer()->frames().at(frameOffset).start();
+    qint64 bitOffset = m_displayHandle->getContainer()->bitInfo()->frames()->at(frameOffset).start();
     m_renderer->setBitOffset(bitOffset);
 
     prepareHeaders();
@@ -173,18 +173,18 @@ void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
         return;
     }
     int baseFrameOffset = m_displayHandle->getFrameOffset();
-    if (baseFrameOffset < 0 || baseFrameOffset > m_displayHandle->getContainer()->frames().size()) {
+    if (baseFrameOffset < 0 || baseFrameOffset > m_displayHandle->getContainer()->frameCount()) {
         emit bitHover(false, 0, 0);
         return;
     }
-    qint64 baseBitOffset = m_displayHandle->getContainer()->frames().at(baseFrameOffset).start();
+    qint64 baseBitOffset = m_displayHandle->getContainer()->frameAt(baseFrameOffset).start();
     int bitsPerY = m_renderer->bitStride();
     qint64 bitOffset = y * bitsPerY + baseBitOffset;
     if (bitOffset >= m_displayHandle->getContainer()->bits()->sizeInBits()) {
         emit bitHover(false, 0, 0);
         return;
     }
-    int frameOffset = m_displayHandle->getContainer()->bitInfo()->frameOffsetContaining(Range(bitOffset, bitOffset));
+    int frameOffset = m_displayHandle->getContainer()->bitInfo()->frameOffsetContaining(bitOffset);
 
     emit bitHover(event, 0, frameOffset);
 }
