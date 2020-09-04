@@ -20,6 +20,7 @@ SpectrogramWidget::SpectrogramWidget(
     m_scale(1),
     m_showFrameOffsets(false),
     m_showColumnOffsets(true),
+    m_showHoverSlices(false),
     m_displayOffset(0, 0),
     m_headerFontSize(0, 0),
     m_renderer(new SpectrogramRenderer(this))
@@ -47,8 +48,8 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
     prepareHeaders();
 
-    int displayWidth = (this->width() - m_displayOffset.x()) / m_scale;
-    int displayHeight = (this->height() - m_displayOffset.y()) / m_scale;
+    int displayWidth = m_displayCenterSize.width() / m_scale;
+    int displayHeight = m_displayCenterSize.height() / m_scale;
 
     m_renderer->setMaxSpectrums(displayHeight);
 
@@ -63,11 +64,11 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
         painter.fillRect(0, 0, width(), m_displayOffset.y(), Qt::lightGray);
     }
     painter.save();
+    qint64 sampleOffset = bitOffset / m_renderer->wordSize();
+    if (m_renderer->dataType() == SpectrogramRenderer::RealComplexInterleaved) {
+        sampleOffset /= 2;
+    }
     if (m_showFrameOffsets) {
-        qint64 sampleOffset = bitOffset / m_renderer->wordSize();
-        if (m_renderer->dataType() == SpectrogramRenderer::RealComplexInterleaved) {
-            sampleOffset /= 2;
-        }
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
             if (increment <= 0) {
@@ -114,13 +115,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
             int yOffset = -2;
 
             double percent = double(i) / double(displayWidth);
-            double freq = percent * m_renderer->sampleRate() / 2.0;
-            QStringList units = {"Hz", "kHz", "MHz", "GHz", "THz"};
-            int unitIndex = 0;
-            while (freq >= 1000.0 && unitIndex + 1 < units.size()) {
-                unitIndex++;
-                freq /= 1000.0;
-            }
+
 
 
             painter.save();
@@ -133,7 +128,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                     m_displayOffset.y() - m_headerFontSize.width(),
                     m_headerFontSize.height(),
                     Qt::AlignLeft,
-                    QString("%1 %2").arg(freq, 0, 'f', 2).arg(units.at(unitIndex)));
+                    getFreq(percent));
             painter.restore();
         }
     }
@@ -158,23 +153,173 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.drawImage(QRect(m_displayOffset.x(), m_displayOffset.y(), displayWidth*m_scale, displayHeight*m_scale), m_spectrogram);
+
+    if (m_hoverX >= 0 && m_hoverY >= 0) {
+        painter.save();
+        painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+        painter.setPen(QColor(0xff, 0xff, 0xff));
+
+        int x = m_hoverX * m_scale;
+        int y = m_hoverY * m_scale;
+
+        painter.translate(m_displayOffset);
+        painter.drawLine(0, y, m_displayCenterSize.width(), y);
+        painter.drawLine(x, 0, x, m_displayCenterSize.height());
+
+        QString freq = getFreq(double(m_hoverX) / double(m_displayCenterSize.width()));
+
+        qint64 hoverSample = m_hoverY * m_renderer->fftSize();
+        if (m_renderer->overlap() > 1) {
+            hoverSample /= m_renderer->overlap();
+        }
+        hoverSample += sampleOffset;
+
+        QString time = timeString(hoverSample);
+
+
+        int pad = 4;
+        int textHeight = m_headerFontSize.height() + 3;
+        int boxWidth = m_headerFontSize.width() * qMax(time.size(), freq.size()) + pad*2;
+        int boxHeight = textHeight * 2 + pad*2;
+
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+        QRect box;
+        if (x > m_displayCenterSize.width() / 2) {
+            box.setX(x - pad - boxWidth);
+        }
+        else {
+            box.setX(x + pad);
+        }
+        if (y > m_displayCenterSize.height() / 2) {
+            box.setY(y - pad - boxHeight);
+        }
+        else {
+            box.setY(y + pad);
+        }
+        box.setWidth(boxWidth);
+        box.setHeight(boxHeight);
+
+        painter.fillRect(box, QColor(0x00, 0x00, 0x00, 0x99));
+
+        painter.setFont(font);
+        painter.drawText(box.x() + pad, box.y() + pad, box.width(), textHeight, Qt::AlignLeft, freq);
+        painter.drawText(box.x() + pad, box.y() + pad + textHeight, box.width(), textHeight, Qt::AlignLeft, time);
+
+        painter.restore();
+    }
+
+    if (m_showHoverSlices) {
+        painter.save();
+
+        painter.translate(m_displayOffset);
+
+        QRect rPanel;
+        rPanel.setTopLeft(QPoint(m_displayCenterSize.width(), 0));
+        rPanel.setBottomRight(QPoint(this->width() - m_displayOffset.x(), this->height() - m_displayOffset.y()));
+        QRect bPanel;
+        bPanel.setTopLeft(QPoint(0, m_displayCenterSize.height()));
+        bPanel.setBottomRight(rPanel.bottomRight());
+
+        painter.fillRect(rPanel, QColor(0x33, 0x33, 0x33));
+        painter.fillRect(bPanel, QColor(0x33, 0x33, 0x33));
+
+        if (m_hoverX >= 0 && m_hoverY >= 0) {
+            if (m_hoverY < m_spectrums.size() && m_spectrums.size() > 0) {
+                painter.save();
+                painter.translate(bPanel.bottomLeft() + QPoint(0, -4));
+                painter.scale(1, -1.0);
+                auto spectrum = m_spectrums.at(m_hoverY);
+
+
+                double yFactor = bPanel.height() - 8;
+                double xFactor = double(m_displayCenterSize.width()) / (double(m_renderer->fftSize()) / 2.0);
+                QPainterPath path;
+                path.moveTo(0, qBound(0.0, spectrum.at(0)*m_renderer->sensitivity(), 1.0)*yFactor);
+                double xVal = xFactor;
+                for (int i = 1; i < spectrum.size(); i++, xVal += xFactor) {
+                    path.lineTo(xVal, qBound(0.0, spectrum.at(i)*m_renderer->sensitivity(), 1.0)*yFactor);
+                }
+
+                painter.setRenderHint(QPainter::Antialiasing, true);
+                painter.setPen(qRgb(0xdd, 0xdd, 0xdd));
+                painter.drawPath(path);
+
+                painter.restore();
+            }
+
+            if (m_spectrums.size() > 0) {
+                painter.save();
+                painter.translate(rPanel.topLeft() + QPoint(4, 0));
+                painter.rotate(90);
+                painter.scale(1.0, -1.0);
+
+                int pos = qFloor(double(m_hoverX) / double(m_displayCenterSize.width()) * (double(m_renderer->fftSize()) / 2.0));
+
+
+                double xFactor = m_scale;
+                double yFactor = rPanel.width() - 8;
+                QPainterPath path;
+                path.moveTo(0, qBound(0.0, m_spectrums.at(0).at(pos)*m_renderer->sensitivity(), 1.0)*yFactor);
+                double xVal = xFactor;
+                for (int i = 1; i < m_spectrums.size(); i++, xVal += xFactor) {
+                    path.lineTo(xVal, qBound(0.0, m_spectrums.at(i).at(pos)*m_renderer->sensitivity(), 1.0)*yFactor);
+                }
+
+                painter.setRenderHint(QPainter::Antialiasing, true);
+                painter.setPen(qRgb(0xdd, 0xdd, 0xdd));
+                painter.drawPath(path);
+
+
+                painter.restore();
+            }
+        }
+
+        painter.restore();
+    }
+}
+
+void SpectrogramWidget::leaveEvent(QEvent *event)
+{
+    DisplayBase::leaveEvent(event);
+    m_hoverY = -1;
+    m_hoverX = -1;
+    repaint();
 }
 
 void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
+    bool wasHovering = (m_hoverX >= 0 || m_hoverY >=0);
+    m_hoverY = -1;
+    m_hoverX = -1;
+
     if (m_displayHandle->getContainer().isNull()) {
         emit bitHover(false, 0, 0);
+        if (wasHovering) {
+            repaint();
+        }
         return;
     }
 
 
-    int y = (event->y() - m_displayOffset.y())/m_scale;
-    if (y < 0) {
+    int y = (event->y() - m_displayOffset.y());
+    int x = (event->x() - m_displayOffset.x());
+    if (y < 0 || x < 0 || y >= m_displayCenterSize.height() || x >= m_displayCenterSize.width()) {
         emit bitHover(false, 0, 0);
+        if (wasHovering) {
+            repaint();
+        }
         return;
     }
+
+    y /= m_scale;
+    x /= m_scale;
+
     int baseFrameOffset = m_displayHandle->getFrameOffset();
     if (baseFrameOffset < 0 || baseFrameOffset > m_displayHandle->getContainer()->frameCount()) {
         emit bitHover(false, 0, 0);
+        if (wasHovering) {
+            repaint();
+        }
         return;
     }
     qint64 baseBitOffset = m_displayHandle->getContainer()->frameAt(baseFrameOffset).start();
@@ -182,11 +327,19 @@ void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
     qint64 bitOffset = y * bitsPerY + baseBitOffset;
     if (bitOffset >= m_displayHandle->getContainer()->bits()->sizeInBits()) {
         emit bitHover(false, 0, 0);
+        if (wasHovering) {
+            repaint();
+        }
         return;
     }
     int frameOffset = m_displayHandle->getContainer()->bitInfo()->frameOffsetContaining(bitOffset);
 
     emit bitHover(event, 0, frameOffset);
+
+    m_hoverY = y;
+    m_hoverX = x;
+
+    repaint();
 }
 
 void SpectrogramWidget::setScale(int val)
@@ -237,6 +390,12 @@ void SpectrogramWidget::setShowHeaders(bool val)
     repaint();
 }
 
+void SpectrogramWidget::setShowHoverSlices(bool val)
+{
+    m_showHoverSlices = val;
+    repaint();
+}
+
 void SpectrogramWidget::prepareHeaders()
 {
     if (m_displayHandle->getContainer().isNull()) {
@@ -267,6 +426,15 @@ void SpectrogramWidget::prepareHeaders()
     else {
         m_displayOffset.setY(0);
     }
+
+    if (m_showHoverSlices) {
+        m_displayCenterSize.setWidth(int(double(this->width() - m_displayOffset.x()) * 0.90));
+        m_displayCenterSize.setHeight(int(double(this->height() - m_displayOffset.y()) * 0.80));
+    }
+    else {
+        m_displayCenterSize.setWidth(this->width() - m_displayOffset.x());
+        m_displayCenterSize.setHeight(this->height() - m_displayOffset.y());
+    }
 }
 
 QString SpectrogramWidget::timeString(qint64 sample)
@@ -294,6 +462,19 @@ QString SpectrogramWidget::timeString(qint64 sample)
                 .arg(s % 60, 2, 10, QChar('0'))
                 .arg((ms % 1000) / 10, 2, 10, QChar('0'));
     }
+}
+
+QString SpectrogramWidget::getFreq(double percent)
+{
+    double freq = percent * m_renderer->sampleRate() / 2.0;
+    QStringList units = {"Hz", "kHz", "MHz", "GHz", "THz"};
+    int unitIndex = 0;
+    while (freq >= 1000.0 && unitIndex + 1 < units.size()) {
+        unitIndex++;
+        freq /= 1000.0;
+    }
+
+    return QString("%1 %2").arg(freq, 0, 'f', 2).arg(units.at(unitIndex));
 }
 
 void SpectrogramWidget::adjustScrollbars()

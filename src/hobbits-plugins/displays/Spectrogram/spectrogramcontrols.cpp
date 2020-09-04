@@ -28,6 +28,7 @@ SpectrogramControls::SpectrogramControls() :
     connect(ui->sb_fftSize, SIGNAL(valueChanged(int)), this, SIGNAL(fftSizeSet(int)));
     connect(ui->sb_overlap, SIGNAL(valueChanged(int)), this, SIGNAL(overlapSet(int)));
     connect(ui->ck_showHeaders, SIGNAL(toggled(bool)), this, SIGNAL(headersShowSet(bool)));
+    connect(ui->ck_hoverSlices, SIGNAL(toggled(bool)), this, SIGNAL(sliceShowSet(bool)));
 }
 
 void SpectrogramControls::sendCurrentValues()
@@ -39,6 +40,7 @@ void SpectrogramControls::sendCurrentValues()
     emit dataTypeSet(ui->cb_dataType->currentData().toInt());
     emit sampleRateSet(ui->sb_sampleRate->value() * ui->cb_rateUnits->currentData().toDouble());
     emit headersShowSet(ui->ck_showHeaders->isChecked());
+    emit sliceShowSet(ui->ck_hoverSlices->isChecked());
 }
 
 void SpectrogramControls::on_cb_wordFormat_currentIndexChanged(int index)

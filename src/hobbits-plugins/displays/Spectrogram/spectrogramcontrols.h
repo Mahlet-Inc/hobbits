@@ -25,6 +25,7 @@ signals:
     void sensitivitySet(double);
     void sampleRateSet(double);
     void headersShowSet(bool);
+    void sliceShowSet(bool);
 
 private slots:
     void on_cb_wordFormat_currentIndexChanged(int index);

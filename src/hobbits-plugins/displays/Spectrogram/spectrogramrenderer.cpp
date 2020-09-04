@@ -323,7 +323,6 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         renderer->m_mutex.unlock();
         return;
     }
-    renderer->m_mutex.unlock();
 
     QList<QVector<double>> spectrums;
     QImage img(renderer->fftSize()/2, renderer->maxSpectrums(), QImage::Format_ARGB32);
@@ -337,6 +336,7 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
     fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(renderer->fftSize())));
     fftw_complex *fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(renderer->fftSize())));
     fftw_plan plan = fftw_plan_dft_1d(renderer->fftSize(), fftIn, fftOut, FFTW_FORWARD, FFTW_ESTIMATE);
+    renderer->m_mutex.unlock();
 
     QVector<double> hanningWindow(renderer->fftSize());
     for (int i = 0; i < renderer->fftSize(); i++) {
@@ -359,10 +359,10 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         renderer->m_mutex.lock();
         if (renderer->m_renderDirty) {
             renderer->m_rendering = false;
-            renderer->m_mutex.unlock();
             fftw_destroy_plan(plan);
             fftw_free(fftIn);
             fftw_free(fftOut);
+            renderer->m_mutex.unlock();
             QTimer::singleShot(10, renderer, [renderer]() {
                 renderer->setDirty();
             });
@@ -403,10 +403,11 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
     }
     QMetaObject::invokeMethod(renderer, "sendSpectrums", Qt::QueuedConnection, Q_ARG(const QList<QVector<double> > &, spectrums), Q_ARG(const QImage &, img));
 
+    renderer->m_mutex.lock();
     fftw_destroy_plan(plan);
-
     fftw_free(fftIn);
     fftw_free(fftOut);
+    renderer->m_mutex.unlock();
 
     if (renderer->m_renderDirty) {
         computeStft(renderer);
