@@ -44,17 +44,20 @@ QSharedPointer<RangeSequence> RangeSequence::fromOther(QSharedPointer<RangeSeque
     sequence->m_maxSize = other->m_maxSize;
     sequence->m_valueCount = other->m_valueCount;
 
-    char* buffer = new char[CACHE_CHUNK_BYTE_SIZE];
-    other->syncCacheWithFile();
-    other->m_dataFile.seek(0);
-    while (other->m_dataFile.bytesAvailable() > 0) {
-        qint64 bytes = other->m_dataFile.read(buffer, CACHE_CHUNK_BYTE_SIZE);
-        if (bytes < 1) {
-            break;
+    if (other->m_dataCacheBlockCount > 0) {
+        char* buffer = new char[CACHE_CHUNK_BYTE_SIZE];
+        other->syncCacheWithFile();
+        other->m_dataFile.seek(0);
+        sequence->resizeCache(other->m_dataCacheBlockCount);
+        while (other->m_dataFile.bytesAvailable() > 0) {
+            qint64 bytes = other->m_dataFile.read(buffer, CACHE_CHUNK_BYTE_SIZE);
+            if (bytes < 1) {
+                break;
+            }
+            sequence->m_dataFile.write(buffer, bytes);
         }
-        sequence->m_dataFile.write(buffer, bytes);
+        delete[] buffer;
     }
-    delete[] buffer;
 
     return sequence;
 }
