@@ -308,7 +308,7 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
 
     QSharedPointer<const BitArray> bits = inputContainers.at(0)->bits();
 
-    auto frames = QSharedPointer<RangeSequence>(new RangeSequence());
+    auto frames = RangeSequence::createEmpty();
     auto outputBits = QSharedPointer<BitArray>(new BitArray(bits->sizeInBits()));
     qint64 start = 0;
     qint64 pos = 0;

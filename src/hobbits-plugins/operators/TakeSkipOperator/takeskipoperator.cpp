@@ -162,7 +162,7 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         OutputHandle handle;
         handle.idx = 0;
         handle.bits = QSharedPointer<BitArray>(new BitArray(outputBufferSize));
-        handle.frames = QSharedPointer<RangeSequence>(new RangeSequence());
+        handle.frames = RangeSequence::createEmpty();
         outputs.append(handle);
     }
 

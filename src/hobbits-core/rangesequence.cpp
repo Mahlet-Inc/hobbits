@@ -62,6 +62,11 @@ QSharedPointer<RangeSequence> RangeSequence::fromOther(QSharedPointer<RangeSeque
     return sequence;
 }
 
+QSharedPointer<RangeSequence> RangeSequence::createEmpty()
+{
+    return QSharedPointer<RangeSequence>(new RangeSequence());
+}
+
 Range RangeSequence::at(qint64 i) const
 {
     if (i < 0 || i >= m_size) {
