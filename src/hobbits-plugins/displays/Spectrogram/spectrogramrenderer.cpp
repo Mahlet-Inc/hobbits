@@ -5,6 +5,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QTime>
 #include <QTimer>
+#include "viridis.h"
 
 #ifdef Q_OS_UNIX
 #define bswap32(X) __builtin_bswap32((X))
@@ -27,6 +28,7 @@ SpectrogramRenderer::SpectrogramRenderer(QObject *parent) :
     m_dataType(DataType::Real),
     m_sensitivity(1.0),
     m_sampleRate(16000),
+    m_logarithmic(true),
     m_renderDirty(true),
     m_rendering(false)
 {
@@ -363,10 +365,6 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
 
     qint64 currOffset = renderer->bitOffset();
 
-    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
-    qreal hue = c.hueF();
-    qreal saturation = c.saturationF();
-
     QTime lastTime = QTime::currentTime();
     for (int i = 0; i < renderer->maxSpectrums(); i++) {
         renderer->m_mutex.lock();
@@ -399,14 +397,19 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         fftw_execute_dft(plan, fftIn, fftOut);
 
         QVector<double> spectrum(renderer->fftSize()/2);
-        for (int n = 0; n < renderer->fftSize()/2; n++) {
-            spectrum[n] = 0.4 * renderer->sensitivity() * log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
+        if (renderer->logarithmic()) {
+            for (int n = 0; n < renderer->fftSize()/2; n++) {
+                spectrum[n] = 0.4 * renderer->sensitivity() * log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
+            }
+        }
+        else {
+            for (int n = 0; n < renderer->fftSize()/2; n++) {
+                spectrum[n] = renderer->sensitivity() * (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
+            }
         }
         spectrums.append(spectrum);
         for (int x = 0; x < img.width()  && x < spectrum.size(); x++) {
-            qreal lightness = qBound(0.0, spectrum.at(x), 1.0);
-            c.setHslF(hue, saturation, lightness);
-            img.setPixel(x, i, c.rgba());
+            img.setPixel(x, i, VIRIDIS_MAP[qBound(0, qFloor(spectrum.at(x) * 256.0), 255)].rgb());
         }
 
         renderer->m_mutex.unlock();
@@ -433,6 +436,20 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         renderer->m_mutex.lock();
         renderer->m_rendering = false;
         renderer->m_mutex.unlock();
+    }
+}
+
+bool SpectrogramRenderer::logarithmic() const
+{
+    return m_logarithmic;
+}
+
+void SpectrogramRenderer::setLogarithmic(bool logarithmic)
+{
+    if (!m_logarithmic == logarithmic) {
+        QMutexLocker lock(&m_mutex);
+        m_logarithmic = logarithmic;
+        setDirty();
     }
 }
 

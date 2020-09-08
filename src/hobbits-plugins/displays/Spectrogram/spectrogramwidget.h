@@ -30,6 +30,7 @@ public slots:
     void setSampleRate(double);
     void setShowHeaders(bool);
     void setShowHoverSlices(bool);
+    void setLogarithmic(bool);
 
 private:
     void prepareHeaders();

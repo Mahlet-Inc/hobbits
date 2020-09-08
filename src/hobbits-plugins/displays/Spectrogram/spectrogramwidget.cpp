@@ -214,25 +214,42 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
         painter.translate(m_displayOffset);
 
+        int borderSize = 4;
+
+
+        QRect rBorder;
+        rBorder.setTopLeft(QPoint(m_displayCenterSize.width(), 0));
+        rBorder.setWidth(borderSize);
+        rBorder.setHeight(this->height() - m_displayOffset.y());
+
+        QRect bBorder;
+        bBorder.setTopLeft(QPoint(0, m_displayCenterSize.height()));
+        bBorder.setWidth(this->width() - m_displayOffset.x());
+        bBorder.setHeight(borderSize);
+
         QRect rPanel;
-        rPanel.setTopLeft(QPoint(m_displayCenterSize.width(), 0));
+        rPanel.setTopLeft(QPoint(m_displayCenterSize.width() + borderSize, 0));
         rPanel.setBottomRight(QPoint(this->width() - m_displayOffset.x(), this->height() - m_displayOffset.y()));
         QRect bPanel;
-        bPanel.setTopLeft(QPoint(0, m_displayCenterSize.height()));
+        bPanel.setTopLeft(QPoint(0, m_displayCenterSize.height() + borderSize));
         bPanel.setBottomRight(rPanel.bottomRight());
 
-        painter.fillRect(rPanel, QColor(0x33, 0x33, 0x33));
-        painter.fillRect(bPanel, QColor(0x33, 0x33, 0x33));
+        painter.fillRect(rPanel, Qt::black);
+        painter.fillRect(bPanel, Qt::black);
+        painter.fillRect(rBorder, Qt::darkGray);
+        painter.fillRect(bBorder, Qt::darkGray);
+
+        int graphPad = 8;
 
         if (m_hoverX >= 0 && m_hoverY >= 0) {
             if (m_hoverY < m_spectrums.size() && m_spectrums.size() > 0) {
                 painter.save();
-                painter.translate(bPanel.bottomLeft() + QPoint(0, -4));
+                painter.translate(bPanel.bottomLeft() + QPoint(0, -1*graphPad));
                 painter.scale(1, -1.0);
                 auto spectrum = m_spectrums.at(m_hoverY);
 
 
-                double yFactor = bPanel.height() - 8;
+                double yFactor = bPanel.height() - (2 * graphPad);
                 double xFactor = double(m_displayCenterSize.width()) / (double(m_renderer->fftSize()) / 2.0);
                 QPainterPath path;
                 path.moveTo(0, qBound(0.0, spectrum.at(0)*m_renderer->sensitivity(), 1.0)*yFactor);
@@ -250,7 +267,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
             if (m_spectrums.size() > 0) {
                 painter.save();
-                painter.translate(rPanel.topLeft() + QPoint(4, 0));
+                painter.translate(rPanel.topLeft() + QPoint(graphPad, 0));
                 painter.rotate(90);
                 painter.scale(1.0, -1.0);
 
@@ -258,7 +275,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
 
                 double xFactor = m_scale;
-                double yFactor = rPanel.width() - 8;
+                double yFactor = rPanel.width() - (2 * graphPad);
                 QPainterPath path;
                 path.moveTo(0, qBound(0.0, m_spectrums.at(0).at(pos)*m_renderer->sensitivity(), 1.0)*yFactor);
                 double xVal = xFactor;
@@ -394,6 +411,11 @@ void SpectrogramWidget::setShowHoverSlices(bool val)
 {
     m_showHoverSlices = val;
     repaint();
+}
+
+void SpectrogramWidget::setLogarithmic(bool val)
+{
+    m_renderer->setLogarithmic(val);
 }
 
 void SpectrogramWidget::prepareHeaders()

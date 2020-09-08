@@ -61,6 +61,9 @@ public:
 
     void setDirty();
 
+    bool logarithmic() const;
+    void setLogarithmic(bool logarithmic);
+
 signals:
     void spectrumsChanged(const QList<QVector<double>>&, const QImage&);
 
@@ -84,6 +87,7 @@ private:
     double m_sensitivity;
     double m_sampleRate;
     QSharedPointer<BitContainer> m_container;
+    bool m_logarithmic;
 
     QFutureWatcher<void> m_watcher;
 

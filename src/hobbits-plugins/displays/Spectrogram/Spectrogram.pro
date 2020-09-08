@@ -31,7 +31,8 @@ SOURCES +=         spectrogram.cpp         spectrogramwidget.cpp         spectro
     spectrogramrenderer.cpp
 
 HEADERS +=         spectrogram.h         spectrogramwidget.h         spectrogramcontrols.h \
-    spectrogramrenderer.h
+    spectrogramrenderer.h \
+    viridis.h
 
 FORMS +=         spectrogramcontrols.ui
 
