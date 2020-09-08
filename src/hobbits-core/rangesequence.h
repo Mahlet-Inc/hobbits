@@ -5,8 +5,9 @@
 #include <QQueue>
 #include <QMutex>
 #include "range.h"
+#include "hobbits-core_global.h"
 
-class RangeSequence
+class HOBBITSCORESHARED_EXPORT RangeSequence
 {
 public:
     RangeSequence();
