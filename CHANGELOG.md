@@ -1,3 +1,24 @@
+# [0.38.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.37.0...v0.38.0) (2020-09-08)
+
+
+### Bug Fixes
+
+* kill render threads on program exit ([ca80c21](https://github.com/Mahlet-Inc/hobbits/commit/ca80c21e08507874614292b4f0a55a315fb82bea))
+
+
+### Features
+
+* [api] expand PluginStateHelper with QComboBox handling ([8dece5d](https://github.com/Mahlet-Inc/hobbits/commit/8dece5d9a339fe3bfd677671554b4a854a92f1f4))
+* add hover details and slice plots to spectrogram ([231af9f](https://github.com/Mahlet-Inc/hobbits/commit/231af9fbfaf02e87b32bf0b6c6430f831635693c))
+* add UDP importer/exporter ([e06c4aa](https://github.com/Mahlet-Inc/hobbits/commit/e06c4aad15724903648a7432c0568ab5e186ef25))
+* make spectrogram render on a separate thread ([3586739](https://github.com/Mahlet-Inc/hobbits/commit/3586739466eee2b244fb2dd904db5f9725f214ae))
+* make viridis the default spectrogram color map ([30f5e90](https://github.com/Mahlet-Inc/hobbits/commit/30f5e90fb69769a628b78b8ef8822bffaf5dfe50))
+
+
+### Performance Improvements
+
+* [api] rehaul BitArray copying (currently only affects take skip) ([a90270f](https://github.com/Mahlet-Inc/hobbits/commit/a90270fd8f12c235b5e1854601f63bf54d64af86))
+
 # [0.37.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.36.0...v0.37.0) (2020-08-27)
 
 
