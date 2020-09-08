@@ -13,6 +13,7 @@ class HOBBITSCORESHARED_EXPORT PreviewScrollBar : public QWidget
     Q_OBJECT
 public:
     explicit PreviewScrollBar(QWidget *parent = nullptr);
+    ~PreviewScrollBar() override;
     int getFrameOffset();
 
     void paintEvent(QPaintEvent *event) override;

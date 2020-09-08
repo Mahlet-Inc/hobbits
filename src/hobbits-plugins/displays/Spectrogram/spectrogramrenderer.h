@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QFutureWatcher>
 #include "fftw3.h"
 #include "bitcontainer.h"
 
@@ -24,6 +25,7 @@ public:
     };
 
     explicit SpectrogramRenderer(QObject *parent = nullptr);
+    ~SpectrogramRenderer();
     int bitStride() const;
 
     qint64 bitOffset() const;
@@ -82,6 +84,8 @@ private:
     double m_sensitivity;
     double m_sampleRate;
     QSharedPointer<BitContainer> m_container;
+
+    QFutureWatcher<void> m_watcher;
 
     bool m_renderDirty;
     bool m_rendering;

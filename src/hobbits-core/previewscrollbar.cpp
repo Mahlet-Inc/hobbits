@@ -10,6 +10,15 @@ PreviewScrollBar::PreviewScrollBar(QWidget *parent) : QWidget(parent)
     setMinimumWidth(50);
 }
 
+PreviewScrollBar::~PreviewScrollBar()
+{
+    for (auto ptr: m_renderWatchers.keys()) {
+        auto watcher = m_renderWatchers.value(ptr);
+        watcher->progress()->setCancelled(true);
+        watcher->watcher()->waitForFinished();
+    }
+}
+
 int PreviewScrollBar::getFrameOffset()
 {
     return m_frameOffset;

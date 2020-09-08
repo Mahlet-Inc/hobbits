@@ -33,6 +33,14 @@ SpectrogramRenderer::SpectrogramRenderer(QObject *parent) :
 
 }
 
+SpectrogramRenderer::~SpectrogramRenderer()
+{
+    if (m_watcher.isRunning()) {
+        m_watcher.cancel();
+    }
+    m_watcher.waitForFinished();
+}
+
 qint64 SpectrogramRenderer::bitOffset() const
 {
     return m_bitOffset;
@@ -178,7 +186,12 @@ void SpectrogramRenderer::setDirty()
     bool locked = m_mutex.tryLock();
     m_renderDirty = true;
     if (!m_rendering) {
-        QtConcurrent::run(&SpectrogramRenderer::computeStft, this);
+        if (m_watcher.isRunning()) {
+            m_watcher.cancel();
+            m_watcher.waitForFinished();
+        }
+        auto future = QtConcurrent::run(&SpectrogramRenderer::computeStft, this);
+        m_watcher.setFuture(future);
     }
     if (locked) {
         m_mutex.unlock();
@@ -357,6 +370,10 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
     QTime lastTime = QTime::currentTime();
     for (int i = 0; i < renderer->maxSpectrums(); i++) {
         renderer->m_mutex.lock();
+        if (renderer->m_watcher.isCanceled()) {
+            renderer->m_rendering = false;
+            return;
+        }
         if (renderer->m_renderDirty) {
             renderer->m_rendering = false;
             fftw_destroy_plan(plan);
@@ -383,11 +400,11 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
 
         QVector<double> spectrum(renderer->fftSize()/2);
         for (int n = 0; n < renderer->fftSize()/2; n++) {
-            spectrum[n] = (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
+            spectrum[n] = 0.4 * renderer->sensitivity() * log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
         }
         spectrums.append(spectrum);
         for (int x = 0; x < img.width()  && x < spectrum.size(); x++) {
-            qreal lightness = qBound(0.0, spectrum.at(x)*renderer->sensitivity(), 1.0);
+            qreal lightness = qBound(0.0, spectrum.at(x), 1.0);
             c.setHslF(hue, saturation, lightness);
             img.setPixel(x, i, c.rgba());
         }
