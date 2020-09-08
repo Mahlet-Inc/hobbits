@@ -208,15 +208,15 @@ void HighlightNavigator::updateSelection()
     QColor focusColor = SettingsManager::getInstance().getUiSetting(SettingsData::FOCUS_COLOR_KEY).value<QColor>();
     RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor);
 
-    int containingFrame = m_container->bitInfo()->frameOffsetContaining(focus.range());
+    qint64 containingFrame = m_container->bitInfo()->frameOffsetContaining(focus.range().start());
     if (containingFrame >= 0) {
-        int bitOffset = qMax(
-                0,
-                int(focus.range().start() - m_container->bitInfo()->frames().at(containingFrame).start() - 16));
+        qint64 bitOffset = qMax(
+                0ll,
+                focus.range().start() - m_container->bitInfo()->frameAt(containingFrame).start() - 16);
         if (bitOffset < 256) {
             bitOffset = 0;
         }
-        int frameOffset = qMax(0, containingFrame - 16);
+        qint64 frameOffset = qMax(0ll, containingFrame - 16);
 
         if (m_shouldHighlightSelection) {
             // Add it only if it is new

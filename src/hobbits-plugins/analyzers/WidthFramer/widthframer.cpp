@@ -183,26 +183,13 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
     if (!canRecallPluginState(recallablePluginState)) {
         return AnalyzerResult::error("Invalid parameters passed to plugin");
     }
+    progressTracker->setProgressPercent(10);
 
     qint64 frameWidth = recallablePluginState.value("width").toInt();
-    QVector<Range> frames;
-
     QSharedPointer<const BitArray> bits = container->bits();
-
-    for (qint64 i = 0; i < bits->sizeInBits(); i += frameWidth) {
-        qint64 width = qMin(frameWidth - 1, bits->sizeInBits() - i - 1);
-        frames.append(Frame(bits, i, i + width));
-
-        progressTracker->setProgress(i, bits->sizeInBits());
-        if (progressTracker->getCancelled()) {
-            return AnalyzerResult::error("Processing cancelled");
-        }
-    }
-
     QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
-
-    bitInfo->setFrames(frames);
-
+    bitInfo->setFrames(RangeSequence::fromConstantSize(frameWidth, bits->sizeInBits()));
+    progressTracker->setProgressPercent(50);
     return AnalyzerResult::result(bitInfo, recallablePluginState);
 }
 

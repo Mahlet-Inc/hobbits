@@ -167,9 +167,29 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="ck_logarithmic">
+       <property name="text">
+        <string>Logarithmic</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="ck_showHeaders">
        <property name="text">
         <string>Show Headers</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="ck_hoverSlices">
+       <property name="text">
+        <string>Show Hover Slices</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

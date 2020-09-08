@@ -55,6 +55,38 @@ void PluginStateHelper::addTextEditStringParameter(QString name, const std::func
     }, optional);
 }
 
+void PluginStateHelper::addComboBoxParameter(QString name, const std::function<QComboBox *()> comboBoxGetter, QJsonValue::Type type, bool optional, int role)
+{
+    addParameter(name, type, [comboBoxGetter, type, role](QJsonValue value) {
+        int index = -1;
+        if (type == QJsonValue::Bool) {
+            index = comboBoxGetter()->findData(value.toBool(), role);
+        }
+        else if (type == QJsonValue::String) {
+            index = comboBoxGetter()->findData(value.toString(), role);
+        }
+        else if (type == QJsonValue::Double) {
+            index = comboBoxGetter()->findData(value.toDouble(), role);
+        }
+        if (index < 0) {
+            return false;
+        }
+        comboBoxGetter()->setCurrentIndex(index);
+        return true;
+    }, [comboBoxGetter, type, role]() {
+        if (type == QJsonValue::Bool) {
+            return QJsonValue(comboBoxGetter()->currentData(role).toBool());
+        }
+        else if (type == QJsonValue::String) {
+            return QJsonValue(comboBoxGetter()->currentData(role).toString());
+        }
+        else if (type == QJsonValue::Double) {
+            return QJsonValue(comboBoxGetter()->currentData(role).toDouble());
+        }
+        return QJsonValue();
+    }, optional);
+}
+
 bool PluginStateHelper::validatePluginState(const QJsonObject &pluginState)
 {
     if (pluginState.isEmpty()) {

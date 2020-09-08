@@ -67,6 +67,7 @@ SOURCES += \
     previewscrollbar.cpp \
     range.cpp \
     rangehighlight.cpp \
+    rangesequence.cpp \
     settingsdata.cpp \
     settingsmanager.cpp
 
@@ -112,6 +113,7 @@ HEADERS += \
     previewscrollbar.h \
     range.h \
     rangehighlight.h \
+    rangesequence.h \
     settingsdata.h \
     settingsmanager.h
 

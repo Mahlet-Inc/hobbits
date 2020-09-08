@@ -24,10 +24,10 @@ void DotPlotWidget::paintEvent(QPaintEvent*) {
     auto bits = m_displayHandle->getContainer()->bits();
     auto frames = m_displayHandle->getContainer()->bitInfo()->frames();
     auto frameOffset = m_displayHandle->getFrameOffset();
-    if (frames.size() <= frameOffset) {
+    if (frames->size() <= frameOffset) {
         return;
     }
-    qint64 startBit = (frames.at(frameOffset).start() / m_wordSize) * m_wordSize;
+    qint64 startBit = (frames->at(frameOffset).start() / m_wordSize) * m_wordSize;
 
     QRgb background = qRgb(0, 0, 0);
     QRgb foreground = qRgb(200, 230, 255);

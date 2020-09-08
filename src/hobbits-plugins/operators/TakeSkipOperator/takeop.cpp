@@ -12,11 +12,10 @@ void TakeOp::apply(
         qint64 &inputIdx,
         qint64 &outputIdx)
 {
-    for (qint64 i = 0; i < m_value && inputIdx < inputFrame.size(); i++) {
-        outputBits->set(outputIdx, inputFrame.at(inputIdx));
-        inputIdx++;
-        outputIdx++;
-    }
+    // copying into an empty bit array, so "Or" can be used instead of "Copy"
+    qint64 taken = inputFrame.copyBits(inputIdx, outputBits.data(), outputIdx, m_value, BitArray::Or);
+    inputIdx += taken;
+    outputIdx += taken;
 }
 
 qint64 TakeOp::inputStep(qint64 inputBits) const

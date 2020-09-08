@@ -5,6 +5,14 @@
 #include <QString>
 #include <QDir>
 
+#ifdef Q_OS_UNIX
+#define bswap64(X) __builtin_bswap64((X))
+#endif
+#ifdef Q_OS_WIN
+#include <stdlib.h>
+#define bswap64(X) _byteswap_uint64((X))
+#endif
+
 static char BIT_MASKS[8] = {
     -128, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
 };
@@ -19,6 +27,26 @@ static quint64 BYTE_MASKS[8] = {
 
 static quint64 INVERSE_BYTE_MASKS[8] = {
     0x00000000000000ff, 0x000000000000ff00, 0x0000000000ff0000, 0x00000000ff000000, 0x000000ff00000000, 0x0000ff0000000000, 0x00ff000000000000, 0xff00000000000000
+};
+
+static quint8 IMASK_MSB_8[8] = {
+    0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe
+};
+
+static quint8 IMASK_LSB_8[8] = {
+    0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f
+};
+
+static quint64 COPY_64_BIT_LE_MASKS[8] = {
+    0x0000000000000000, 0x0000000000000080, 0x00000000000000b0, 0x00000000000000e0, 0x00000000000000f0, 0x00000000000000f8, 0x00000000000000fb, 0x00000000000000fe
+};
+
+static quint8 MASK_MSB_8[8] {
+    0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01
+};
+
+static quint8 MASK_LSB_8[8] {
+    0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
 };
 
 #define CACHE_CHUNK_BYTE_SIZE (10 * 1000 * 1000)
@@ -207,27 +235,27 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEnd
 
 qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
-    qint64 val = static_cast<qint64>(getWordValue(bitOffset, wordBitSize, littleEndian));
+    quint64 uVal = getWordValue(bitOffset, wordBitSize, littleEndian);
+    qint64 *val = reinterpret_cast<qint64*>(&uVal);
     if (wordBitSize == 64) {
-        return val;
+        return *val;
     }
     qint64 signBit = 1 << (wordBitSize-1);
-    if (signBit & val) {
-        auto r = (val - signBit) - signBit;
+    if (signBit & *val) {
+        auto r = (*val - signBit) - signBit;
         return r;
     }
     else {
-        return val;
+        return *val;
     }
 }
 
-bool BitArray::loadCacheAt(qint64 i) const
+void BitArray::loadCacheAt(qint64 i) const
 {
     QMutexLocker lock(&m_cacheMutex);
     qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
-    int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     if (m_dataCaches[cacheIdx]) {
-        return m_dataCaches[cacheIdx][index / 8] & BIT_MASKS[index % 8];
+        return;
     }
 
     QQueue<qint64> *unconstRecentCacheAccess = const_cast<QQueue<qint64>*>(&m_recentCacheAccess);
@@ -254,8 +282,6 @@ bool BitArray::loadCacheAt(qint64 i) const
         delete[] unconstDataCaches[removedCacheIndex];
         unconstDataCaches[removedCacheIndex] = nullptr;
     }
-
-    return byteBuffer[index / 8] & BIT_MASKS[index % 8];
 }
 
 qint64 BitArray::sizeInBits() const
@@ -297,6 +323,178 @@ void BitArray::set(qint64 i, bool value)
     else {
         m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] & INVERSE_BIT_MASKS[index % 8];
     }
+}
+
+qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode) const
+{
+    if (!dest) {
+        return 0;
+    }
+
+    // figure out how many bits will actually be copied
+    qint64 bitsToCopy = qMin(maxBits, sizeInBits() - bitOffset);
+    if (bitsToCopy <= 0) {
+        return 0;
+    }
+
+    // resize the destination array, if neccessary
+    if (dest->sizeInBits() < destBitOffset + bitsToCopy) {
+        dest->resize(destBitOffset + bitsToCopy);
+    }
+
+    dest->m_mutex.lock();
+
+    qint64 bitsCopied = 0;
+    while (bitsCopied < bitsToCopy) {
+        qint64 srcCacheIdx = bitOffset / CACHE_CHUNK_BIT_SIZE;
+        if (!m_dataCaches[srcCacheIdx]) {
+            loadCacheAt(bitOffset);
+        }
+        // TODO: race condition if cache is dropped between load and lock. need a recursive mutex
+        m_cacheMutex.lock();
+
+        qint64 destCacheIdx = destBitOffset / CACHE_CHUNK_BIT_SIZE;
+        if (!dest->m_dataCaches[destCacheIdx]) {
+            dest->loadCacheAt(destBitOffset);
+        }
+        dest->m_cacheMutex.lock();
+
+        int srcByteAlignment = bitOffset % 8;
+        int destByteAlignment = destBitOffset % 8;
+
+        qint64 srcCacheBitOffset = bitOffset - (srcCacheIdx * CACHE_CHUNK_BIT_SIZE);
+        qint64 destCacheBitOffset = destBitOffset - (destCacheIdx * CACHE_CHUNK_BIT_SIZE);
+
+        qint64 srcCacheByteOffset = srcCacheBitOffset / 8;
+        qint64 destCacheByteOffset = destCacheBitOffset / 8;
+
+        char* srcCache = m_dataCaches[srcCacheIdx] + srcCacheByteOffset;
+        char* destCache = dest->m_dataCaches[destCacheIdx] + destCacheByteOffset;
+
+        qint64 bitsThisRound = CACHE_CHUNK_BIT_SIZE - qMax(srcCacheBitOffset, destCacheBitOffset);
+        bitsThisRound = qMin(bitsThisRound, (bitsToCopy - bitsCopied));
+
+        // TODO: short-circuit for byte-aligned copy here
+
+        int srcOffset = srcByteAlignment;
+        int destOffset = destByteAlignment;
+        int srcByteOffset = 0;
+        int destByteOffset = 0;
+        qint64 increment = 0;
+        qint64 bitsLeft = bitsThisRound;
+        while (bitsLeft > 0) {
+            if (bitsLeft < 8) {
+                quint8 mask8 =  IMASK_MSB_8[destByteAlignment];
+
+                // get the source value and shift it to align with the destination
+                quint8 srcVal = quint8(srcCache[srcByteOffset]);
+                if (copyMode == CopyMode::Invert) {
+                    srcVal = ~srcVal;
+                }
+                srcVal <<= srcByteAlignment;
+                srcVal >>= destByteAlignment;
+
+                // remove any bits from the byte that extend beyond the remaining bits to copy
+                int destTrailMask = 8 - destByteAlignment - int(bitsLeft);
+                if (destTrailMask > 0) {
+                    mask8 &= IMASK_LSB_8[destTrailMask];
+                    srcVal &= MASK_LSB_8[destTrailMask];
+                }
+
+                // get the target destination byte and applythe source value
+                char* target = destCache + destByteOffset;
+                if (copyMode == CopyMode::Copy || copyMode == CopyMode::Invert) {
+                    *target &= mask8;
+                    *target |= srcVal;
+                }
+                else if (copyMode == CopyMode::Xor) {
+                    *target ^= srcVal;
+                }
+                else if (copyMode == CopyMode::And) {
+                    *target &= srcVal;
+                }
+                else if (copyMode == CopyMode::Or) {
+                    *target |= srcVal;
+                }
+
+                increment = 8 - qMax(destByteAlignment, srcByteAlignment);
+            }
+            else if (bitsLeft < 64) {
+                // copy up to 8 bits
+                quint8 srcVal = quint8(srcCache[srcByteOffset]);
+                if (copyMode == CopyMode::Invert) {
+                    srcVal = ~srcVal;
+                }
+                srcVal <<= srcByteAlignment;
+                srcVal >>= destByteAlignment;
+                char* target = destCache + destByteOffset;
+
+                if (copyMode == CopyMode::Copy || copyMode == CopyMode::Invert) {
+                    *target &= IMASK_MSB_8[destByteAlignment];
+                    *target |= srcVal;
+                }
+                else if (copyMode == CopyMode::Xor) {
+                    *target ^= srcVal;
+                }
+                else if (copyMode == CopyMode::And) {
+                    *target &= srcVal;
+                }
+                else if (copyMode == CopyMode::Or) {
+                    *target |= srcVal;
+                }
+
+                increment = 8 - qMax(destByteAlignment, srcByteAlignment);
+            }
+            else {
+                // copy up to 64 bits
+                quint64 srcVal = static_cast<quint64*>(static_cast<void*>(srcCache + srcByteOffset))[0];
+                if (copyMode == CopyMode::Invert) {
+                    srcVal = ~srcVal;
+                }
+                srcVal = bswap64(srcVal);
+                srcVal <<= srcByteAlignment;
+                srcVal >>= destByteAlignment;
+                srcVal = bswap64(srcVal);
+                quint64* target = static_cast<quint64*>(static_cast<void*>(destCache + destByteOffset));
+
+                if (copyMode == CopyMode::Copy || copyMode == CopyMode::Invert) {
+                    *target &= COPY_64_BIT_LE_MASKS[destByteAlignment];
+                    *target |= srcVal;
+                }
+                else if (copyMode == CopyMode::Xor) {
+                    *target ^= srcVal;
+                }
+                else if (copyMode == CopyMode::And) {
+                    *target &= srcVal;
+                }
+                else if (copyMode == CopyMode::Or) {
+                    *target |= srcVal;
+                }
+
+                increment = 64 - qMax(destByteAlignment, srcByteAlignment);
+            }
+
+            bitsLeft -= increment;
+            srcOffset += increment;
+            destOffset += increment;
+            srcByteOffset = srcOffset / 8;
+            srcByteAlignment = srcOffset % 8;
+            destByteOffset = destOffset / 8;
+            destByteAlignment = destOffset % 8;
+        }
+
+        dest->m_cacheMutex.unlock();
+        m_cacheMutex.unlock();
+
+        bitsCopied += bitsThisRound;
+        bitOffset += bitsThisRound;
+        destBitOffset += bitsThisRound;
+    }
+
+    dest->m_dirtyCache = true;
+    dest->m_mutex.unlock();
+
+    return bitsToCopy;
 }
 
 void BitArray::syncCacheToFile() const

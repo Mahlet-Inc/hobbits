@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QComboBox>
 #include "hobbits-core_global.h"
 
 class HOBBITSCORESHARED_EXPORT PluginStateHelper
@@ -60,6 +61,11 @@ public:
     void addTextEditStringParameter(QString name,
                       const std::function<QPlainTextEdit*()> textEditGetter,
                       bool optional=false);
+
+    void addComboBoxParameter(QString name,
+                      const std::function<QComboBox*()> comboBoxGetter,
+                      QJsonValue::Type type,
+                      bool optional=false, int role = Qt::UserRole);
 
     bool validatePluginState(const QJsonObject &pluginState);
     bool applyPluginStateToUi(const QJsonObject &pluginState);

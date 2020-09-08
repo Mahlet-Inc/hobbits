@@ -93,12 +93,12 @@ void DisplayBase::sendHoverUpdate(QMouseEvent *event, int xSize, int ySize, int 
 
     int frameOffset = m_displayHandle->getFrameOffset() + diff.y();
     int bitOffset = m_displayHandle->getBitOffset() + diff.x();
-    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frames().size()) {
+    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->frameCount()) {
         m_lastHover = QPoint();
         emit bitHover(false, 0, 0);
         return;
     }
-    if (bitOffset >= m_displayHandle->getContainer()->frames().at(frameOffset).size()) {
+    if (bitOffset >= m_displayHandle->getContainer()->frameAt(frameOffset).size()) {
         m_lastHover = QPoint();
         emit bitHover(false, 0, 0);
         return;
@@ -142,7 +142,7 @@ void DisplayBase::adjustScrollbars()
             m_displayHandle->getVScroll()->setEnabled(true);
             m_displayHandle->getVScroll()->setVisible(true);
             m_displayHandle->getVScroll()->setMinimum(0);
-            m_displayHandle->getVScroll()->setMaximum(m_displayHandle->getContainer()->frames().size() - 1);
+            m_displayHandle->getVScroll()->setMaximum(m_displayHandle->getContainer()->frameCount() - 1);
             m_displayHandle->getVScroll()->setSingleStep(1);
             m_displayHandle->getVScroll()->setPageStep(this->height());
         }
@@ -233,12 +233,12 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
     if (m_displayHandle->getContainer()->bitInfo()->highlights(category).size() > 0) {
         int lastHighlight = 0;
         int rowOffset = -1;
-        for (int i = frameOffset; i < m_displayHandle->getContainer()->frames().size(); i++) {
+        for (int i = frameOffset; i < m_displayHandle->getContainer()->frameCount(); i++) {
             rowOffset++;
             if (rowOffset >= rowCount) {
                 break;
             }
-            Frame frame = m_displayHandle->getContainer()->frames().at(i);
+            Frame frame = m_displayHandle->getContainer()->frameAt(i);
             Frame displayFrame =
                 Frame(
                         m_displayHandle->getContainer()->bits(),
@@ -293,7 +293,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
     }
     QMenu menu(this);
 
-    Frame frame = m_displayHandle->getContainer()->frames().at(m_lastHover.y());
+    Frame frame = m_displayHandle->getContainer()->frameAt(m_lastHover.y());
 
     menu.addSection(
             QString("Frame %1, Bit %2 of %3")
@@ -338,9 +338,8 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Next Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
-        for (int i = m_lastHover.y() + 1; i < frames.size(); i++) {
-            if (frames.at(i).at(m_lastHover.x()) != value) {
+        for (int i = m_lastHover.y() + 1; i < m_displayHandle->getContainer()->frameCount(); i++) {
+            if (m_displayHandle->getContainer()->frameAt(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
                 break;
             }
@@ -350,9 +349,8 @@ void DisplayBase::showContextMenu(const QPoint &point)
             tr("Previous Bit Change in Column"),
             [this, frame]() {
         bool value = frame.at(m_lastHover.x());
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.y() - 1; i >= 0; i--) {
-            if (frames.at(i).at(m_lastHover.x()) != value) {
+            if (m_displayHandle->getContainer()->frameAt(i).at(m_lastHover.x()) != value) {
                 this->m_displayHandle->getVScroll()->setValue(i);
                 break;
             }
@@ -361,14 +359,13 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Next Constant(ish) Column"),
             [this, frame]() {
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() + 1; i < frame.size(); i++) {
             bool value = frame.at(i);
             bool constantish = true;
             for (int adjacent = qMax(0, m_lastHover.y() - 6);
-                 adjacent <= qMin(frames.size() - 1, m_lastHover.y() + 6);
+                 adjacent <= qMin(m_displayHandle->getContainer()->frameCount() - 1, qint64(m_lastHover.y() + 6));
                  adjacent++) {
-                Frame adjFrame = frames.at(adjacent);
+                Frame adjFrame = m_displayHandle->getContainer()->frameAt(adjacent);
                 if (i >= adjFrame.size()
                     || adjFrame.at(i) != value) {
                     constantish = false;
@@ -384,14 +381,13 @@ void DisplayBase::showContextMenu(const QPoint &point)
     gotoMenu.addAction(
             tr("Previous Constant(ish) Column"),
             [this, frame]() {
-        QVector<Frame> frames = m_displayHandle->getContainer()->frames();
         for (int i = m_lastHover.x() - 1; i >= 0; i--) {
             bool value = frame.at(i);
             bool constantish = true;
             for (int adjacent = qMax(0, m_lastHover.y() - 5);
-                 adjacent <= qMin(frames.size() - 1, m_lastHover.y() + 5);
+                 adjacent <= qMin(m_displayHandle->getContainer()->frameCount() - 1, qint64(m_lastHover.y() + 5));
                  adjacent++) {
-                Frame adjFrame = frames.at(adjacent);
+                Frame adjFrame = m_displayHandle->getContainer()->frameAt(adjacent);
                 if (i >= adjFrame.size()
                     || adjFrame.at(i) != value) {
                     constantish = false;
@@ -443,11 +439,11 @@ void DisplayBase::showContextMenu(const QPoint &point)
         gotoMarkerMenu.addAction(
                 QString("\"%1\"").arg(name),
                 [this, container, name, bit]() {
-            int frameOffset = container->bitInfo()->frameOffsetContaining(Range(bit, bit));
-            if (frameOffset < 0 || frameOffset >= container->frames().size()) {
+            qint64 frameOffset = container->bitInfo()->frameOffsetContaining(bit);
+            if (frameOffset < 0 || frameOffset >= container->frameCount()) {
                 return;
             }
-            Frame frame = container->frames().at(frameOffset);
+            Frame frame = container->frameAt(frameOffset);
             qint64 bitOffset = bit - frame.start();
             this->m_displayHandle->setOffsets(int(bitOffset), frameOffset);
         });

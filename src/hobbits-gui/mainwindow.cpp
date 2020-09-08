@@ -752,7 +752,7 @@ void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
         this->statusBar()->showMessage("");
     }
     else {
-        qint64 totalBitOffset = currContainer()->frames().at(frameOffset).start() + bitOffset;
+        qint64 totalBitOffset = currContainer()->frameAt(frameOffset).start() + bitOffset;
         qint64 totalByteOffset = totalBitOffset / 8;
         this->statusBar()->showMessage(
                 QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(

@@ -57,7 +57,7 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     if (m_showFrameOffsets) {
         painter.fillRect(0, 0, m_displayOffset.x() - m_fontWidth / 2, height(), Qt::lightGray);
         for (int i = 0; i < h; i++) {
-            if (i + frameOffset >= m_displayHandle->getContainer()->frames().size()) {
+            if (i + frameOffset >= m_displayHandle->getContainer()->frameCount()) {
                 break;
             }
             painter.setPen(Qt::darkGray);
@@ -100,10 +100,10 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     painter.save();
     painter.translate(m_displayOffset);
     for (int i = 0; i < h; i++) {
-        if (i + frameOffset >= m_displayHandle->getContainer()->frames().size()) {
+        if (i + frameOffset >= m_displayHandle->getContainer()->frameCount()) {
             break;
         }
-        Frame frame = m_displayHandle->getContainer()->frames().at(i + frameOffset);
+        Frame frame = m_displayHandle->getContainer()->frameAt(i + frameOffset);
 
         QString frameString = "";
         QString nibString;
@@ -169,7 +169,7 @@ void DisplayBaseText::prepareHeaders()
     m_frameHeight = m_fontHeight + 2;
 
     if (m_showFrameOffsets) {
-        int totalFrames = m_displayHandle->getContainer()->frames().size();
+        qint64 totalFrames = m_displayHandle->getContainer()->frameCount();
         int maxChars = qFloor(log10(totalFrames)) + 1;
         m_displayOffset.setX(qRound(m_fontWidth * (maxChars + 1.5)));
     }
@@ -178,7 +178,7 @@ void DisplayBaseText::prepareHeaders()
     }
 
     if (m_showColumnOffsets) {
-        int maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
+        qint64 maxWidth = m_displayHandle->getContainer()->maxFrameWidth();
         int maxChars = qCeil(log10(maxWidth));
         m_displayOffset.setY(qRound(m_fontWidth * (maxChars + 1.5)));
     }

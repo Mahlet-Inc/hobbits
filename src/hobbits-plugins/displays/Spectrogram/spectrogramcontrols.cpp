@@ -1,6 +1,6 @@
 #include "spectrogramcontrols.h"
 #include "ui_spectrogramcontrols.h"
-#include "spectrogramwidget.h"
+#include "spectrogramrenderer.h"
 
 
 SpectrogramControls::SpectrogramControls() :
@@ -14,19 +14,22 @@ SpectrogramControls::SpectrogramControls() :
     ui->cb_rateUnits->addItem("GHz", 1000000000.0);
     ui->cb_rateUnits->addItem("THz", 1000000000000.0);
 
-    ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramWidget::Unsigned);
-    ui->cb_wordFormat->addItem("Two's Complement", SpectrogramWidget::TwosComplement);
+    ui->cb_wordFormat->addItem("Unsigned Integer", SpectrogramRenderer::Unsigned);
+    ui->cb_wordFormat->addItem("Two's Complement", SpectrogramRenderer::TwosComplement);
+    ui->cb_wordFormat->addItem("IEEE 754 Floating Point", SpectrogramRenderer::IEEE_754);
 
-    ui->cb_endianness->addItem("Big Endian", SpectrogramWidget::BigEndian);
-    ui->cb_endianness->addItem("Little Endian", SpectrogramWidget::LittleEndian);
+    ui->cb_endianness->addItem("Big Endian", SpectrogramRenderer::BigEndian);
+    ui->cb_endianness->addItem("Little Endian", SpectrogramRenderer::LittleEndian);
 
-    ui->cb_dataType->addItem("Real", SpectrogramWidget::Real);
-    ui->cb_dataType->addItem("Real and Complex Interleaved", SpectrogramWidget::RealComplexInterleaved);
+    ui->cb_dataType->addItem("Real", SpectrogramRenderer::Real);
+    ui->cb_dataType->addItem("Real and Complex Interleaved", SpectrogramRenderer::RealComplexInterleaved);
 
     connect(ui->sb_wordSize, SIGNAL(valueChanged(int)), this, SIGNAL(wordSizeSet(int)));
     connect(ui->sb_fftSize, SIGNAL(valueChanged(int)), this, SIGNAL(fftSizeSet(int)));
     connect(ui->sb_overlap, SIGNAL(valueChanged(int)), this, SIGNAL(overlapSet(int)));
     connect(ui->ck_showHeaders, SIGNAL(toggled(bool)), this, SIGNAL(headersShowSet(bool)));
+    connect(ui->ck_hoverSlices, SIGNAL(toggled(bool)), this, SIGNAL(sliceShowSet(bool)));
+    connect(ui->ck_logarithmic, SIGNAL(toggled(bool)), this, SIGNAL(logarithmicSet(bool)));
 }
 
 void SpectrogramControls::sendCurrentValues()
@@ -38,6 +41,8 @@ void SpectrogramControls::sendCurrentValues()
     emit dataTypeSet(ui->cb_dataType->currentData().toInt());
     emit sampleRateSet(ui->sb_sampleRate->value() * ui->cb_rateUnits->currentData().toDouble());
     emit headersShowSet(ui->ck_showHeaders->isChecked());
+    emit sliceShowSet(ui->ck_hoverSlices->isChecked());
+    emit logarithmicSet(ui->ck_logarithmic->isChecked());
 }
 
 void SpectrogramControls::on_cb_wordFormat_currentIndexChanged(int index)

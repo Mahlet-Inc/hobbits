@@ -10,6 +10,15 @@ PreviewScrollBar::PreviewScrollBar(QWidget *parent) : QWidget(parent)
     setMinimumWidth(50);
 }
 
+PreviewScrollBar::~PreviewScrollBar()
+{
+    for (auto ptr: m_renderWatchers.keys()) {
+        auto watcher = m_renderWatchers.value(ptr);
+        watcher->progress()->setCancelled(true);
+        watcher->watcher()->waitForFinished();
+    }
+}
+
 int PreviewScrollBar::getFrameOffset()
 {
     return m_frameOffset;
@@ -103,7 +112,7 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
     // draw frame offset
     painter.setCompositionMode(QPainter::CompositionMode_Difference);
     painter.setPen(QPen(QBrush(Qt::white), 2));
-    int pos = int(this->height() * double(m_frameOffset) / double(container->frames().size()));
+    int pos = int(this->height() * double(m_frameOffset) / double(container->frameCount()));
     painter.drawLine(0, pos, this->width(), pos);
 }
 
@@ -138,7 +147,7 @@ void PreviewScrollBar::getOffsetFromEvent(QMouseEvent* event)
         return;
     }
     double percent = double(event->y()) / this->height();
-    setFrameOffset(int(double(m_manager->getCurrentContainer()->frames().size()) * percent));
+    setFrameOffset(int(double(m_manager->getCurrentContainer()->frameCount()) * percent));
 }
 
 void PreviewScrollBar::setFrameOffset(int offset)
@@ -195,12 +204,12 @@ void PreviewScrollBar::newContainer()
 
 QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, QSharedPointer<ActionRenderProgress> progress)
 {
-    if (container->bitInfo()->maxFrameWidth() < 8 || container->frames().size() < 1) {
+    if (container->bitInfo()->maxFrameWidth() < 8 || container->frameCount() < 1) {
         return QImage();
     }
-    auto frames = container->frames();
+    auto frames = container->bitInfo()->frames();
     int width = int(container->bitInfo()->maxFrameWidth() / 8);
-    int height = qMin(10000, frames.size());
+    int height = qMin(10000ll, frames->size());
     QImage image(width, height, QImage::Format_ARGB32);
     image.fill(qRgb(50, 50, 90));
     QPainter imagePainter(&image);
@@ -209,16 +218,16 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
     int hue = c.hue();
     int saturation = c.saturation();
-    int chunkHeight = qMax(50, qMin(10000, 5000000/width));
-    int chunkSize = qMin(frames.size(), chunkHeight);
-    double chunkHeightRatio = double(chunkSize)/double(frames.size());
+    qint64 chunkHeight = qMax(50, qMin(10000, 5000000/width));
+    int chunkSize = qMin(frames->size(), chunkHeight);
+    double chunkHeightRatio = double(chunkSize)/double(frames->size());
     double targetChunkHeight = chunkHeightRatio * height;
     QImage bufferChunk(width, chunkSize, QImage::Format_ARGB32);
-    for (int frame = 0; frame < frames.size(); frame += chunkSize) {
+    for (int frame = 0; frame < frames->size(); frame += chunkSize) {
         bufferChunk.fill(qRgb(0, 0, 0));
         int offset = 0;
-        for (; offset < chunkSize && offset + frame < frames.size(); offset++) {
-            Frame f = frames.at(offset + frame);
+        for (; offset < chunkSize && offset + frame < frames->size(); offset++) {
+            Frame f = Frame(container->bits(), frames->at(offset + frame));
             qint64 byteOffset = f.start()/8;
             for (int i = 0; i < f.size()/8 && byteOffset + i < container->bits()->sizeInBytes(); i++) {
                 char byteValue = container->bits()->byteAt(byteOffset + i);

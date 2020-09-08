@@ -16,6 +16,9 @@ public:
     Frame(const Frame &other) = default;
 
     bool at(qint64 i) const;
+    qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = BitArray::Copy) const;
+
+    QSharedPointer<const BitArray> bits() const;
 
 private:
     QSharedPointer<const BitArray> m_bits;

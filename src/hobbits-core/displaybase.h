@@ -60,7 +60,7 @@ signals:
     void bitHover(bool, int, int);
 
 public slots:
-    void bitContainerChanged();
+    virtual void bitContainerChanged();
     void checkFocus(QSet<DisplayInterface*>);
 
 protected slots:

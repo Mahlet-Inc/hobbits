@@ -92,17 +92,15 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
 
     bool frameBased =
         (recallablePluginState.contains("frame_based") && recallablePluginState.value("frame_based").toBool());
-    int frameCount = inputContainers.at(0)->frames().size();
-    QList<QPair<QVector<Frame>, qint64>> inputs;
+    qint64 frameCount = inputContainers.at(0)->frameCount();
+    QList<QPair<QSharedPointer<const BitContainer>, qint64>> inputs;
     for (auto inputContainer : inputContainers) {
+        inputs.append({inputContainer, 0});
         if (frameBased) {
-            frameCount = qMin(frameCount, inputContainer->frames().size());
-            inputs.append({inputContainer->frames(), 0});
+            frameCount = qMin(frameCount, inputContainer->frameCount());
         }
         else {
             frameCount = 1;
-            inputs.append({{Frame(inputContainer->bits(), 0,
-                    inputContainer->bits()->sizeInBits() - 1)}, 0});
         }
     }
 
@@ -112,7 +110,14 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     for (QSharedPointer<BitOp> op : ops) {
         for (auto input : inputs) {
             for (int i = 0; i < frameCount; i++) {
-                Frame frame = input.first[i];
+                Frame frame;
+                if (frameBased) {
+                    frame = input.first->frameAt(i);
+                }
+                else {
+                    frame = {Frame(input.first->bits(), 0,
+                             input.first->bits()->sizeInBits() - 1)};
+                }
                 // need to check for integer overflow
                 inputBitCount += frame.size();
                 qint64 frameStep = op->inputStep(frame.size());
@@ -152,16 +157,17 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
         outputCount = recallablePluginState.value("deinterleave_channels").toInt();
     }
     QList<OutputHandle> outputs;
-    QHash<QSharedPointer<BitArray>, QVector<Range>> outputFrames;
+    QHash<QSharedPointer<BitArray>, QSharedPointer<RangeSequence>> outputFrames;
     for (int i = 0; i < outputCount; i++) {
         OutputHandle handle;
         handle.idx = 0;
         handle.bits = QSharedPointer<BitArray>(new BitArray(outputBufferSize));
+        handle.frames = RangeSequence::createEmpty();
         outputs.append(handle);
     }
 
-    int lastPercent = 0;
 
+    qint64 totalBitsProcessed = 0;
     for (int currFrame = 0; currFrame < frameCount; currFrame++) {
         qint64 bitsProcessed = 0;
         bool reachedEnd = false;
@@ -176,7 +182,14 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                     qint64 outputIdx = outputs.at(k).idx;
                     qint64 outStart = outputIdx;
 
-                    Frame inputBits = inputs.at(i).first.at(currFrame);
+                    Frame inputBits;
+                    if (frameBased) {
+                        inputBits = inputs.at(i).first->frameAt(currFrame);
+                    }
+                    else {
+                        inputBits = {Frame(inputs.at(i).first->bits(), 0,
+                                 inputs.at(i).first->bits()->sizeInBits() - 1)};
+                    }
                     qint64 inputIdx = inputs.at(i).second;
                     qint64 start = inputIdx;
                     for (QSharedPointer<BitOp> op : ops) {
@@ -188,7 +201,9 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
                     }
 
                     if (outputIdx > outStart) {
-                        outputs[k].frames.append(Range(outStart, outputIdx - 1));
+                        if (frameBased) {
+                            outputs[k].frames->appendRange(outputIdx - outStart);
+                        }
                         outputs[k].idx = outputIdx;
                     }
 
@@ -199,19 +214,13 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
             if (reachedEnd) {
                 break;
             }
+            totalBitsProcessed += bitsProcessed;
 
             if (bitsProcessed > 0) {
-                int nextPercent = int(double(bitsProcessed) / double(inputBitCount) * 100.0);
-                if (nextPercent > lastPercent) {
-                    lastPercent = nextPercent;
-                    progressTracker->setProgressPercent(nextPercent);
-                }
+                progressTracker->setProgress(totalBitsProcessed, inputBitCount);
             }
-
             if (progressTracker->getCancelled()) {
-                auto cancelledPair = QPair<QString, QJsonValue>("error", QJsonValue("Processing cancelled"));
-                auto cancelled = (new OperatorResult())->setPluginState(QJsonObject({cancelledPair}));
-                return QSharedPointer<const OperatorResult>(cancelled);
+                return OperatorResult::error("Processing cancelled");
             }
         }
     }

@@ -4,4 +4,5 @@ SUBDIRS += \
     FileData \
     HexString \
     HttpData \
-    TcpData
+    TcpData \
+    UdpData

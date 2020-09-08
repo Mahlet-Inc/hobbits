@@ -10,6 +10,7 @@
 #include <QSharedPointer>
 #include <QVariant>
 #include <QMutex>
+#include "rangesequence.h"
 
 class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
 {
@@ -21,7 +22,7 @@ public:
     QSharedPointer<BitInfo> copyMetadata() const;
 
     void setBits(QSharedPointer<const BitArray> bits);
-    void setFrames(QVector<Range> frames);
+    void setFrames(QSharedPointer<RangeSequence> frames);
     void setFramesFromInfo(QSharedPointer<BitInfo> frameSource);
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
@@ -29,14 +30,16 @@ public:
     void clearHighlightCategory(QString category);
 
     qint64 maxFrameWidth() const;
-    QVector<Frame> frames() const;
+    Frame frameAt(qint64 i) const;
+    qint64 frameCount() const;
+    QSharedPointer<const RangeSequence> frames() const;
     QList<RangeHighlight> highlights(QString category) const;
     QList<RangeHighlight> highlights(QString category, QString label) const;
     QList<QString> highlightCategories() const;
     bool containsHighlightCategory(QString category) const;
     QVariant metadata(QString key) const;
 
-    int frameOffsetContaining(Range target, Range frameRange = Range()) const;
+    qint64 frameOffsetContaining(qint64 value, Range indexBounds = Range()) const;
 
     friend QDataStream& operator<<(QDataStream&, const BitInfo&);
     friend QDataStream& operator>>(QDataStream&, BitInfo&);
@@ -45,12 +48,8 @@ Q_SIGNALS:
     void changed();
 
 private:
-    void initFrames();
-
     QSharedPointer<const BitArray> m_bits;
-    qint64 m_maxFrameWidth;
-    QVector<Range> m_ranges;
-    QVector<Frame> m_frames;
+    QSharedPointer<RangeSequence> m_rangeSequence;
     QHash<QString, QList<RangeHighlight>> m_rangeHighlights;
     QVariantHash m_metadata;
     QMutex m_mutex;
