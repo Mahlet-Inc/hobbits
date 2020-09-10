@@ -229,11 +229,10 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     int outputNum = 0;
     for (auto output: outputs) {
         output.bits->resize(output.idx);
-        auto outputContainer = QSharedPointer<BitContainer>(new BitContainer());
+        auto outputContainer = BitContainer::create(output.bits);
         outputContainers.append(outputContainer);
-        outputContainer->setBits(output.bits);
         if (frameBased) {
-            outputContainer->bitInfo()->setFrames(output.frames);
+            outputContainer->info()->setFrames(output.frames);
         }
         if (inputContainers.size() > 1) {
             outputContainer->setName(QString("%1 Interleave").arg(recallablePluginState.value("take_skip_string").toString()));

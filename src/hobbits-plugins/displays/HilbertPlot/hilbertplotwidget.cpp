@@ -20,7 +20,7 @@ void HilbertPlotWidget::paintEvent(QPaintEvent*) {
     if (m_displayHandle->getContainer().isNull()) {
         return;
     }
-    if (m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->bitInfo()->frameCount()) {
+    if (m_displayHandle->getFrameOffset() >= m_displayHandle->getContainer()->info()->frameCount()) {
         return;
     }
 
@@ -33,7 +33,7 @@ void HilbertPlotWidget::paintEvent(QPaintEvent*) {
     raster.fill(qRgba(0, 0, 0, 0));
 
     auto bits = m_displayHandle->getContainer()->bits();
-    qint64 byteOffset = m_displayHandle->getContainer()->bitInfo()->frames()->at(m_displayHandle->getFrameOffset()).start() / 8;
+    qint64 byteOffset = m_displayHandle->getContainer()->info()->frames()->at(m_displayHandle->getFrameOffset()).start() / 8;
     for (int i = 0; i + byteOffset < bits->sizeInBytes() && i < rasterLength * rasterLength; i++) {
         int chunkLength = 1;
         int chunk = i;

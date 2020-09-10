@@ -171,7 +171,7 @@ void KaitaiStruct::previewBits(QSharedPointer<BitContainerPreview> container)
             m_highlightNav->setTitle("");
         }
         else {
-            QString resultLabel = m_previewContainer->bitInfo()->metadata(KAITAI_RESULT_LABEL).toString();
+            QString resultLabel = m_previewContainer->info()->metadata(KAITAI_RESULT_LABEL).toString();
             if (resultLabel.size() > 28) {
                 resultLabel.truncate(25);
                 resultLabel += "...";
@@ -370,7 +370,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         highlights.append(makeHighlight(label, labelMap));
     }
 
-    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+    QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
     bitInfo->addHighlights(highlights);
 
     return AnalyzerResult::result(bitInfo, recallablePluginState);

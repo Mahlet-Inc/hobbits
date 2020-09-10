@@ -131,7 +131,7 @@ void AnalyzerRunner::postProcess()
     PluginActionLineage::recordLineage(action, {m_container}, {m_container});
 
     if (!result->bitInfo().isNull()) {
-        m_container->setBitInfo(result->bitInfo());
+        m_container->setInfo(result->bitInfo());
     }
 
     emit finished(m_id);

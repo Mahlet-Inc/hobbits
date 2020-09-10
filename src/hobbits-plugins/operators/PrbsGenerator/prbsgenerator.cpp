@@ -194,14 +194,12 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
         return OperatorResult::error("Invalid Input. Please try again.");
     }
 
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(bitsWanted));
 
     std::vector<int> allTaps = findIntsSort(recallablePluginState.value("taps").toString());
     qint64 numBits = 0;
     qint64 outputIndex = 0;
     int lastPercent = 0;
-
 
     do {
         int bitToAdd = 0;
@@ -247,7 +245,7 @@ QSharedPointer<const OperatorResult> PrbsGenerator::operateOnContainers(
 
 
     updateEndState(lfsr);
-    bitContainer->setBits(outputBits);
+    auto bitContainer = BitContainer::create(outputBits);
     outputContainers.append(bitContainer);
 
     return OperatorResult::result(outputContainers, recallablePluginState);

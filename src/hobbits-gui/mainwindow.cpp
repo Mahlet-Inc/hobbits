@@ -83,9 +83,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->tb_containersMenu->setMenu(containersMenu);
     ui->tb_containersMenu->setPopupMode(QToolButton::InstantPopup);
 
-    connect(ui->tb_containersMenu, &QPushButton::pressed, [this]() {
-    });
-
     // Configure Plugin Action Management
     connect(
             ui->operatorTabs,
@@ -394,9 +391,7 @@ void MainWindow::importBitfile(QString file)
 
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
 {
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBits(rawBytes);
-
+    auto bitContainer = BitContainer::create(rawBytes);
     bitContainer->setName(name);
 
     QModelIndex addedIndex = m_bitContainerManager->getTreeModel()->addContainer(bitContainer);
@@ -579,27 +574,15 @@ void MainWindow::currBitContainerChanged()
 
 void MainWindow::sendBitContainerPreview()
 {
+    QSharedPointer<BitContainerPreview> preview;
+    if (!currContainer().isNull()) {
+        preview = BitContainerPreview::wrap(currContainer());
+    }
     for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->getAllAnalyzers()) {
-        if (currContainer().isNull()) {
-            analyzer->previewBits(QSharedPointer<BitContainerPreview>());
-        }
-        else {
-            analyzer->previewBits(
-                    QSharedPointer<BitContainerPreview>(
-                            new BitContainerPreview(
-                                    currContainer())));
-        }
+        analyzer->previewBits(preview);
     }
     for (QSharedPointer<OperatorInterface> op : m_pluginManager->getAllOperators()) {
-        if (currContainer().isNull()) {
-            op->previewBits(QSharedPointer<BitContainerPreview>());
-        }
-        else {
-            op->previewBits(
-                    QSharedPointer<BitContainerPreview>(
-                            new BitContainerPreview(
-                                    currContainer())));
-        }
+        op->previewBits(preview);
     }
 }
 
@@ -757,102 +740,6 @@ void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
         this->statusBar()->showMessage(
                 QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(
                         totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset));
-    }
-}
-
-void MainWindow::on_action_Save_Current_Container_triggered()
-{
-    if (currContainer().isNull()) {
-        warningMessage(
-                "You must first select a bit container in order to save it.",
-                "Cannot Save Container");
-        return;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Bit Container"),
-            SettingsManager::getInstance().getPrivateSetting(
-                    SettingsData::LAST_CONTAINER_PATH_KEY).toString(),
-            tr("Hobbits Bit Containers (*.hobbits_bits)"));
-    if (!fileName.endsWith(".hobbits_bits")) {
-        fileName += ".hobbits_bits";
-    }
-
-    QFile file(fileName);
-    SettingsManager::getInstance().setPrivateSetting(
-            SettingsData::LAST_CONTAINER_PATH_KEY,
-            QFileInfo(file).dir().path());
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        warningMessage(
-                QString("Could not open file '%1' for writing").arg(fileName),
-                "Cannot Save Container");
-        return;
-    }
-
-    QDataStream out(&file);
-    out << *currContainer().data();
-    file.close();
-
-    if (out.status() != QDataStream::Status::Ok) {
-        warningMessage(
-                QString("Encountered errors while writing to file '%1'").arg(fileName),
-                "Error Saving Container");
-    }
-
-}
-
-QStringList MainWindow::openHobbitsBits(QString fileName)
-{
-    QFile file(fileName);
-    SettingsManager::getInstance().setPrivateSetting(
-            SettingsData::LAST_CONTAINER_PATH_KEY,
-            QFileInfo(file).dir().path());
-
-    if (!file.open(QIODevice::ReadOnly)) {
-        return QStringList(QString("Could not open hobbits bits file '%1'").arg(fileName));
-    }
-
-
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    QDataStream in(&file);
-    in >> *bitContainer.data();
-    file.close();
-
-    if (in.status() != QDataStream::Status::Ok) {
-        return QStringList(
-                QString("Failure opening hobbits container file '%1'\nMaybe you meant to 'Import Bits'?").arg(
-                        fileName));
-    }
-
-    bitContainer->setName(QFileInfo(file).completeBaseName());
-
-    QModelIndex addedIndex = m_bitContainerManager->getTreeModel()->addContainer(bitContainer);
-    m_bitContainerManager->getCurrSelectionModel()->setCurrentIndex(
-            addedIndex,
-            QItemSelectionModel::ClearAndSelect);
-
-    return QStringList();
-}
-
-void MainWindow::on_actionOpen_Container_triggered()
-{
-    QString fileName = QFileDialog::getOpenFileName(
-            this,
-            tr("Open Bit Container"),
-            SettingsManager::getInstance().getPrivateSetting(
-                    SettingsData::LAST_CONTAINER_PATH_KEY).toString(),
-            tr("Hobbits Bit Containers (*.hobbits_bits)"));
-
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    QStringList errors = openHobbitsBits(fileName);
-
-    if (!errors.isEmpty()) {
-        warningMessage(errors.join("\n\n"), "Error Opening Container");
     }
 }
 

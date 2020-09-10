@@ -199,7 +199,7 @@ void DisplayBase::drawHighlights(
     }
 
     painter->setPen(Qt::transparent);
-    for (QString category: m_displayHandle->getContainer()->bitInfo()->highlightCategories()) {
+    for (QString category: m_displayHandle->getContainer()->info()->highlightCategories()) {
         drawHighlightRects(painter,
                            category,
                            colWidth,
@@ -230,7 +230,7 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
     }
 
     QVector<QRectF> rects;
-    if (m_displayHandle->getContainer()->bitInfo()->highlights(category).size() > 0) {
+    if (m_displayHandle->getContainer()->info()->highlights(category).size() > 0) {
         int lastHighlight = 0;
         int rowOffset = -1;
         for (int i = frameOffset; i < m_displayHandle->getContainer()->frameCount(); i++) {
@@ -245,7 +245,7 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
                         frame.start() + bitOffset,
                         qMin(frame.end(), frame.start() + bitOffset + colCount - 1));
             QList<RangeHighlight> spots = getHighlightSpots(
-                    m_displayHandle->getContainer()->bitInfo()->highlights(category),
+                    m_displayHandle->getContainer()->info()->highlights(category),
                     lastHighlight,
                     displayFrame);
 
@@ -410,7 +410,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             [this, frame]() {
         qint64 focusBit = frame.start() + m_lastHover.x();
         auto container = this->m_displayHandle->getContainer();
-        auto markers = container->bitInfo()->metadata("location_markers").toStringList();
+        auto markers = container->info()->metadata("location_markers").toStringList();
 
         bool ok;
         QString text = QInputDialog::getText(
@@ -425,12 +425,12 @@ void DisplayBase::showContextMenu(const QPoint &point)
         }
 
         markers.append(QString("%1,%2").arg(focusBit).arg(text));
-        container->setMetadata("location_markers", markers);
+        container->info()->setMetadata("location_markers", markers);
     });
 
 
     auto container = this->m_displayHandle->getContainer();
-    auto markers = container->bitInfo()->metadata("location_markers").toStringList();
+    auto markers = container->info()->metadata("location_markers").toStringList();
     QMenu gotoMarkerMenu("Go to Marker");
 
     for (auto marker : markers) {
@@ -439,7 +439,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
         gotoMarkerMenu.addAction(
                 QString("\"%1\"").arg(name),
                 [this, container, name, bit]() {
-            qint64 frameOffset = container->bitInfo()->frameOffsetContaining(bit);
+            qint64 frameOffset = container->info()->frameOffsetContaining(bit);
             if (frameOffset < 0 || frameOffset >= container->frameCount()) {
                 return;
             }
@@ -483,7 +483,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             range,
             SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
         );
-        container->addHighlight(highlight);
+        container->info()->addHighlight(highlight);
     });
 
     menu.addAction(
@@ -496,14 +496,14 @@ void DisplayBase::showContextMenu(const QPoint &point)
             frame,
             SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
         );
-        container->addHighlight(highlight);
+        container->info()->addHighlight(highlight);
     });
 
     menu.addAction(
             tr("Clear All Highlights"),
             [this, frame]() {
         auto container = this->m_displayHandle->getContainer();
-        container->clearHighlightCategory("manual_highlights");
+        container->info()->clearHighlightCategory("manual_highlights");
     });
 
     menu.exec(this->mapToGlobal(point));

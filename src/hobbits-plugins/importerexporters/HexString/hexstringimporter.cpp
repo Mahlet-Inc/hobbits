@@ -74,8 +74,7 @@ void HexStringImporter::importFromFile(QString fileName) {
         return;
     }
 
-    m_container = QSharedPointer<BitContainer>(new BitContainer());
-    m_container->setBits(data);
+    m_container = BitContainer::create(data);
     m_container->setName(QString("hex decode < %1").arg(QFileInfo(file).baseName()));
 }
 
@@ -106,8 +105,7 @@ void HexStringImporter::importFromHexString(QString hexString, int repeats)
         data.append(baseData);
     }
 
-    m_container = QSharedPointer<BitContainer>(new BitContainer());
-    m_container->setBits(data);
+    m_container = BitContainer::create(data);
     m_container->setName("hex input");
 
     this->accept();

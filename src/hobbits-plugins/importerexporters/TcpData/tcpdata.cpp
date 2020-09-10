@@ -57,8 +57,7 @@ QSharedPointer<ImportResult> TcpData::importBits(QJsonObject pluginState)
     }
 
     if (receiver->exec()) {
-        QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer());
-        container->setBits(receiver->getDownloadedData());
+        QSharedPointer<BitContainer> container = BitContainer::create(receiver->getDownloadedData());
         container->setName("TCP Import");
         QJsonObject state;
         state.insert("port", receiver->getPort());

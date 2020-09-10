@@ -117,14 +117,13 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
     bool takeAfter = recallablePluginState.value("extract_after").toBool();
     QString category = recallablePluginState.value("highlight_category").toString();
     QString label = recallablePluginState.value("highlight_label").toString();
-    auto highlights = inputContainer->bitInfo()->highlights(category, label);
+    auto highlights = inputContainer->info()->highlights(category, label);
     if (highlights.size() < 1) {
         return OperatorResult::error(QString("No highlight found matching required label (%1) and category (%2)").arg(label).arg(category));
     }
     RangeHighlight highlight = highlights.at(0);
     Range range = highlight.range();
 
-    QSharedPointer<BitContainer> outputContainer(new BitContainer());
     qint64 outputSize = inputContainer->bits()->sizeInBits();
     if (!takeBefore) {
         outputSize -= range.start();
@@ -190,9 +189,8 @@ QSharedPointer<const OperatorResult> Extractor::operateOnContainers(
             prefix += "-";
         }
     }
+    auto outputContainer = BitContainer::create(outBits);
     outputContainer->setName(prefix + name);
-
-    outputContainer->setBits(outBits);
 
     return OperatorResult::result({outputContainer}, recallablePluginState);
 }
@@ -206,7 +204,7 @@ void Extractor::previewBits(QSharedPointer<BitContainerPreview> container)
         return;
     }
     ui->cb_category->clear();
-    for (QString category: m_previewContainer->bitInfo()->highlightCategories()) {
+    for (QString category: m_previewContainer->info()->highlightCategories()) {
         ui->cb_category->addItem(category);
     }
     setPluginStateInUi(uiState);

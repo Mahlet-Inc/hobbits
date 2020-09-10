@@ -22,7 +22,7 @@ void DotPlotWidget::paintEvent(QPaintEvent*) {
     }
 
     auto bits = m_displayHandle->getContainer()->bits();
-    auto frames = m_displayHandle->getContainer()->bitInfo()->frames();
+    auto frames = m_displayHandle->getContainer()->info()->frames();
     auto frameOffset = m_displayHandle->getFrameOffset();
     if (frames->size() <= frameOffset) {
         return;

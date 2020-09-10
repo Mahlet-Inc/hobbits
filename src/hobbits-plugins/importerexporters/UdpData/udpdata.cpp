@@ -58,8 +58,7 @@ QSharedPointer<ImportResult> UdpData::importBits(QJsonObject pluginState)
     }
 
     if (receiver->exec()) {
-        QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer());
-        container->setBits(receiver->getDownloadedData());
+        QSharedPointer<BitContainer> container = BitContainer::create(receiver->getDownloadedData());
         container->setName("UDP Import");
         QJsonObject state;
         state.insert("port", receiver->getPort());

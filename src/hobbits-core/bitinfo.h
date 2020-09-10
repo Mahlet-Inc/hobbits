@@ -2,8 +2,6 @@
 #define BITINFO_H
 
 #include <QObject>
-#include "frame.h"
-#include "bitarray.h"
 #include "rangehighlight.h"
 #include <QVector>
 #include <QHash>
@@ -12,25 +10,23 @@
 #include <QMutex>
 #include "rangesequence.h"
 
+class BitContainer;
+
 class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit BitInfo(QObject *parent = nullptr);
-    BitInfo(QSharedPointer<const BitArray> bits, QObject *parent = nullptr);
-    QSharedPointer<BitInfo> copyMetadata() const;
+    static QSharedPointer<BitInfo> create(qint64 bitLength, QSharedPointer<const BitInfo> other = QSharedPointer<const BitInfo>(), bool clearFrames = false);
+    static QSharedPointer<BitInfo> copyFromContainer(QSharedPointer<const BitContainer> container, bool clearFrames = false);
 
-    void setBits(QSharedPointer<const BitArray> bits);
-    void setFrames(QSharedPointer<RangeSequence> frames);
-    void setFramesFromInfo(QSharedPointer<BitInfo> frameSource);
+    void setFrames(QSharedPointer<const RangeSequence> frames);
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
     void setMetadata(QString key, QVariant value);
     void clearHighlightCategory(QString category);
 
     qint64 maxFrameWidth() const;
-    Frame frameAt(qint64 i) const;
     qint64 frameCount() const;
     QSharedPointer<const RangeSequence> frames() const;
     QList<RangeHighlight> highlights(QString category) const;
@@ -48,8 +44,9 @@ Q_SIGNALS:
     void changed();
 
 private:
-    QSharedPointer<const BitArray> m_bits;
-    QSharedPointer<RangeSequence> m_rangeSequence;
+    explicit BitInfo();
+
+    QSharedPointer<RangeSequence> m_frames;
     QHash<QString, QList<RangeHighlight>> m_rangeHighlights;
     QVariantHash m_metadata;
     QMutex m_mutex;

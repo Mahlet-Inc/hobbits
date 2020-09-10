@@ -204,11 +204,11 @@ void PreviewScrollBar::newContainer()
 
 QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, QSharedPointer<ActionRenderProgress> progress)
 {
-    if (container->bitInfo()->maxFrameWidth() < 8 || container->frameCount() < 1) {
+    if (container->info()->maxFrameWidth() < 8 || container->frameCount() < 1) {
         return QImage();
     }
-    auto frames = container->bitInfo()->frames();
-    int width = int(container->bitInfo()->maxFrameWidth() / 8);
+    auto frames = container->info()->frames();
+    int width = int(container->info()->maxFrameWidth() / 8);
     int height = qMin(10000ll, frames->size());
     QImage image(width, height, QImage::Format_ARGB32);
     image.fill(qRgb(50, 50, 90));

@@ -12,11 +12,11 @@ class HOBBITSCORESHARED_EXPORT BitContainerPreview : public QObject
     Q_OBJECT
 
 public:
-    explicit BitContainerPreview(QSharedPointer<BitContainer> m_bitContainer);
+    static QSharedPointer<BitContainerPreview> wrap(QSharedPointer<BitContainer> bitContainer);
 
-    QString getName() const;
+    QString name() const;
     QSharedPointer<const BitArray> bits() const;
-    QSharedPointer<const BitInfo> bitInfo() const;
+    QSharedPointer<const BitInfo> info() const;
 
     void addHighlight(RangeHighlight highlight);
     void addHighlights(QList<RangeHighlight> highlights);
@@ -27,6 +27,7 @@ Q_SIGNALS:
     void changed();
 
 private:
+    BitContainerPreview(QSharedPointer<BitContainer> bitContainer);
     QSharedPointer<BitContainer> m_bitContainer;
 };
 

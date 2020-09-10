@@ -64,7 +64,7 @@ static PyObject* BitContainerPy_get_info(BitContainerPyObj *self, void *Py_UNUSE
     PyObject* hobbitsModule = PyImport_GetModule(hobbitsModuleName);
     Py_XDECREF(hobbitsModuleName);
     PyObject* type = PyObject_GetAttrString(hobbitsModule, "BitInfo");
-    PyObject* capsule = PyCapsule_New(container->bitInfo().data(), nullptr, nullptr);
+    PyObject* capsule = PyCapsule_New(container->info().data(), nullptr, nullptr);
     PyObject* info = PyObject_CallFunction(type, "O", capsule);
     Py_DECREF(type);
     Py_DECREF(capsule);
@@ -80,7 +80,7 @@ static PyObject* ImmutableBitContainerPy_get_info(BitContainerPyObj *self, void 
     PyObject* hobbitsModule = PyImport_GetModule(hobbitsModuleName);
     Py_XDECREF(hobbitsModuleName);
     PyObject* type = PyObject_GetAttrString(hobbitsModule, "ImmutableBitInfo");
-    PyObject* capsule = PyCapsule_New(container->bitInfo().data(), nullptr, nullptr);
+    PyObject* capsule = PyCapsule_New(container->info().data(), nullptr, nullptr);
     PyObject* info = PyObject_CallFunction(type, "O", capsule);
     Py_DECREF(type);
     Py_DECREF(capsule);

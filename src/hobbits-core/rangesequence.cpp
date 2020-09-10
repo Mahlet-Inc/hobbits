@@ -29,7 +29,7 @@ QSharedPointer<RangeSequence> RangeSequence::fromConstantSize(qint64 constantSiz
     return sequence;
 }
 
-QSharedPointer<RangeSequence> RangeSequence::fromOther(QSharedPointer<RangeSequence> other)
+QSharedPointer<RangeSequence> RangeSequence::fromOther(QSharedPointer<const RangeSequence> other)
 {
     QSharedPointer<RangeSequence> sequence(new RangeSequence());
     if (other->m_size < 1) {

@@ -14,7 +14,7 @@ public:
     ~RangeSequence();
 
     static QSharedPointer<RangeSequence> fromConstantSize(qint64 constantSize, qint64 valueCount);
-    static QSharedPointer<RangeSequence> fromOther(QSharedPointer<RangeSequence> other);
+    static QSharedPointer<RangeSequence> fromOther(QSharedPointer<const RangeSequence> other);
     static QSharedPointer<RangeSequence> createEmpty();
 
     Range at(qint64 i) const;

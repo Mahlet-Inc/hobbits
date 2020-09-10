@@ -2,7 +2,6 @@
 #define BITCONTAINER_H
 
 #include "frame.h"
-
 #include <QJsonDocument>
 #include <QMap>
 #include <QObject>
@@ -15,9 +14,6 @@
 class PluginActionLineage;
 class PluginAction;
 
-class QColor;
-class QPixmap;
-
 class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {
     Q_OBJECT
@@ -25,28 +21,21 @@ class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
     // this lets OperatorActor set the container's ID when necessary
     friend class OperatorActor;
 
-public Q_SLOTS:
-    void setBits(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
-    void setBits(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
-    void setBits(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
-    void setBits(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> bitInfo=QSharedPointer<BitInfo>());
-    void setBitInfo(QSharedPointer<BitInfo>);
-
 public:
-    explicit BitContainer(QObject *parent = nullptr);
+    static QSharedPointer<BitContainer> create(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
+    static QSharedPointer<BitContainer> create(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
+    static QSharedPointer<BitContainer> create(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
+    static QSharedPointer<BitContainer> create(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
+
+    void setInfo(QSharedPointer<const BitInfo> info);
 
     QSharedPointer<const BitArray> bits() const;
-    QSharedPointer<const BitInfo> bitInfo() const;
-    QSharedPointer<BitInfo> bitInfo();
+    QSharedPointer<const BitInfo> info() const;
+    QSharedPointer<BitInfo> info();
 
     Frame frameAt(qint64 i) const;
     qint64 frameCount() const;
     qint64 maxFrameWidth() const;
-
-    void addHighlight(RangeHighlight highlight);
-    void addHighlights(QList<RangeHighlight> highlights);
-    void setMetadata(QString key, QVariant value);
-    void clearHighlightCategory(QString category);
 
     QString name() const;
     void setName(QString name);
@@ -65,17 +54,13 @@ public:
     void addChild(QUuid childId);
     void addParent(QUuid parentId);
 
-    QJsonDocument serializeJson() const;
-    bool deserializeJson(QJsonDocument json);
-
-    friend HOBBITSCORESHARED_EXPORT QDataStream& operator<<(QDataStream&, const BitContainer&);
-    friend HOBBITSCORESHARED_EXPORT QDataStream& operator>>(QDataStream&, BitContainer&);
-
 private:
+    explicit BitContainer();
+
     QString m_name;
     bool m_nameWasSet;
     QSharedPointer<BitArray> m_bits;
-    QSharedPointer<BitInfo> m_bitInfo;
+    QSharedPointer<BitInfo> m_info;
 
     QSharedPointer<PluginActionLineage> m_actionLineage;
 

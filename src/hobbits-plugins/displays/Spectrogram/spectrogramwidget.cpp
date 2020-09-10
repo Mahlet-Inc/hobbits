@@ -40,10 +40,10 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
     m_renderer->setContainer(m_displayHandle->getContainer());
 
     int frameOffset = m_displayHandle->getFrameOffset();
-    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->bitInfo()->frames()->size()) {
+    if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->info()->frames()->size()) {
         return;
     }
-    qint64 bitOffset = m_displayHandle->getContainer()->bitInfo()->frames()->at(frameOffset).start();
+    qint64 bitOffset = m_displayHandle->getContainer()->info()->frames()->at(frameOffset).start();
     m_renderer->setBitOffset(bitOffset);
 
     prepareHeaders();
@@ -349,7 +349,7 @@ void SpectrogramWidget::mouseMoveEvent(QMouseEvent *event) {
         }
         return;
     }
-    int frameOffset = m_displayHandle->getContainer()->bitInfo()->frameOffsetContaining(bitOffset);
+    int frameOffset = m_displayHandle->getContainer()->info()->frameOffsetContaining(bitOffset);
 
     emit bitHover(event, 0, frameOffset);
 

@@ -187,7 +187,7 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
 
     qint64 frameWidth = recallablePluginState.value("width").toInt();
     QSharedPointer<const BitArray> bits = container->bits();
-    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+    QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
     bitInfo->setFrames(RangeSequence::fromConstantSize(frameWidth, bits->sizeInBits()));
     progressTracker->setProgressPercent(50);
     return AnalyzerResult::result(bitInfo, recallablePluginState);
