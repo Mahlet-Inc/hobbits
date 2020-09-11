@@ -143,5 +143,11 @@ QSharedPointer<const AnalyzerResult> AnalyzerRunner::analyzerCall(
         QJsonObject pluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    return analyzer->analyzeBits(bits, pluginState, progressTracker);
+    try {
+        return analyzer->analyzeBits(bits, pluginState, progressTracker);
+    } catch (std::exception e) {
+        return OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(analyzer->getName()).arg(e.what()));
+    } catch (...) {
+        return OperatorResult::error(QString("Unexpected exception in plugin %1").arg(analyzer->getName()));
+    }
 }
