@@ -252,10 +252,10 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                 double yFactor = bPanel.height() - (2 * graphPad);
                 double xFactor = double(m_displayCenterSize.width()) / (double(m_renderer->fftSize()) / 2.0);
                 QPainterPath path;
-                path.moveTo(0, qBound(0.0, spectrum.at(0)*m_renderer->sensitivity(), 1.0)*yFactor);
+                path.moveTo(0, qBound(0.0, spectrum.at(0), 1.0)*yFactor);
                 double xVal = xFactor;
                 for (int i = 1; i < spectrum.size(); i++, xVal += xFactor) {
-                    path.lineTo(xVal, qBound(0.0, spectrum.at(i)*m_renderer->sensitivity(), 1.0)*yFactor);
+                    path.lineTo(xVal, qBound(0.0, spectrum.at(i), 1.0)*yFactor);
                 }
 
                 painter.setRenderHint(QPainter::Antialiasing, true);
@@ -277,10 +277,10 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                 double xFactor = m_scale;
                 double yFactor = rPanel.width() - (2 * graphPad);
                 QPainterPath path;
-                path.moveTo(0, qBound(0.0, m_spectrums.at(0).at(pos)*m_renderer->sensitivity(), 1.0)*yFactor);
+                path.moveTo(0, qBound(0.0, m_spectrums.at(0).at(pos), 1.0)*yFactor);
                 double xVal = xFactor;
                 for (int i = 1; i < m_spectrums.size(); i++, xVal += xFactor) {
-                    path.lineTo(xVal, qBound(0.0, m_spectrums.at(i).at(pos)*m_renderer->sensitivity(), 1.0)*yFactor);
+                    path.lineTo(xVal, qBound(0.0, m_spectrums.at(i).at(pos), 1.0)*yFactor);
                 }
 
                 painter.setRenderHint(QPainter::Antialiasing, true);
