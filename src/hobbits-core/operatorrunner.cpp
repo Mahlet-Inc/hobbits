@@ -185,7 +185,7 @@ QSharedPointer<const OperatorResult> OperatorRunner::operatorCall(
 {
     try {
         return op->operateOnContainers(inputContainers, pluginState, progressTracker);
-    } catch (std::exception e) {
+    } catch (std::exception &e) {
         return OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(op->getName()).arg(e.what()));
     } catch (...) {
         return OperatorResult::error(QString("Unexpected exception in plugin %1").arg(op->getName()));

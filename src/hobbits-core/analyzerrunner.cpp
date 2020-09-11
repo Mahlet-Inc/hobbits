@@ -145,9 +145,9 @@ QSharedPointer<const AnalyzerResult> AnalyzerRunner::analyzerCall(
 {
     try {
         return analyzer->analyzeBits(bits, pluginState, progressTracker);
-    } catch (std::exception e) {
-        return OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(analyzer->getName()).arg(e.what()));
+    } catch (std::exception &e) {
+        return AnalyzerResult::error(QString("Exception encountered in plugin %1: %2").arg(analyzer->getName()).arg(e.what()));
     } catch (...) {
-        return OperatorResult::error(QString("Unexpected exception in plugin %1").arg(analyzer->getName()));
+        return AnalyzerResult::error(QString("Unexpected exception in plugin %1").arg(analyzer->getName()));
     }
 }

@@ -67,10 +67,10 @@ QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<con
     QSharedPointer<ImportResult> result;
     try {
         result = plugin->importBits(action->getPluginState());
-    } catch (std::exception e) {
-        result = OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
+    } catch (std::exception &e) {
+        result = ImportResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
     } catch (...) {
-        result = OperatorResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
+        result = ImportResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
     }
     if (!result->errorString().isEmpty()) {
         reportError(QString("'%1' Error: %2").arg(action->getPluginName()).arg(result->errorString()));
@@ -99,10 +99,10 @@ QSharedPointer<ExportResult> PluginActionManager::runExporter(QSharedPointer<con
     QSharedPointer<ExportResult> result;
     try {
         result = plugin->exportBits(container, action->getPluginState());
-    } catch (std::exception e) {
-        result = OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
+    } catch (std::exception &e) {
+        result = ExportResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
     } catch (...) {
-        result = OperatorResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
+        result = ExportResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
     }
     if (!result->errorString().isEmpty()) {
         reportError(QString("'%1' Error: %2").arg(action->getPluginName()).arg(result->errorString()));
