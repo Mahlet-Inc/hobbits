@@ -32,6 +32,11 @@ QSharedPointer<BitInfo> BitInfo::copyFromContainer(QSharedPointer<const BitConta
     return create(container->bits()->sizeInBits(), container->info(), clearFrames);
 }
 
+void BitInfo::setFrames(QSharedPointer<const RangeSequence> frames)
+{
+    m_frames = RangeSequence::fromOther(frames);
+}
+
 void BitInfo::addHighlight(RangeHighlight highlight)
 {
     m_mutex.lock();
