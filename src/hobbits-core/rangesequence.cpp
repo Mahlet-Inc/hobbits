@@ -2,7 +2,7 @@
 #include <QMutexLocker>
 #include <QSharedPointer>
 
-#define CACHE_CHUNK_64_SIZE (1000ll * 1000ll)
+#define CACHE_CHUNK_64_SIZE (1000ll * 10ll)
 #define CACHE_CHUNK_BYTE_SIZE (CACHE_CHUNK_64_SIZE * 8ll)
 #define MAX_ACTIVE_CACHE_CHUNKS 5
 
@@ -214,7 +214,7 @@ qint64 *RangeSequence::getLocation(qint64 i) const
     qint64 cacheIdx = i / CACHE_CHUNK_64_SIZE;
 
     if (cacheIdx >= m_dataCacheBlockCount) {
-        resizeCache(cacheIdx + 1000);
+        resizeCache(cacheIdx + 1);
     }
 
     if (!m_dataCaches[cacheIdx]) {
