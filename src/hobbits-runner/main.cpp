@@ -156,15 +156,13 @@ int main(int argc, char *argv[])
                     err << "Error: cannot open input file: " << parser.value(inputFileOption) << endl;
                     return -1;
                 }
-                auto container = QSharedPointer<BitContainer>(new BitContainer());
-                container->setBits(&inputFile);
+                auto container = BitContainer::create(&inputFile);
                 targetContainers.append(container);
                 inputFile.close();
             }
         }
         else {
-            auto container = QSharedPointer<BitContainer>(new BitContainer());
-            container->setBits(pipedInData);
+            auto container = BitContainer::create(pipedInData);
             targetContainers.append(container);
         }
 

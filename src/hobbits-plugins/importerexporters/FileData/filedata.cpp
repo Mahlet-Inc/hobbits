@@ -86,8 +86,7 @@ QSharedPointer<ImportResult> FileData::importBits(QJsonObject pluginState)
             SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
-    QSharedPointer<BitContainer> container = QSharedPointer<BitContainer>(new BitContainer);
-    container->setBits(&file);
+    QSharedPointer<BitContainer> container = BitContainer::create(&file);
     container->setName(QFileInfo(file).fileName());
 
     return ImportResult::result(container, pluginState);

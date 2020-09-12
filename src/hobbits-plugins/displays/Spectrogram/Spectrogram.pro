@@ -46,7 +46,7 @@ INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
 
 win32-msvc* {
-    requires(exists($$OUT_PWD/../../../../windows/libfftw3.h))
+    requires(exists($$OUT_PWD/../../../../windows/fftw3.h))
     requires(exists($$OUT_PWD/../../../../windows/libfftw3-3.lib))
     LIBS += -L$$OUT_PWD/../../../../windows -llibfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows
@@ -55,7 +55,7 @@ win32-msvc* {
     DEFINES += FFTW_AUTOCORRELATION
 }
 win32-g++ {
-    requires(exists($$OUT_PWD/../../../../windows/libfftw3.h))
+    requires(exists($$OUT_PWD/../../../../windows/fftw3.h))
     requires(exists($$OUT_PWD/../../../../windows/libfftw3-3.dll))
     LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows

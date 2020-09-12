@@ -50,8 +50,6 @@ public slots:
     void importBitfile(QString file);
     void importBytes(QByteArray rawBytes, QString name);
 
-    QStringList openHobbitsBits(QString fileName);
-
     void checkOperatorInput(QString pluginName = "");
     void checkCurrentDisplays();
 
@@ -75,8 +73,6 @@ public slots:
     void warningMessage(QString message, QString windowTitle = "Warning");
 
 private slots:
-    void on_actionOpen_Container_triggered();
-    void on_action_Save_Current_Container_triggered();
     void on_action_Apply_Batch_triggered();
     void on_action_Save_Batch_triggered();
     void on_action_About_triggered();

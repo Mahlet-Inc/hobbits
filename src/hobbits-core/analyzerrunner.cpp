@@ -131,7 +131,7 @@ void AnalyzerRunner::postProcess()
     PluginActionLineage::recordLineage(action, {m_container}, {m_container});
 
     if (!result->bitInfo().isNull()) {
-        m_container->setBitInfo(result->bitInfo());
+        m_container->setInfo(result->bitInfo());
     }
 
     emit finished(m_id);
@@ -143,5 +143,11 @@ QSharedPointer<const AnalyzerResult> AnalyzerRunner::analyzerCall(
         QJsonObject pluginState,
         QSharedPointer<ActionProgress> progressTracker)
 {
-    return analyzer->analyzeBits(bits, pluginState, progressTracker);
+    try {
+        return analyzer->analyzeBits(bits, pluginState, progressTracker);
+    } catch (std::exception &e) {
+        return AnalyzerResult::error(QString("Exception encountered in plugin %1: %2").arg(analyzer->getName()).arg(e.what()));
+    } catch (...) {
+        return AnalyzerResult::error(QString("Unexpected exception in plugin %1").arg(analyzer->getName()));
+    }
 }

@@ -377,9 +377,8 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnContainers(
     }
     outputBits->resize(outputSize);
 
-    QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBits(outputBits);
-    outputContainer->bitInfo()->setFrames(frames);
+    QSharedPointer<BitContainer> outputContainer = BitContainer::create(outputBits);
+    outputContainer->info()->setFrames(frames);
     outputContainer->setName(QString("h-framed <- %1").arg(inputContainers.at(0)->name()));
 
     return OperatorResult::result({outputContainer}, recallablePluginState);

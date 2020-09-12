@@ -336,9 +336,6 @@
       <string>Export Recent</string>
      </property>
     </widget>
-    <addaction name="action_Save_Current_Container"/>
-    <addaction name="actionOpen_Container"/>
-    <addaction name="separator"/>
     <addaction name="menuImport_Recent"/>
     <addaction name="menu_Import_Bits_From"/>
     <addaction name="menuExport_Recent"/>

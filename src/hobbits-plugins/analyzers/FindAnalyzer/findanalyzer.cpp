@@ -39,7 +39,7 @@ void FindAnalyzer::previewBits(QSharedPointer<BitContainerPreview> container)
             m_highlightNav->setTitle("");
         }
         else {
-            QString resultLabel = m_previewContainer->bitInfo()->metadata(FOUND_RESULT_LABEL).toString();
+            QString resultLabel = m_previewContainer->info()->metadata(FOUND_RESULT_LABEL).toString();
             if (resultLabel.size() > 28) {
                 resultLabel.truncate(25);
                 resultLabel += "...";
@@ -160,7 +160,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         }
     }
 
-    QSharedPointer<BitInfo> bitInfo = container->bitInfo()->copyMetadata();
+    QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
     bitInfo->clearHighlightCategory(FOUND_HIGHLIGHT);
     bitInfo->addHighlights(highlights);
 

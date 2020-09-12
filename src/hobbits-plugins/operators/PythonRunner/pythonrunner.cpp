@@ -119,7 +119,7 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     userScriptFile.close();
 
     auto outputBits = QSharedPointer<BitArray>(new BitArray());
-    auto outputInfo = QSharedPointer<BitInfo>(new BitInfo());
+    auto outputInfo = BitInfo::create(inputContainers.at(0)->bits()->sizeInBits());
     auto pyRequest = PythonRequest::create(userScriptFile.fileName())->setFunctionName("process_bits");
     pyRequest->addArg(PythonArg::constBitContainer(inputContainers.at(0)));
     pyRequest->addArg(PythonArg::bitArray(outputBits));
@@ -146,10 +146,8 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
                 Q_ARG(QString, output));
     }
 
-    QSharedPointer<BitContainer> outputContainer = QSharedPointer<BitContainer>(new BitContainer());
-    outputContainer->setBits(outputBits);
-    outputInfo->setFramesFromInfo(outputContainer->bitInfo());
-    outputContainer->setBitInfo(outputInfo);
+    QSharedPointer<BitContainer> outputContainer = BitContainer::create(outputBits);
+    outputContainer->setInfo(outputInfo);
     outputContainer->setName(QString("python <- %1").arg(inputContainers.at(0)->name()));
 
     return OperatorResult::result({outputContainer}, recallablePluginState);

@@ -12,8 +12,8 @@
 #define bswap64(X) __builtin_bswap64((X))
 #endif
 #ifdef Q_OS_WIN
-#include <stdlib.h>
-#define bswap32(X) _byteswap_uint32((X))
+#include <intrin.h>
+#define bswap32(X) _byteswap_ulong((X))
 #define bswap64(X) _byteswap_uint64((X))
 #endif
 
@@ -214,11 +214,11 @@ void SpectrogramRenderer::fillSamples(fftw_complex* buffer, qint64 offset, Spect
 {
     if (renderer->wordFormat() & IEEE_754) {
         if (renderer->wordSize() == 32) {
-            float *fBuffer = new float[renderer->fftSize()];
             qint64 maxBytes = renderer->fftSize() * 4;
             if (renderer->dataType() == RealComplexInterleaved) {
                 maxBytes *= 2;
             }
+            float *fBuffer = new float[maxBytes / 4];
             qint64 samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(fBuffer), offset / 8, maxBytes);
             samples /= 4;
 
@@ -248,11 +248,11 @@ void SpectrogramRenderer::fillSamples(fftw_complex* buffer, qint64 offset, Spect
             delete[] fBuffer;
         }
         else if (renderer->wordSize() == 64) {
-            double *dBuffer = new double[renderer->fftSize()];
             qint64 maxBytes = renderer->fftSize() * 8;
             if (renderer->dataType() == RealComplexInterleaved) {
                 maxBytes *= 2;
             }
+            double *dBuffer = new double[maxBytes / 8];
             qint64 samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(dBuffer), offset / 8, maxBytes);
             samples /= 8;
 
@@ -359,6 +359,12 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
     }
 
     double outputFactor = 2.0 / double(renderer->fftSize());
+    if (renderer->logarithmic()) {
+        outputFactor *= (renderer->sensitivity() * renderer->sensitivity());
+    }
+    else {
+        outputFactor *= renderer->sensitivity();
+    }
 
     int fftBits = renderer->fftSize()*renderer->wordSize();
     int strideBits = renderer->bitStride();
@@ -370,6 +376,7 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         renderer->m_mutex.lock();
         if (renderer->m_watcher.isCanceled()) {
             renderer->m_rendering = false;
+            renderer->m_mutex.unlock();
             return;
         }
         if (renderer->m_renderDirty) {
@@ -399,12 +406,12 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         QVector<double> spectrum(renderer->fftSize()/2);
         if (renderer->logarithmic()) {
             for (int n = 0; n < renderer->fftSize()/2; n++) {
-                spectrum[n] = 0.4 * renderer->sensitivity() * log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
+                spectrum[n] = log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
             }
         }
         else {
             for (int n = 0; n < renderer->fftSize()/2; n++) {
-                spectrum[n] = renderer->sensitivity() * (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
+                spectrum[n] = (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
             }
         }
         spectrums.append(spectrum);

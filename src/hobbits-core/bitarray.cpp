@@ -9,7 +9,7 @@
 #define bswap64(X) __builtin_bswap64((X))
 #endif
 #ifdef Q_OS_WIN
-#include <stdlib.h>
+#include <intrin.h>
 #define bswap64(X) _byteswap_uint64((X))
 #endif
 

@@ -105,7 +105,7 @@ void HighlightNavigator::refresh()
     // has the important stuff actually changed?
     // if not, just return
     if (!m_container.isNull()) {
-        auto newHighlights = m_container->bitInfo()->highlights(m_category);
+        auto newHighlights = m_container->info()->highlights(m_category);
         if (newHighlights.size() == m_highlights.size()) {
             bool same = true;
             for (int i = 0; i < m_highlights.size(); i++) {
@@ -131,7 +131,7 @@ void HighlightNavigator::refresh()
         return;
     }
 
-    if (m_container.isNull() || m_container->bitInfo()->highlights(m_category).isEmpty()) {
+    if (m_container.isNull() || m_container->info()->highlights(m_category).isEmpty()) {
         return;
     }
 
@@ -139,11 +139,11 @@ void HighlightNavigator::refresh()
     ui->tb_gotoPrevious->setEnabled(true);
     ui->lb_selected->setText("");
 
-    m_highlights = m_container->bitInfo()->highlights(m_category);
+    m_highlights = m_container->info()->highlights(m_category);
 
     QList<QTreeWidgetItem*> items;
     m_allHighlightCount = 0;
-    for (auto highlight: m_container->bitInfo()->highlights(m_category)) {
+    for (auto highlight: m_container->info()->highlights(m_category)) {
         items.append(highlightToItem(highlight, m_allHighlightCount));
     }
     ui->tw_highlights->addTopLevelItems(items);
@@ -199,7 +199,7 @@ void HighlightNavigator::updateSelection()
 
     RangeHighlight selected = curr->data(0, Qt::UserRole).value<RangeHighlight>();
     // Make sure this exists in the container
-    if (m_container->bitInfo()->highlights(selected.category(), selected.label()).isEmpty()) {
+    if (m_container->info()->highlights(selected.category(), selected.label()).isEmpty()) {
         return;
     }
 
@@ -208,11 +208,11 @@ void HighlightNavigator::updateSelection()
     QColor focusColor = SettingsManager::getInstance().getUiSetting(SettingsData::FOCUS_COLOR_KEY).value<QColor>();
     RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor);
 
-    qint64 containingFrame = m_container->bitInfo()->frameOffsetContaining(focus.range().start());
+    qint64 containingFrame = m_container->info()->frameOffsetContaining(focus.range().start());
     if (containingFrame >= 0) {
         qint64 bitOffset = qMax(
                 0ll,
-                focus.range().start() - m_container->bitInfo()->frameAt(containingFrame).start() - 16);
+                focus.range().start() - m_container->info()->frames()->at(containingFrame).start() - 16);
         if (bitOffset < 256) {
             bitOffset = 0;
         }
@@ -220,7 +220,7 @@ void HighlightNavigator::updateSelection()
 
         if (m_shouldHighlightSelection) {
             // Add it only if it is new
-            if (m_container->bitInfo()->highlights(FOCUS_HIGHLIGHT_CATEGORY, focus.label()).isEmpty()) {
+            if (m_container->info()->highlights(FOCUS_HIGHLIGHT_CATEGORY, focus.label()).isEmpty()) {
                 m_container->clearHighlightCategory(FOCUS_HIGHLIGHT_CATEGORY);
                 m_container->addHighlight(focus);
             }

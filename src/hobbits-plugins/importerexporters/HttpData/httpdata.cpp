@@ -60,8 +60,7 @@ QSharedPointer<ImportResult> HttpData::importBits(QJsonObject pluginState)
     }
 
     if (http->exec()) {
-        auto container = QSharedPointer<BitContainer>(new BitContainer());
-        container->setBits(http->getDownloadedData());
+        auto container = BitContainer::create(http->getDownloadedData());
         container->setName(http->getUrl().toDisplayString());
 
         pluginState.remove("url");

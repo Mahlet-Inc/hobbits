@@ -96,8 +96,7 @@ QSharedPointer<const OperatorResult> BitsError::getGaussianErrorBits(QSharedPoin
             }
         }
     }
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBits(outputBits);
+    QSharedPointer<BitContainer> bitContainer = BitContainer::create(outputBits);
     bitContainer->setName(QString("%1 BER <- %2").arg(ber, 0, 'e', 2).arg(input->name()));
 
     return OperatorResult::result({bitContainer}, recallablePluginState);
@@ -129,8 +128,7 @@ QSharedPointer<const OperatorResult> BitsError::getPeriodicErrorBits(QSharedPoin
         }
     }
 
-    QSharedPointer<BitContainer> bitContainer = QSharedPointer<BitContainer>(new BitContainer());
-    bitContainer->setBits(outputBits);
+    QSharedPointer<BitContainer> bitContainer = BitContainer::create(outputBits);
     bitContainer->setName(QString("%1 BER <- %2").arg(ber, 0, 'e', 2).arg(input->name()));
 
     return OperatorResult::result({ bitContainer }, recallablePluginState);
