@@ -1,3 +1,15 @@
+## [0.38.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.38.0...v0.38.1) (2020-09-12)
+
+
+### Bug Fixes
+
+* correct some spectrogram rendering issues and a crash ([790e169](https://github.com/Mahlet-Inc/hobbits/commit/790e169345455576eec828b06c27869893891359))
+
+
+### Performance Improvements
+
+* prevent excessive disk allocation by variable frame widths ([beda5de](https://github.com/Mahlet-Inc/hobbits/commit/beda5de35b3b3dc0abd85a882549e6ffd55644a3))
+
 # [0.38.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.37.0...v0.38.0) (2020-09-08)
 
 
