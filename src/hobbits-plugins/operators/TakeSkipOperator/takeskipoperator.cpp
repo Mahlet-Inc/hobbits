@@ -107,19 +107,20 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
     qint64 inputBitCount = 0;
     qint64 inputStepTotal = 0;
     qint64 outputStepTotal = 0;
-    for (QSharedPointer<BitOp> op : ops) {
-        for (auto input : inputs) {
-            for (int i = 0; i < frameCount; i++) {
-                Frame frame;
-                if (frameBased) {
-                    frame = input.first->frameAt(i);
-                }
-                else {
-                    frame = {Frame(input.first->bits(), 0,
-                             input.first->bits()->sizeInBits() - 1)};
-                }
-                // need to check for integer overflow
-                inputBitCount += frame.size();
+    for (auto input : inputs) {
+        for (int i = 0; i < frameCount; i++) {
+            Frame frame;
+            if (frameBased) {
+                frame = input.first->frameAt(i);
+            }
+            else {
+                frame = {Frame(input.first->bits(), 0,
+                         input.first->bits()->sizeInBits() - 1)};
+            }
+            // need to check for integer overflow
+            inputBitCount += frame.size();
+
+            for (QSharedPointer<BitOp> op : ops) {
                 qint64 frameStep = op->inputStep(frame.size());
                 qint64 inTotal = frameStep + inputStepTotal;
                 if (inTotal < frameStep || inTotal < inputStepTotal) {
@@ -222,6 +223,8 @@ QSharedPointer<const OperatorResult> TakeSkipOperator::operateOnContainers(
             if (progressTracker->getCancelled()) {
                 return OperatorResult::error("Processing cancelled");
             }
+
+            bitsProcessed = 0;
         }
     }
 

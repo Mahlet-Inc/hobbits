@@ -15,24 +15,24 @@ BitContainer::BitContainer() :
     setActionLineage(PluginActionLineage::actionlessLineage());
 }
 
-QSharedPointer<BitContainer> BitContainer::create(QByteArray bytes, qint64 bitLen, QSharedPointer<BitInfo> bitInfo)
+QSharedPointer<BitContainer> BitContainer::create(QByteArray bytes, qint64 bitLen, QSharedPointer<const BitInfo> bitInfo)
 {
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::ReadOnly);
     return create(&buffer, bitLen, bitInfo);
 }
 
-QSharedPointer<BitContainer> BitContainer::create(QIODevice *readableBytes, qint64 bitLen, QSharedPointer<BitInfo> bitInfo)
+QSharedPointer<BitContainer> BitContainer::create(QIODevice *readableBytes, qint64 bitLen, QSharedPointer<const BitInfo> bitInfo)
 {
     return create(QSharedPointer<BitArray>(new BitArray(readableBytes, bitLen)), bitInfo);
 }
 
-QSharedPointer<BitContainer> BitContainer::create(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> bitInfo)
+QSharedPointer<BitContainer> BitContainer::create(QSharedPointer<const BitArray> bits, QSharedPointer<const BitInfo> bitInfo)
 {
     return create(QSharedPointer<BitArray>(new BitArray(*bits.data())), bitInfo);
 }
 
-QSharedPointer<BitContainer> BitContainer::create(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> bitInfo)
+QSharedPointer<BitContainer> BitContainer::create(QSharedPointer<BitArray> bits, QSharedPointer<const BitInfo> bitInfo)
 {
     auto container = QSharedPointer<BitContainer>(new BitContainer());
     container->m_bits = bits;

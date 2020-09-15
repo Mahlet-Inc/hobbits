@@ -187,7 +187,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
         }
     }
 
-    QSharedPointer<BitContainer> container = BitContainer::create(outputArray);
+    QSharedPointer<BitContainer> container = BitContainer::create(outputArray, inputContainers.at(0)->info());
     container->setName(QString("%1 <- %2").arg("QAM Remap").arg(inputContainers.at(0)->name()));
 
     return OperatorResult::result({container}, pluginState);
