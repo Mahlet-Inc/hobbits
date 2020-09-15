@@ -214,7 +214,7 @@ char BitArray::byteAt(qint64 i) const
     return m_dataCaches[cacheIdx][index];
 }
 
-quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+quint64 BitArray::parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
     quint64 word = 0;
     for (qint64 i = 0; i < wordBitSize; i++) {
@@ -233,9 +233,9 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEnd
     return word;
 }
 
-qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+qint64 BitArray::parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
-    quint64 uVal = getWordValue(bitOffset, wordBitSize, littleEndian);
+    quint64 uVal = parseUIntValue(bitOffset, wordBitSize, littleEndian);
     qint64 *val = reinterpret_cast<qint64*>(&uVal);
     if (wordBitSize == 64) {
         return *val;

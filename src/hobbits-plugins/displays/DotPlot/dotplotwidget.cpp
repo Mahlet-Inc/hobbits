@@ -42,7 +42,7 @@ void DotPlotWidget::paintEvent(QPaintEvent*) {
             words.resize(word);
             break;
         }
-        words[word] = int(bits->getWordValue(start, int(m_wordSize)));
+        words[word] = int(bits->parseUIntValue(start, int(m_wordSize)));
     }
     for (int x = 0; x < words.size(); x++) {
         for (int y = 0; y < words.size(); y++) {

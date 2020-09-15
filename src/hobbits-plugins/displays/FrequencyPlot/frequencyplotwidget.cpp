@@ -41,7 +41,7 @@ void FrequencyPlotWidget::paintEvent(QPaintEvent*) {
         if (bits->sizeInBits() < end) {
             break;
         }
-        int wordValue = int(bits->getWordValue(start, int(m_wordSize)));
+        int wordValue = int(bits->parseUIntValue(start, int(m_wordSize)));
         wordFrequency[wordValue]++;
         frequencyMax = qMax(frequencyMax, wordFrequency.at(wordValue));
     }

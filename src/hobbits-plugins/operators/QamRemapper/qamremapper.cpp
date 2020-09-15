@@ -155,14 +155,14 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
         QStringList parseErrors;
 
-        BitArray oldBits = *(BitArray::fromString("0b" + oldVal, parseErrors).data());
+        auto oldBits = BitArray::fromString("0b" + oldVal, parseErrors);
         QSharedPointer<BitArray> newBits = BitArray::fromString("0b" + newVal, parseErrors);
 
         if (!parseErrors.isEmpty()) {
             return nullResult;
         }
 
-        bitMapping.insert(oldBits.getWordValue(0, bitChunkLength), newBits);
+        bitMapping.insert(oldBits->parseUIntValue(0, bitChunkLength), newBits);
     }
 
     QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->bits();
@@ -172,17 +172,11 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
     QJsonObject pluginState = recallablePluginState;
 
-    int failedRemappings = 0;
-    BitArray inputBitChunk(bitChunkLength);
     for (qint64 i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits(); i += bitChunkLength) {
-        inputBits->copyBits(i, &inputBitChunk, 0, bitChunkLength);
-        quint64 key = inputBitChunk.getWordValue(0, bitChunkLength);
+        quint64 key = inputBits->parseUIntValue(i, bitChunkLength);
         if (bitMapping.contains(key)) {
             QSharedPointer<BitArray> mappedValue = bitMapping.value(key);
             mappedValue->copyBits(0, outputArray.data(), i, mappedValue->sizeInBits());
-        }
-        else {
-            failedRemappings++;
         }
 
         if (i % bitChunkLength*10 == 0) {
@@ -191,13 +185,6 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
                 return OperatorResult::error("Processing cancelled");
             }
         }
-    }
-    if (failedRemappings > 0) {
-        pluginState.insert(
-                "error",
-                QString(
-                        "Failed at the remapping of %1 sequences - the output data will be incorrect where the remapping failed").arg(
-                        failedRemappings));
     }
 
     QSharedPointer<BitContainer> container = BitContainer::create(outputArray);

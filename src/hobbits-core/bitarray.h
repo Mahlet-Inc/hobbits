@@ -38,8 +38,8 @@ public:
     char byteAt(qint64 i) const;
     qint64 sizeInBits() const;
     qint64 sizeInBytes() const;
-    quint64 getWordValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
-    qint64 getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    quint64 parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    qint64 parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
 
     void resize(qint64 sizeInBits);
 

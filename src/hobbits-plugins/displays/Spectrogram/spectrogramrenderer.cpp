@@ -307,17 +307,17 @@ void SpectrogramRenderer::fillSamples(fftw_complex* buffer, qint64 offset, Spect
             continue;
         }
         if (renderer->wordFormat() & TwosComplement) {
-            buffer[i][0] = double(renderer->container()->bits()->getWordValueTwosComplement(offset, renderer->wordSize(), littleEndian)) * wordInverse;
+            buffer[i][0] = double(renderer->container()->bits()->parseIntValue(offset, renderer->wordSize(), littleEndian)) * wordInverse;
         }
         else {
-            buffer[i][0] = double(renderer->container()->bits()->getWordValue(offset, renderer->wordSize(), littleEndian)) * wordInverse;
+            buffer[i][0] = double(renderer->container()->bits()->parseUIntValue(offset, renderer->wordSize(), littleEndian)) * wordInverse;
         }
         if (withComplex) {
             if (renderer->wordFormat() & TwosComplement) {
-                buffer[i][1] = double(renderer->container()->bits()->getWordValueTwosComplement(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
+                buffer[i][1] = double(renderer->container()->bits()->parseIntValue(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
             }
             else {
-                buffer[i][1] = double(renderer->container()->bits()->getWordValue(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
+                buffer[i][1] = double(renderer->container()->bits()->parseUIntValue(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
             }
         }
         else {
