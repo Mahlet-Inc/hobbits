@@ -397,7 +397,7 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                 // remove any bits from the byte that extend beyond the remaining bits to copy
                 int destTrailMask = 8 - destByteAlignment - int(bitsLeft);
                 if (destTrailMask > 0) {
-                    mask8 &= IMASK_LSB_8[destTrailMask];
+                    mask8 |= IMASK_LSB_8[destTrailMask];
                     srcVal &= MASK_LSB_8[destTrailMask];
                 }
 
@@ -517,6 +517,12 @@ qint64 BitArray::readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const
     return readBytesNoSync(data, byteOffset, maxBytes);
 }
 
+QByteArray BitArray::readBytes(qint64 byteOffset, qint64 maxBytes) const
+{
+    syncCacheToFile();
+    return readBytesNoSync(byteOffset, maxBytes);
+}
+
 void BitArray::writeTo(QIODevice *outputStream) const
 {
     QIODevice *reader = dataReader();
@@ -545,16 +551,14 @@ qint64 BitArray::readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes)
     return m_dataFile.read(data, maxBytes);
 }
 
-int BitArray::getPreviewSize() const
+QByteArray BitArray::readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const
 {
-    return int(qMin(sizeInBits(), qint64(CACHE_CHUNK_BIT_SIZE)));
-}
+    QMutexLocker lock(&m_dataFileMutex);
+    if (!m_dataFile.seek(byteOffset)) {
+        return QByteArray();
+    }
 
-QByteArray BitArray::getPreviewBytes() const
-{
-    loadCacheAt(0);
-    QByteArray preview(m_dataCaches[0], int(qMin(sizeInBytes(), qint64(CACHE_CHUNK_BYTE_SIZE))));
-    return preview;
+    return m_dataFile.read(maxBytes);
 }
 
 QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList parseErrors)

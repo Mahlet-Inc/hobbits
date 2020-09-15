@@ -18,11 +18,10 @@ HexStringImporter::~HexStringImporter()
     delete ui;
 }
 
-QSharedPointer<BitContainer> HexStringImporter::getContainer() const
+QSharedPointer<ImportResult> HexStringImporter::getResult() const
 {
-    return m_container;
+    return m_result;
 }
-
 
 QString HexStringImporter::getFileName() const
 {
@@ -49,37 +48,47 @@ void HexStringImporter::on_te_hexString_textChanged()
     ui->pb_submitInput->setEnabled(!ui->te_hexString->toPlainText().isEmpty());
 }
 
-void HexStringImporter::importFromFile(QString fileName) {
+QSharedPointer<ImportResult> HexStringImporter::importFromFile(QString fileName) {
+    m_result = ImportResult::nullResult();
     m_fileName = fileName;
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox msg(this);
-        msg.setWindowTitle("Import Bits Error");
-        msg.setText(QString("Failed to import bit file: '%1'").arg(fileName));
-        msg.setDefaultButton(QMessageBox::Ok);
-        msg.exec();
-        return;
+        m_result = ImportResult::error(QString("Failed to open hex string file: '%1'").arg(fileName));
+        return m_result;
     }
 
-    QByteArray hexEncoded = file.readAll();
-    QByteArray data = QByteArray::fromHex(hexEncoded);
-
-    if (data.isEmpty()) {
-        QMessageBox msg(this);
-        msg.setWindowTitle("Import Bits Error");
-        msg.setText(QString("Failed to import hex-encoded string data from: '%1'").arg(fileName));
-        msg.setDefaultButton(QMessageBox::Ok);
-        msg.exec();
-        return;
+    QTemporaryFile bufferFile;
+    if (!bufferFile.open()) {
+        m_result = ImportResult::error(QString("Failed to open temporary buffer file: '%1'").arg(bufferFile.fileName()));
+        return m_result;
     }
 
-    m_container = BitContainer::create(data);
-    m_container->setName(QString("hex decode < %1").arg(QFileInfo(file).baseName()));
+    while (file.bytesAvailable() > 0) {
+        QByteArray hexEncoded = file.read(100000);
+        QByteArray data = QByteArray::fromHex(hexEncoded);
+        bufferFile.write(data);
+    }
+
+    bufferFile.seek(0);
+
+    if (bufferFile.bytesAvailable() < 1) {
+        m_result = ImportResult::error(QString("Failed to read hex-encoded string data from: '%1'").arg(fileName));
+        return m_result;
+    }
+
+    auto container = BitContainer::create(&bufferFile);
+    container->setName(QString("hex decode < %1").arg(QFileInfo(file).baseName()));
+    QJsonObject pluginState;
+    pluginState.insert("filename", fileName);
+    m_result = ImportResult::result(container, pluginState);
+
+    return m_result;
 }
 
-void HexStringImporter::importFromHexString(QString hexString, int repeats)
+QSharedPointer<ImportResult> HexStringImporter::importFromHexString(QString hexString, int repeats)
 {
+    m_result = ImportResult::nullResult();
     ui->te_hexString->setPlainText(hexString);
     if (repeats > 1) {
         ui->cb_repeat->setChecked(true);
@@ -90,30 +99,40 @@ void HexStringImporter::importFromHexString(QString hexString, int repeats)
     }
 
     QByteArray data = QByteArray::fromHex(hexString.toLatin1());
-
     if (data.isEmpty()) {
-        QMessageBox msg(this);
-        msg.setWindowTitle("Import Bits Error");
-        msg.setText(QString("Failed to import hex-encoded string data"));
-        msg.setDefaultButton(QMessageBox::Ok);
-        msg.exec();
-        return;
+        m_result = ImportResult::error(QString("Failed to import hex-encoded string data"));
+        return m_result;
     }
 
-    auto baseData = data;
-    for (int i = 1; i < repeats; i++) {
-        data.append(baseData);
+    QTemporaryFile bufferFile;
+    if (!bufferFile.open()) {
+        m_result = ImportResult::error(QString("Failed to open temporary buffer file: '%1'").arg(bufferFile.fileName()));
+        return m_result;
     }
 
-    m_container = BitContainer::create(data);
-    m_container->setName("hex input");
+    for (int i = 0; i < repeats; i++) {
+        bufferFile.write(data);
+    }
 
-    this->accept();
+    bufferFile.seek(0);
+
+    if (bufferFile.bytesAvailable() < 1) {
+        m_result = ImportResult::error(QString("Failed to process hex-encoded string data"));
+        return m_result;
+    }
+
+    auto container = BitContainer::create(&bufferFile);
+    container->setName("hex input");
+    QJsonObject pluginState;
+    pluginState.insert("hex_string", hexString);
+    pluginState.insert("repeats", repeats);
+    m_result = ImportResult::result(container, pluginState);
+
+    return m_result;
 }
 
 void HexStringImporter::on_pb_selectFile_pressed()
 {
-    m_container = QSharedPointer<BitContainer>();
     QString fileName = QFileDialog::getOpenFileName(
             this,
             tr("Import Hex String File"),
@@ -126,7 +145,16 @@ void HexStringImporter::on_pb_selectFile_pressed()
 
     importFromFile(fileName);
 
-    this->accept();
+    if (!m_result.isNull() && m_result->errorString().isEmpty()) {
+        this->accept();
+    }
+    else if (!m_result.isNull()) {
+        QMessageBox msg(this);
+        msg.setWindowTitle("Import Bits Error");
+        msg.setText(m_result->errorString());
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    }
 }
 
 void HexStringImporter::on_pb_submitInput_pressed()
@@ -137,9 +165,21 @@ void HexStringImporter::on_pb_submitInput_pressed()
     }
 
     importFromHexString(ui->te_hexString->toPlainText(), repeats);
+
+    if (!m_result.isNull() && m_result->errorString().isEmpty()) {
+        this->accept();
+    }
+    else if (!m_result.isNull()) {
+        QMessageBox msg(this);
+        msg.setWindowTitle("Import Bits Error");
+        msg.setText(m_result->errorString());
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    }
 }
 
 void HexStringImporter::on_cb_repeat_toggled(bool checked)
 {
     ui->sb_repeats->setEnabled(checked);
 }
+

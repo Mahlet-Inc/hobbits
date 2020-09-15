@@ -15,6 +15,7 @@ public:
     bool hasEmptyState() const;
     QString errorString() const;
 
+    static QSharedPointer<ExportResult> nullResult();
     static QSharedPointer<ExportResult> error(QString error);
     static QSharedPointer<ExportResult> result(QJsonObject pluginState);
 

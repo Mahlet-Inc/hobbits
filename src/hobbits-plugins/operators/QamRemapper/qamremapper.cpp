@@ -139,7 +139,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
         return nullResult;
     }
 
-    QHash<BitArray, QSharedPointer<BitArray>> bitMapping;
+    QHash<quint64, QSharedPointer<BitArray>> bitMapping;
     QJsonArray mappingsArray = recallablePluginState.value("mappings").toArray();
     int bitChunkLength = 0;
     for (auto valueRef : mappingsArray) {
@@ -148,6 +148,10 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
         QString newVal = valueRef.toObject().value("new").toString();
 
         bitChunkLength = oldVal.size();
+
+        if (bitChunkLength > 64) {
+            return OperatorResult::error("Cannot remap symbols longer than 64 bits");
+        }
 
         QStringList parseErrors;
 
@@ -158,7 +162,7 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
             return nullResult;
         }
 
-        bitMapping.insert(oldBits, newBits);
+        bitMapping.insert(oldBits.getWordValue(0, bitChunkLength), newBits);
     }
 
     QSharedPointer<const BitArray> inputBits = inputContainers.at(0)->bits();
@@ -168,37 +172,24 @@ QSharedPointer<const OperatorResult> QamRemapper::operateOnContainers(
 
     QJsonObject pluginState = recallablePluginState;
 
-    int lastPercent = 0;
     int failedRemappings = 0;
     BitArray inputBitChunk(bitChunkLength);
-    for (int i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits();
-         i += bitChunkLength) {
-        for (int ii = 0; ii < bitChunkLength; ii++) {
-            inputBitChunk.set(ii, inputBits->at(i + ii));
-        }
-        if (bitMapping.contains(inputBitChunk)) {
-            QSharedPointer<BitArray> mappedValue = bitMapping.value(inputBitChunk);
-            for (int ii = 0; ii < mappedValue->sizeInBits(); ii++) {
-                outputArray->set(i + ii, mappedValue->at(ii));
-            }
+    for (qint64 i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits(); i += bitChunkLength) {
+        inputBits->copyBits(i, &inputBitChunk, 0, bitChunkLength);
+        quint64 key = inputBitChunk.getWordValue(0, bitChunkLength);
+        if (bitMapping.contains(key)) {
+            QSharedPointer<BitArray> mappedValue = bitMapping.value(key);
+            mappedValue->copyBits(0, outputArray.data(), i, mappedValue->sizeInBits());
         }
         else {
             failedRemappings++;
         }
 
-        int nextPercent = int(double(i) / double(inputBitsLength) * 100.0);
-        if (nextPercent > lastPercent) {
-            lastPercent = nextPercent;
-            progressTracker->setProgressPercent(nextPercent);
-        }
-        if (progressTracker->getCancelled()) {
-            return QSharedPointer<const OperatorResult>(
-                    (new OperatorResult())->setPluginState(
-                            QJsonObject(
-                                    {QPair<QString, QJsonValue>(
-                                            "error",
-                                            QJsonValue("Processing cancelled"))}))
-                    );
+        if (i % bitChunkLength*10 == 0) {
+            progressTracker->setProgress(i, inputBitsLength);
+            if (progressTracker->getCancelled()) {
+                return OperatorResult::error("Processing cancelled");
+            }
         }
     }
     if (failedRemappings > 0) {

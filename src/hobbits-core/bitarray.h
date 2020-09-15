@@ -48,15 +48,14 @@ public:
     qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = CopyMode::Copy) const;
 
     qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    QByteArray readBytes(qint64 byteOffset, qint64 maxBytes) const;
     void writeTo(QIODevice *outputStream) const;
-
-    int getPreviewSize() const;
-    QByteArray getPreviewBytes() const;
 
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
     qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    QByteArray readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const;
     QIODevice* dataReader() const;
     void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
     void reinitializeCache();
@@ -75,15 +74,5 @@ private:
     mutable QMutex m_cacheMutex;
     mutable QMutex m_dataFileMutex;
 };
-
-inline bool operator==(const BitArray &b1, const BitArray &b2)
-{
-    return b1.getPreviewBytes().compare(b2.getPreviewBytes()) == 0;
-}
-
-inline uint qHash(const BitArray &key, uint seed)
-{
-    return qHash(key.getPreviewBytes(), seed) ^ uint(key.getPreviewSize());
-}
 
 #endif // BITARRAY_H
