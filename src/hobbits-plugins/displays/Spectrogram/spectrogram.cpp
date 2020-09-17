@@ -35,14 +35,12 @@ void Spectrogram::initialize(QSharedPointer<DisplayHandle> displayHandle)
         m_displayWidget = new SpectrogramWidget(displayHandle, this);
         m_controlsWidget = new SpectrogramControls();
 
-        connect(m_controlsWidget, &SpectrogramControls::wordSizeSet,
-                m_displayWidget, &SpectrogramWidget::setWordSize);
         connect(m_controlsWidget, &SpectrogramControls::overlapSet,
                 m_displayWidget, &SpectrogramWidget::setOverlap);
         connect(m_controlsWidget, &SpectrogramControls::fftSizeSet,
                 m_displayWidget, &SpectrogramWidget::setFftSize);
-        connect(m_controlsWidget, &SpectrogramControls::wordFormatSet,
-                m_displayWidget, &SpectrogramWidget::setWordFormat);
+        connect(m_controlsWidget, &SpectrogramControls::sampleFormatSet,
+                m_displayWidget, &SpectrogramWidget::setSampleFormat);
         connect(m_controlsWidget, &SpectrogramControls::dataTypeSet,
                 m_displayWidget, &SpectrogramWidget::setDataType);
         connect(m_controlsWidget, &SpectrogramControls::sensitivitySet,
@@ -55,6 +53,8 @@ void Spectrogram::initialize(QSharedPointer<DisplayHandle> displayHandle)
                 m_displayWidget, &SpectrogramWidget::setShowHoverSlices);
         connect(m_controlsWidget, &SpectrogramControls::logarithmicSet,
                 m_displayWidget, &SpectrogramWidget::setLogarithmic);
+        connect(m_displayWidget, &SpectrogramWidget::sampleFormatChanged,
+                m_controlsWidget, &SpectrogramControls::setSampleFormat);
 
         m_controlsWidget->sendCurrentValues();
     }

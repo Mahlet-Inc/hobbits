@@ -6,10 +6,14 @@
 #include <QDir>
 
 #ifdef Q_OS_UNIX
+#define bswap16(X) __builtin_bswap16((X))
+#define bswap32(X) __builtin_bswap32((X))
 #define bswap64(X) __builtin_bswap64((X))
 #endif
 #ifdef Q_OS_WIN
 #include <intrin.h>
+#define bswap16(X) _byteswap_ushort((X))
+#define bswap32(X) _byteswap_ulong((X))
 #define bswap64(X) _byteswap_uint64((X))
 #endif
 
@@ -248,6 +252,97 @@ qint64 BitArray::parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEnd
     else {
         return *val;
     }
+}
+
+qint64 BitArray::readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt16Samples(reinterpret_cast<quint16*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 2, maxSamples * 2);
+    samples /= 2;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap16(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 bitOffset = sampleOffset * 24;
+    qint64 samples = 0;
+    while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
+        data[samples] = qint32(parseIntValue(bitOffset, 24, !bigEndian));
+        bitOffset += 24;
+        samples++;
+    }
+    return samples;
+}
+
+qint64 BitArray::readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 bitOffset = sampleOffset * 24;
+    qint64 samples = 0;
+    while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
+        data[samples] = quint32(parseUIntValue(bitOffset, 24, !bigEndian));
+        bitOffset += 24;
+        samples++;
+    }
+    return samples;
+}
+
+qint64 BitArray::readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 4, maxSamples * 4);
+    samples /= 4;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap32(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 8, maxSamples * 8);
+    samples /= 8;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap64(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
 void BitArray::loadCacheAt(qint64 i) const

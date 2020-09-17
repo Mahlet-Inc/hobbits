@@ -51,8 +51,6 @@ win32-msvc* {
     LIBS += -L$$OUT_PWD/../../../../windows -llibfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows
     DEPENDPATH += $$OUT_PWD/../../../../windows
-
-    DEFINES += FFTW_AUTOCORRELATION
 }
 win32-g++ {
     requires(exists($$OUT_PWD/../../../../windows/fftw3.h))
@@ -60,8 +58,6 @@ win32-g++ {
     LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
     INCLUDEPATH += $$OUT_PWD/../../../../windows
     DEPENDPATH += $$OUT_PWD/../../../../windows
-
-    DEFINES += FFTW_AUTOCORRELATION
 }
 unix {
     requires(packagesExist(fftw3))
@@ -70,7 +66,6 @@ unix {
         LIBS += -L/usr/local/lib
     }
     LIBS += -lfftw3
-    DEFINES += FFTW_AUTOCORRELATION
 }
 
 unix:!mac {

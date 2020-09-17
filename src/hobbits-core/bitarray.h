@@ -40,6 +40,16 @@ public:
     qint64 sizeInBytes() const;
     quint64 parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
     qint64 parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    qint64 readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
 
     void resize(qint64 sizeInBits);
 

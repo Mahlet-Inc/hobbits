@@ -4,6 +4,7 @@
 #include "displaybase.h"
 #include "spectrogramrenderer.h"
 #include <QThread>
+#include <QSemaphore>
 
 class SpectrogramWidget : public DisplayBase
 {
@@ -24,13 +25,16 @@ public slots:
     void setOverlap(int);
     void setFftSize(int);
     void setWordSize(int);
-    void setWordFormat(int);
+    void setSampleFormat(QString);
     void setDataType(int);
     void setSensitivity(double);
     void setSampleRate(double);
     void setShowHeaders(bool);
     void setShowHoverSlices(bool);
     void setLogarithmic(bool);
+
+signals:
+    void sampleFormatChanged(QString);
 
 private:
     void prepareHeaders();
@@ -53,6 +57,8 @@ private:
     QImage m_spectrogram;
 
     SpectrogramRenderer * m_renderer;
+
+    QSemaphore m_paintSemaphore;
 
 protected slots:
     void adjustScrollbars() override;

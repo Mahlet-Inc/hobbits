@@ -6,19 +6,12 @@
 #include <QFutureWatcher>
 #include "fftw3.h"
 #include "bitcontainer.h"
+#include "metadatahelper.h"
 
 class SpectrogramRenderer : public QObject
 {
     Q_OBJECT
 public:
-    enum WordFormat {
-        Unsigned = 0x00,
-        TwosComplement = 0x01,
-        BigEndian = 0x00,
-        LittleEndian = 0x10,
-        IEEE_754 = 0x80
-    };
-
     enum DataType {
         Real = 1,
         RealComplexInterleaved = 2
@@ -32,16 +25,12 @@ public:
     void setBitOffset(const qint64 &bitOffset);
 
     int wordSize() const;
-    void setWordSize(int wordSize);
 
     int overlap() const;
     void setOverlap(int overlap);
 
     int fftSize() const;
     void setFftSize(int fftSize);
-
-    int wordFormat() const;
-    void setWordFormat(int wordFormat);
 
     DataType dataType() const;
     void setDataType(const DataType &dataType);
@@ -64,6 +53,9 @@ public:
     bool logarithmic() const;
     void setLogarithmic(bool logarithmic);
 
+    MetadataHelper::SampleFormat sampleFormat() const;
+    void setSampleFormat(const QString &sampleFormat);
+
 signals:
     void spectrumsChanged(const QList<QVector<double>>&, const QImage&);
 
@@ -79,10 +71,9 @@ private:
 
     int m_maxSpectrums;
     qint64 m_bitOffset;
-    int m_wordSize;
+    MetadataHelper::SampleFormat m_sampleFormat;
     int m_overlap;
     int m_fftSize;
-    int m_wordFormat;
     DataType m_dataType;
     double m_sensitivity;
     double m_sampleRate;

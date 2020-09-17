@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include "settingsmanager.h"
 #include <QTime>
+#include <QTimer>
 
 #include <QDebug>
 
@@ -23,7 +24,8 @@ SpectrogramWidget::SpectrogramWidget(
     m_showHoverSlices(false),
     m_displayOffset(0, 0),
     m_headerFontSize(0, 0),
-    m_renderer(new SpectrogramRenderer(this))
+    m_renderer(new SpectrogramRenderer(this)),
+    m_paintSemaphore(2)
 {
     connect(m_renderer, &SpectrogramRenderer::spectrumsChanged, [this](const QList<QVector<double>> &s, const QImage &img) {
         m_spectrogram = img;
@@ -33,11 +35,24 @@ SpectrogramWidget::SpectrogramWidget(
 }
 
 void SpectrogramWidget::paintEvent(QPaintEvent*) {
+    if (!m_paintSemaphore.tryAcquire()) {
+        return;
+    }
+    if (m_paintSemaphore.available() < 1) {
+        QTimer::singleShot(100, this, SLOT(repaint()));
+        m_paintSemaphore.release();
+        return;
+    }
+    QSemaphoreReleaser releaser(&m_paintSemaphore);
+
     if (m_displayHandle->getContainer().isNull()) {
         return;
     }
 
-    m_renderer->setContainer(m_displayHandle->getContainer());
+    if (m_renderer->container() != m_displayHandle->getContainer()) {
+        m_renderer->setContainer(m_displayHandle->getContainer());
+        emit sampleFormatChanged(m_renderer->sampleFormat().id);
+    }
 
     int frameOffset = m_displayHandle->getFrameOffset();
     if (frameOffset < 0 || frameOffset >= m_displayHandle->getContainer()->info()->frames()->size()) {
@@ -375,14 +390,9 @@ void SpectrogramWidget::setFftSize(int val)
     m_renderer->setFftSize(val);
 }
 
-void SpectrogramWidget::setWordSize(int val)
+void SpectrogramWidget::setSampleFormat(QString val)
 {
-    m_renderer->setWordSize(val);
-}
-
-void SpectrogramWidget::setWordFormat(int val)
-{
-    m_renderer->setWordFormat(val);
+    m_renderer->setSampleFormat(val);
 }
 
 void SpectrogramWidget::setDataType(int val)

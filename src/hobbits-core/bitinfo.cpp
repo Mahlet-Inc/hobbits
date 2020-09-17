@@ -75,6 +75,9 @@ void BitInfo::addHighlights(QList<RangeHighlight> highlights)
 
 void BitInfo::setMetadata(QString key, QVariant value)
 {
+    if (m_metadata.value(key) == value) {
+        return;
+    }
     m_mutex.lock();
     m_metadata.remove(key);
     m_metadata.insert(key, value);
