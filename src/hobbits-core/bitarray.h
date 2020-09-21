@@ -24,8 +24,8 @@ public:
 
     BitArray();
     BitArray(qint64 sizeInBits);
-    BitArray(QByteArray bytes, qint64 sizeInBits);
-    BitArray(QIODevice *dataStream, qint64 sizeInBits);
+    BitArray(QByteArray bytes, qint64 sizeInBits = -1);
+    BitArray(QIODevice *dataStream, qint64 sizeInBits = -1);
     BitArray(const BitArray &other, qint64 sizeInBits);
     BitArray(const BitArray &other);
     BitArray(const BitArray *other);

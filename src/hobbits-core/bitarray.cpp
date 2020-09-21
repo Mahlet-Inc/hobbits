@@ -124,7 +124,6 @@ BitArray::BitArray(const BitArray *other) :
 {
 }
 
-
 BitArray::~BitArray()
 {
     deleteCache();
