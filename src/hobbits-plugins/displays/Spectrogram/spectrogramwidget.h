@@ -24,7 +24,6 @@ public slots:
     void setScale(int);
     void setOverlap(int);
     void setFftSize(int);
-    void setWordSize(int);
     void setSampleFormat(QString);
     void setDataType(int);
     void setSensitivity(double);
