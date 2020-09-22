@@ -5,7 +5,9 @@
 #include <QScopedPointer>
 #include <QMap>
 
-class MetadataHelper
+#include "hobbits-core_global.h"
+
+class HOBBITSCORESHARED_EXPORT MetadataHelper
 {
 public:
     static MetadataHelper& instance();
