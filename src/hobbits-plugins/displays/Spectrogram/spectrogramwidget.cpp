@@ -1,6 +1,7 @@
 #include "spectrogramwidget.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QImage>
 #include "displayhelper.h"
 #include "fftw3.h"

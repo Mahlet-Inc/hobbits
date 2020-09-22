@@ -2,6 +2,7 @@
 #include <cmath>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 
 PeakSelector::PeakSelector(QWidget *parent) :
     QWidget(parent),
