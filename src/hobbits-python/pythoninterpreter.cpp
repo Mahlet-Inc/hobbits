@@ -26,6 +26,7 @@ public:
     ScopedPyObj& operator=(PyObject *obj) {
         Py_XDECREF(m_obj);
         m_obj = obj;
+        return *this;
     }
 
     PyObject* obj() const { return m_obj; }
