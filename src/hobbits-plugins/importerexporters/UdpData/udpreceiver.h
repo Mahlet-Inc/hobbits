@@ -20,6 +20,8 @@ public:
     QTemporaryFile* getDownloadedData();
     int getPort();
     void setPort(int);
+    int getLimit();
+    void setLimit(int bytes);
     QString getError();
 
 public slots:

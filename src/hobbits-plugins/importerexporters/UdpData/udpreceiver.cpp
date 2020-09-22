@@ -1,6 +1,7 @@
 #include "udpreceiver.h"
 #include "ui_udpreceiver.h"
 #include <QNetworkDatagram>
+#include <QTimer>
 
 UdpReceiver::UdpReceiver(QWidget *parent) :
     QDialog(parent),
@@ -13,6 +14,7 @@ UdpReceiver::UdpReceiver(QWidget *parent) :
     setWindowTitle("Import via UDP");
 
     ui->pb_stop->setEnabled(false);
+
 }
 
 UdpReceiver::~UdpReceiver()
@@ -34,6 +36,27 @@ int UdpReceiver::getPort()
 void UdpReceiver::setPort(int port)
 {
     ui->sb_port->setValue(port);
+}
+
+int UdpReceiver::getLimit()
+{
+    if (ui->ck_limit->isChecked()) {
+        return ui->sb_limit->value() * 1000;
+    }
+    else {
+        return -1;
+    }
+}
+
+void UdpReceiver::setLimit(int bytes)
+{
+    if (bytes > 0) {
+        ui->ck_limit->setChecked(true);
+        ui->sb_limit->setValue(bytes / 1000);
+    }
+    else {
+        ui->ck_limit->setChecked(false);
+    }
 }
 
 QString UdpReceiver::getError()
@@ -98,6 +121,11 @@ void UdpReceiver::socketRead()
         m_downloadFile.write(datagram.data());
     }
     ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'g', 3));
+
+    if (getLimit() > 0 && m_downloadFile.size() >= getLimit()) {
+        disconnect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::socketRead);
+        QTimer::singleShot(10, this, &UdpReceiver::stopListening);
+    }
 }
 
 void UdpReceiver::on_pb_start_pressed()
