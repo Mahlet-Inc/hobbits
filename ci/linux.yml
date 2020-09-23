@@ -77,6 +77,7 @@ steps:
       cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* release/lib
       echo "Checking fftw3" `ldconfig -p | grep 'fftw3.so '`
       cp --preserve=links `ldconfig -p | grep 'fftw3.so ' | awk '{print $NF"*"}'` release/lib
+      cp --preserve=links `ldconfig -p | grep 'libpcap.so ' | awk '{print $NF"*"}'` release/lib
       cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
       find release/python -name "*.so*" -type f -exec chmod +x {} \;
       chmod +x release/python/bin/*
