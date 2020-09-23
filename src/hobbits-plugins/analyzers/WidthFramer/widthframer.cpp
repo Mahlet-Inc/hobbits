@@ -42,7 +42,7 @@ AnalyzerInterface* WidthFramer::createDefaultAnalyzer()
     return new WidthFramer();
 }
 
-QString WidthFramer::getName()
+QString WidthFramer::name()
 {
     return "Width Framer";
 }
@@ -134,7 +134,7 @@ void WidthFramer::requestRun()
         return;
     }
 
-    m_pluginCallback->requestAnalyzerRun(getName(), getStateFromUi());
+    m_pluginCallback->requestAnalyzerRun(name(), getStateFromUi());
 }
 
 QJsonObject WidthFramer::getStateFromUi()

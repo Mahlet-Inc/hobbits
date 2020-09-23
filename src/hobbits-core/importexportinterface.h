@@ -11,9 +11,7 @@
 class HOBBITSCORESHARED_EXPORT ImportExportInterface
 {
 public:
-    virtual ~ImportExportInterface()
-    {
-    }
+    virtual ~ImportExportInterface() = default;
 
     virtual ImportExportInterface* createDefaultImporterExporter() = 0;
 

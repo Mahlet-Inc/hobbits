@@ -21,7 +21,7 @@ public:
     ~KaitaiStruct() override;
 
     AnalyzerInterface* createDefaultAnalyzer() override;
-    QString getName() override;
+    QString name() override;
 
     void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
     void applyToWidget(QWidget *widget) override;

@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-QT       += widgets
-
 QT       -= gui
 
 TARGET = hobbits-core
@@ -33,28 +31,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     actionprogress.cpp \
-    actionrenderprogress.cpp \
     analyzerresult.cpp \
     analyzerrunner.cpp \
     batchrunner.cpp \
         bitarray.cpp \
         bitcontainer.cpp \
-    bitcontainerlistmodel.cpp \
     bitcontainermanager.cpp \
     bitcontainerpreview.cpp \
-    bitcontainertreemodel.cpp \
     bitinfo.cpp \
-        displaybase.cpp \
-    displaybasetext.cpp \
-    displayhandle.cpp \
-    displayhelper.cpp \
     exportresult.cpp \
-        frame.cpp \
-    highlightnavigator.cpp \
+    frame.cpp \
     hobbitscoreinfo.cpp \
     hobbitspluginmanager.cpp \
     importresult.cpp \
-        mathparser.cpp \
+    mathparser.cpp \
     metadatahelper.cpp \
     operatorresult.cpp \
     operatorrunner.cpp \
@@ -63,9 +53,7 @@ SOURCES += \
     pluginactionbatch.cpp \
     pluginactionlineage.cpp \
     pluginactionmanager.cpp \
-    plugincallback.cpp \
-    pluginstatehelper.cpp \
-    previewscrollbar.cpp \
+    pluginstatemanager.cpp \
     range.cpp \
     rangehighlight.cpp \
     rangesequence.cpp \
@@ -74,7 +62,6 @@ SOURCES += \
 
 HEADERS += \
     actionprogress.h \
-    actionrenderprogress.h \
     actionwatcher.h \
     analyzerinterface.h \
     analyzerresult.h \
@@ -82,19 +69,12 @@ HEADERS += \
     batchrunner.h \
         bitarray.h \
         bitcontainer.h \
-    bitcontainerlistmodel.h \
     bitcontainermanager.h \
     bitcontainerpreview.h \
-    bitcontainertreemodel.h \
     bitinfo.h \
-        displaybase.h \
-    displaybasetext.h \
-    displayhandle.h \
-    displayhelper.h \
     displayinterface.h \
     exportresult.h \
         frame.h \
-    highlightnavigator.h \
         hobbits-core_global.h  \
     hobbitscoreinfo.h \
     hobbitspluginmanager.h \
@@ -110,9 +90,8 @@ HEADERS += \
     pluginactionbatch.h \
     pluginactionlineage.h \
     pluginactionmanager.h \
-    plugincallback.h \
-    pluginstatehelper.h \
-    previewscrollbar.h \
+    pluginstateeditor.h \
+    pluginstatemanager.h \
     range.h \
     rangehighlight.h \
     rangesequence.h \
@@ -135,9 +114,6 @@ message(qmake config hobbits-core: $$CONFIG)
 message(Building from: $$PWD)
 message(Building in: $$OUT_PWD)
 message(Target output: $$DESTDIR/$$TARGET)
-
-FORMS += \
-    highlightnavigator.ui
 
 RESOURCES += \
     hobbitscoreicons.qrc

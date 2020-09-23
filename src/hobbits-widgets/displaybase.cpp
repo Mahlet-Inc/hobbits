@@ -266,7 +266,7 @@ QVector<QRectF> DisplayBase::drawHighlightRects(
                 double hw =
                     getGroupedOffset(displayEnd, colWidth, colGroupSize, bitOffset, colGroupMargin) + colWidth - hx;
                 double hh = rowHeight;
-                painter->setBrush(spot.color());
+                painter->setBrush(QColor::fromRgba(spot.color()));
                 painter->drawRect(QRectF(hx, hy, hw, hh));
             }
         }
@@ -481,7 +481,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             "manual_highlights",
             QString("%1 to %2").arg(range.start()).arg(range.end()),
             range,
-            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
+            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>().rgba()
         );
         container->info()->addHighlight(highlight);
     });
@@ -494,7 +494,7 @@ void DisplayBase::showContextMenu(const QPoint &point)
             "manual_highlights",
             QString("%1 to %2").arg(frame.start()).arg(frame.end()),
             frame,
-            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>()
+            SettingsManager::getInstance().getUiSetting(SettingsData::HIGHLIGHT_5_COLOR_KEY).value<QColor>().rgba()
         );
         container->info()->addHighlight(highlight);
     });

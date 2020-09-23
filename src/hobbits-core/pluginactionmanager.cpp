@@ -81,8 +81,9 @@ QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<con
     }
 
     if (!result->getContainer().isNull() && !m_containerManager.isNull()) {
-        auto index = m_containerManager->getTreeModel()->addContainer(result->getContainer());
-        m_containerManager->getCurrSelectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+        if (m_containerManager->addContainer(result->getContainer())) {
+            m_containerManager->selectContainer(result->getContainer());
+        }
     }
 
     return result;

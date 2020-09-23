@@ -5,12 +5,13 @@
 #include <QTreeWidgetItem>
 #include "bitcontainerpreview.h"
 #include "plugincallback.h"
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class HighlightNavigator;
 }
 
-class HOBBITSCORESHARED_EXPORT HighlightNavigator : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT HighlightNavigator : public QWidget
 {
     Q_OBJECT
 

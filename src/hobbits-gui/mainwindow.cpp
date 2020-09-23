@@ -528,7 +528,7 @@ void MainWindow::loadPlugins()
         }
     }
     for (QSharedPointer<AnalyzerInterface> plugin : m_pluginManager->getAllAnalyzers()) {
-        if (!queued.contains(plugin->getName())) {
+        if (!queued.contains(plugin->name())) {
             analyzers.append(plugin);
         }
     }
@@ -537,7 +537,7 @@ void MainWindow::loadPlugins()
         QWidget *analysisUi = new QWidget();
         analyzer->applyToWidget(analysisUi);
         analysisUi->setAutoFillBackground(true);
-        int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->getName());
+        int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->name());
         m_analyzerMap.insert(idx, analyzer);
         analyzer->provideCallback(m_pluginCallback);
     }
@@ -726,7 +726,7 @@ void MainWindow::on_pb_analyze_clicked()
         warningMessage("Current Analyzer plugin cannot be determined");
         return;
     }
-    requestAnalyzerRun(plugin->getName(), plugin->getStateFromUi());
+    requestAnalyzerRun(plugin->name(), plugin->getStateFromUi());
 }
 
 void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)

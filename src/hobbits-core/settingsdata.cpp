@@ -1,6 +1,5 @@
 #include "settingsdata.h"
 
-#include <QColor>
 #include <QDir>
 #include <QPoint>
 #include <QSize>
@@ -54,16 +53,6 @@ SettingsData::SettingsData()
     m_privateSettings.insert(LAST_BATCH_PATH_KEY, QDir::homePath());
     m_privateSettings.insert(LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
     m_privateSettings.insert(LAST_CONTAINER_PATH_KEY, QDir::homePath());
-
-    m_uiSettings.insert(ONE_COLOR_KEY, QColor(Qt::black));
-    m_uiSettings.insert(ZERO_COLOR_KEY, QColor(253, 254, 229));
-    m_uiSettings.insert(BYTE_HUE_SAT_KEY, QColor::fromHsl(120, 200, 128));
-    m_uiSettings.insert(FOCUS_COLOR_KEY, QColor(50, 190, 0, 85));
-    m_uiSettings.insert(HIGHLIGHT_1_COLOR_KEY, QColor(100, 220, 100, 85));
-    m_uiSettings.insert(HIGHLIGHT_2_COLOR_KEY, QColor(100, 0, 255, 50));
-    m_uiSettings.insert(HIGHLIGHT_3_COLOR_KEY, QColor(0, 150, 230, 100));
-    m_uiSettings.insert(HIGHLIGHT_4_COLOR_KEY, QColor(200, 140, 0, 100));
-    m_uiSettings.insert(HIGHLIGHT_5_COLOR_KEY, QColor(250, 50, 0, 100));
 
     m_pluginLoaderSettings.insert(
             PLUGIN_PATH_KEY,

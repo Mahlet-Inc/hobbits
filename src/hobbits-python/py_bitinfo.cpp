@@ -67,7 +67,7 @@ static PyObject* buildRangeHighlight(RangeHighlight highlight) {
                          "label", highlight.label().toStdString().c_str(),
                          "start", highlight.range().start(),
                          "end", highlight.range().end(),
-                         "color", highlight.rgbaColor());
+                         "color", highlight.color());
 }
 
 static char* getHighlightsKwargs[] = {C_TEXT("category"), nullptr};

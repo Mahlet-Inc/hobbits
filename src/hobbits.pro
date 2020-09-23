@@ -3,6 +3,7 @@ TEMPLATE = subdirs
 SUBDIRS += \
     gui \
     core \
+    hobbits-widgets \
     python \
     runner \
     plugins

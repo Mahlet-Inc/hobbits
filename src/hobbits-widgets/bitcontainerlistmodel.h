@@ -4,9 +4,9 @@
 #include <bitcontainer.h>
 #include <QAbstractListModel>
 
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT BitContainerListModel : public QAbstractListModel
+class HOBBITSWIDGETSSHARED_EXPORT BitContainerListModel : public QAbstractListModel
 {
     Q_OBJECT
 

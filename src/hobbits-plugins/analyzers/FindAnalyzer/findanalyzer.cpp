@@ -25,7 +25,7 @@ FindAnalyzer::~FindAnalyzer()
     delete ui;
 }
 
-QString FindAnalyzer::getName()
+QString FindAnalyzer::name()
 {
     return "Find";
 }
@@ -60,7 +60,7 @@ void FindAnalyzer::provideCallback(QSharedPointer<PluginCallback> pluginCallback
 void FindAnalyzer::triggerRun()
 {
     if (!m_pluginCallback.isNull()) {
-        m_pluginCallback->requestAnalyzerRun(this->getName(), this->getStateFromUi());
+        m_pluginCallback->requestAnalyzerRun(this->name(), this->getStateFromUi());
     }
 }
 

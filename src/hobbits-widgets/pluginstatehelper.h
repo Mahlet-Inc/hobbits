@@ -9,9 +9,9 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT PluginStateHelper
+class HOBBITSWIDGETSSHARED_EXPORT PluginStateHelper
 {
 public:
     PluginStateHelper();

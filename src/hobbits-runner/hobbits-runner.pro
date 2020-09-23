@@ -1,5 +1,5 @@
-# This is sort of a hack because the core library requires widgets...
-QT += widgets 
+
+QT -= gui
 
 CONFIG += c++11 console
 CONFIG -= app_bundle debug_and_release_target

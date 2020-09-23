@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
         QSharedPointer<BitContainerManager> bitManager = QSharedPointer<BitContainerManager>(new BitContainerManager());
         for (auto container : targetContainers) {
-            bitManager->getTreeModel()->addContainer(container);
+            bitManager->addContainer(container);
         }
         pluginActionManager->setContainerManager(bitManager);
 

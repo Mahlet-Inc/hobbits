@@ -1,75 +1,64 @@
 #include "bitcontainermanager.h"
 
 BitContainerManager::BitContainerManager(QObject *parent) :
-    QObject(parent),
-    m_bitContainerTreeModel(QSharedPointer<BitContainerTreeModel>(new BitContainerTreeModel())),
-    m_currSelectionModel(QSharedPointer<QItemSelectionModel>(new QItemSelectionModel))
+    QObject(parent)
 {
-    m_currSelectionModel->setModel(m_bitContainerTreeModel.data());
-    connect(
-            m_currSelectionModel.data(),
-            SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
-            this,
-            SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)));
-
-    connect(
-                m_bitContainerTreeModel.data(),
-                SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
-                this,
-                SIGNAL(containerAdded(QSharedPointer<BitContainer>)));
 }
 
-void BitContainerManager::manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+BitContainerManager::~BitContainerManager()
 {
-    auto newBits = QSharedPointer<BitContainer>();
-    auto oldBits = QSharedPointer<BitContainer>();
 
-    if (selected.indexes().size() == 1 && selected.indexes().at(0).isValid()) {
-        newBits = m_bitContainerTreeModel->getContainer(selected.indexes().first());
-    }
-    if (deselected.indexes().size() == 1 && deselected.indexes().at(0).isValid()) {
-        oldBits = m_bitContainerTreeModel->getContainer(deselected.indexes().first());
-    }
-
-    emit currSelectionChanged(newBits, oldBits);
 }
 
 QSharedPointer<BitContainer> BitContainerManager::getCurrentContainer()
 {
-    if (m_currSelectionModel->selection().isEmpty()) {
-        return QSharedPointer<BitContainer>();
-    }
-    return m_bitContainerTreeModel->getContainer(m_currSelectionModel->selection().indexes().first());
-}
-
-QSharedPointer<BitContainerTreeModel> BitContainerManager::getTreeModel()
-{
-    return m_bitContainerTreeModel;
+    return m_current;
 }
 
 QSharedPointer<BitContainer> BitContainerManager::getContainerById(QUuid id)
 {
-    return m_bitContainerTreeModel->getContainerById(id);
+    return m_containerMap.value(id);
 }
 
-QSharedPointer<QItemSelectionModel> BitContainerManager::getCurrSelectionModel()
+bool BitContainerManager::addContainer(QSharedPointer<BitContainer> container)
 {
-    return m_currSelectionModel;
+    m_containerMap.remove(container->getId());
+    m_containerMap.insert(container->getId(), container);
+
+    emit containerAdded(container);
+
+    return true;
+}
+
+bool BitContainerManager::selectContainer(QSharedPointer<BitContainer> container)
+{
+    if (m_containerMap.contains(container->getId())) {
+        auto old = m_current;
+        m_current = m_containerMap.value(container->getId());
+        emit currSelectionChanged(m_current, old);
+        return true;
+    }
+    return false;
 }
 
 void BitContainerManager::deleteCurrentContainer()
 {
-    if (m_currSelectionModel->selection().indexes().isEmpty()) {
+    if (m_current.isNull()) {
         return;
     }
-    QModelIndex index = m_currSelectionModel->selection().indexes().first();
-    if (!index.isValid()) {
-        return;
+    auto old = m_current;
+    m_containerMap.remove(m_current->getId());
+    m_current = QSharedPointer<BitContainer>();
+    if (!m_containerMap.isEmpty()) {
+        m_current = m_containerMap.values().first();
     }
-    m_bitContainerTreeModel->removeContainer(index);
+    emit currSelectionChanged(m_current, old);
 }
 
 void BitContainerManager::deleteAllContainers()
 {
-    m_bitContainerTreeModel->removeAllContainers();
+    auto old = m_current;
+    m_containerMap.clear();
+    m_current = QSharedPointer<BitContainer>();
+    emit currSelectionChanged(m_current, old);
 }

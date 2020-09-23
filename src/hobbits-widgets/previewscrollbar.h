@@ -7,8 +7,9 @@
 #include "actionwatcher.h"
 #include "actionrenderprogress.h"
 #include "displayhandle.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT PreviewScrollBar : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT PreviewScrollBar : public QWidget
 {
     Q_OBJECT
 public:

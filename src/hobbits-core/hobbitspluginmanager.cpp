@@ -2,6 +2,7 @@
 #include "settingsmanager.h"
 #include <QDir>
 #include <QPluginLoader>
+#include <QSet>
 
 HobbitsPluginManager::HobbitsPluginManager()
 {
@@ -65,14 +66,14 @@ QStringList HobbitsPluginManager::loadPlugins(const QString &pluginPath)
             SettingsManager::getInstance().setPrivateSetting(SettingsData::PLUGIN_RUNNING_KEY, QVariant(pluginFile));
             QSharedPointer<AnalyzerInterface> analyzerInstance = QSharedPointer<AnalyzerInterface>(
                     analyzer->createDefaultAnalyzer());
-            if (m_analyzers.contains(analyzerInstance->getName())) {
+            if (m_analyzers.contains(analyzerInstance->name())) {
                 warnings.append(
                         QString("Duplicate Analyzer plugin found with name '%1' - skipping...").arg(
-                                analyzerInstance->getName()));
+                                analyzerInstance->name()));
             }
             else {
-                m_analyzers.insert(analyzerInstance->getName(), analyzerInstance);
-                m_loadedPluginLocations.insert(analyzerInstance->getName(), pluginFile);
+                m_analyzers.insert(analyzerInstance->name(), analyzerInstance);
+                m_loadedPluginLocations.insert(analyzerInstance->name(), pluginFile);
             }
             SettingsManager::getInstance().setPrivateSetting(SettingsData::PLUGIN_RUNNING_KEY, QVariant());
         }

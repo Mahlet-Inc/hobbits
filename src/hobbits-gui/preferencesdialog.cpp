@@ -228,10 +228,10 @@ QWidget* PreferencesDialog::createPluginLoaderPage()
         uiSettingsLayout->addRow(plugin->getName(), path);
     }
     for (auto plugin : m_pluginManager->getAllAnalyzers()) {
-        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->getName()));
+        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
         path->setDisabled(true);
-        uiSettingsLayout->addRow(plugin->getName(), path);
+        uiSettingsLayout->addRow(plugin->name(), path);
     }
     for (auto plugin : m_pluginManager->getAllOperators()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->getName()));

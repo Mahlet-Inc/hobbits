@@ -4,14 +4,15 @@
 #include "bitcontainer.h"
 #include "bitcontainermanager.h"
 #include <QObject>
+#include <QSet>
 
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
 class DisplayInterface;
 
 class QScrollBar;
 
-class HOBBITSCORESHARED_EXPORT DisplayHandle : public QObject
+class HOBBITSWIDGETSSHARED_EXPORT DisplayHandle : public QObject
 {
     Q_OBJECT
 

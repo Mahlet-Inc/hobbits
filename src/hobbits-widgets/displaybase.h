@@ -6,9 +6,9 @@
 #include <QScrollBar>
 #include <QWidget>
 
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT DisplayBase : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT DisplayBase : public QWidget
 {
     Q_OBJECT
 

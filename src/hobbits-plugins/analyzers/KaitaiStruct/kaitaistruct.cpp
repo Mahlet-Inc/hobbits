@@ -36,7 +36,7 @@ AnalyzerInterface* KaitaiStruct::createDefaultAnalyzer()
 }
 
 //Return name of operator
-QString KaitaiStruct::getName()
+QString KaitaiStruct::name()
 {
     return "Kaitai Struct";
 }

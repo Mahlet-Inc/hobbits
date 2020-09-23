@@ -1,13 +1,11 @@
 #ifndef DISPLAYINTERFACE_H
 #define DISPLAYINTERFACE_H
 
-#include <QSharedPointer>
-#include <QStringListModel>
-
-#include "bitcontainer.h"
-#include "displayhandle.h"
-
 #include "hobbits-core_global.h"
+#include <QSharedPointer>
+
+class QWidget;
+class DisplayHandle;
 
 class HOBBITSCORESHARED_EXPORT DisplayInterface
 {

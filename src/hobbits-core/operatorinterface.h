@@ -4,7 +4,6 @@
 #include "actionprogress.h"
 #include "bitcontainer.h"
 #include "operatorresult.h"
-#include "plugincallback.h"
 #include "bitcontainerpreview.h"
 #include <QSharedPointer>
 
@@ -21,7 +20,6 @@ public:
     virtual OperatorInterface* createDefaultOperator() = 0;
 
     virtual void applyToWidget(QWidget *widget) = 0;
-    virtual void provideCallback(QSharedPointer<PluginCallback> pluginCallback) = 0;
     virtual QJsonObject getStateFromUi() = 0;
     virtual bool canRecallPluginState(const QJsonObject &pluginState) = 0;
     virtual bool setPluginStateInUi(const QJsonObject &pluginState) = 0;

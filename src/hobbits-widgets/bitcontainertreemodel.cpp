@@ -137,9 +137,12 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     endInsertRows();
     connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
+    QModelIndex idx = this->index(row, 0, parentIndex);
+    m_containerIndexMap.insert(bitContainer->getId(), idx);
+
     emit containerAdded(bitContainer);
 
-    return this->index(row, 0, parentIndex);
+    return idx;
 }
 
 void BitContainerTreeModel::removeContainer(const QModelIndex &index)
@@ -152,6 +155,7 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
     // Get a copy of the container as a QSharedPointer so it doesn't get deleted when it is removed from the container
     QSharedPointer<BitContainer> containerPtr = m_containerMap.value(container->getId());
     m_containerMap.remove(container->getId());
+    m_containerIndexMap.remove(container->getId());
     QList<QUuid> detach;
     for (QUuid childUuid : container->getChildUuids()) {
         detach.append(childUuid);
@@ -183,6 +187,7 @@ void BitContainerTreeModel::removeAllContainers()
 {
     beginRemoveRows(QModelIndex(), 0, rowCount()-1);
     m_containerMap.clear();
+    m_containerIndexMap.clear();
     endRemoveRows();
 }
 
@@ -200,6 +205,11 @@ QSharedPointer<BitContainer> BitContainerTreeModel::getContainer(const QModelInd
     }
 
     return QSharedPointer<BitContainer>();
+}
+
+QModelIndex BitContainerTreeModel::getContainerIndex(const QUuid &id) const
+{
+    return m_containerIndexMap.value(id);
 }
 
 QSharedPointer<BitContainer> BitContainerTreeModel::getContainerById(QUuid id) const

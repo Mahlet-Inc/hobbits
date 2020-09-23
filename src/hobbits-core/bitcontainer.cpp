@@ -2,9 +2,6 @@
 #include "pluginactionlineage.h"
 #include "settingsmanager.h"
 #include <QBuffer>
-#include <QDebug>
-#include <QColor>
-#include <QPixmap>
 
 BitContainer::BitContainer() :
     QObject(),

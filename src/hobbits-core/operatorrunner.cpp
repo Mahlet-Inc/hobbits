@@ -165,12 +165,14 @@ void OperatorRunner::postProcess()
     }
 
     if (!m_containerManager.isNull()) {
-        QModelIndex lastIndex;
+        QSharedPointer<BitContainer> lastContainer;
         for (QSharedPointer<BitContainer> output : result->getOutputContainers()) {
-            lastIndex = m_containerManager->getTreeModel()->addContainer(output);
+            if (m_containerManager->addContainer(output)) {
+                lastContainer = output;
+            }
         }
-        if (lastIndex.isValid()) {
-            m_containerManager->getCurrSelectionModel()->setCurrentIndex(lastIndex, QItemSelectionModel::ClearAndSelect);
+        if (!lastContainer.isNull()) {
+            m_containerManager->selectContainer(lastContainer);
         }
     }
 

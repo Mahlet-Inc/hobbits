@@ -4,9 +4,9 @@
 #include "bitcontainer.h"
 #include <QAbstractItemModel>
 
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT BitContainerTreeModel : public QAbstractItemModel
+class HOBBITSWIDGETSSHARED_EXPORT BitContainerTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -32,6 +32,7 @@ public:
     void removeContainer(const QModelIndex &index);
     void removeAllContainers();
     QSharedPointer<BitContainer> getContainer(const QModelIndex &index) const;
+    QModelIndex getContainerIndex(const QUuid &id) const;
 
     QList<QSharedPointer<BitContainer>> getContainers() const;
     QSharedPointer<BitContainer> getContainerById(QUuid id) const;
@@ -47,6 +48,7 @@ private:
     QModelIndex getContainerParentIndex(BitContainer *bitContainer) const;
 
     QMap<QUuid, QSharedPointer<BitContainer>> m_containerMap;
+    QMap<QUuid, QModelIndex> m_containerIndexMap;
 };
 
 #endif // BITCONTAINERTREEMODEL_H

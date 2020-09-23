@@ -20,7 +20,7 @@ public:
 
     ~FindAnalyzer() override;
 
-    QString getName() override;
+    QString name() override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
     void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
 

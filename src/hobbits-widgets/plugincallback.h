@@ -4,9 +4,9 @@
 #include <QJsonObject>
 #include <QObject>
 #include "displayhandle.h"
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT PluginCallback : public QObject
+class HOBBITSWIDGETSSHARED_EXPORT PluginCallback : public QObject
 {
     Q_OBJECT
 

@@ -206,7 +206,7 @@ void HighlightNavigator::updateSelection()
     int selectedNum = curr->data(0, Qt::UserRole + 1).toInt();
 
     QColor focusColor = SettingsManager::getInstance().getUiSetting(SettingsData::FOCUS_COLOR_KEY).value<QColor>();
-    RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor);
+    RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor.rgba());
 
     qint64 containingFrame = m_container->info()->frameOffsetContaining(focus.range().start());
     if (containingFrame >= 0) {

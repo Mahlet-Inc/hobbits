@@ -4,9 +4,9 @@
 #include "displaybase.h"
 #include <QWidget>
 
-#include "hobbits-core_global.h"
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT DisplayBaseText : public DisplayBase
+class HOBBITSWIDGETSSHARED_EXPORT DisplayBaseText : public DisplayBase
 {
     Q_OBJECT
 

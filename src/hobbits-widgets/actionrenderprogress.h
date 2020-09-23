@@ -3,8 +3,9 @@
 
 #include "actionprogress.h"
 #include <QImage>
+#include "hobbits-widgets_global.h"
 
-class HOBBITSCORESHARED_EXPORT ActionRenderProgress : public ActionProgress
+class HOBBITSWIDGETSSHARED_EXPORT ActionRenderProgress : public ActionProgress
 {
     Q_OBJECT
 public:
