@@ -60,8 +60,6 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
-      echo "Checking python dep: " `ldd $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so | grep libpython`
-      cp `ldd $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so | grep libpython | awk '{print $3}'` release/lib
       cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
       cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* release/lib
