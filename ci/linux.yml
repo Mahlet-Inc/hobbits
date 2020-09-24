@@ -60,6 +60,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
+      echo "Checking python dep: " `ldd $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so | grep libpython`
       cp `ldd $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so | grep libpython | awk '{print $3}'` release/lib
       cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
       cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
@@ -75,9 +76,9 @@ steps:
       cp --preserve=links $QT_LIB_DIR/libQt5Widgets.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5XcbQpa.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* release/lib
-      echo "Checking fftw3" `ldconfig -p | grep 'fftw3'`
-      cp --preserve=links `ldconfig -p | grep 'fftw3' | awk '{print $NF}'` release/lib64
-      echo "Checking libpcap" `ldconfig -p | grep 'libpcap'`
+      echo "Checking fftw3: " `ldconfig -p | grep 'fftw3'`
+      cp --preserve=links `ldconfig -p | grep 'fftw3' | awk '{print $NF}'` release/lib
+      echo "Checking libpcap: " `ldconfig -p | grep 'libpcap'`
       cp --preserve=links `ldconfig -p | grep 'libpcap' | awk '{print $NF}'` release/lib
       cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
       find release/python -name "*.so*" -type f -exec chmod +x {} \;
