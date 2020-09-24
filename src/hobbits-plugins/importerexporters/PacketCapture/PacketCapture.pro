@@ -41,7 +41,7 @@ DEPENDPATH += $$PWD/../../../hobbits-core
 
 requires(unix)
 unix {
-    requires(packagesExist(libpcap)|exists(/usr/include/pcap.h))
+    requires(packagesExist(libpcap)|exists(/usr/include/pcap.h)|exists(/usr/local/include/pcap.h))
     mac {
         INCLUDEPATH += /usr/local/include
         LIBS += -L/usr/local/lib
