@@ -11,28 +11,59 @@
 PyObject* callFunction(PyObject* module, const char* name, PyObject* args = nullptr);
 PyObject* hobbitsTypeWrapper(PyObject* hobbitsModule, const char* typeName, void *toWrap);
 PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg);
-QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors = QStringList());
+QSharedPointer<PythonResult> finish(QFile &stdoutFile, QFile &stderrFile, QStringList errors = QStringList());
 
-static QMutex mutex;
-static bool hobbitsAppended;
+class ScopedPyObj {
+public:
+    ScopedPyObj(PyObject* obj = nullptr) :
+        m_obj(obj) {}
+
+    ~ScopedPyObj() { Py_XDECREF(m_obj); }
+
+    ScopedPyObj(ScopedPyObj const&) = delete;
+    void operator=(ScopedPyObj const&) = delete;
+
+    ScopedPyObj& operator=(PyObject *obj) {
+        Py_XDECREF(m_obj);
+        m_obj = obj;
+        return *this;
+    }
+
+    PyObject* obj() const { return m_obj; }
+    bool isNull() const { return m_obj == nullptr; }
+
+private:
+    PyObject *m_obj;
+};
+
+PythonInterpreter::PythonInterpreter()
+{
+    initialize();
+}
+
+PythonInterpreter::~PythonInterpreter()
+{
+    if (m_initializationError.isNull()) {
+        Py_FinalizeEx();
+    }
+}
+
 QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<PythonRequest> request)
 {
-    QMutexLocker lock(&mutex);
+    return instance()._runProcessScript(request);
+}
 
-    QTemporaryDir temp(QDir::temp().absoluteFilePath("HobbitsPythonXXXXXX"));
+PythonInterpreter &PythonInterpreter::instance()
+{
+    static PythonInterpreter instance;
+    return instance;
+}
 
-    QFile stderrFile(temp.filePath("stderr.log"));
-    QFile stdoutFile(temp.filePath("stdout.log"));
-    QStringList errors;
-
-    QFile::copy(request->scriptName(), temp.filePath("thescript.py"));
-
-    if (!hobbitsAppended) {
-        if (PyImport_AppendInittab("hobbits", &PyInit_hobbits) == -1) {
-            errors.append("Failed PyImport_AppendInittab with 'hobbits' module");
-            return PythonResult::result(errors);
-        }
-        hobbitsAppended = true;
+void PythonInterpreter::initialize()
+{
+    if (PyImport_AppendInittab("hobbits", &PyInit_hobbits) == -1) {
+        m_initializationError = PythonResult::result({"Failed PyImport_AppendInittab with 'hobbits' module"});
+        return;
     }
 
     PyStatus status;
@@ -46,113 +77,123 @@ QSharedPointer<PythonResult> PythonInterpreter::runProcessScript(QSharedPointer<
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
-        errors.append(QString("Failed Py_InitializeFromConfig - is there a valid python at '%1'?").arg(QString::fromStdWString(wsPyHome)));
-        return PythonResult::result(errors);
+        m_initializationError = PythonResult::result({QString("Failed Py_InitializeFromConfig - is there a valid python at '%1'?").arg(QString::fromStdWString(wsPyHome))});
+        return;
+    }
+}
+
+QSharedPointer<PythonResult> PythonInterpreter::_runProcessScript(QSharedPointer<PythonRequest> request)
+{
+    if (!m_initializationError.isNull()) {
+        return m_initializationError;
     }
 
+    QMutexLocker lock(&m_mutex);
 
-    // Setup path and output files
+    QStringList errors;
+    QTemporaryDir temp(QDir::temp().absoluteFilePath("HobbitsPythonXXXXXX"));
+
+    // Setup stderr and stdout
+    QFile stderrFile(temp.filePath("stderr.log"));
+    QFile stdoutFile(temp.filePath("stdout.log"));
     PyRun_SimpleString("import sys");
     PyRun_SimpleString(QString("sys.stderr = open('%1', 'w', buffering=1 )").arg(stderrFile.fileName()).toStdString().c_str());
     PyRun_SimpleString(QString("sys.stdout = open('%1', 'w', buffering=1 )").arg(stdoutFile.fileName()).toStdString().c_str());
+
+    // Get the script in sys.path
+    QFile::copy(request->scriptName(), temp.filePath("thescript.py"));
     PyRun_SimpleString(QString("sys.path.append('%1')").arg(temp.path()).toStdString().c_str());
 
+    // Append any other sys.path extensions
     for (QString extension : request->pathExtensions()) {
         PyRun_SimpleString(QString("sys.path.append('%1')").arg(extension).toStdString().c_str());
     }
 
     // Import hobbits module
-    PyObject* hobbitsModule = PyImport_ImportModule("hobbits");
-    if (hobbitsModule == nullptr) {
-        PyErr_Print();
+    ScopedPyObj hobbitsModule(PyImport_ImportModule("hobbits"));
+    if (hobbitsModule.isNull()) {
+        errorCheckAndPrint();
         errors.append("Failed to import 'hobbits' Python module");
-        return finalize(stdoutFile, stderrFile, errors);
+        return finish(stdoutFile, stderrFile, errors);
     }
 
-    // Import custom script
-    PyObject *scriptName = PyUnicode_DecodeFSDefault("thescript");
-    PyObject *scriptModule = PyImport_Import(scriptName);
-    Py_DECREF(scriptName);
-
-    if (scriptModule == nullptr) {
-        PyErr_Print();
+    // Import custom script, reloading to make sure it's not using 'thescript' from the previous run
+    ScopedPyObj scriptName(PyUnicode_DecodeFSDefault("thescript"));
+    ScopedPyObj scriptModule(PyImport_Import(scriptName.obj()));
+    if (scriptModule.isNull()) {
+        errorCheckAndPrint();
         errors.append("Failed to import custom Python script");
-        Py_XDECREF(hobbitsModule);
-        return finalize(stdoutFile, stderrFile, errors);
+        return finish(stdoutFile, stderrFile, errors);
+    }
+    scriptModule = PyImport_ReloadModule(scriptModule.obj());
+    if (scriptModule.isNull()) {
+        errorCheckAndPrint();
+        errors.append("Failed to import custom Python script");
+        return finish(stdoutFile, stderrFile, errors);
     }
 
+    // Run a function in the script, if specified
     if (!request->functionName().isEmpty()) {
         // Collect and build the arguments
-        PyObject *args = nullptr;
+        ScopedPyObj args;
         if (request->args().size() > 0) {
             args = PyTuple_New(request->args().size());
-            if (args == nullptr) {
+            if (args.isNull()) {
                 errors.append("Failed to create a tuple for function arguments");
-                Py_XDECREF(hobbitsModule);
-                Py_XDECREF(scriptModule);
-                return finalize(stdoutFile, stderrFile, errors);
+                return finish(stdoutFile, stderrFile, errors);
             }
             for (int i = 0; i < request->args().size(); i++) {
-                PyObject* arg = parseArg(hobbitsModule, request->args().at(i));
+                PyObject *arg = parseArg(hobbitsModule.obj(), request->args().at(i));
                 if (arg == nullptr) {
                     errors.append(QString("Failed to parse arg %1").arg(i));
-                    Py_XDECREF(args);
-                    Py_XDECREF(hobbitsModule);
-                    Py_XDECREF(scriptModule);
-                    return finalize(stdoutFile, stderrFile, errors);
+                    return finish(stdoutFile, stderrFile, errors);
                 }
-                int setCode = PyTuple_SetItem(args, i, arg);
+                int setCode = PyTuple_SetItem(args.obj(), i, arg);
                 if (setCode != 0) {
-                    PyErr_Print();
+                    errorCheckAndPrint();
                     errors.append(QString("Failed to set arg %1 in position").arg(i));
-                    Py_XDECREF(args);
-                    Py_XDECREF(hobbitsModule);
-                    Py_XDECREF(scriptModule);
-                    return finalize(stdoutFile, stderrFile, errors);
+                    return finish(stdoutFile, stderrFile, errors);
                 }
             }
         }
 
         // Run the function
-        PyObject *result = callFunction(scriptModule, request->functionName().toStdString().c_str(), args);
-        if (PyErr_Occurred()) {
-            PyErr_Print();
-        }
-        Py_XDECREF(result);
-        Py_XDECREF(args);
+        ScopedPyObj result(callFunction(scriptModule.obj(), request->functionName().toStdString().c_str(), args.obj()));
+        errorCheckAndPrint();
     }
 
-    // Cleanup
-    Py_XDECREF(hobbitsModule);
-    Py_XDECREF(scriptModule);
+    return finish(stdoutFile, stderrFile, errors);
+}
 
-    return finalize(stdoutFile, stderrFile, errors);
+bool PythonInterpreter::errorCheckAndPrint()
+{
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        return true;
+    }
+    return false;
 }
 
 PyObject* callFunction(PyObject *module, const char *name, PyObject *args)
 {
-    PyObject* func = PyObject_GetAttrString(module, name);
+    ScopedPyObj func(PyObject_GetAttrString(module, name));
     PyObject *result = nullptr;
 
-    if (func && PyCallable_Check(func)) {
-        result = PyObject_CallObject(func, args);
+    if (!func.isNull() && PyCallable_Check(func.obj())) {
+        result = PyObject_CallObject(func.obj(), args);
     }
-    else {
-        if (PyErr_Occurred())
-            PyErr_Print();
+    else if (PyErr_Occurred()) {
+        PyErr_Print();
     }
 
-    Py_XDECREF(func);
     return result;
 }
 
 PyObject* hobbitsTypeWrapper(PyObject *hobbitsModule, const char *typeName, void *toWrap)
 {
-    PyObject* type = PyObject_GetAttrString(hobbitsModule, typeName);
-    PyObject* capsule = PyCapsule_New(toWrap, nullptr, nullptr);
-    PyObject* instance = PyObject_CallFunction(type, "O", capsule);
-    Py_DECREF(type);
-    Py_DECREF(capsule);
+    ScopedPyObj type(PyObject_GetAttrString(hobbitsModule, typeName));
+    ScopedPyObj capsule(PyCapsule_New(toWrap, nullptr, nullptr));
+    PyObject* instance = PyObject_CallFunction(type.obj(), "O", capsule.obj());
     return instance;
 }
 
@@ -168,17 +209,18 @@ PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
     else if (arg->type() == PythonArg::String) {
         return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->stringData().toStdString().c_str());
     }
+    else if (arg->type() == PythonArg::Integer) {
+        return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->integerData());
+    }
     else {
         return nullptr;
     }
 }
 
-QSharedPointer<PythonResult> finalize(QFile &stdoutFile, QFile &stderrFile, QStringList errors)
+QSharedPointer<PythonResult> finish(QFile &stdoutFile, QFile &stderrFile, QStringList errors)
 {
     PyRun_SimpleString("sys.stderr.close()");
     PyRun_SimpleString("sys.stdout.close()");
-    if (Py_FinalizeEx() != 0) {
-        errors.append("Error encountered in Py_FinalizeEx()");
-    }
+
     return PythonResult::result(stdoutFile, stderrFile, errors);
 }

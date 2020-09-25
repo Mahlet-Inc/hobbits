@@ -6,6 +6,11 @@ PythonArg::PythonArg()
 
 }
 
+int PythonArg::integerData() const
+{
+    return m_integerData;
+}
+
 QString PythonArg::stringData() const
 {
     return m_stringData;
@@ -107,5 +112,14 @@ PythonArg *PythonArg::qString(QString s)
     arg->m_type = Type::String;
     arg->m_argSymbol = "s";
     arg->m_stringData = s;
+    return arg;
+}
+
+PythonArg *PythonArg::integer(int n)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::Integer;
+    arg->m_argSymbol = "i";
+    arg->m_integerData = n;
     return arg;
 }

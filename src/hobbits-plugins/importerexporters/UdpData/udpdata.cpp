@@ -35,6 +35,13 @@ bool UdpData::canImport()
 QString UdpData::getImportLabelForState(QJsonObject pluginState)
 {
     if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
+
+        if (pluginState.contains("limit") && pluginState.value("limit").isDouble()) {
+            int value = pluginState.value("limit").toInt();
+            if (value > 0) {
+                return QString("UDP Listen for %2 KB on port %1").arg(pluginState.value("port").toInt()).arg(double(value)/1000.0);
+            }
+        }
         return QString("UDP Listen on port %1").arg(pluginState.value("port").toInt());
     }
     return "";
@@ -54,14 +61,24 @@ QSharedPointer<ImportResult> UdpData::importBits(QJsonObject pluginState)
     QSharedPointer<UdpReceiver> receiver = QSharedPointer<UdpReceiver>(new UdpReceiver());
     if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
         receiver->setPort(pluginState.value("port").toInt());
+        if (pluginState.contains("limit") && pluginState.value("limit").isDouble()) {
+            receiver->setLimit(pluginState.value("limit").toInt());
+        }
         receiver->startListening();
     }
 
     if (receiver->exec()) {
-        QSharedPointer<BitContainer> container = BitContainer::create(receiver->getDownloadedData());
+        QSharedPointer<BitContainer> container;
+        if (receiver->getLimit() > 0) {
+            container = BitContainer::create(receiver->getDownloadedData(), receiver->getLimit() * 8);
+        }
+        else {
+            container = BitContainer::create(receiver->getDownloadedData());
+        }
         container->setName("UDP Import");
         QJsonObject state;
         state.insert("port", receiver->getPort());
+        state.insert("limit", receiver->getLimit());
         return ImportResult::result(container, state);
     }
     else {

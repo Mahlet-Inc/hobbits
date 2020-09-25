@@ -1,4 +1,5 @@
 #include "httpdata.h"
+#include <QMessageBox>
 
 HttpData::HttpData() :
     http(nullptr)
@@ -77,7 +78,20 @@ QSharedPointer<ExportResult> HttpData::exportBits(QSharedPointer<const BitContai
     if (!http) {
         http = new HttpTransceiver();
     }
-    http->setUploadMode(container->bits()->getPreviewBytes());
+
+    if (container->bits()->sizeInBytes() > 10000000) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(
+                nullptr,
+                "Data Truncation Warning",
+                QString("Uploaded data will be truncated at 10MB. Do you want to proceed anyways?"),
+                QMessageBox::Yes | QMessageBox::No);
+        if (reply != QMessageBox::Yes) {
+            return ExportResult::nullResult();
+        }
+    }
+
+    http->setUploadMode(container->bits()->readBytes(0, 25000000));
 
     if (pluginState.contains("url")) {
         http->setUrl(QUrl(pluginState.value("url").toString()));

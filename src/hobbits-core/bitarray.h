@@ -24,8 +24,8 @@ public:
 
     BitArray();
     BitArray(qint64 sizeInBits);
-    BitArray(QByteArray bytes, qint64 sizeInBits);
-    BitArray(QIODevice *dataStream, qint64 sizeInBits);
+    BitArray(QByteArray bytes, qint64 sizeInBits = -1);
+    BitArray(QIODevice *dataStream, qint64 sizeInBits = -1);
     BitArray(const BitArray &other, qint64 sizeInBits);
     BitArray(const BitArray &other);
     BitArray(const BitArray *other);
@@ -38,8 +38,18 @@ public:
     char byteAt(qint64 i) const;
     qint64 sizeInBits() const;
     qint64 sizeInBytes() const;
-    quint64 getWordValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
-    qint64 getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    quint64 parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    qint64 parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
+    qint64 readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    qint64 readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
 
     void resize(qint64 sizeInBits);
 
@@ -48,15 +58,14 @@ public:
     qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = CopyMode::Copy) const;
 
     qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    QByteArray readBytes(qint64 byteOffset, qint64 maxBytes) const;
     void writeTo(QIODevice *outputStream) const;
-
-    int getPreviewSize() const;
-    QByteArray getPreviewBytes() const;
 
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
     qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
+    QByteArray readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const;
     QIODevice* dataReader() const;
     void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
     void reinitializeCache();
@@ -75,15 +84,5 @@ private:
     mutable QMutex m_cacheMutex;
     mutable QMutex m_dataFileMutex;
 };
-
-inline bool operator==(const BitArray &b1, const BitArray &b2)
-{
-    return b1.getPreviewBytes().compare(b2.getPreviewBytes()) == 0;
-}
-
-inline uint qHash(const BitArray &key, uint seed)
-{
-    return qHash(key.getPreviewBytes(), seed) ^ uint(key.getPreviewSize());
-}
 
 #endif // BITARRAY_H

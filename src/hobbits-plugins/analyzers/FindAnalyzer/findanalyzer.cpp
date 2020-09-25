@@ -166,7 +166,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
 
     QString resultHead = "";
     if (findBits->sizeInBits() % 8 == 0) {
-        resultHead += "0x" + findBits->getPreviewBytes().toHex();
+        resultHead += "0x" + findBits->readBytes(0, findBits->sizeInBytes()).toHex();
     }
     else {
         for (int i = 0; i < findBits->sizeInBits(); i++) {

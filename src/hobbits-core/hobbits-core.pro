@@ -55,6 +55,7 @@ SOURCES += \
     hobbitspluginmanager.cpp \
     importresult.cpp \
         mathparser.cpp \
+    metadatahelper.cpp \
     operatorresult.cpp \
     operatorrunner.cpp \
     parseresult.cpp \
@@ -99,6 +100,7 @@ HEADERS += \
     hobbitspluginmanager.h \
     importexportinterface.h \
     importresult.h \
+    metadatahelper.h \
         operatorinterface.h \
         mathparser.h \
     operatorresult.h \

@@ -60,7 +60,7 @@ void TcpReceiver::startListening()
 void TcpReceiver::stopListening()
 {
     ui->pb_start->setText("Begin Listening");
-    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'g', 3));
+    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
     ui->pb_start->setEnabled(true);
     ui->pb_stop->setEnabled(false);
     ui->sb_port->setEnabled(true);
@@ -104,7 +104,7 @@ void TcpReceiver::socketRead()
     while (m_socket->bytesAvailable() > 0) {
         m_downloadFile.write(m_socket->read(10000));
     }
-    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'g', 3));
+    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
 }
 
 void TcpReceiver::on_pb_start_pressed()

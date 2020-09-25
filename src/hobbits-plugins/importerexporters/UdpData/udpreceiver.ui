@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
-    <height>142</height>
+    <width>373</width>
+    <height>219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,6 +18,12 @@
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Port</string>
        </property>
@@ -36,14 +42,46 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QPushButton" name="pb_start">
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="sb_limit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="suffix">
+        <string/>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>10000000</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="ck_limit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Begin Listening</string>
+        <string>KB Limit</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pb_start">
+     <property name="text">
+      <string>Begin Listening</string>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -66,5 +104,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ck_limit</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sb_limit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>171</x>
+     <y>83</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

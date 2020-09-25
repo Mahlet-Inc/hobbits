@@ -6,10 +6,14 @@
 #include <QDir>
 
 #ifdef Q_OS_UNIX
+#define bswap16(X) __builtin_bswap16((X))
+#define bswap32(X) __builtin_bswap32((X))
 #define bswap64(X) __builtin_bswap64((X))
 #endif
 #ifdef Q_OS_WIN
 #include <intrin.h>
+#define bswap16(X) _byteswap_ushort((X))
+#define bswap32(X) _byteswap_ulong((X))
 #define bswap64(X) _byteswap_uint64((X))
 #endif
 
@@ -120,7 +124,6 @@ BitArray::BitArray(const BitArray *other) :
 {
 }
 
-
 BitArray::~BitArray()
 {
     deleteCache();
@@ -214,7 +217,7 @@ char BitArray::byteAt(qint64 i) const
     return m_dataCaches[cacheIdx][index];
 }
 
-quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+quint64 BitArray::parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
     quint64 word = 0;
     for (qint64 i = 0; i < wordBitSize; i++) {
@@ -233,9 +236,9 @@ quint64 BitArray::getWordValue(qint64 bitOffset, int wordBitSize, bool littleEnd
     return word;
 }
 
-qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+qint64 BitArray::parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
 {
-    quint64 uVal = getWordValue(bitOffset, wordBitSize, littleEndian);
+    quint64 uVal = parseUIntValue(bitOffset, wordBitSize, littleEndian);
     qint64 *val = reinterpret_cast<qint64*>(&uVal);
     if (wordBitSize == 64) {
         return *val;
@@ -248,6 +251,97 @@ qint64 BitArray::getWordValueTwosComplement(qint64 bitOffset, int wordBitSize, b
     else {
         return *val;
     }
+}
+
+qint64 BitArray::readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt16Samples(reinterpret_cast<quint16*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 2, maxSamples * 2);
+    samples /= 2;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap16(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 bitOffset = sampleOffset * 24;
+    qint64 samples = 0;
+    while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
+        data[samples] = qint32(parseIntValue(bitOffset, 24, !bigEndian));
+        bitOffset += 24;
+        samples++;
+    }
+    return samples;
+}
+
+qint64 BitArray::readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 bitOffset = sampleOffset * 24;
+    qint64 samples = 0;
+    while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
+        data[samples] = quint32(parseUIntValue(bitOffset, 24, !bigEndian));
+        bitOffset += 24;
+        samples++;
+    }
+    return samples;
+}
+
+qint64 BitArray::readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 4, maxSamples * 4);
+    samples /= 4;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap32(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 8, maxSamples * 8);
+    samples /= 8;
+
+    if (bigEndian) {
+        for (int i = 0; i < samples; i++) {
+            data[i] = bswap64(data[i]);
+        }
+    }
+
+    return samples;
+}
+
+qint64 BitArray::readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+}
+
+qint64 BitArray::readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+{
+    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
 void BitArray::loadCacheAt(qint64 i) const
@@ -397,7 +491,7 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                 // remove any bits from the byte that extend beyond the remaining bits to copy
                 int destTrailMask = 8 - destByteAlignment - int(bitsLeft);
                 if (destTrailMask > 0) {
-                    mask8 &= IMASK_LSB_8[destTrailMask];
+                    mask8 |= IMASK_LSB_8[destTrailMask];
                     srcVal &= MASK_LSB_8[destTrailMask];
                 }
 
@@ -517,6 +611,12 @@ qint64 BitArray::readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const
     return readBytesNoSync(data, byteOffset, maxBytes);
 }
 
+QByteArray BitArray::readBytes(qint64 byteOffset, qint64 maxBytes) const
+{
+    syncCacheToFile();
+    return readBytesNoSync(byteOffset, maxBytes);
+}
+
 void BitArray::writeTo(QIODevice *outputStream) const
 {
     QIODevice *reader = dataReader();
@@ -545,16 +645,14 @@ qint64 BitArray::readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes)
     return m_dataFile.read(data, maxBytes);
 }
 
-int BitArray::getPreviewSize() const
+QByteArray BitArray::readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const
 {
-    return int(qMin(sizeInBits(), qint64(CACHE_CHUNK_BIT_SIZE)));
-}
+    QMutexLocker lock(&m_dataFileMutex);
+    if (!m_dataFile.seek(byteOffset)) {
+        return QByteArray();
+    }
 
-QByteArray BitArray::getPreviewBytes() const
-{
-    loadCacheAt(0);
-    QByteArray preview(m_dataCaches[0], int(qMin(sizeInBytes(), qint64(CACHE_CHUNK_BYTE_SIZE))));
-    return preview;
+    return m_dataFile.read(maxBytes);
 }
 
 QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList parseErrors)

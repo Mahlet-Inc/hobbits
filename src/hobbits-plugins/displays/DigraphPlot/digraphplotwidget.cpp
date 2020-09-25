@@ -44,7 +44,7 @@ void DigraphPlotWidget::paintEvent(QPaintEvent*) {
             break;
         }
         lastWord = nextWord;
-        nextWord = int(bits->getWordValue(start, int(m_wordSize)));
+        nextWord = int(bits->parseUIntValue(start, int(m_wordSize)));
         if (word == 0) {
             continue;
         }

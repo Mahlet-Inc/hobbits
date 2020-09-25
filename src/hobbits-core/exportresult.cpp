@@ -29,6 +29,11 @@ QString ExportResult::errorString() const
     return QString();
 }
 
+QSharedPointer<ExportResult> ExportResult::nullResult()
+{
+    return QSharedPointer<ExportResult>(new ExportResult());
+}
+
 QSharedPointer<ExportResult> ExportResult::error(QString error)
 {
     QJsonObject pluginState;

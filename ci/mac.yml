@@ -5,6 +5,9 @@ steps:
   - script: brew install fftw
     displayName: 'Install FFTW3'
 
+  - script: brew install libpcap
+    displayName: 'Install libpcap'
+
   - script: brew install pkg-config
     displayName: 'Install pkg-config'
 
@@ -103,6 +106,7 @@ steps:
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/displays/libSpectrogram.dylib
+      install_name_tool -change /usr/local/opt/libpcap/lib/libpcap.1.9.1.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/importerexporters/libPacketCapture.dylib
       cp /usr/local/opt/gettext/lib/libintl.8.dylib hobbits.app/Contents/Frameworks/
       install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @rpath/libintl.8.dylib hobbits.app/Contents/Frameworks/python/lib/libpython3.8.dylib
 

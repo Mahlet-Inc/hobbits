@@ -6,25 +6,14 @@
 #include <QTime>
 #include <QTimer>
 #include "viridis.h"
-
-#ifdef Q_OS_UNIX
-#define bswap32(X) __builtin_bswap32((X))
-#define bswap64(X) __builtin_bswap64((X))
-#endif
-#ifdef Q_OS_WIN
-#include <intrin.h>
-#define bswap32(X) _byteswap_ulong((X))
-#define bswap64(X) _byteswap_uint64((X))
-#endif
+#include "metadatahelper.h"
 
 SpectrogramRenderer::SpectrogramRenderer(QObject *parent) :
     QObject(parent),
     m_maxSpectrums(1),
     m_bitOffset(0),
-    m_wordSize(8),
     m_overlap(4),
     m_fftSize(1024),
-    m_wordFormat(WordFormat::Unsigned),
     m_dataType(DataType::Real),
     m_sensitivity(1.0),
     m_sampleRate(16000),
@@ -32,7 +21,7 @@ SpectrogramRenderer::SpectrogramRenderer(QObject *parent) :
     m_renderDirty(true),
     m_rendering(false)
 {
-
+    m_sampleFormat = MetadataHelper::sampleFormats().at(0);
 }
 
 SpectrogramRenderer::~SpectrogramRenderer()
@@ -51,24 +40,16 @@ qint64 SpectrogramRenderer::bitOffset() const
 void SpectrogramRenderer::setBitOffset(const qint64 &bitOffset)
 {
     if (m_bitOffset != bitOffset) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_bitOffset = bitOffset;
+        m_mutex.unlock();
         setDirty();
     }
 }
 
 int SpectrogramRenderer::wordSize() const
 {
-    return m_wordSize;
-}
-
-void SpectrogramRenderer::setWordSize(int wordSize)
-{
-    if (m_wordSize != wordSize) {
-        QMutexLocker lock(&m_mutex);
-        m_wordSize = wordSize;
-        setDirty();
-    }
+    return m_sampleFormat.wordSize;
 }
 
 int SpectrogramRenderer::overlap() const
@@ -79,8 +60,9 @@ int SpectrogramRenderer::overlap() const
 void SpectrogramRenderer::setOverlap(int overlap)
 {
     if (m_overlap != overlap) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_overlap = overlap;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -93,22 +75,9 @@ int SpectrogramRenderer::fftSize() const
 void SpectrogramRenderer::setFftSize(int fftSize)
 {
     if (m_fftSize != fftSize) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_fftSize = fftSize;
-        setDirty();
-    }
-}
-
-int SpectrogramRenderer::wordFormat() const
-{
-    return m_wordFormat;
-}
-
-void SpectrogramRenderer::setWordFormat(int wordFormat)
-{
-    if (m_wordFormat != wordFormat) {
-        QMutexLocker lock(&m_mutex);
-        m_wordFormat = wordFormat;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -121,8 +90,9 @@ SpectrogramRenderer::DataType SpectrogramRenderer::dataType() const
 void SpectrogramRenderer::setDataType(const DataType &dataType)
 {
     if (m_dataType != dataType) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_dataType = dataType;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -135,8 +105,9 @@ double SpectrogramRenderer::sensitivity() const
 void SpectrogramRenderer::setSensitivity(double sensitivity)
 {
     if (m_sensitivity != sensitivity) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_sensitivity = sensitivity;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -149,8 +120,9 @@ double SpectrogramRenderer::sampleRate() const
 void SpectrogramRenderer::setSampleRate(double sampleRate)
 {
     if (m_sampleRate != sampleRate) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_sampleRate = sampleRate;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -158,8 +130,16 @@ void SpectrogramRenderer::setSampleRate(double sampleRate)
 void SpectrogramRenderer::setContainer(const QSharedPointer<BitContainer> &container)
 {
     if (m_container != container) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_container = container;
+        QVariant sampleFormat = m_container->info()->metadata(MetadataHelper::sampleFormatKey());
+        if (sampleFormat.isValid()) {
+            m_sampleFormat = MetadataHelper::sampleFormat(sampleFormat.toString());
+        }
+        else {
+            m_container->info()->setMetadata(MetadataHelper::sampleFormatKey(), m_sampleFormat.id);
+        }
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -177,8 +157,9 @@ int SpectrogramRenderer::maxSpectrums() const
 void SpectrogramRenderer::setMaxSpectrums(int maxSpectrums)
 {
     if (m_maxSpectrums != maxSpectrums) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_maxSpectrums = maxSpectrums;
+        m_mutex.unlock();
         setDirty();
     }
 }
@@ -190,7 +171,12 @@ void SpectrogramRenderer::setDirty()
     if (!m_rendering) {
         if (m_watcher.isRunning()) {
             m_watcher.cancel();
+            if (locked) {
+                m_mutex.unlock();
+                locked = false;
+            }
             m_watcher.waitForFinished();
+            locked = m_mutex.tryLock();
         }
         auto future = QtConcurrent::run(&SpectrogramRenderer::computeStft, this);
         m_watcher.setFuture(future);
@@ -206,124 +192,257 @@ int SpectrogramRenderer::bitStride() const
     if (m_overlap > 0) {
         strideBits = m_fftSize / m_overlap;
     }
-    strideBits *= m_wordSize;
+    strideBits *= m_sampleFormat.wordSize;
     return strideBits;
+}
+
+MetadataHelper::SampleFormat SpectrogramRenderer::sampleFormat() const
+{
+    return m_sampleFormat;
+}
+
+void SpectrogramRenderer::setSampleFormat(const QString &sampleFormat)
+{
+    if (m_sampleFormat.id != sampleFormat) {
+        m_mutex.lock();
+        m_sampleFormat = MetadataHelper::sampleFormat(sampleFormat);
+        m_mutex.unlock();
+        if (!m_container.isNull()) {
+            m_container->info()->setMetadata(MetadataHelper::sampleFormatKey(), m_sampleFormat.id);
+        }
+        setDirty();
+    }
 }
 
 void SpectrogramRenderer::fillSamples(fftw_complex* buffer, qint64 offset, SpectrogramRenderer *renderer)
 {
-    if (renderer->wordFormat() & IEEE_754) {
-        if (renderer->wordSize() == 32) {
-            qint64 maxBytes = renderer->fftSize() * 4;
-            if (renderer->dataType() == RealComplexInterleaved) {
-                maxBytes *= 2;
-            }
-            float *fBuffer = new float[maxBytes / 4];
-            qint64 samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(fBuffer), offset / 8, maxBytes);
-            samples /= 4;
+    offset /= renderer->sampleFormat().wordSize;
+    qint64 maxSamples = renderer->fftSize();
+    if (renderer->dataType() == RealComplexInterleaved) {
+        maxSamples *= 2;
+    }
+    qint64 samples = 0;
+    double weight = double(1ull << (renderer->sampleFormat().wordSize - 1));
+    if (renderer->sampleFormat().id.startsWith("float32")) {
+        float *fBuffer = new float[maxSamples];
+        samples = renderer->container()->bits()->readFloat32Samples(fBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
 
-            if (!(renderer->wordFormat() & LittleEndian)) {
-                quint32* endianBuff = reinterpret_cast<quint32*>(fBuffer);
-                for (int i = 0; i < samples; i++) {
-                    endianBuff[i] = bswap32(endianBuff[i]);
-                }
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(fBuffer[i*2]);
+                buffer[i][1] = double(fBuffer[i*2 + 1]);
             }
-
-            if (renderer->dataType() == RealComplexInterleaved) {
-                for (int i = 0; i < samples/2; i++) {
-                    buffer[i][0] = double(fBuffer[i*2]);
-                    buffer[i][1] = double(fBuffer[i*2 + 1]);
-                }
-            }
-            else {
-                for (int i = 0; i < samples; i++) {
-                    buffer[i][0] = double(fBuffer[i]);
-                    buffer[i][1] = 0.0;
-                }
-            }
-            for (qint64 i = samples; i < renderer->fftSize(); i++) {
-                buffer[i][0] = 0.0;
-                buffer[i][1] = 0.0;
-            }
-            delete[] fBuffer;
-        }
-        else if (renderer->wordSize() == 64) {
-            qint64 maxBytes = renderer->fftSize() * 8;
-            if (renderer->dataType() == RealComplexInterleaved) {
-                maxBytes *= 2;
-            }
-            double *dBuffer = new double[maxBytes / 8];
-            qint64 samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(dBuffer), offset / 8, maxBytes);
-            samples /= 8;
-
-            if (!(renderer->wordFormat() & LittleEndian)) {
-                quint64* endianBuff = reinterpret_cast<quint64*>(dBuffer);
-                for (int i = 0; i < samples; i++) {
-                    endianBuff[i] = bswap64(endianBuff[i]);
-                }
-            }
-
-            if (renderer->dataType() == RealComplexInterleaved) {
-                for (int i = 0; i < samples/2; i++) {
-                    buffer[i][0] = dBuffer[i*2];
-                    buffer[i][1] = dBuffer[i*2 + 1];
-                }
-            }
-            else {
-                for (int i = 0; i < samples; i++) {
-                    buffer[i][0] = dBuffer[i];
-                    buffer[i][1] = 0.0;
-                }
-            }
-            for (qint64 i = samples; i < renderer->fftSize(); i++) {
-                buffer[i][0] = 0.0;
-                buffer[i][1] = 0.0;
-            }
-            delete[] dBuffer;
         }
         else {
-            for (int i = 0; i < renderer->fftSize(); i++) {
-                buffer[i][0] = 0.0;
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(fBuffer[i]);
                 buffer[i][1] = 0.0;
             }
         }
-        return;
+        delete[] fBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("float64")) {
+        double *sBuffer = new double[maxSamples];
+        samples = renderer->container()->bits()->readFloat64Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]);
+                buffer[i][1] = double(sBuffer[i*2 + 1]);
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]);
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("int8")) {
+        qint8 *sBuffer = new qint8[maxSamples];
+        samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(sBuffer), offset, maxSamples);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("uint8")) {
+        quint8 *sBuffer = new quint8[maxSamples];
+        samples = renderer->container()->bits()->readBytes(reinterpret_cast<char*>(sBuffer), offset, maxSamples);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("int16")) {
+        qint16 *sBuffer = new qint16[maxSamples];
+        samples = renderer->container()->bits()->readInt16Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("uint16")) {
+        quint16 *sBuffer = new quint16[maxSamples];
+        samples = renderer->container()->bits()->readUInt16Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("int24")) {
+        qint32 *sBuffer = new qint32[maxSamples];
+        samples = renderer->container()->bits()->readInt24Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("uint24")) {
+        quint32 *sBuffer = new quint32[maxSamples];
+        samples = renderer->container()->bits()->readUInt24Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("int32")) {
+        qint32 *sBuffer = new qint32[maxSamples];
+        samples = renderer->container()->bits()->readInt32Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("uint32")) {
+        quint32 *sBuffer = new quint32[maxSamples];
+        samples = renderer->container()->bits()->readUInt32Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("int64")) {
+        qint64 *sBuffer = new qint64[maxSamples];
+        samples = renderer->container()->bits()->readInt64Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
+    }
+    else if (renderer->sampleFormat().id.startsWith("uint64")) {
+        quint64 *sBuffer = new quint64[maxSamples];
+        samples = renderer->container()->bits()->readUInt64Samples(sBuffer, offset, maxSamples, !renderer->sampleFormat().littleEndian);
+
+        if (renderer->dataType() == RealComplexInterleaved) {
+            for (int i = 0; i < samples/2; i++) {
+                buffer[i][0] = double(sBuffer[i*2]) / weight;
+                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+            }
+        }
+        else {
+            for (int i = 0; i < samples; i++) {
+                buffer[i][0] = double(sBuffer[i]) / weight;
+                buffer[i][1] = 0.0;
+            }
+        }
+        delete[] sBuffer;
     }
 
-
-    quint64 maxWordValue = 1;
-    maxWordValue <<= (renderer->wordSize() - 1);
-    double wordInverse = 1.0 / double(maxWordValue);
-    int sampleSize = renderer->wordSize();
-    bool withComplex = (renderer->dataType() == RealComplexInterleaved);
-    if (withComplex) {
-        sampleSize *= 2;
-    }
-    bool littleEndian = (renderer->wordFormat() & LittleEndian);
-    for (int i = 0; i < renderer->fftSize(); i++) {
-        if (offset+sampleSize >= renderer->container()->bits()->sizeInBits()) {
-            buffer[i][0] = 0.0;
-            buffer[i][1] = 0.0;
-            continue;
-        }
-        if (renderer->wordFormat() & TwosComplement) {
-            buffer[i][0] = double(renderer->container()->bits()->getWordValueTwosComplement(offset, renderer->wordSize(), littleEndian)) * wordInverse;
-        }
-        else {
-            buffer[i][0] = double(renderer->container()->bits()->getWordValue(offset, renderer->wordSize(), littleEndian)) * wordInverse;
-        }
-        if (withComplex) {
-            if (renderer->wordFormat() & TwosComplement) {
-                buffer[i][1] = double(renderer->container()->bits()->getWordValueTwosComplement(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
-            }
-            else {
-                buffer[i][1] = double(renderer->container()->bits()->getWordValue(offset + renderer->wordSize(), renderer->wordSize(), littleEndian)) * wordInverse;
-            }
-        }
-        else {
-            buffer[i][1] = 0.0;
-        }
-        offset += sampleSize;
+    for (qint64 i = samples; i < renderer->fftSize(); i++) {
+        buffer[i][0] = 0.0;
+        buffer[i][1] = 0.0;
     }
 }
 
@@ -358,7 +477,7 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         hanningWindow[i] = 0.5*(1.0-cos(2.0*M_PI*i/double(renderer->fftSize()-1.0)));
     }
 
-    double outputFactor = 2.0 / double(renderer->fftSize());
+    double outputFactor = 1.0 / double(renderer->fftSize());
     if (renderer->logarithmic()) {
         outputFactor *= (renderer->sensitivity() * renderer->sensitivity());
     }
@@ -370,6 +489,8 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
     int strideBits = renderer->bitStride();
 
     qint64 currOffset = renderer->bitOffset();
+    currOffset /= fftBits;
+    currOffset *= fftBits;
 
     QTime lastTime = QTime::currentTime();
     for (int i = 0; i < renderer->maxSpectrums(); i++) {
@@ -406,12 +527,12 @@ void SpectrogramRenderer::computeStft(SpectrogramRenderer *renderer)
         QVector<double> spectrum(renderer->fftSize()/2);
         if (renderer->logarithmic()) {
             for (int n = 0; n < renderer->fftSize()/2; n++) {
-                spectrum[n] = log((fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor)) / log(10);
+                spectrum[n] = log(outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]))) / log(10);
             }
         }
         else {
             for (int n = 0; n < renderer->fftSize()/2; n++) {
-                spectrum[n] = (fftOut[n][0] * fftOut[n][0] * outputFactor) + (fftOut[n][1] * fftOut[n][1] * outputFactor);
+                spectrum[n] = outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]));
             }
         }
         spectrums.append(spectrum);

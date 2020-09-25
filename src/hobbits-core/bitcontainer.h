@@ -22,10 +22,10 @@ class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
     friend class OperatorActor;
 
 public:
-    static QSharedPointer<BitContainer> create(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
-    static QSharedPointer<BitContainer> create(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
-    static QSharedPointer<BitContainer> create(QSharedPointer<const BitArray> bits, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
-    static QSharedPointer<BitContainer> create(QSharedPointer<BitArray> bits, QSharedPointer<BitInfo> info=QSharedPointer<BitInfo>());
+    static QSharedPointer<BitContainer> create(QByteArray bytes, qint64 bitLen = -1, QSharedPointer<const BitInfo> info=QSharedPointer<const BitInfo>());
+    static QSharedPointer<BitContainer> create(QIODevice *readableBytes, qint64 bitLen = -1, QSharedPointer<const BitInfo> info=QSharedPointer<const BitInfo>());
+    static QSharedPointer<BitContainer> create(QSharedPointer<const BitArray> bits, QSharedPointer<const BitInfo> info=QSharedPointer<const BitInfo>());
+    static QSharedPointer<BitContainer> create(QSharedPointer<BitArray> bits, QSharedPointer<const BitInfo> info=QSharedPointer<const BitInfo>());
 
     void setInfo(QSharedPointer<const BitInfo> info);
 

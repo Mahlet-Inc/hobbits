@@ -1,7 +1,7 @@
 #ifndef HEXSTRINGIMPORTER_H
 #define HEXSTRINGIMPORTER_H
 
-#include "bitcontainer.h"
+#include "importresult.h"
 #include <QDialog>
 
 namespace Ui
@@ -18,12 +18,13 @@ public:
 
     ~HexStringImporter();
 
-    void importFromFile(QString fileName);
-    void importFromHexString(QString hexString, int repeats);
-    QSharedPointer<BitContainer> getContainer() const;
+    QSharedPointer<ImportResult> importFromFile(QString fileName);
+    QSharedPointer<ImportResult> importFromHexString(QString hexString, int repeats);
+    QSharedPointer<ImportResult> getResult() const;
     QString getFileName() const;
     QString getHexString() const;
     int getRepeats() const;
+
 
 private slots:
     void on_te_hexString_textChanged();
@@ -35,7 +36,7 @@ private slots:
 private:
     Ui::HexStringImporter *ui;
 
-    QSharedPointer<BitContainer> m_container;
+    QSharedPointer<ImportResult> m_result;
     QString m_fileName;
 };
 
