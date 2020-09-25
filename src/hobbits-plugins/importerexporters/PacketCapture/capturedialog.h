@@ -5,6 +5,7 @@
 #include <QTemporaryFile>
 #include <pcap/pcap.h>
 #include "bitcontainer.h"
+#include <QFuture>
 
 namespace Ui {
 class CaptureDialog;
@@ -43,6 +44,8 @@ private:
     QTemporaryFile m_file;
     QSharedPointer<BitContainer> m_container;
     QSharedPointer<RangeSequence> m_packetSizes;
+    QFuture<void> m_loopFuture;
+    QAtomicInt m_captureMode;
 };
 
 #endif // CAPTUREDIALOG_H

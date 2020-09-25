@@ -12,9 +12,17 @@ enum DevData {
     Mask = Qt::UserRole + 2
 };
 
+enum CapMode {
+    Idle = 0,
+    Capturing = 1,
+    Finishing = 2,
+    Aborting = 3
+};
+
 CaptureDialog::CaptureDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CaptureDialog)
+    ui(new Ui::CaptureDialog),
+    m_captureMode(CapMode::Idle)
 {
     ui->setupUi(this);
     populateDeviceBox();
@@ -24,38 +32,75 @@ CaptureDialog::CaptureDialog(QWidget *parent) :
 
 CaptureDialog::~CaptureDialog()
 {
+    if (m_captureMode != CapMode::Idle) {
+        m_captureMode = CapMode::Aborting;
+        if (m_loopFuture.isRunning()) {
+            m_loopFuture.waitForFinished();
+        }
+    }
+
     delete ui;
 }
 
 void CaptureDialog::captureLoop(CaptureDialog *capture)
 {
-    int packets = 0;
-    if (capture->ui->cb_limitType->currentText() == "Packets") {
-        packets = capture->ui->sb_limit->value();
+    int packetsBufferSize = capture->ui->sb_packetBufferSize->value();
+    int captureSizeLimit = -1;
+    int capturePacketLimit = -1;
+
+    if (capture->ui->cb_limitType->currentText() == "KB") {
+        captureSizeLimit = capture->ui->sb_limit->value() * 1000;
+    }
+    else if (capture->ui->cb_limitType->currentText() == "Packets") {
+        capturePacketLimit = capture->ui->sb_limit->value();
     }
 
     void *arg = capture;
-    int loopRet = pcap_loop(capture->m_handle, packets, &CaptureDialog::processPacket, static_cast<u_char*>(arg));
-    if (loopRet == PCAP_ERROR) {
-        QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection, Q_ARG(QString, "Error during packet capture"));
-    }
-    else {
-        QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection);
+
+    while (true) {
+        int loopRet = pcap_dispatch(capture->m_handle, packetsBufferSize, &CaptureDialog::processPacket, static_cast<u_char*>(arg));
+
+        if (capture->m_captureMode == CapMode::Aborting) {
+            pcap_close(capture->m_handle);
+            capture->m_handle = nullptr;
+            return;
+        }
+        else if (loopRet == PCAP_ERROR) {
+            QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection, Q_ARG(QString, "Error during packet capture"));
+            return;
+        }
+        else if (capture->m_captureMode == CapMode::Finishing) {
+            QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection);
+            return;
+        }
+
+        int packets = int(capture->m_packetSizes->size());
+        int bytes = int(capture->m_packetSizes->getValueCount() / 8);
+        QMetaObject::invokeMethod(capture, "setProgress", Qt::QueuedConnection, Q_ARG(int, packets), Q_ARG(int, bytes));
+
+        if (captureSizeLimit > 0 && bytes >= captureSizeLimit) {
+            capture->m_captureMode = CapMode::Finishing;
+            QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection);
+            return;
+        }
+        else if (capturePacketLimit > 0 && packets >= capturePacketLimit) {
+            if (packets >= capture->ui->sb_limit->value()) {
+                capture->m_captureMode = CapMode::Finishing;
+                QMetaObject::invokeMethod(capture, "finalizeCapture", Qt::QueuedConnection);
+                return;
+            }
+        }
     }
 }
 
 void CaptureDialog::processPacket(u_char *args, const pcap_pkthdr *header, const u_char *packet)
 {
     CaptureDialog * capture = static_cast<CaptureDialog*>(static_cast<void*>(args));
+    if (capture->m_captureMode != CapMode::Capturing) {
+        return;
+    }
     capture->m_file.write(reinterpret_cast<const char*>(packet), header->caplen);
     capture->m_packetSizes->appendRange(header->caplen * 8);
-
-    QMetaObject::invokeMethod(capture, "setProgress", Qt::QueuedConnection, Q_ARG(int, int(capture->m_packetSizes->size())), Q_ARG(int, int(capture->m_packetSizes->getValueCount() / 8)));
-    if (capture->ui->cb_limitType->currentText() == "KB") {
-        if (capture->m_file.size() >= capture->ui->sb_limit->value() * 1000) {
-            QMetaObject::invokeMethod(capture, "endLoop", Qt::QueuedConnection);
-        }
-    }
 }
 
 void CaptureDialog::populateDeviceBox()
@@ -114,8 +159,8 @@ void CaptureDialog::checkCurrDevice()
 
 void CaptureDialog::endLoop()
 {
-    if (m_handle) {
-        pcap_breakloop(m_handle);
+    if (m_captureMode == CapMode::Capturing) {
+        m_captureMode = CapMode::Finishing;
     }
 }
 
@@ -129,19 +174,30 @@ void CaptureDialog::finalizeCapture(QString error)
         msg.exec();
     }
 
-    if (m_file.size() > 0) {
-        m_file.seek(0);
-        m_container = BitContainer::create(&m_file, m_packetSizes->getValueCount());
-        auto info = BitInfo::create(m_container->bits()->sizeInBits());
-        info->setFrames(m_packetSizes);
-        m_container->setInfo(info);
-        m_container->setName("Packet Capture");
+    if (m_captureMode == CapMode::Finishing) {
+        if (m_file.size() > 0) {
+            m_file.seek(0);
+            m_container = BitContainer::create(&m_file, m_packetSizes->getValueCount());
+            auto info = BitInfo::create(m_container->bits()->sizeInBits());
+            info->setFrames(m_packetSizes);
+            m_container->setInfo(info);
+            m_container->setName("Packet Capture");
+            m_file.close();
+            endCapture();
+            this->accept();
+        }
+        else {
+            m_file.close();
+            endCapture();
+            m_captureMode = CapMode::Idle;
+        }
+    }
+    else {
         m_file.close();
-        this->accept();
+        endCapture();
+        this->reject();
     }
 
-    m_file.close();
-    endCapture();
 }
 
 void CaptureDialog::endCapture(QString error)
@@ -159,20 +215,27 @@ void CaptureDialog::endCapture(QString error)
         m_handle = nullptr;
     }
 
-    ui->configLayout->setEnabled(true);
+    for (auto child : ui->configLayout->findChildren<QWidget*>()) {
+        child->setEnabled(true);
+    }
     ui->pb_beginCapture->setEnabled(true);
     ui->pb_stopCapture->setEnabled(false);
 }
 
 void CaptureDialog::setProgress(int packets, int bytes)
 {
-    ui->lb_packets->setText(QString("%1 packets").arg(packets));
-    ui->lb_kilobytes->setText(QString("%1 KB").arg(double(bytes)/1000.0, 1, 'f', 3));
+    ui->lb_packets->setText(QString("`````` %1 packets").arg(packets));
+    ui->lb_kilobytes->setText(QString("..... %1 KB").arg(double(bytes)/1000.0, 1, 'f', 3));
 }
 
 void CaptureDialog::on_pb_beginCapture_clicked()
 {
-    ui->configLayout->setEnabled(false);
+    if (m_captureMode != CapMode::Idle) {
+        endCapture("Cannot initialize new capture while a capture loop is still running");
+    }
+    for (auto child : ui->configLayout->findChildren<QWidget*>()) {
+        child->setEnabled(false);
+    }
     ui->pb_beginCapture->setEnabled(false);
     ui->pb_stopCapture->setEnabled(true);
 
@@ -180,21 +243,18 @@ void CaptureDialog::on_pb_beginCapture_clicked()
 
     QString devName = ui->cb_device->currentData(DevData::Name).toString();
     bpf_u_int32 net = ui->cb_device->currentData(DevData::Address).toUInt();
-    bpf_u_int32 mask = ui->cb_device->currentData(DevData::Mask).toUInt();
 
+    int snapLength = ui->sb_maxPacketSize->value();
     int promiscuous = 0;
     if (ui->ck_promiscuous->isChecked()) {
         promiscuous = 1;
     }
-    int timeout = 0;
-    if (ui->ck_timeout->isChecked()) {
-        timeout = ui->sb_timeout->value();
-    }
-    m_handle = pcap_open_live(devName.toStdString().c_str(), BUFSIZ, promiscuous, timeout, errbuf);
+    int timeout = ui->sb_timeout->value();
+    m_handle = pcap_open_live(devName.toStdString().c_str(), snapLength, promiscuous, timeout, errbuf);
     if (m_handle == nullptr) {
         endCapture("Failed to open pcap handle:\n" + QString(errbuf));
         return;
-     }
+    }
 
     if (!ui->le_filter->text().isEmpty()) {
         struct bpf_program filter;
@@ -210,15 +270,18 @@ void CaptureDialog::on_pb_beginCapture_clicked()
 
     if (!m_file.open()) {
         endCapture("Failed to open a temporary file buffer for packets");
+        return;
     }
+
     m_file.resize(0);
     m_packetSizes = RangeSequence::createEmpty();
-
-    QtConcurrent::run(&CaptureDialog::captureLoop, this);
+    m_captureMode = CapMode::Capturing;
+    m_loopFuture = QtConcurrent::run(&CaptureDialog::captureLoop, this);
 }
 
 void CaptureDialog::on_pb_stopCapture_clicked()
 {
+    ui->pb_stopCapture->setEnabled(false);
     endLoop();
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>325</height>
+    <width>519</width>
+    <height>423</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,16 +27,37 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="cb_device"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QComboBox" name="cb_device"/>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="ck_promiscuous">
+         <property name="text">
+          <string>Promiscuous</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item row="3" column="0">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Filter</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="le_filter"/>
+     </item>
+     <item row="2" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Limit:</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="2" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QSpinBox" name="sb_limit">
@@ -67,15 +88,64 @@
        </item>
       </layout>
      </item>
-     <item row="4" column="0">
-      <widget class="QCheckBox" name="ck_timeout">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Timeout:</string>
+        <string>Packet Size Limit:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSpinBox" name="sb_maxPacketSize">
+       <property name="suffix">
+        <string> bytes</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>262144</number>
+       </property>
+       <property name="value">
+        <number>65535</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Buffer Size:</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
+      <widget class="QSpinBox" name="sb_packetBufferSize">
+       <property name="suffix">
+        <string> packets</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>10000</number>
+       </property>
+       <property name="value">
+        <number>500</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Buffer Timeout:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
       <widget class="QSpinBox" name="sb_timeout">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="suffix">
         <string> ms</string>
        </property>
@@ -83,27 +153,10 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>10000000</number>
+        <number>100000</number>
        </property>
        <property name="value">
-        <number>10000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Filter</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="le_filter"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="ck_promiscuous">
-       <property name="text">
-        <string>Promiscuous</string>
+        <number>150</number>
        </property>
       </widget>
      </item>
@@ -128,13 +181,6 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="lb_kilobytes">
-       <property name="text">
-        <string>0.0 KB</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="1">
       <widget class="QPushButton" name="pb_stopCapture">
        <property name="enabled">
@@ -142,6 +188,23 @@
        </property>
        <property name="text">
         <string>Stop Capture</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QWidget" name="widget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lb_kilobytes">
+       <property name="text">
+        <string>0.0 KB</string>
        </property>
       </widget>
      </item>
@@ -158,22 +221,11 @@
        </property>
       </spacer>
      </item>
-     <item row="1" column="1">
-      <widget class="QWidget" name="widget" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>36</height>
-        </size>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cb_device</tabstop>
   <tabstop>pb_beginCapture</tabstop>
   <tabstop>pb_stopCapture</tabstop>
  </tabstops>
