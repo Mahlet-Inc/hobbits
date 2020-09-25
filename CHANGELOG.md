@@ -1,3 +1,18 @@
+# [0.39.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.38.1...v0.39.0) (2020-09-25)
+
+
+### Bug Fixes
+
+* [build] properly #include QPainterPath for Qt 5.15 for [#65](https://github.com/Mahlet-Inc/hobbits/issues/65) ([2a66ed0](https://github.com/Mahlet-Inc/hobbits/commit/2a66ed0a7b2a177d799ddb3aa9427b6ebae6af2c))
+* prevent spectrogram crash (caused by uninitialized values) ([8c60a16](https://github.com/Mahlet-Inc/hobbits/commit/8c60a16ac441d997465f3d5dd35d3cb55e19b2d1))
+* take skip bug in progress reports and output buffering ([92c8a29](https://github.com/Mahlet-Inc/hobbits/commit/92c8a2980506cd88ecfaca95b6247357872f1010))
+
+
+### Features
+
+* add packet capture importer ([4620445](https://github.com/Mahlet-Inc/hobbits/commit/46204456690f43510aa0a9eb9877f949bf539c91))
+* add preemptive size-limiting to UDP import ([9417f8e](https://github.com/Mahlet-Inc/hobbits/commit/9417f8e060d440a3ab4b73d57177d11fbcc927af))
+
 ## [0.38.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.38.0...v0.38.1) (2020-09-12)
 
 
