@@ -224,8 +224,8 @@ void CaptureDialog::endCapture(QString error)
 
 void CaptureDialog::setProgress(int packets, int bytes)
 {
-    ui->lb_packets->setText(QString("`````` %1 packets").arg(packets));
-    ui->lb_kilobytes->setText(QString("..... %1 KB").arg(double(bytes)/1000.0, 1, 'f', 3));
+    ui->lb_packets->setText(QString("%1 packets").arg(packets));
+    ui->lb_kilobytes->setText(QString("%1 KB").arg(double(bytes)/1000.0, 1, 'f', 3));
 }
 
 void CaptureDialog::on_pb_beginCapture_clicked()
