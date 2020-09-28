@@ -55,6 +55,6 @@ mac {
 }
 
 unix {
-    target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
+    target.path = $$(HOME)/.local/share/hobbits/plugins/importerexporters
     INSTALLS += target
 }

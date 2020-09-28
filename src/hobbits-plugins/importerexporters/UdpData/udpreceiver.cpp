@@ -89,7 +89,7 @@ void UdpReceiver::startListening()
 void UdpReceiver::stopListening()
 {
     ui->pb_start->setText("Begin Listening");
-    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'g', 3));
+    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
     ui->pb_start->setEnabled(true);
     ui->pb_stop->setEnabled(false);
     ui->sb_port->setEnabled(true);
@@ -120,7 +120,7 @@ void UdpReceiver::socketRead()
         auto datagram = m_socket->receiveDatagram();
         m_downloadFile.write(datagram.data());
     }
-    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'g', 3));
+    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
 
     if (getLimit() > 0 && m_downloadFile.size() >= getLimit()) {
         disconnect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::socketRead);

@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-10T16:34:57.900Z
+# Project created by QtCreator 2020-09-23T16:30:21.170Z
 #
 #-------------------------------------------------
 
@@ -8,10 +8,10 @@ QT       += widgets network
 
 QT       -= gui
 
-TARGET = TcpData
+TARGET = PacketCapture
 TEMPLATE = lib
 
-DEFINES += TCPDATA_LIBRARY
+DEFINES += PACKETCAPTURE_LIBRARY
 
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -27,19 +27,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         tcpdata.cpp \
-    tcpreceiver.cpp \
-    tcpsender.cpp
+SOURCES +=         packetcapture.cpp \
+    capturedialog.cpp
 
-HEADERS +=         tcpdata.h \
-    tcpreceiver.h \
-    tcpsender.h
+HEADERS +=         packetcapture.h \
+    capturedialog.h
 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 
 INCLUDEPATH += $$PWD/../../../hobbits-core
 DEPENDPATH += $$PWD/../../../hobbits-core
+
+requires(unix)
+unix {
+    requires(packagesExist(libpcap)|exists(/usr/include/pcap.h)|exists(/usr/local/include/pcap.h))
+    mac {
+        INCLUDEPATH += /usr/local/include
+        LIBS += -L/usr/local/lib
+    }
+
+    LIBS += -lpcap
+}
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
@@ -57,5 +66,4 @@ unix {
 }
 
 FORMS += \
-    tcpreceiver.ui \
-    tcpsender.ui
+    capturedialog.ui

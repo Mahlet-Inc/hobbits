@@ -8,6 +8,8 @@ steps:
   - script: sudo apt-get install fftw3-dev
     displayName: 'Install FFTW3'
 
+  - script: sudo apt-get install libpcap-dev
+    displayName: 'Install libpcap'
 
   - task: UsePythonVersion@0 
     inputs:

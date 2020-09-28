@@ -23,6 +23,8 @@ SpectrogramWidget::SpectrogramWidget(
     m_showFrameOffsets(false),
     m_showColumnOffsets(true),
     m_showHoverSlices(false),
+    m_hoverX(-1),
+    m_hoverY(-1),
     m_displayOffset(0, 0),
     m_headerFontSize(0, 0),
     m_renderer(new SpectrogramRenderer(this)),
@@ -288,7 +290,6 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                 painter.scale(1.0, -1.0);
 
                 int pos = qFloor(double(m_hoverX) / double(m_displayCenterSize.width()) * (double(m_renderer->fftSize()) / 2.0));
-
 
                 double xFactor = m_scale;
                 double yFactor = rPanel.width() - (2 * graphPad);
