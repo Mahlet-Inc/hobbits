@@ -1,11 +1,11 @@
 #ifndef ACTIONRENDERPROGRESS_H
 #define ACTIONRENDERPROGRESS_H
 
-#include "actionprogress.h"
+#include "pluginactionprogress.h"
 #include <QImage>
 #include "hobbits-widgets_global.h"
 
-class HOBBITSWIDGETSSHARED_EXPORT ActionRenderProgress : public ActionProgress
+class HOBBITSWIDGETSSHARED_EXPORT ActionRenderProgress : public PluginActionProgress
 {
     Q_OBJECT
 public:

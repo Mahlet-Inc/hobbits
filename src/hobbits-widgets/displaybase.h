@@ -8,6 +8,11 @@
 
 #include "hobbits-widgets_global.h"
 
+/**
+  * @brief The DisplayBase class is a useful base class for DisplayInterface display widgets
+  *
+  * \see DisplayInterface DisplayBaseText
+*/
 class HOBBITSWIDGETSSHARED_EXPORT DisplayBase : public QWidget
 {
     Q_OBJECT

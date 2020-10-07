@@ -56,7 +56,7 @@ PythonArg* PythonArg::constBitArray(QSharedPointer<const BitArray> bitArray)
     return arg;
 }
 
-PythonArg *PythonArg::actionProgress(QSharedPointer<ActionProgress> progress)
+PythonArg *PythonArg::actionProgress(QSharedPointer<PluginActionProgress> progress)
 {
     PythonArg *arg = new PythonArg();
     arg->m_type = Type::HobbitsWrapper;

@@ -16,46 +16,37 @@ QSharedPointer<BitInfo> AnalyzerResult::bitInfo() const
     return m_bitInfo;
 }
 
-AnalyzerResult* AnalyzerResult::setPluginState(QJsonObject pluginState)
+AnalyzerResult* AnalyzerResult::setParameters(QJsonObject parameters)
 {
-    m_pluginState = pluginState;
+    m_parameters = parameters;
     return this;
 }
 
-const QJsonObject AnalyzerResult::getPluginState() const
+const QJsonObject AnalyzerResult::parameters() const
 {
-    return m_pluginState;
+    return m_parameters;
 }
 
-bool AnalyzerResult::hasEmptyState() const
+bool AnalyzerResult::hasEmptyParameters() const
 {
-    return m_pluginState.isEmpty();
+    return m_parameters.isEmpty();
 }
 
 QString AnalyzerResult::errorString() const
 {
-    if (m_pluginState.contains("error")) {
-        return m_pluginState.value("error").toString();
-    }
-    return QString();
+    return m_errorString;
 }
 
-QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, QJsonObject pluginState)
+QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, QJsonObject parameters)
 {
-
     return QSharedPointer<const AnalyzerResult>(
-                (new AnalyzerResult())->setPluginState(pluginState)->setBitInfo(bitInfo)
+                (new AnalyzerResult())->setParameters(parameters)->setBitInfo(bitInfo)
             );
 }
 
-QSharedPointer<const AnalyzerResult> AnalyzerResult::error(QString error)
+QSharedPointer<const AnalyzerResult> AnalyzerResult::error(QString errorString)
 {
-
-    return QSharedPointer<const AnalyzerResult>(
-            (new AnalyzerResult())->setPluginState(
-                    QJsonObject(
-                            {QPair<QString, QJsonValue>(
-                                    "error",
-                                    QJsonValue(error))}))
-            );
+    auto result = new AnalyzerResult();
+    result->m_errorString = errorString;
+    return QSharedPointer<const AnalyzerResult>(result);
 }

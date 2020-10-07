@@ -52,7 +52,7 @@ PyObject* PyInit_hobbits(void){
     Py_INCREF(&PyImmutableBitContainer);
     if (PyModule_AddObject(m, "BitArray", (PyObject*)&PyBitArray) < 0
             || PyModule_AddObject(m, "ImmutableBitArray", (PyObject*)&PyImmutableBitArray) < 0
-            || PyModule_AddObject(m, "ActionProgress", (PyObject*)&PyActionProgress) < 0
+            || PyModule_AddObject(m, "PluginActionProgress", (PyObject*)&PyActionProgress) < 0
             || PyModule_AddObject(m, "BitInfo", (PyObject*)&PyBitInfo) < 0
             || PyModule_AddObject(m, "ImmutableBitInfo", (PyObject*)&PyImmutableBitInfo) < 0
             || PyModule_AddObject(m, "BitContainer", (PyObject*)&PyBitContainer) < 0

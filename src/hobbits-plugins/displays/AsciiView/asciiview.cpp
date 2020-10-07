@@ -15,18 +15,28 @@ DisplayInterface* AsciiView::createDefaultDisplay()
     return new AsciiView();
 }
 
-QString AsciiView::getName()
+QString AsciiView::name()
 {
     return "ASCII";
 }
 
-QWidget* AsciiView::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString AsciiView::description()
+{
+    return "Displays data as ASCII characters";
+}
+
+QStringList AsciiView::tags()
+{
+    return {"Generic", "Encoding"};
+}
+
+QWidget* AsciiView::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* AsciiView::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* AsciiView::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

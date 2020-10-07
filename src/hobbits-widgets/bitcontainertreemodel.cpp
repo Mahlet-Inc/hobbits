@@ -70,7 +70,7 @@ QModelIndex BitContainerTreeModel::index(
     else {
         BitContainer *parentContainer = static_cast<BitContainer*>(parent.internalPointer());
         int currentChild = 0;
-        for (QUuid childUuid : parentContainer->getChildUuids()) {
+        for (QUuid childUuid : parentContainer->childUuids()) {
             if (m_containerMap.contains(childUuid)) {
                 if (currentChild == row) {
                     return createIndex(row, column, m_containerMap.value(childUuid).data());
@@ -113,7 +113,7 @@ int BitContainerTreeModel::rowCount(const QModelIndex &parent) const
     else {
         BitContainer *parentContainer = static_cast<BitContainer*>(parent.internalPointer());
         // maybe needs to make sure they are there?
-        return parentContainer->getChildUuids().length();
+        return parentContainer->childUuids().length();
     }
 }
 
@@ -130,7 +130,7 @@ void BitContainerTreeModel::updateAll()
 
 QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bitContainer)
 {
-    m_containerMap.insert(bitContainer->getId(), bitContainer);
+    m_containerMap.insert(bitContainer->id(), bitContainer);
     QModelIndex parentIndex = getContainerParentIndex(bitContainer.data());
     int row = getContainerRow(bitContainer.data());
     beginInsertRows(parentIndex, row, row);
@@ -138,7 +138,7 @@ QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bit
     connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
 
     QModelIndex idx = this->index(row, 0, parentIndex);
-    m_containerIndexMap.insert(bitContainer->getId(), idx);
+    m_containerIndexMap.insert(bitContainer->id(), idx);
 
     emit containerAdded(bitContainer);
 
@@ -153,26 +153,26 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
     QList<QSharedPointer<BitContainer>> orphanedContainers;
     beginRemoveRows(parentIndex, row, row);
     // Get a copy of the container as a QSharedPointer so it doesn't get deleted when it is removed from the container
-    QSharedPointer<BitContainer> containerPtr = m_containerMap.value(container->getId());
-    m_containerMap.remove(container->getId());
-    m_containerIndexMap.remove(container->getId());
+    QSharedPointer<BitContainer> containerPtr = m_containerMap.value(container->id());
+    m_containerMap.remove(container->id());
+    m_containerIndexMap.remove(container->id());
     QList<QUuid> detach;
-    for (QUuid childUuid : container->getChildUuids()) {
+    for (QUuid childUuid : container->childUuids()) {
         detach.append(childUuid);
     }
     for (QUuid childUuid : detach) {
         if (m_containerMap.contains(childUuid)) {
-            m_containerMap.value(childUuid)->detachParent(container->getId());
+            m_containerMap.value(childUuid)->detachParent(container->id());
             orphanedContainers.append(m_containerMap.value(childUuid));
         }
     }
     detach.clear();
-    for (QUuid parentUuid : container->getParentUuids()) {
+    for (QUuid parentUuid : container->parentUuids()) {
         detach.append(parentUuid);
     }
     for (QUuid parentUuid : detach) {
         if (m_containerMap.contains(parentUuid)) {
-            m_containerMap.value(parentUuid)->detachChild(container->getId());
+            m_containerMap.value(parentUuid)->detachChild(container->id());
         }
     }
     endRemoveRows();
@@ -236,9 +236,9 @@ int BitContainerTreeModel::getContainerRow(BitContainer *bitContainer) const
         }
     }
     else {
-        for (QUuid parentUuid : bitContainer->getParentUuids()) {
+        for (QUuid parentUuid : bitContainer->parentUuids()) {
             if (m_containerMap.contains(parentUuid)) {
-                return m_containerMap.value(parentUuid)->getChildUuids().indexOf(bitContainer->getId());
+                return m_containerMap.value(parentUuid)->childUuids().indexOf(bitContainer->id());
             }
         }
     }
@@ -251,7 +251,7 @@ QModelIndex BitContainerTreeModel::getContainerParentIndex(BitContainer *childCo
         return QModelIndex();
     }
 
-    for (QUuid parentUuid : childContainer->getParentUuids()) {
+    for (QUuid parentUuid : childContainer->parentUuids()) {
         if (m_containerMap.contains(parentUuid)) {
             BitContainer *parentContainer = m_containerMap.value(parentUuid).data();
             int row = getContainerRow(parentContainer);

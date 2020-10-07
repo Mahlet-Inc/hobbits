@@ -10,7 +10,7 @@ BitContainerManager::~BitContainerManager()
 
 }
 
-QSharedPointer<BitContainer> BitContainerManager::getCurrentContainer()
+QSharedPointer<BitContainer> BitContainerManager::currentContainer()
 {
     return m_current;
 }
@@ -22,8 +22,8 @@ QSharedPointer<BitContainer> BitContainerManager::getContainerById(QUuid id)
 
 bool BitContainerManager::addContainer(QSharedPointer<BitContainer> container)
 {
-    m_containerMap.remove(container->getId());
-    m_containerMap.insert(container->getId(), container);
+    m_containerMap.remove(container->id());
+    m_containerMap.insert(container->id(), container);
 
     emit containerAdded(container);
 
@@ -32,9 +32,9 @@ bool BitContainerManager::addContainer(QSharedPointer<BitContainer> container)
 
 bool BitContainerManager::selectContainer(QSharedPointer<BitContainer> container)
 {
-    if (m_containerMap.contains(container->getId())) {
+    if (m_containerMap.contains(container->id())) {
         auto old = m_current;
-        m_current = m_containerMap.value(container->getId());
+        m_current = m_containerMap.value(container->id());
         emit currSelectionChanged(m_current, old);
         return true;
     }
@@ -47,7 +47,7 @@ void BitContainerManager::deleteCurrentContainer()
         return;
     }
     auto old = m_current;
-    m_containerMap.remove(m_current->getId());
+    m_containerMap.remove(m_current->id());
     m_current = QSharedPointer<BitContainer>();
     if (!m_containerMap.isEmpty()) {
         m_current = m_containerMap.values().first();

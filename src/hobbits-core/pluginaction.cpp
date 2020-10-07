@@ -38,17 +38,17 @@ QSharedPointer<PluginAction> PluginAction::noAction()
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::NoAction, "No Action", QJsonObject()));
 }
 
-PluginAction::PluginType PluginAction::getPluginType() const
+PluginAction::PluginType PluginAction::pluginType() const
 {
     return m_pluginType;
 }
 
-QString PluginAction::getPluginName() const
+QString PluginAction::pluginName() const
 {
     return m_pluginName;
 }
 
-QJsonObject PluginAction::getPluginState() const
+QJsonObject PluginAction::parameters() const
 {
     return m_pluginState;
 }

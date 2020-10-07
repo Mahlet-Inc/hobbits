@@ -3,19 +3,19 @@
 
 #include "importexportinterface.h"
 
-class UdpData : public QObject, ImportExportInterface
+class UdpData : public QObject, ImporterExporterInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "hobbits.ImportExportInterface.UdpData")
-    Q_INTERFACES(ImportExportInterface)
+    Q_INTERFACES(ImporterExporterInterface)
 
 public:
     UdpData();
     ~UdpData() override;
 
-    ImportExportInterface* createDefaultImporterExporter() override;
+    ImporterExporterInterface* createDefaultImporterExporter() override;
 
-    QString getName() override;
+    QString name() override;
 
     bool canExport() override;
     bool canImport() override;

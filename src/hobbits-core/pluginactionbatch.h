@@ -5,6 +5,11 @@
 #include "hobbits-core_global.h"
 #include "pluginactionlineage.h"
 
+/**
+  * @brief The PluginActionBatch class describes a (possibly branching or merging) sequence of plugin actions
+  *
+  * \see PluginActionManager PluginAction
+*/
 class HOBBITSCORESHARED_EXPORT PluginActionBatch : public QEnableSharedFromThis<PluginActionBatch>
 {
 public:

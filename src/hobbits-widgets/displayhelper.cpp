@@ -19,8 +19,8 @@ QPixmap DisplayHelper::bitRasterThumbnail(QSharedPointer<const BitContainer> bit
 
 QImage DisplayHelper::getBitRasterImage(const BitContainer * const bits, qint64 x, qint64 y, int w, int h)
 {
-    QColor trueColor = SettingsManager::getInstance().getUiSetting(SettingsData::ONE_COLOR_KEY).value<QColor>();
-    QColor falseColor = SettingsManager::getInstance().getUiSetting(SettingsData::ZERO_COLOR_KEY).value<QColor>();
+    QColor trueColor = SettingsManager::getUiSetting(SettingsManager::ONE_COLOR_KEY).value<QColor>();
+    QColor falseColor = SettingsManager::getUiSetting(SettingsManager::ZERO_COLOR_KEY).value<QColor>();
     QImage raster(w, h, QImage::Format_ARGB32);
     raster.fill(qRgba(0x66, 0x66, 0x66, 0x66));
 
@@ -66,7 +66,7 @@ QImage DisplayHelper::getByteRasterImage(const BitContainer * const bits, qint64
         return raster;
     }
 
-    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
+    QColor c = SettingsManager::getUiSetting(SettingsManager::BYTE_HUE_SAT_KEY).value<QColor>();
     int hue = c.hue();
     int saturation = c.saturation();
     for (int i = 0; i < h; i++) {

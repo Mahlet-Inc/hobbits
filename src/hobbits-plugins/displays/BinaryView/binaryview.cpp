@@ -12,18 +12,28 @@ DisplayInterface* BinaryView::createDefaultDisplay()
     return new BinaryView();
 }
 
-QString BinaryView::getName()
+QString BinaryView::name()
 {
     return "Binary";
 }
 
-QWidget* BinaryView::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString BinaryView::description()
+{
+    return "Display data as 1s and 0s";
+}
+
+QStringList BinaryView::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* BinaryView::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* BinaryView::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* BinaryView::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

@@ -3,9 +3,13 @@
 
 #include "bitcontainer.h"
 #include <QSharedPointer>
-
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The BitContainerManager class assists with the management of BitContainer instances
+  *
+  * \see BitContainer
+*/
 class HOBBITSCORESHARED_EXPORT BitContainerManager : public QObject
 {
     Q_OBJECT
@@ -14,7 +18,7 @@ public:
     explicit BitContainerManager(QObject *parent = nullptr);
     virtual ~BitContainerManager();
 
-    virtual QSharedPointer<BitContainer> getCurrentContainer();
+    virtual QSharedPointer<BitContainer> currentContainer();
     virtual QSharedPointer<BitContainer> getContainerById(QUuid id);
 
     virtual bool addContainer(QSharedPointer<BitContainer> container);

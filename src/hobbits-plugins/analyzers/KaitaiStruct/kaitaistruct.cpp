@@ -184,7 +184,7 @@ void KaitaiStruct::previewBits(QSharedPointer<BitContainerPreview> container)
 QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         QSharedPointer<const BitContainer> container,
         const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
     QMetaObject::invokeMethod(this, "clearOutputText", Qt::QueuedConnection);
 

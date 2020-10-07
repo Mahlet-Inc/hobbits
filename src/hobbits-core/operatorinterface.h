@@ -1,39 +1,43 @@
 #ifndef OPERATORINTERFACE_H
 #define OPERATORINTERFACE_H
 
-#include "actionprogress.h"
+#include "pluginactionprogress.h"
 #include "bitcontainer.h"
 #include "operatorresult.h"
 #include "bitcontainerpreview.h"
+#include "parameterdelegate.h"
 #include <QSharedPointer>
-
 #include "hobbits-core_global.h"
 
+/**
+  * @brief Implementations of the OperatorInterface plugin interface process bit data into new bit data
+  *
+  * Operator plugins take one or more BitContainer inputs and create one or more BitContainer outputs.
+  *
+  * \see ParameterDelegate OperatorResult BitContainer ActionProgress
+*/
 class HOBBITSCORESHARED_EXPORT OperatorInterface
 {
 public:
-    virtual ~OperatorInterface()
-    {
-    }
+    virtual ~OperatorInterface() = default;
 
-    virtual QString getName() = 0;
     virtual OperatorInterface* createDefaultOperator() = 0;
 
-    virtual void applyToWidget(QWidget *widget) = 0;
-    virtual QJsonObject getStateFromUi() = 0;
-    virtual bool canRecallPluginState(const QJsonObject &pluginState) = 0;
-    virtual bool setPluginStateInUi(const QJsonObject &pluginState) = 0;
+    virtual QString name() = 0;
+    virtual QString description() = 0;
+    virtual QStringList tags() = 0;
 
-    virtual int getMinInputContainers(const QJsonObject &pluginState) = 0;
-    virtual int getMaxInputContainers(const QJsonObject &pluginState) = 0;
-    virtual QSharedPointer<const OperatorResult> operateOnContainers(
+    virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
+
+    virtual int getMinInputContainers(const QJsonObject &parameters) = 0;
+    virtual int getMaxInputContainers(const QJsonObject &parameters) = 0;
+
+    virtual QSharedPointer<const OperatorResult> operateOnBits(
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) = 0;
-    virtual void previewBits(QSharedPointer<BitContainerPreview> container) = 0;
-
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) = 0;
 };
 
-Q_DECLARE_INTERFACE(OperatorInterface, "hobbits.OperatorInterface.4")
+Q_DECLARE_INTERFACE(OperatorInterface, "hobbits.OperatorInterface")
 
 #endif // OPERATORINTERFACE_H

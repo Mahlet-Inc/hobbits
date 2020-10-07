@@ -3,8 +3,8 @@
 
 #include <QWidget>
 #include <QTreeWidgetItem>
+#include "displayhandle.h"
 #include "bitcontainerpreview.h"
-#include "plugincallback.h"
 #include "hobbits-widgets_global.h"
 
 namespace Ui {
@@ -23,7 +23,7 @@ public:
     QString currentlySelectedLabel();
 
 public slots:
-    void setPluginCallback(QSharedPointer<PluginCallback> pluginCallback);
+    void setPluginCallback(QSharedPointer<DisplayHandle> displayHandle);
     void setContainer(QSharedPointer<BitContainerPreview> container);
     void setHighlightCategory(QString category);
     void setTitle(QString title);
@@ -44,7 +44,7 @@ private:
     int m_allHighlightCount;
     QString m_category;
     QSharedPointer<BitContainerPreview> m_container;
-    QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<DisplayHandle> m_displayHandle;
     bool m_shouldHighlightSelection;
 };
 

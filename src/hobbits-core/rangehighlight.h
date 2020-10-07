@@ -5,6 +5,11 @@
 #include "range.h"
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The RangeHighlight class defines a Range with some additional, display-oriented metadata
+  *
+  * \see Range BitInfo
+*/
 class HOBBITSCORESHARED_EXPORT RangeHighlight
 {
 public:

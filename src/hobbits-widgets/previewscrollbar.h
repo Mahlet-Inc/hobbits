@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QFuture>
 #include "bitcontainermanager.h"
-#include "actionwatcher.h"
+#include "pluginactionwatcher.h"
 #include "actionrenderprogress.h"
 #include "displayhandle.h"
 #include "hobbits-widgets_global.h"
@@ -48,7 +48,7 @@ private:
     QHash<quint64, QImage> m_imageCache;
     QHash<quint64, QImage> m_previewImageCache;
 
-    QHash<quint64, QSharedPointer<ActionWatcher<QImage>>> m_renderWatchers;
+    QHash<quint64, QSharedPointer<PluginActionWatcher<QImage>>> m_renderWatchers;
 };
 
 #endif // PREVIEWSCROLLBAR_H

@@ -1,41 +1,47 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
-#include "settingsdata.h"
 #include <QSettings>
 #include <QMutex>
-
+#include "settingsdata.h"
 #include "hobbits-core_global.h"
 
+class WidgetsSettings;
+
+/**
+  * @brief The SettingsManager class provides a singleton for reading and writings hobbits settings
+  *
+  * \see SettingsData
+*/
 class HOBBITSCORESHARED_EXPORT SettingsManager
 {
+    friend WidgetsSettings;
 public:
-    static SettingsManager& getInstance();
+    static void setConfigFilePath(const QString &configFilePath);
 
-    void setConfigFilePath(const QString &configFilePath);
+    static void setAll(const SettingsData &data);
+    static SettingsData getAll();
 
-    void writeSettings();
-    void readSettings();
+    static void writeSettings();
+    static void readSettings();
 
-    SettingsData getAll() const;
-    void setAll(const SettingsData &data);
+    static QVariant getTransientSetting(const QString &key);
+    static void setTransientSetting(const QString &key, const QVariant &value);
 
-    QVariant getTransientSetting(const QString &key);
-    void setTransientSetting(const QString &key, const QVariant &value);
+    static QVariant getPrivateSetting(const QString &key);
+    static void setPrivateSetting(const QString &key, const QVariant &value);
 
-    QVariant getPrivateSetting(const QString &key);
-    void setPrivateSetting(const QString &key, const QVariant &value);
+    static QVariant getUiSetting(const QString &key);
+    static void setUiSetting(const QString &key, const QVariant &value);
 
-    QVariant getUiSetting(const QString &key);
-    void setUiSetting(const QString &key, const QVariant &value);
+    static QVariant getPluginLoaderSetting(const QString &key);
+    static void setPluginLoaderSetting(const QString &key, const QVariant &value);
 
-    QVariant getPluginLoaderSetting(const QString &key);
-    void setPluginLoaderSetting(const QString &key, const QVariant &value);
-
-    QVariant getPluginSetting(const QString &key);
-    void setPluginSetting(const QString &key, const QVariant &value);
+    static QVariant getPluginSetting(const QString &key);
+    static void setPluginSetting(const QString &key, const QVariant &value);
 
 private:
+    static SettingsManager& instance();
     SettingsManager();
 
     void writeToSettings(QSettings &settings);
@@ -50,9 +56,30 @@ private:
 
 public:
     SettingsManager(SettingsManager const&) = delete;
-
     void operator=(SettingsManager const&) = delete;
 
+    static const QString ONE_COLOR_KEY;
+    static const QString ZERO_COLOR_KEY;
+    static const QString BYTE_HUE_SAT_KEY;
+    static const QString FOCUS_COLOR_KEY;
+    static const QString HIGHLIGHT_1_COLOR_KEY;
+    static const QString HIGHLIGHT_2_COLOR_KEY;
+    static const QString HIGHLIGHT_3_COLOR_KEY;
+    static const QString HIGHLIGHT_4_COLOR_KEY;
+    static const QString HIGHLIGHT_5_COLOR_KEY;
+    static const QString WINDOW_SIZE_KEY;
+    static const QString WINDOW_POSITION_KEY;
+    static const QString WINDOW_STATE_KEY;
+    static const QString PLUGIN_PATH_KEY;
+    static const QString PLUGIN_BLACKLIST_KEY;
+    static const QString OPERATOR_DISPLAY_ORDER_KEY;
+    static const QString ANALYZER_DISPLAY_ORDER_KEY;
+    static const QString DISPLAY_DISPLAY_ORDER_KEY;
+    static const QString LAST_BATCH_PATH_KEY;
+    static const QString LAST_IMPORT_EXPORT_PATH_KEY;
+    static const QString LAST_CONTAINER_PATH_KEY;
+    static const QString PLUGINS_RUNNING_KEY;
+    static const QString PYTHON_HOME_KEY;
 };
 
 #endif // SETTINGSMANAGER_H

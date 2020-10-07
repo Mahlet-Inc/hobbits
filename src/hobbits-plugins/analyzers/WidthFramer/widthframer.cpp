@@ -177,7 +177,7 @@ bool WidthFramer::canRecallPluginState(const QJsonObject &pluginState)
 QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         QSharedPointer<const BitContainer> container,
         const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
 
     if (!canRecallPluginState(recallablePluginState)) {

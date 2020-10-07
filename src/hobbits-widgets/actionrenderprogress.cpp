@@ -1,7 +1,7 @@
 #include "actionrenderprogress.h"
 
 ActionRenderProgress::ActionRenderProgress() :
-    ActionProgress()
+    PluginActionProgress()
 {
 
 }

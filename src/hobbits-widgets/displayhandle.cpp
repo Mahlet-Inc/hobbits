@@ -22,7 +22,7 @@ DisplayHandle::DisplayHandle(
 
 QSharedPointer<BitContainer> DisplayHandle::getContainer() const
 {
-    return m_bitManager->getCurrentContainer();
+    return m_bitManager->currentContainer();
 }
 
 int DisplayHandle::getBitOffset() const

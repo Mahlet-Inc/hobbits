@@ -27,16 +27,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         headerframer.cpp
+SOURCES +=         headerframer.cpp \
+    headerframerform.cpp
 
-HEADERS +=         headerframer.h
+HEADERS +=         headerframer.h \
+    headerframerform.h
 
-FORMS +=        headerframer.ui
+FORMS +=        \
+    headerframerform.ui
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-
-INCLUDEPATH += $$PWD/../../../hobbits-core
-DEPENDPATH += $$PWD/../../../hobbits-core
+LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
+DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=

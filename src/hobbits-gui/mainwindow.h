@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "bitcontainermanager.h"
+#include "bitcontainermanagerui.h"
 #include "displayinterface.h"
 #include "operatorinterface.h"
 #include "pluginactionlineage.h"
@@ -63,8 +63,8 @@ public slots:
 
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState);
-    void requestImportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
-    void requestExportRun(QString pluginName, QJsonObject pluginState = QJsonObject());
+    void requestImportRun(QString pluginName, QJsonObject pluginState);
+    void requestExportRun(QString pluginName, QJsonObject pluginState);
 
     QSharedPointer<BitContainer> currContainer();
 
@@ -107,17 +107,20 @@ private:
 
     QString m_extraPluginPath;
 
-    QSharedPointer<BitContainerManager> m_bitContainerManager;
+    QSharedPointer<BitContainerManagerUi> m_bitContainerManager;
     QSharedPointer<HobbitsPluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
 
     QMutex m_previewMutex;
-    QSharedPointer<PluginCallback> m_pluginCallback;
 
     QHash<QUuid, PluginProgress*> m_pluginProgress;
+    QHash<QUuid, QSharedPointer<ImporterRunner>> m_pendingImports;
+    QHash<QUuid, QSharedPointer<ExporterRunner>> m_pendingExports;
 
     QMap<int, QSharedPointer<OperatorInterface>> m_operatorMap;
+    QMap<QSharedPointer<OperatorInterface>, AbstractParameterEditor*> m_operatorUiMap;
     QMap<int, QSharedPointer<AnalyzerInterface>> m_analyzerMap;
+    QMap<QSharedPointer<AnalyzerInterface>, AbstractParameterEditor*> m_analyzerUiMap;
 
     QList<QPair<QMap<int, QSharedPointer<DisplayInterface>>, QTabWidget*>> m_displayMaps;
     QSplitter *m_displayTabsSplitter;

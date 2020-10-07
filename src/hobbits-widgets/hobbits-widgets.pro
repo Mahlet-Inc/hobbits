@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         batcheditor.cpp \
         actionrenderprogress.cpp \
-        bitcontainerlistmodel.cpp \
         bitcontainermanagerui.cpp \
         bitcontainertreemodel.cpp \
         highlightnavigator.cpp \
@@ -33,20 +32,24 @@ SOURCES += \
         displaybasetext.cpp \
         displayhandle.cpp \
         displayhelper.cpp \
-        plugincallback.cpp \
-        pluginstatehelper.cpp \
+        parameterdelegateui.cpp \
+        parametereditordialog.cpp \
+        parametereditorfileselect.cpp \
+        parameterhelper.cpp \
         previewscrollbar.cpp \
         widgetssettings.cpp
 
 HEADERS += \
+        abstractparametereditor.h \
         batcheditor.h \
         bitcontainermanagerui.h \
-        plugincallback.h \
-        pluginstatehelper.h \
         hobbits-widgets_global.h \
+        parameterdelegateui.h \
+        parametereditordialog.h \
+        parametereditorfileselect.h \
+        parameterhelper.h \
         previewscrollbar.h \
         actionrenderprogress.h \
-        bitcontainerlistmodel.h \
         bitcontainertreemodel.h \
         displaybase.h \
         displaybasetext.h \
@@ -56,7 +59,8 @@ HEADERS += \
         widgetssettings.h
 
 FORMS += \
-        highlightnavigator.ui
+        highlightnavigator.ui \
+        parametereditordialog.ui
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../hobbits-core
@@ -66,3 +70,6 @@ headers.files   += $$HEADERS
 headers.path    = $$(HOME)/.local/include/hobbits
 target.path = $$(HOME)/.local/lib/hobbits
 INSTALLS += target headers
+
+RESOURCES += \
+    hobbitswidgets.qrc

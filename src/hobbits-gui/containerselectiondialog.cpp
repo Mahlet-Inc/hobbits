@@ -1,7 +1,7 @@
 #include "containerselectiondialog.h"
 #include "ui_containerselectiondialog.h"
 
-ContainerSelectionDialog::ContainerSelectionDialog(QSharedPointer<BitContainerManager> manager, QWidget *parent) :
+ContainerSelectionDialog::ContainerSelectionDialog(QSharedPointer<BitContainerManagerUi> manager, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ContainerSelectionDialog),
     m_currSelectionModel(QSharedPointer<QItemSelectionModel>(new QItemSelectionModel)),

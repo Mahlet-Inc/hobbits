@@ -120,7 +120,7 @@ QSharedPointer<BitArray> FindAnalyzer::getFindBits(const QJsonObject &pluginStat
 QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         QSharedPointer<const BitContainer> container,
         const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
     QSharedPointer<BitArray> findBits = getFindBits(recallablePluginState);
     QSharedPointer<const BitArray> bits = container->bits();
@@ -155,7 +155,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         }
 
         progressTracker->setProgress(start, bits->sizeInBits());
-        if (progressTracker->getCancelled()) {
+        if (progressTracker->isCancelled()) {
             return AnalyzerResult::error("Processing cancelled");
         }
     }

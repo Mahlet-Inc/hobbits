@@ -22,22 +22,22 @@ QString HobbitsPython::pythonVersion()
     return version;
 }
 
-QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(
+QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(
         QSharedPointer<PythonRequest> request,
         bool includeActionProgressArg)
 {
     if (includeActionProgressArg) {
-        return runProcessScript(request, QSharedPointer<ActionProgress>(new ActionProgress()));
+        return runProcessScript(request, QSharedPointer<PluginActionProgress>(new PluginActionProgress()));
     }
     else {
-        return runProcessScript(request, QSharedPointer<ActionProgress>());
+        return runProcessScript(request, QSharedPointer<PluginActionProgress>());
     }
 }
 
-QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(QSharedPointer<PythonRequest> request, QSharedPointer<ActionProgress> progress)
+QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(QSharedPointer<PythonRequest> request, QSharedPointer<PluginActionProgress> progress)
 {
     if (progress.isNull()) {
-        progress = QSharedPointer<ActionProgress>(new ActionProgress());
+        progress = QSharedPointer<PluginActionProgress>(new PluginActionProgress());
     }
     else {
         request->addArg(PythonArg::actionProgress(progress));
@@ -48,8 +48,8 @@ QSharedPointer<ActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::run
             PythonInterpreter::runProcessScript,
             request);
 
-    QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> watcher(
-            new ActionWatcher<QSharedPointer<PythonResult>>(future, progress));
+    QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult>>> watcher(
+            new PluginActionWatcher<QSharedPointer<PythonResult>>(future, progress));
 
     return watcher;
 }

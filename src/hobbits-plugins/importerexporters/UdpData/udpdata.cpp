@@ -12,12 +12,12 @@ UdpData::~UdpData()
 {
 }
 
-ImportExportInterface* UdpData::createDefaultImporterExporter()
+ImporterExporterInterface* UdpData::createDefaultImporterExporter()
 {
     return new UdpData();
 }
 
-QString UdpData::getName()
+QString UdpData::name()
 {
     return "UDP Data";
 }

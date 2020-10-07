@@ -41,9 +41,9 @@ FORMS +=         asciiviewcontrols.ui
 DISTFILES +=     
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-
-INCLUDEPATH += $$PWD/../../../hobbits-core
-DEPENDPATH += $$PWD/../../../hobbits-core
+LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
+DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=

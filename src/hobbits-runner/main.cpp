@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
 
 
     if (parser.isSet(configFilePathOption)) {
-        SettingsManager::getInstance().setConfigFilePath(parser.value(configFilePathOption));
+        SettingsManager::setConfigFilePath(parser.value(configFilePathOption));
     }
 
     if (parser.isSet(pythonHomePathOption)) {
-        SettingsManager::getInstance().setTransientSetting(SettingsData::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
+        SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
         err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << endl;
     }
 
@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
         pluginPaths.append(parser.value(extraPluginPathOption).split(":"));
     }
     pluginPaths.append(
-            SettingsManager::getInstance().getPluginLoaderSetting(
-                    SettingsData::PLUGIN_PATH_KEY).toString().split(":"));
+            SettingsManager::getPluginLoaderSetting(
+                    SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
     for (QString pluginPath : pluginPaths) {
         if (pluginPath.startsWith("~/")) {
             pluginPath.replace(0, 1, QDir::homePath());

@@ -3,53 +3,34 @@
 
 #include "mathparser.h"
 #include "operatorinterface.h"
-#include "pluginstatehelper.h"
-
-namespace Ui
-{
-class PythonRunner;
-}
+#include "parameterdelegateui.h"
 
 class PythonRunner : public QObject, OperatorInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.OperatorInterface.3.PythonRunner")
+    Q_PLUGIN_METADATA(IID "hobbits.OperatorInterface.PythonRunner")
     Q_INTERFACES(OperatorInterface)
 
 public:
     PythonRunner();
 
-    QString getName() override;
-
     OperatorInterface* createDefaultOperator() override;
-    void applyToWidget(QWidget *widget) override;
-    void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
 
-    bool canRecallPluginState(const QJsonObject &pluginState) override;
-    virtual bool setPluginStateInUi(const QJsonObject &pluginState) override;
-    QJsonObject getStateFromUi() override;
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
+
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
     int getMinInputContainers(const QJsonObject &pluginState) override;
     int getMaxInputContainers(const QJsonObject &pluginState) override;
 
-    QSharedPointer<const OperatorResult> operateOnContainers(
+    QSharedPointer<const OperatorResult> operateOnBits(
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) override;
-    void previewBits(QSharedPointer<BitContainerPreview> container) override;
-
-public Q_SLOTS:
-    void openHelpDialog();
-
-    void updateOutputText(QString);
-    void clearOutputText();
-
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
 private:
-    Ui::PythonRunner *ui;
-    QSharedPointer<PluginCallback> m_pluginCallback;
-    QSharedPointer<PluginStateHelper> m_stateHelper;
-    QString m_outputText;
-    bool m_hasUi;
+    QSharedPointer<ParameterDelegateUi> m_delegate;
 };
 
 #endif // PYTHONRUNNER_H

@@ -15,18 +15,9 @@ TEMPLATE = app
     DEFINES += "HOBBITS_GUI_VERSION=\"\\\"Totally Rad Developer Version\\\"\""
 }
 
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which has been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
 QMAKE_RESOURCE_FLAGS += -no-compress
-
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
 CONFIG -= debug_and_release_target
@@ -53,8 +44,9 @@ FORMS += \
         preferencesdialog.ui
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-INCLUDEPATH += $$PWD/../hobbits-core
-DEPENDPATH += $$PWD/../hobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
+DEPENDPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
 
 defined(HOBBITS_PYPATH, var) {
     message(Building hobbits-gui with python support...)
@@ -73,7 +65,7 @@ unix:!mac {
 
     # this is for situations when LD_LIBRARY_PATH won't work for launching hobbits in Qt Creator due to something like setcap
     defined(DEVELOPER_RPATH, var) {
-        QMAKE_LFLAGS += "-Wl,-rpath,\'$$OUT_PWD/../hobbits-core:$$OUT_PWD/../hobbits-python:$$HOBBITS_PYPATH/lib\'"
+        QMAKE_LFLAGS += "-Wl,-rpath,\'$$OUT_PWD/../hobbits-core:$$OUT_PWD/../hobbits-python:$$OUT_PWD/../hobbits-widgets:$$HOBBITS_PYPATH/lib\'"
     }
     else {
         QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN/../python/lib:\$$ORIGIN\'"

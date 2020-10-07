@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>HttpTransceiver</class>
- <widget class="QDialog" name="HttpTransceiver">
+ <widget class="QWidget" name="HttpTransceiver">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>268</height>
+    <width>555</width>
+    <height>185</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,30 +79,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QProgressBar" name="pr_request">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pb_interrupt">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Interrupt</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">

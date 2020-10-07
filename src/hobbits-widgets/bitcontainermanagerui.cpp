@@ -10,13 +10,15 @@ BitContainerManagerUi::BitContainerManagerUi(QObject *parent) :
             m_currSelectionModel.data(),
             SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
             this,
-            SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)));
+            SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)),
+             Qt::QueuedConnection);
 
     connect(
-                m_bitContainerTreeModel.data(),
-                SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
-                this,
-                SIGNAL(containerAdded(QSharedPointer<BitContainer>)));
+            m_bitContainerTreeModel.data(),
+            SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
+            this,
+            SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
+            Qt::QueuedConnection);
 }
 
 void BitContainerManagerUi::manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -34,7 +36,7 @@ void BitContainerManagerUi::manageSelectionChanged(const QItemSelection &selecte
     emit currSelectionChanged(newBits, oldBits);
 }
 
-QSharedPointer<BitContainer> BitContainerManagerUi::getCurrentContainer()
+QSharedPointer<BitContainer> BitContainerManagerUi::currentContainer()
 {
     if (m_currSelectionModel->selection().isEmpty()) {
         return QSharedPointer<BitContainer>();
@@ -60,7 +62,7 @@ bool BitContainerManagerUi::addContainer(QSharedPointer<BitContainer> container)
 
 bool BitContainerManagerUi::selectContainer(QSharedPointer<BitContainer> container)
 {
-    auto index = m_bitContainerTreeModel->getContainerIndex(container->getId());
+    auto index = m_bitContainerTreeModel->getContainerIndex(container->id());
     if (!index.isValid()) {
         return false;
     }

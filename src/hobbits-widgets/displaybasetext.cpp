@@ -214,7 +214,7 @@ void DisplayBaseText::adjustScrollbars()
         m_displayHandle->getVScroll()->setPageStep(h);
         m_displayHandle->getHScroll()->setPageStep(w);
         m_displayHandle->getHScroll()->setSingleStep(bitsPerChar());
-        m_displayHandle->getHScroll()->setMaximum(m_displayHandle->getContainer()->maxFrameWidth() - bitsPerChar());
+        m_displayHandle->getHScroll()->setMaximum(int(m_displayHandle->getContainer()->maxFrameWidth()) - bitsPerChar());
     }
 }
 

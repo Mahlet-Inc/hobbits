@@ -2,7 +2,7 @@
 #define PYTHONARG_H
 
 #include <QString>
-#include "actionprogress.h"
+#include "pluginactionprogress.h"
 #include "bitcontainer.h"
 #include "hobbits-python_global.h"
 
@@ -17,7 +17,7 @@ public:
 
     static PythonArg* bitArray(QSharedPointer<BitArray> bitArray);
     static PythonArg* constBitArray(QSharedPointer<const BitArray> bitArray);
-    static PythonArg* actionProgress(QSharedPointer<ActionProgress> progress);
+    static PythonArg* actionProgress(QSharedPointer<PluginActionProgress> progress);
     static PythonArg* bitContainer(QSharedPointer<BitContainer> container);
     static PythonArg* constBitContainer(QSharedPointer<const BitContainer> container);
     static PythonArg* bitInfo(QSharedPointer<BitInfo> info);

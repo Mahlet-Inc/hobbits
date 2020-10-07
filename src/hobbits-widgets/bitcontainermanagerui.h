@@ -16,7 +16,7 @@ public:
     QSharedPointer<BitContainerTreeModel> getTreeModel();
     QSharedPointer<QItemSelectionModel> getCurrSelectionModel();
 
-    virtual QSharedPointer<BitContainer> getCurrentContainer() override;
+    virtual QSharedPointer<BitContainer> currentContainer() override;
     virtual QSharedPointer<BitContainer> getContainerById(QUuid id) override;
 
     virtual bool addContainer(QSharedPointer<BitContainer> container) override;

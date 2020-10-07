@@ -8,9 +8,13 @@
 #include <QStringList>
 #include <QTemporaryFile>
 #include <QMutex>
-
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The BitArray class simplifies the use of byte-packed bitwise data
+  *
+  * \see BitContainer
+*/
 class HOBBITSCORESHARED_EXPORT BitArray
 {
 public:

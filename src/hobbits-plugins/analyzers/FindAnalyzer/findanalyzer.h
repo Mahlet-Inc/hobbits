@@ -33,7 +33,7 @@ public:
     QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
             const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) override;
+            QSharedPointer<PluginActionProgress> progressTracker) override;
 
 public slots:
     void triggerRun();

@@ -3,8 +3,7 @@ TEMPLATE = subdirs
 SUBDIRS += \
     BitsError \
     Extractor \
-    PrbsGenerator \
     PythonRunner \
-    QamRemapper \
-    TakeSkipOperator \
+    SymbolRemapper \
+    TakeSkip \
     HeaderFramer

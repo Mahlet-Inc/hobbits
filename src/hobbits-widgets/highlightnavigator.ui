@@ -54,8 +54,8 @@
         <string>Previous</string>
        </property>
        <property name="icon">
-        <iconset resource="hobbitscoreicons.qrc">
-         <normaloff>:/hobbits-core/images/icons/arrow-left.png</normaloff>:/hobbits-core/images/icons/arrow-left.png</iconset>
+        <iconset resource="hobbitswidgets.qrc">
+         <normaloff>:/images/icons/arrow-left.png</normaloff>:/images/icons/arrow-left.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -84,8 +84,8 @@
         <string>Next</string>
        </property>
        <property name="icon">
-        <iconset resource="hobbitscoreicons.qrc">
-         <normaloff>:/hobbits-core/images/icons/arrow-right.png</normaloff>:/hobbits-core/images/icons/arrow-right.png</iconset>
+        <iconset resource="hobbitswidgets.qrc">
+         <normaloff>:/images/icons/arrow-right.png</normaloff>:/images/icons/arrow-right.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -124,7 +124,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="hobbitscoreicons.qrc"/>
+  <include location="hobbitswidgets.qrc"/>
  </resources>
  <connections/>
 </ui>

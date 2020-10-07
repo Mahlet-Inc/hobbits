@@ -3,7 +3,7 @@ TEMPLATE = subdirs
 SUBDIRS += \
     gui \
     core \
-    hobbits-widgets \
+    widgets \
     python \
     runner \
     plugins
@@ -13,8 +13,10 @@ gui.subdir = hobbits-gui
 plugins.subdir = hobbits-plugins
 runner.subdir = hobbits-runner
 python.subdir = hobbits-python
+widgets.subdir = hobbits-widgets
 
 python.depends = core
-gui.depends = core python
-plugins.depends = core python
+widgets.depends = core
 runner.depends = core python
+plugins.depends = core python widgets
+gui.depends = core python widgets

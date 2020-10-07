@@ -14,10 +14,10 @@ void PluginActionManager::setContainerManager(QSharedPointer<BitContainerManager
 
 QSharedPointer<AnalyzerRunner> PluginActionManager::runAnalyzer(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container)
 {
-    auto plugin = m_pluginManager->getAnalyzer(action->getPluginName());
+    auto plugin = m_pluginManager->getAnalyzer(action->pluginName());
     if (!plugin) {
-        reportError(QString("Analyzer plugin named '%1' could not be loaded.").arg(action->getPluginName()));
-        QPair<QUuid, QSharedPointer<AnalyzerRunner>>();
+        reportError(QString("Analyzer plugin named '%1' could not be loaded.").arg(action->pluginName()));
+        return QSharedPointer<AnalyzerRunner>();
     }
 
     auto runner = AnalyzerRunner::create(m_pluginManager, action);
@@ -27,8 +27,12 @@ QSharedPointer<AnalyzerRunner> PluginActionManager::runAnalyzer(QSharedPointer<c
     connect(runner.data(), &AnalyzerRunner::finished, this, &PluginActionManager::finishAnalyzer);
     connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(analyzerProgress(QUuid, int)));
 
-    runner->run(container);
+    auto watcher = runner->run(container);
     emit analyzerStarted(runner->id());
+    if (watcher.isNull()) {
+        finishAnalyzer(runner->id());
+        return QSharedPointer<AnalyzerRunner>();
+    }
 
     return runner;
 }
@@ -37,10 +41,10 @@ QSharedPointer<OperatorRunner> PluginActionManager::runOperator(
         QSharedPointer<const PluginAction> action,
         QList<QSharedPointer<BitContainer>> containers)
 {
-    auto plugin = m_pluginManager->getOperator(action->getPluginName());
+    auto plugin = m_pluginManager->getOperator(action->pluginName());
     if (!plugin) {
-        reportError(QString("Operator plugin named '%1' could not be loaded.").arg(action->getPluginName()));
-        QPair<QUuid, QSharedPointer<AnalyzerRunner>>();
+        reportError(QString("Operator plugin named '%1' could not be loaded.").arg(action->pluginName()));
+        return QSharedPointer<OperatorRunner>();
     }
 
     auto runner = OperatorRunner::create(m_pluginManager, m_containerManager, action);
@@ -50,75 +54,89 @@ QSharedPointer<OperatorRunner> PluginActionManager::runOperator(
     connect(runner.data(), &OperatorRunner::finished, this, &PluginActionManager::finishOperator);
     connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(operatorProgress(QUuid, int)));
 
-    runner->run(containers);
+    auto watcher = runner->run(containers);
     emit operatorStarted(runner->id());
+    if (watcher.isNull()) {
+        finishOperator(runner->id());
+        return QSharedPointer<OperatorRunner>();
+    }
 
     return runner;
 }
 
-QSharedPointer<ImportResult> PluginActionManager::runImporter(QSharedPointer<const PluginAction> action)
+QSharedPointer<ImporterRunner> PluginActionManager::runImporter(QSharedPointer<const PluginAction> action)
 {
-    auto plugin = m_pluginManager->getImporterExporter(action->getPluginName());
+    auto plugin = m_pluginManager->getImporterExporter(action->pluginName());
     if (!plugin) {
-        reportError(QString("Importer plugin named '%1' could not be loaded.").arg(action->getPluginName()));
-        return QSharedPointer<ImportResult>();
+        reportError(QString("Importer plugin named '%1' could not be loaded.").arg(action->pluginName()));
+        return QSharedPointer<ImporterRunner>();
     }
 
-    QSharedPointer<ImportResult> result;
-    try {
-        result = plugin->importBits(action->getPluginState());
-    } catch (std::exception &e) {
-        result = ImportResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
-    } catch (...) {
-        result = ImportResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
-    }
-    if (!result->errorString().isEmpty()) {
-        reportError(QString("'%1' Error: %2").arg(action->getPluginName()).arg(result->errorString()));
-    }
-    else if (!result->hasEmptyState() && !result->getContainer().isNull()) {
-        auto fullAction = PluginAction::importerAction(action->getPluginName(), result->pluginState());
-        PluginActionLineage::recordLineage(fullAction, {}, {result->getContainer()});
+    auto runner = ImporterRunner::create(m_pluginManager, m_containerManager, action);
+
+    m_importerRunners.insert(runner->id(), runner);
+    connect(runner.data(), &ImporterRunner::reportError, this, &PluginActionManager::relayErrorFromImporter);
+    connect(runner.data(), &ImporterRunner::finished, this, &PluginActionManager::finishImporter);
+    connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(importerProgress(QUuid, int)));
+
+    auto watcher = runner->run();
+    emit importerStarted(runner->id());
+    if (watcher.isNull()) {
+        finishImporter(runner->id());
+        return QSharedPointer<ImporterRunner>();
     }
 
-    if (!result->getContainer().isNull() && !m_containerManager.isNull()) {
-        if (m_containerManager->addContainer(result->getContainer())) {
-            m_containerManager->selectContainer(result->getContainer());
-        }
-    }
-
-    return result;
+    return runner;
 }
 
-QSharedPointer<ExportResult> PluginActionManager::runExporter(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container)
+QSharedPointer<ExporterRunner> PluginActionManager::runExporter(QSharedPointer<const PluginAction> action, QSharedPointer<BitContainer> container)
 {
-    auto plugin = m_pluginManager->getImporterExporter(action->getPluginName());
+    auto plugin = m_pluginManager->getImporterExporter(action->pluginName());
     if (!plugin) {
-        reportError(QString("Exporter plugin named '%1' could not be loaded.").arg(action->getPluginName()));
-        return QSharedPointer<ExportResult>();
+        reportError(QString("Exporter plugin named '%1' could not be loaded.").arg(action->pluginName()));
+        return QSharedPointer<ExporterRunner>();
     }
 
-    QSharedPointer<ExportResult> result;
-    try {
-        result = plugin->exportBits(container, action->getPluginState());
-    } catch (std::exception &e) {
-        result = ExportResult::error(QString("Exception encountered in plugin %1: %2").arg(plugin->getName()).arg(e.what()));
-    } catch (...) {
-        result = ExportResult::error(QString("Unexpected exception in plugin %1").arg(plugin->getName()));
-    }
-    if (!result->errorString().isEmpty()) {
-        reportError(QString("'%1' Error: %2").arg(action->getPluginName()).arg(result->errorString()));
+    auto runner = ExporterRunner::create(m_pluginManager, action);
+
+    m_exporterRunners.insert(runner->id(), runner);
+    connect(runner.data(), &ExporterRunner::reportError, this, &PluginActionManager::relayErrorFromExporter);
+    connect(runner.data(), &ExporterRunner::finished, this, &PluginActionManager::finishExporter);
+    connect(runner.data(), SIGNAL(progress(QUuid, int)), this, SIGNAL(exporterProgress(QUuid, int)));
+
+    auto watcher = runner->run(container);
+    emit exporterStarted(runner->id());
+    if (watcher.isNull()) {
+        finishExporter(runner->id());
+        return QSharedPointer<ExporterRunner>();
     }
 
-    return result;
+    return runner;
+}
+
+const QHash<QUuid, QSharedPointer<ImporterRunner> > PluginActionManager::runningImporters() const
+{
+    return m_importerRunners;
+}
+
+const QHash<QUuid, QSharedPointer<ExporterRunner> > PluginActionManager::runningExporters() const
+{
+    return m_exporterRunners;
 }
 
 void PluginActionManager::cancelById(QUuid id)
 {
     if (m_analyzerRunners.contains(id)) {
-        m_analyzerRunners.value(id)->getWatcher()->progress()->setCancelled(true);
+        m_analyzerRunners.value(id)->watcher()->progress()->setCancelled(true);
     }
     else if (m_operatorRunners.contains(id)) {
-        m_operatorRunners.value(id)->getWatcher()->progress()->setCancelled(true);
+        m_operatorRunners.value(id)->watcher()->progress()->setCancelled(true);
+    }
+    else if (m_importerRunners.contains(id)) {
+        m_importerRunners.value(id)->watcher()->progress()->setCancelled(true);
+    }
+    else if (m_exporterRunners.contains(id)) {
+        m_exporterRunners.value(id)->watcher()->progress()->setCancelled(true);
     }
     else if (m_batchRunners.contains(id)) {
         m_batchRunners.value(id)->cancel();
@@ -160,6 +178,26 @@ void PluginActionManager::finishAnalyzer(QUuid id)
     emit analyzerFinished(id);
 }
 
+void PluginActionManager::finishImporter(QUuid id)
+{
+    auto runner = m_importerRunners.take(id);
+    if (!runner.isNull()) {
+        disconnect(runner.data(), &ImporterRunner::reportError, this, &PluginActionManager::relayErrorFromImporter);
+        disconnect(runner.data(), &ImporterRunner::finished, this, &PluginActionManager::finishImporter);
+    }
+    emit importerFinished(id);
+}
+
+void PluginActionManager::finishExporter(QUuid id)
+{
+    auto runner = m_exporterRunners.take(id);
+    if (!runner.isNull()) {
+        disconnect(runner.data(), &ExporterRunner::reportError, this, &PluginActionManager::relayErrorFromExporter);
+        disconnect(runner.data(), &ExporterRunner::finished, this, &PluginActionManager::finishExporter);
+    }
+    emit exporterFinished(id);
+}
+
 void PluginActionManager::finishBatch(QUuid id)
 {
     auto runner = m_batchRunners.take(id);
@@ -186,19 +224,34 @@ void PluginActionManager::relayErrorFromAnalyzer(QUuid id, QString errorString)
     emit reportError(QString("Analyzer Plugin Error: %1").arg(errorString));
 }
 
+void PluginActionManager::relayErrorFromImporter(QUuid id, QString errorString)
+{
+    // TODO: runners should have a human-referenceable name that can be included in the error report
+    Q_UNUSED(id)
+    emit reportError(QString("Importer Plugin Error: %1").arg(errorString));
+}
+
+void PluginActionManager::relayErrorFromExporter(QUuid id, QString errorString)
+{
+    // TODO: runners should have a human-referenceable name that can be included in the error report
+    Q_UNUSED(id)
+    emit reportError(QString("Exporter Plugin Error: %1").arg(errorString));
+}
+
 void PluginActionManager::runBatch(QSharedPointer<PluginActionBatch> batch, QList<QSharedPointer<BitContainer>> containers)
 {
-    while (containers.size() < batch->getMinRequiredInputs(m_pluginManager)) {
-        auto result = runImporter(PluginAction::importerAction("File Data"));
-        if (result.isNull() || result->hasEmptyState()) {
-            emit reportError(QString("Cannot execute batch without %1 additional imported containers").arg(batch->getMinRequiredInputs(m_pluginManager) - containers.size()));
-            return;
-        }
-        if (!result->errorString().isEmpty()) {
-            emit reportError(result->errorString());
-            return;
-        }
-    }
+    // TODO: prompt for batches with incomplete input containers
+//    while (containers.size() < batch->getMinRequiredInputs(m_pluginManager)) {
+//        auto result = runImporter(PluginAction::importerAction("File Data"));
+//        if (result.isNull() || result->hasEmptyParameters()) {
+//            emit reportError(QString("Cannot execute batch without %1 additional imported containers").arg(batch->getMinRequiredInputs(m_pluginManager) - containers.size()));
+//            return;
+//        }
+//        if (!result->errorString().isEmpty()) {
+//            emit reportError(result->errorString());
+//            return;
+//        }
+//    }
 
     auto runner = BatchRunner::create(batch, containers);
     m_batchRunners.insert(runner->id(), runner);

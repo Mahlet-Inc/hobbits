@@ -4,6 +4,11 @@
 #include "bitcontainer.h"
 #include <QJsonObject>
 
+/**
+  * @brief The ExportResult class contains the result of an ImportExportInterface::importBits() run
+  *
+  * \see ImportExportInterface
+*/
 class HOBBITSCORESHARED_EXPORT ImportResult
 {
 public:
@@ -12,19 +17,20 @@ public:
     ImportResult* setContainer(QSharedPointer<BitContainer> container);
     QSharedPointer<BitContainer> getContainer() const;
 
-    ImportResult* setPluginState(QJsonObject pluginState);
-    const QJsonObject pluginState() const;
+    ImportResult* setParameters(QJsonObject parameters);
+    const QJsonObject parameters() const;
 
-    bool hasEmptyState() const;
+    bool hasEmptyParameters() const;
     QString errorString() const;
 
     static QSharedPointer<ImportResult> nullResult();
     static QSharedPointer<ImportResult> error(QString error);
-    static QSharedPointer<ImportResult> result(QSharedPointer<BitContainer> container, QJsonObject pluginState);
+    static QSharedPointer<ImportResult> result(QSharedPointer<BitContainer> container, QJsonObject parameters);
 
 private:
     QSharedPointer<BitContainer> m_container;
-    QJsonObject m_pluginState;
+    QJsonObject m_parameters;
+    QString m_errorString;
 };
 
 #endif // IMPORTRESULT_H

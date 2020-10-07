@@ -12,18 +12,28 @@ DisplayInterface* DigraphPlot::createDefaultDisplay()
     return new DigraphPlot();
 }
 
-QString DigraphPlot::getName()
+QString DigraphPlot::name()
 {
     return "Digraph Plot";
 }
 
-QWidget* DigraphPlot::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString DigraphPlot::description()
+{
+    return "Displays pairs of adjacent n-bit words by their values, x and y, on a Cartesian plane";
+}
+
+QStringList DigraphPlot::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* DigraphPlot::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* DigraphPlot::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* DigraphPlot::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

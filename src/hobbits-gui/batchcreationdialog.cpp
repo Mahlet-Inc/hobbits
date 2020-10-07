@@ -9,7 +9,7 @@ BatchCreationDialog::BatchCreationDialog(QSharedPointer<BitContainer> container,
 
     this->setWindowTitle("Batch Configuration");
 
-    if (container->getChildUuids().isEmpty()) {
+    if (container->childUuids().isEmpty()) {
         ui->rb_after->setEnabled(false);
         ui->rb_before->setChecked(true);
     }

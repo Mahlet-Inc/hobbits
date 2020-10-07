@@ -12,6 +12,11 @@
 
 class BitContainer;
 
+/**
+  * @brief The BitInfo class provides metadata for bitwise data
+  *
+  * \see BitContainer RangeSequence RangeHighlight
+*/
 class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
 {
     Q_OBJECT

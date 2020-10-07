@@ -1,15 +1,26 @@
 #ifndef PLUGINACTION_H
 #define PLUGINACTION_H
 
-#include "actionwatcher.h"
+#include "pluginactionwatcher.h"
 #include "analyzerrunner.h"
 #include "hobbitspluginmanager.h"
 #include <QJsonObject>
 #include <QtConcurrent/QtConcurrentRun>
-
 #include "hobbits-core_global.h"
 
 class BitContainerManager;
+
+/**
+  * @brief The PluginAction class describes a reproduceable plugin action
+  *
+  * PluginActions can be used to document, de/serialize, and reproduce actions that plugins can
+  * take.
+  *
+  * The plugin action system is similar to the "Command" design pattern. The PluginAction
+  * class correlates loosely to the state of the ConcreteCommand class in that pattern.
+  *
+  * \see PluginActionManager PluginActionLineage PluginActionBatch
+*/
 class HOBBITSCORESHARED_EXPORT PluginAction
 {
 public:
@@ -30,23 +41,22 @@ public:
     static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState = QJsonObject());
     static QSharedPointer<PluginAction> noAction();
 
-    PluginType getPluginType() const;
-    QString getPluginName() const;
-    QJsonObject getPluginState() const;
+    PluginType pluginType() const;
+    QString pluginName() const;
+    QJsonObject parameters() const;
 
     int minPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
     int maxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
 
     QJsonObject serialize() const;
-
     static QSharedPointer<PluginAction> deserialize(QJsonObject data);
 
     inline bool operator==(const PluginAction &other) const
     {
         return (
-            m_pluginName == other.getPluginName()
-            && m_pluginType == other.getPluginType()
-            && m_pluginState == other.getPluginState()
+            m_pluginName == other.pluginName()
+            && m_pluginType == other.pluginType()
+            && m_pluginState == other.parameters()
             );
     }
 
@@ -59,7 +69,7 @@ private:
 
 inline uint qHash(const PluginAction &key, uint seed)
 {
-    return qHash(key.getPluginState(), seed) ^ uint(key.getPluginType()) ^ qHash(key.getPluginName(), seed);
+    return qHash(key.parameters(), seed) ^ uint(key.pluginType()) ^ qHash(key.pluginName(), seed);
 }
 
 #endif // PLUGINACTION_H

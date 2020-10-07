@@ -1,7 +1,7 @@
 #ifndef OPERATORACTOR_H
 #define OPERATORACTOR_H
 
-#include "actionwatcher.h"
+#include "pluginactionwatcher.h"
 #include "bitcontainermanager.h"
 #include "hobbitspluginmanager.h"
 #include <QJsonObject>
@@ -9,10 +9,15 @@
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
 #include "bitcontainermanager.h"
-
 #include "hobbits-core_global.h"
+#include "abstractpluginrunner.h"
 
-class HOBBITSCORESHARED_EXPORT OperatorRunner : public QObject
+/**
+  * @brief The OperatorRunner class manages the execution of an OperatorInterface PluginAction
+  *
+  * \see OperatorInterface PluginAction
+*/
+class HOBBITSCORESHARED_EXPORT OperatorRunner : public AbstractPluginRunner<const OperatorResult>
 {
     Q_OBJECT
 
@@ -22,36 +27,24 @@ public:
             QSharedPointer<BitContainerManager> containerManager,
             QSharedPointer<const PluginAction> action);
 
-    QUuid id() const;
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> getWatcher();
-
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> run(QList<QSharedPointer<BitContainer>> inputContainers);
-
-signals:
-    void reportError(QUuid, QString);
-    void progress(QUuid, int);
-    void finished(QUuid);
+    QSharedPointer<PluginActionWatcher<QSharedPointer<const OperatorResult>>> run(QList<QSharedPointer<BitContainer>> inputContainers);
 
 private slots:
-    void postProcess();
+    void postProcess() override;
 
 private:
+    OperatorRunner(QString pluginName, QString pluginFileLocation);
     static QSharedPointer<const OperatorResult> operatorCall(
             QSharedPointer<OperatorInterface> op,
             QList<QSharedPointer<const BitContainer>> inputContainers,
             QJsonObject pluginState,
-            QSharedPointer<ActionProgress> progressTracker);
+            QSharedPointer<PluginActionProgress> progressTracker);
 
-    QUuid m_id;
     QSharedPointer<const PluginAction> m_action;
     QSharedPointer<OperatorInterface> m_op;
-    QString m_pluginFileLocation;
     QList<QSharedPointer<BitContainer>> m_inputContainers;
-    QList<QSharedPointer<BitContainer>> m_outputContainers;
 
     QSharedPointer<BitContainerManager> m_containerManager;
-
-    QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> m_actionWatcher;
 };
 
 #endif // OPERATORACTOR_H

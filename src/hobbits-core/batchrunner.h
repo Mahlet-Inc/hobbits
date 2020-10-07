@@ -4,10 +4,18 @@
 #include <QObject>
 #include "pluginactionbatch.h"
 #include "operatorrunner.h"
+#include "importerrunner.h"
+#include "exporterrunner.h"
+#include "hobbits-core_global.h"
 
 class PluginActionManager;
 
-class BatchRunner : public QObject
+/**
+  * @brief The BatchRunner class manages the execution of a PluginActionBatch
+  *
+  * \see PluginActionBatch PluginActionManager
+*/
+class HOBBITSCORESHARED_EXPORT BatchRunner : public QObject
 {
     Q_OBJECT
 public:
@@ -25,6 +33,8 @@ signals:
 public slots:
     void cancel();
     void checkDone();
+    void checkFinishedImporter(QUuid);
+    void checkFinishedExporter(QUuid);
     void checkFinishedAnalyzer(QUuid);
     void checkFinishedOperator(QUuid);
 
@@ -48,6 +58,8 @@ private:
     QHash<QUuid, QList<QSharedPointer<BitContainer>>> m_stepOutputs;
     QHash<QUuid, QPair<QUuid, QSharedPointer<AnalyzerRunner>>> m_analyzerRunners;
     QHash<QUuid, QPair<QUuid, QSharedPointer<OperatorRunner>>> m_operatorRunners;
+    QHash<QUuid, QPair<QUuid, QSharedPointer<ImporterRunner>>> m_importerRunners;
+    QHash<QUuid, QPair<QUuid, QSharedPointer<ExporterRunner>>> m_exporterRunners;
 
     QHash<QSharedPointer<const PluginActionBatch::ActionStep>, QList<QPair<QUuid, int>>> m_trueStepInputs;
 

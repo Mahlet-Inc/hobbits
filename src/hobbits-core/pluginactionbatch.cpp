@@ -31,10 +31,10 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
                 stageTwoQueue.enqueue(currLineage);
                 auto uuid = QUuid::createUuid();
                 auto action = currLineage->getPluginAction();
-                if (action->getPluginType() == PluginAction::Importer) {
+                if (action->pluginType() == PluginAction::Importer) {
                     if (currMode & Mode::IncludeImporters) {
                         if (!(currMode & Mode::IncludeImporterState)) {
-                            action = PluginAction::importerAction(action->getPluginName());
+                            action = PluginAction::importerAction(action->pluginName());
                         }
                     }
                     else {
@@ -87,7 +87,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
         alreadyAssigned.insert(currLineage->getPluginAction());
 
         // If it's a "no action" step, it will get a null QUuid input
-        if (stepMap[currLineage->getPluginAction()]->action->getPluginType() == PluginAction::NoAction) {
+        if (stepMap[currLineage->getPluginAction()]->action->pluginType() == PluginAction::NoAction) {
             // TODO: what if there's a "no action" that isn't in the beginning?
             stepMap[currLineage->getPluginAction()]->inputs = {{QUuid(), 0}};
             continue;
@@ -220,7 +220,7 @@ int PluginActionBatch::getMinRequiredInputs(QSharedPointer<const HobbitsPluginMa
 {
     int inputTotal = 0;
     for (auto step : m_actionSteps) {
-        if (step->action->getPluginType() == PluginAction::NoAction) {
+        if (step->action->pluginType() == PluginAction::NoAction) {
             inputTotal += 1;
             continue;
         }

@@ -4,9 +4,13 @@
 #include "bitarray.h"
 #include "range.h"
 #include <QSharedPointer>
-
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The Frame class specifies a slice of bits from a BitArray
+  *
+  * \see Range BitArray
+*/
 class HOBBITSCORESHARED_EXPORT Frame : public Range
 {
 public:

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PythonRunnerForm</class>
+ <widget class="QWidget" name="PythonRunnerForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1547</width>
+    <height>307</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Script:</string>
+       </property>
+       <property name="buddy">
+        <cstring>te_pythonScript</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="pb_scriptHelp">
+       <property name="text">
+        <string>?</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPlainTextEdit" name="te_pythonScript">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="plainText">
+        <string># example of inverting and highlighting
+def process_bits(input, output_bits, output_info, progress):
+  if input.bits.size() &gt; 3000:
+    output_info.add_highlight(&quot;python&quot;, &quot;mychunk&quot;, 20, 3000)
+  output_bits.resize(input.bits.size())
+  for i in range(0, input.bits.size()):
+    output_bits.set(i, not input.bits.at(i))
+    
+    if progress.is_cancelled():
+      return
+    progress.set_progress(i, input.bits.size())</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPlainTextEdit" name="te_pluginOutput">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>te_pythonScript</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

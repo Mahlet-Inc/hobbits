@@ -1,23 +1,42 @@
 #ifndef MATHPARSER_H
 #define MATHPARSER_H
-#include "parseresult.h"
-#include <QObject>
 
+#include <QObject>
 #include "hobbits-core_global.h"
 
-enum HOBBITSCORESHARED_EXPORT ParseType {
-    Default = 0,
-    No_Unit = 1,
-    Hex = 2,
-    Bin = 3,
-    Dec = 4,
-    Oct = 5,
-    No_Math = 6
-};
-
+/**
+  * @brief The MathParser class provides parsing and evaluation of simple math expressions
+  *
+*/
 class HOBBITSCORESHARED_EXPORT MathParser
 {
 public:
+    class ParseResult
+    {
+    public:
+        ParseResult() = default;
+        ParseResult(qlonglong, int);
+
+        qlonglong getVal(); // Returns evaluated value of math expression
+        int getMult(); // Returns unit multiplier
+        qlonglong getResult(); // Returns total # of bits
+        bool isValid(); // Checks if expression was valid
+
+    private:
+        qlonglong _val;
+        int _mult;
+    };
+
+    enum ParseType {
+        Default = 0,
+        No_Unit = 1,
+        Hex = 2,
+        Bin = 3,
+        Dec = 4,
+        Oct = 5,
+        No_Math = 6
+    };
+
     MathParser();
 
     QString tokens;

@@ -17,7 +17,7 @@ HighlightNavigator::HighlightNavigator(QWidget *parent) :
     connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SLOT(updateSelection()));
     connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged()));
 
-    Q_INIT_RESOURCE(hobbitscoreicons);
+    Q_INIT_RESOURCE(hobbitswidgets);
     ui->tb_gotoNext->setIcon(QIcon(":/hobbits-core/images/icons/arrow-right.png"));
     ui->tb_gotoPrevious->setIcon(QIcon(":/hobbits-core/images/icons/arrow-left.png"));
 }
@@ -51,12 +51,9 @@ bool HighlightNavigator::selectRow(QString text)
     return true;
 }
 
-void HighlightNavigator::setPluginCallback(QSharedPointer<PluginCallback> pluginCallback)
+void HighlightNavigator::setPluginCallback(QSharedPointer<DisplayHandle> displayHandle)
 {
-    if (!m_pluginCallback.isNull()) {
-        disconnect(m_pluginCallback.data(), SIGNAL(changed()), this, SLOT(refresh()));
-    }
-    m_pluginCallback = pluginCallback;
+    m_displayHandle = displayHandle;
     refresh();
 }
 
@@ -205,7 +202,7 @@ void HighlightNavigator::updateSelection()
 
     int selectedNum = curr->data(0, Qt::UserRole + 1).toInt();
 
-    QColor focusColor = SettingsManager::getInstance().getUiSetting(SettingsData::FOCUS_COLOR_KEY).value<QColor>();
+    QColor focusColor = SettingsManager::getUiSetting(SettingsManager::FOCUS_COLOR_KEY).value<QColor>();
     RangeHighlight focus = RangeHighlight(FOCUS_HIGHLIGHT_CATEGORY, selected.label(), selected.range(), focusColor.rgba());
 
     qint64 containingFrame = m_container->info()->frameOffsetContaining(focus.range().start());
@@ -226,8 +223,8 @@ void HighlightNavigator::updateSelection()
             }
         }
 
-        if (!m_pluginCallback.isNull()) {
-            m_pluginCallback->getDisplayHandle()->setOffsets(bitOffset, frameOffset);
+        if (!m_displayHandle.isNull()) {
+            m_displayHandle->setOffsets(bitOffset, frameOffset);
         }
     }
 

@@ -1,33 +1,9 @@
 #include "settingsdata.h"
-
+#include "settingsmanager.h"
 #include <QDir>
 #include <QPoint>
 #include <QSize>
 #include <QCoreApplication>
-
-const QString SettingsData::ONE_COLOR_KEY = "1-Bit Color";
-const QString SettingsData::ZERO_COLOR_KEY = "0-Bit Color";
-const QString SettingsData::BYTE_HUE_SAT_KEY = "Byte Hue and Saturation";
-const QString SettingsData::FOCUS_COLOR_KEY = "Range Focus Color";
-const QString SettingsData::HIGHLIGHT_1_COLOR_KEY = "Highlight 1";
-const QString SettingsData::HIGHLIGHT_2_COLOR_KEY = "Highlight 2";
-const QString SettingsData::HIGHLIGHT_3_COLOR_KEY = "Highlight 3";
-const QString SettingsData::HIGHLIGHT_4_COLOR_KEY = "Highlight 4";
-const QString SettingsData::HIGHLIGHT_5_COLOR_KEY = "Highlight 5";
-const QString SettingsData::PLUGIN_PATH_KEY = "Plugin Path";
-const QString SettingsData::PLUGIN_BLACKLIST_KEY = "Plugin Blacklist";
-const QString SettingsData::OPERATOR_DISPLAY_ORDER_KEY = "Operator Display Order";
-const QString SettingsData::ANALYZER_DISPLAY_ORDER_KEY = "Analyzer Display Order";
-const QString SettingsData::DISPLAY_DISPLAY_ORDER_KEY = "Display Display Order";
-const QString SettingsData::WINDOW_SIZE_KEY = "window_size";
-const QString SettingsData::WINDOW_POSITION_KEY = "window_position";
-const QString SettingsData::WINDOW_STATE_KEY = "window_state";
-const QString SettingsData::LAST_BATCH_PATH_KEY = "last_batch_path";
-const QString SettingsData::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_path";
-const QString SettingsData::LAST_CONTAINER_PATH_KEY = "last_container_path";
-const QString SettingsData::PLUGIN_RUNNING_KEY = "plugin_running";
-const QString SettingsData::PLUGINS_RUNNING_KEY = "plugins_running";
-const QString SettingsData::PYTHON_HOME_KEY = "python_home_dir";
 
 SettingsData::SettingsData()
 {
@@ -46,25 +22,25 @@ SettingsData::SettingsData()
     if (!pythonHomeCanonical.isEmpty()) {
         pythonHome = pythonHomeCanonical;
     }
-    m_transientSettings.insert(PYTHON_HOME_KEY, pythonHome);
+    m_transientSettings.insert(SettingsManager::PYTHON_HOME_KEY, pythonHome);
 
-    m_privateSettings.insert(WINDOW_SIZE_KEY, QSize(640, 480));
-    m_privateSettings.insert(WINDOW_POSITION_KEY, QPoint(100, 100));
-    m_privateSettings.insert(LAST_BATCH_PATH_KEY, QDir::homePath());
-    m_privateSettings.insert(LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
-    m_privateSettings.insert(LAST_CONTAINER_PATH_KEY, QDir::homePath());
+    m_privateSettings.insert(SettingsManager::WINDOW_SIZE_KEY, QSize(640, 480));
+    m_privateSettings.insert(SettingsManager::WINDOW_POSITION_KEY, QPoint(100, 100));
+    m_privateSettings.insert(SettingsManager::LAST_BATCH_PATH_KEY, QDir::homePath());
+    m_privateSettings.insert(SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
+    m_privateSettings.insert(SettingsManager::LAST_CONTAINER_PATH_KEY, QDir::homePath());
 
     m_pluginLoaderSettings.insert(
-            PLUGIN_PATH_KEY,
+            SettingsManager::PLUGIN_PATH_KEY,
             "../hobbits-plugins:../plugins:plugins:~/.local/share/hobbits/plugins");
-    m_pluginLoaderSettings.insert(PLUGIN_BLACKLIST_KEY, QStringList({}));
+    m_pluginLoaderSettings.insert(SettingsManager::PLUGIN_BLACKLIST_KEY, QStringList({}));
     m_pluginLoaderSettings.insert(
-            OPERATOR_DISPLAY_ORDER_KEY,
+            SettingsManager::OPERATOR_DISPLAY_ORDER_KEY,
             QStringList({"Take Skip", "Header Framer", "Bit Error", "LFSR"}));
     m_pluginLoaderSettings.insert(
-            ANALYZER_DISPLAY_ORDER_KEY,
+            SettingsManager::ANALYZER_DISPLAY_ORDER_KEY,
             QStringList({ "Find", "Width Framer", "Flexible Framer" }));
-    m_pluginLoaderSettings.insert(DISPLAY_DISPLAY_ORDER_KEY, QStringList({"Bit Raster", "Hex", "Binary", "ASCII"}));
+    m_pluginLoaderSettings.insert(SettingsManager::DISPLAY_DISPLAY_ORDER_KEY, QStringList({"Bit Raster", "Hex", "Binary", "ASCII"}));
 
 }
 

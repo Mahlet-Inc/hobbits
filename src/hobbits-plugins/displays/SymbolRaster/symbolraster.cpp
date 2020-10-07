@@ -12,18 +12,28 @@ DisplayInterface* SymbolRaster::createDefaultDisplay()
     return new SymbolRaster();
 }
 
-QString SymbolRaster::getName()
+QString SymbolRaster::name()
 {
     return "Symbol Raster";
 }
 
-QWidget* SymbolRaster::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString SymbolRaster::description()
+{
+    return "Displays each n-bit symbol in the data as a uniquely colored pixel";
+}
+
+QStringList SymbolRaster::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* SymbolRaster::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* SymbolRaster::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* SymbolRaster::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

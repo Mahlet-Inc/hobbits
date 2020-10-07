@@ -12,18 +12,28 @@ DisplayInterface* Spectrogram::createDefaultDisplay()
     return new Spectrogram();
 }
 
-QString Spectrogram::getName()
+QString Spectrogram::name()
 {
     return "Spectrogram";
 }
 
-QWidget* Spectrogram::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString Spectrogram::description()
+{
+    return "Displays a power spectral density waterfall for sample-based data";
+}
+
+QStringList Spectrogram::tags()
+{
+    return {"DSP"};
+}
+
+QWidget* Spectrogram::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* Spectrogram::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* Spectrogram::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

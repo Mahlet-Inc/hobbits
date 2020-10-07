@@ -12,18 +12,28 @@ DisplayInterface* BitRaster::createDefaultDisplay()
     return new BitRaster();
 }
 
-QString BitRaster::getName()
+QString BitRaster::name()
 {
     return "Bit Raster";
 }
 
-QWidget* BitRaster::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString BitRaster::description()
+{
+    return "Displays each bit in the data as a single colored pixel";
+}
+
+QStringList BitRaster::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* BitRaster::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* BitRaster::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* BitRaster::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

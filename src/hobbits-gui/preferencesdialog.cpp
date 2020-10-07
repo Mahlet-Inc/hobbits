@@ -19,7 +19,7 @@ PreferencesDialog::PreferencesDialog(QSharedPointer<const HobbitsPluginManager> 
     ui->pb_apply->setDisabled(true);
     this->setWindowTitle("Hobbits Preferences");
 
-    m_data = SettingsManager::getInstance().getAll();
+    m_data = SettingsManager::getAll();
 
     ui->lw_groups->addItem("Display");
     ui->lw_groups->addItem("Plugin Loader");
@@ -215,29 +215,29 @@ QWidget* PreferencesDialog::createPluginLoaderPage()
     }
 
     uiSettingsLayout->addRow("Loaded plugins:", new QLabel());
-    for (auto plugin : m_pluginManager->getAllDisplays()) {
-        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->getName()));
-        path->setReadOnly(true);
-        path->setDisabled(true);
-        uiSettingsLayout->addRow(plugin->getName(), path);
-    }
-    for (auto plugin : m_pluginManager->getAllImporterExporters()) {
-        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->getName()));
-        path->setReadOnly(true);
-        path->setDisabled(true);
-        uiSettingsLayout->addRow(plugin->getName(), path);
-    }
-    for (auto plugin : m_pluginManager->getAllAnalyzers()) {
+    for (auto plugin : m_pluginManager->displays()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
         path->setDisabled(true);
         uiSettingsLayout->addRow(plugin->name(), path);
     }
-    for (auto plugin : m_pluginManager->getAllOperators()) {
-        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->getName()));
+    for (auto plugin : m_pluginManager->importerExporters()) {
+        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
         path->setDisabled(true);
-        uiSettingsLayout->addRow(plugin->getName(), path);
+        uiSettingsLayout->addRow(plugin->name(), path);
+    }
+    for (auto plugin : m_pluginManager->analyzers()) {
+        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
+        path->setReadOnly(true);
+        path->setDisabled(true);
+        uiSettingsLayout->addRow(plugin->name(), path);
+    }
+    for (auto plugin : m_pluginManager->operators()) {
+        QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
+        path->setReadOnly(true);
+        path->setDisabled(true);
+        uiSettingsLayout->addRow(plugin->name(), path);
     }
 
     uiSettingsWidget->setLayout(uiSettingsLayout);
@@ -247,7 +247,7 @@ QWidget* PreferencesDialog::createPluginLoaderPage()
 
 void PreferencesDialog::on_pb_apply_clicked()
 {
-    SettingsManager::getInstance().setAll(m_data);
+    SettingsManager::setAll(m_data);
     ui->pb_apply->setDisabled(true);
 }
 

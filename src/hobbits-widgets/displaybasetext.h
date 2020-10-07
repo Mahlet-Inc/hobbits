@@ -6,6 +6,11 @@
 
 #include "hobbits-widgets_global.h"
 
+/**
+  * @brief The DisplayBaseText class extends DisplayBase for displays that represent bits with text
+  *
+  * \see DisplayInterface DisplayBase
+*/
 class HOBBITSWIDGETSSHARED_EXPORT DisplayBaseText : public DisplayBase
 {
     Q_OBJECT
@@ -13,8 +18,8 @@ class HOBBITSWIDGETSSHARED_EXPORT DisplayBaseText : public DisplayBase
 public:
     DisplayBaseText(QSharedPointer<DisplayHandle> displayHandle, DisplayInterface *pluginRef, int columnGrouping);
 
-    void paintEvent(QPaintEvent*);
-    void mouseMoveEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent*) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
     virtual QString getDisplayChars(Frame frame, int offset) = 0;
     virtual int bitsPerChar() = 0;

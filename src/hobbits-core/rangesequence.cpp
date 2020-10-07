@@ -214,7 +214,7 @@ qint64 *RangeSequence::getLocation(qint64 i) const
     qint64 cacheIdx = i / CACHE_CHUNK_64_SIZE;
 
     if (cacheIdx >= m_dataCacheBlockCount) {
-        resizeCache(cacheIdx + 1);
+        resizeCache(int(cacheIdx + 1));
     }
 
     if (!m_dataCaches[cacheIdx]) {

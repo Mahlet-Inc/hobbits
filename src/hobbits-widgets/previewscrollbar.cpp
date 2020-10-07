@@ -31,11 +31,11 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.fillRect(QRect(QPoint(0,0), this->size()), Qt::darkGray);
 
-    if (m_manager.isNull() || m_manager->getCurrentContainer().isNull()) {
+    if (m_manager.isNull() || m_manager->currentContainer().isNull()) {
         return;
     }
 
-    auto container = m_manager->getCurrentContainer();
+    auto container = m_manager->currentContainer();
     auto containerPtr = reinterpret_cast<quint64>(container.data());
 
     if (!m_imageCache.contains(containerPtr)) {
@@ -49,11 +49,11 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                                                        PreviewScrollBar::renderPreview,
                                                        container, progress);
 
-            auto actionWatcher = QSharedPointer<ActionWatcher<QImage>>(
-                    new ActionWatcher<QImage>(future, progress));
+            auto actionWatcher = QSharedPointer<PluginActionWatcher<QImage>>(
+                    new PluginActionWatcher<QImage>(future, progress));
             m_renderWatchers.insert(containerPtr, actionWatcher);
 
-            auto watcherRef = QWeakPointer<ActionWatcher<QImage>>(actionWatcher);
+            auto watcherRef = QWeakPointer<PluginActionWatcher<QImage>>(actionWatcher);
 
             connect(progress.data(), &ActionRenderProgress::renderPreviewChanged, this, [containerPtr, watcherRef, this](const QImage& preview) {
                 if (watcherRef.isNull()) {
@@ -143,11 +143,11 @@ void PreviewScrollBar::leaveEvent(QEvent *event)
 
 void PreviewScrollBar::getOffsetFromEvent(QMouseEvent* event)
 {
-    if (m_manager.isNull() || m_manager->getCurrentContainer().isNull()) {
+    if (m_manager.isNull() || m_manager->currentContainer().isNull()) {
         return;
     }
     double percent = double(event->y()) / this->height();
-    setFrameOffset(int(double(m_manager->getCurrentContainer()->frameCount()) * percent));
+    setFrameOffset(int(double(m_manager->currentContainer()->frameCount()) * percent));
 }
 
 void PreviewScrollBar::setFrameOffset(int offset)
@@ -215,7 +215,7 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     QPainter imagePainter(&image);
     imagePainter.setRenderHint(QPainter::Antialiasing, true);
 
-    QColor c = SettingsManager::getInstance().getUiSetting(SettingsData::BYTE_HUE_SAT_KEY).value<QColor>();
+    QColor c = SettingsManager::getUiSetting(SettingsManager::BYTE_HUE_SAT_KEY).value<QColor>();
     int hue = c.hue();
     int saturation = c.saturation();
     qint64 chunkHeight = qMax(50, qMin(10000, 5000000/width));
@@ -239,7 +239,7 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
         QRectF target(0, targetChunkHeight * (frame / chunkSize), width, heightRatio * targetChunkHeight);
         QRectF source(0, 0, width, offset);
         imagePainter.drawImage(target, bufferChunk, source);
-        if (progress->getCancelled()) {
+        if (progress->isCancelled()) {
             return QImage();
         }
         progress->setRenderPreview(image);

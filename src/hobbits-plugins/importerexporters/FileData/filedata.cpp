@@ -1,28 +1,75 @@
 #include "filedata.h"
 #include "settingsmanager.h"
-#include "ui_filedata.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include "parametereditorfileselect.h"
+#include <QVBoxLayout>
+#include <QLabel>
+#include "parametereditordialog.h"
 
-FileData::FileData() :
-    ui(new Ui::FileData())
+FileData::FileData()
 {
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        {"filename", QJsonValue::String, false}
+    };
 
+    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    infos,
+                    [](const QJsonObject &parameters) {
+                        if (parameters.contains("filename")) {
+                            return QString("Import from %1").arg(parameters.value("filename").toString());
+                        }
+                        else {
+                            return QString();
+                        }
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        Q_UNUSED(delegate)
+                        return new ParameterEditorFileSelect(QFileDialog::AcceptOpen);
+                    }));
+
+    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    infos,
+                    [](const QJsonObject &parameters) {
+                        if (parameters.contains("filename")) {
+                            return QString("Export to %1").arg(parameters.value("filename").toString());
+                        }
+                        else {
+                            return QString();
+                        }
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        Q_UNUSED(delegate)
+                        return new ParameterEditorFileSelect(QFileDialog::AcceptSave);
+                    }));
 }
 
 FileData::~FileData()
 {
-    delete ui;
 }
 
-ImportExportInterface* FileData::createDefaultImporterExporter()
+ImporterExporterInterface* FileData::createDefaultImporterExporter()
 {
     return new FileData();
 }
 
-QString FileData::getName()
+QString FileData::name()
 {
     return "File Data";
+}
+
+QString FileData::description()
+{
+    return "Raw file data importing and exporting";
+}
+
+QStringList FileData::tags()
+{
+    return {"Generic"};
 }
 
 bool FileData::canExport()
@@ -35,90 +82,58 @@ bool FileData::canImport()
     return true;
 }
 
-QString FileData::getImportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> FileData::importParameterDelegate()
 {
-    if (pluginState.contains("filename")) {
-        QString fileName = pluginState.value("filename").toString();
-        return QString("Import file %1").arg(fileName);
-    }
-    return "";
+    return m_importDelegate;
 }
 
-QString FileData::getExportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> FileData::exportParameterDelegate()
 {
-    Q_UNUSED(pluginState)
-    return "";
+    return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> FileData::importBits(QJsonObject pluginState)
+QSharedPointer<ImportResult> FileData::importBits(QJsonObject parameters,
+                                                  QSharedPointer<PluginActionProgress> progress)
 {
-    QString fileName;
-
-    if (pluginState.contains("filename")) {
-        fileName = pluginState.value("filename").toString();
-    }
-    else {
-        fileName = QFileDialog::getOpenFileName(
-                nullptr,
-                tr("Import Bits"),
-                SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_IMPORT_EXPORT_PATH_KEY).toString(),
-                tr("All Files (*)"));
-    }
-
+    QString fileName = parameters.value("filename").toString();
     if (fileName.isEmpty()) {
         return ImportResult::error("No file selected for import");
     }
-
-    pluginState.remove("filename");
-    pluginState.insert("filename", fileName);
-
     QFile file(fileName);
-
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox msg;
-        msg.setWindowTitle("Import Bits Error");
-        msg.setText(QString("Failed to import bit file: '%1'").arg(fileName));
-        msg.setDefaultButton(QMessageBox::Ok);
-        msg.exec();
-        return ImportResult::error(QString("Failed to import bit file: '%1'").arg(fileName));
+        return ImportResult::error(QString("Failed to open file for import: '%1'").arg(fileName));
     }
-    SettingsManager::getInstance().setPrivateSetting(
-            SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
+    SettingsManager::setPrivateSetting(
+            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
     QSharedPointer<BitContainer> container = BitContainer::create(&file);
     container->setName(QFileInfo(file).fileName());
 
-    return ImportResult::result(container, pluginState);
+    return ImportResult::result(container, parameters);
 }
 
-QSharedPointer<ExportResult> FileData::exportBits(QSharedPointer<const BitContainer> container, QJsonObject pluginState)
+QSharedPointer<ExportResult> FileData::exportBits(QSharedPointer<const BitContainer> container,
+                                                  QJsonObject parameters,
+                                                  QSharedPointer<PluginActionProgress> progress)
 {
-    QString fileName;
-
-    if (pluginState.contains("filename")) {
-        fileName = pluginState.value("filename").toString();
+    progress->setProgressPercent(10);
+    QString fileName = parameters.value("filename").toString();
+    if (fileName.isEmpty()) {
+        return ExportResult::error("No file selected for export");
     }
-    else {
-        fileName = QFileDialog::getSaveFileName(
-                nullptr,
-                tr("Export Bits"),
-                SettingsManager::getInstance().getPrivateSetting(SettingsData::LAST_IMPORT_EXPORT_PATH_KEY).toString(),
-                tr("All Files (*)"));
-    }
-    pluginState.remove("filename");
-    pluginState.insert("filename", fileName);
 
     QFile file(fileName);
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return ExportResult::error(QString("Failed to open export bit file: '%1'").arg(fileName));
     }
-    SettingsManager::getInstance().setPrivateSetting(
-            SettingsData::LAST_IMPORT_EXPORT_PATH_KEY,
+    SettingsManager::setPrivateSetting(
+            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
             QFileInfo(file).dir().path());
 
     container->bits()->writeTo(&file);
     file.close();
+    progress->setProgressPercent(90);
 
-    return ExportResult::result(pluginState);
+    return ExportResult::result(parameters);
 }

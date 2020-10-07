@@ -11,12 +11,12 @@ TcpData::~TcpData()
 {
 }
 
-ImportExportInterface* TcpData::createDefaultImporterExporter()
+ImporterExporterInterface* TcpData::createDefaultImporterExporter()
 {
     return new TcpData();
 }
 
-QString TcpData::getName()
+QString TcpData::name()
 {
     return "TCP Data";
 }

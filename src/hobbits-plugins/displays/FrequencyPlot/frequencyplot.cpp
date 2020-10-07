@@ -12,18 +12,28 @@ DisplayInterface* FrequencyPlot::createDefaultDisplay()
     return new FrequencyPlot();
 }
 
-QString FrequencyPlot::getName()
+QString FrequencyPlot::name()
 {
     return "Frequency Plot";
 }
 
-QWidget* FrequencyPlot::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString FrequencyPlot::description()
+{
+    return "Displays a histogram where each bar shows the frequency of an n-bit word across the given sample window";
+}
+
+QStringList FrequencyPlot::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* FrequencyPlot::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* FrequencyPlot::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* FrequencyPlot::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;
