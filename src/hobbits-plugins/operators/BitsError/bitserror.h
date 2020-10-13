@@ -4,8 +4,6 @@
 #include "operatorinterface.h"
 #include "parameterdelegateui.h"
 
-
-
 class BitsError : public QObject, OperatorInterface
 {
     Q_OBJECT

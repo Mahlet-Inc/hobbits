@@ -100,6 +100,7 @@ private slots:
     void setupSplitViewMenu();
 
     void sendBitContainerPreview();
+    static void processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor*  editor);
 
 
 private:
@@ -110,8 +111,6 @@ private:
     QSharedPointer<BitContainerManagerUi> m_bitContainerManager;
     QSharedPointer<HobbitsPluginManager> m_pluginManager;
     QSharedPointer<PluginActionManager> m_pluginActionManager;
-
-    QMutex m_previewMutex;
 
     QHash<QUuid, PluginProgress*> m_pluginProgress;
     QHash<QUuid, QSharedPointer<ImporterRunner>> m_pendingImports;

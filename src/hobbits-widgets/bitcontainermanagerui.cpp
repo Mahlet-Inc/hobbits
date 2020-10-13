@@ -8,17 +8,16 @@ BitContainerManagerUi::BitContainerManagerUi(QObject *parent) :
     m_currSelectionModel->setModel(m_bitContainerTreeModel.data());
     connect(
             m_currSelectionModel.data(),
-            SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
+            &QItemSelectionModel::selectionChanged,
             this,
-            SLOT(manageSelectionChanged(const QItemSelection&,const QItemSelection&)),
+            &BitContainerManagerUi::manageSelectionChanged,
              Qt::QueuedConnection);
 
     connect(
             m_bitContainerTreeModel.data(),
             SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
             this,
-            SIGNAL(containerAdded(QSharedPointer<BitContainer>)),
-            Qt::QueuedConnection);
+            SIGNAL(containerAdded(QSharedPointer<BitContainer>)));
 }
 
 void BitContainerManagerUi::manageSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

@@ -9,7 +9,12 @@ BitContainerPreview::BitContainerPreview(QSharedPointer<BitContainer> bitContain
 
 QSharedPointer<BitContainerPreview> BitContainerPreview::wrap(QSharedPointer<BitContainer> bitContainer)
 {
-    return QSharedPointer<BitContainerPreview>(new BitContainerPreview(bitContainer));
+    if (bitContainer.isNull()) {
+        return QSharedPointer<BitContainerPreview>();
+    }
+    else {
+        return QSharedPointer<BitContainerPreview>(new BitContainerPreview(bitContainer));
+    }
 }
 
 QString BitContainerPreview::name() const

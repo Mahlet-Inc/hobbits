@@ -3,18 +3,15 @@
 #include <QNetworkDatagram>
 #include <QTimer>
 
-UdpReceiver::UdpReceiver(QWidget *parent) :
-    QDialog(parent),
+UdpReceiver::UdpReceiver(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::UdpReceiver),
-    m_socket(nullptr)
+    m_paramHelper(new ParameterHelper(delegate))
 {
     ui->setupUi(this);
-    m_downloadFile.open();
 
-    setWindowTitle("Import via UDP");
-
-    ui->pb_stop->setEnabled(false);
-
+    m_paramHelper->addSpinBoxIntParameter("port", ui->sb_port);
+    m_paramHelper->addSpinBoxIntParameter("max_kb", ui->sb_limitKb);
+    m_paramHelper->addSpinBoxIntParameter("timeout", ui->sb_timeout);
 }
 
 UdpReceiver::~UdpReceiver()
@@ -22,118 +19,70 @@ UdpReceiver::~UdpReceiver()
     delete ui;
 }
 
-QTemporaryFile* UdpReceiver::getDownloadedData()
+QString UdpReceiver::title()
 {
-    m_downloadFile.seek(0);
-    return &m_downloadFile;
+    return "Configure UDP Receiver";
 }
 
-int UdpReceiver::getPort()
+bool UdpReceiver::setParameters(QJsonObject parameters)
 {
-    return ui->sb_port->value();
+    return m_paramHelper->applyParametersToUi(parameters);
 }
 
-void UdpReceiver::setPort(int port)
+QJsonObject UdpReceiver::parameters()
 {
-    ui->sb_port->setValue(port);
+    return m_paramHelper->getParametersFromUi();
 }
 
-int UdpReceiver::getLimit()
+bool UdpReceiver::isStandaloneDialog()
 {
-    if (ui->ck_limit->isChecked()) {
-        return ui->sb_limit->value() * 1000;
-    }
-    else {
-        return -1;
-    }
+    return true;
 }
 
-void UdpReceiver::setLimit(int bytes)
+QSharedPointer<ImportResult> UdpReceiver::importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    if (bytes > 0) {
-        ui->ck_limit->setChecked(true);
-        ui->sb_limit->setValue(bytes / 1000);
-    }
-    else {
-        ui->ck_limit->setChecked(false);
-    }
-}
+    int port = parameters.value("port").toInt();
+    qint64 maxBytes = qint64(parameters.value("max_kb").toInt()) * 1000ll;
+    int timeout = parameters.value("timeout").toInt() * 1000;
 
-QString UdpReceiver::getError()
-{
-    if (m_socket) {
-        return m_socket->errorString();
+    QTemporaryFile downloadBuffer;
+    if (!downloadBuffer.open()) {
+        return ImportResult::error("Failed to open buffer file for downloaded data");
     }
-    return QString();
-}
 
-void UdpReceiver::startListening()
-{
-    ui->pb_start->setText("Listening...");
-    ui->pb_start->setEnabled(false);
-    ui->pb_stop->setEnabled(true);
-    ui->sb_port->setEnabled(false);
-    m_downloadFile.resize(0);
-    ui->lb_progress->setText(QString("Waiting for data..."));
-    if (m_socket) {
-        delete m_socket;
-    }
-    m_socket = new QUdpSocket(this);
+    auto socket = new QUdpSocket();
+    socket->bind(QHostAddress::LocalHost, quint16(port));
 
-    connect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::socketRead);
-    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
+    while (true) {
+        if (downloadBuffer.size() >= maxBytes
+                || progress->isCancelled()
+                || !socket->waitForReadyRead(timeout)) {
+            break;
+        }
 
-    m_socket->bind(QHostAddress::LocalHost, quint16(getPort()));
-}
+        while (socket->hasPendingDatagrams()) {
+            auto datagram = socket->receiveDatagram();
+            downloadBuffer.write(datagram.data());
+            progress->setProgress(downloadBuffer.size(), maxBytes);
+        }
+    }
 
-void UdpReceiver::stopListening()
-{
-    ui->pb_start->setText("Begin Listening");
-    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
-    ui->pb_start->setEnabled(true);
-    ui->pb_stop->setEnabled(false);
-    ui->sb_port->setEnabled(true);
-    if (m_socket) {
-        m_socket->close();
-        delete m_socket;
-        m_socket = nullptr;
-    }
-    if (m_downloadFile.size() > 0) {
-        accept();
-    }
-}
+    socket->close();
+    QString socketErr = socket->errorString();
+    socket->deleteLater();
 
-void UdpReceiver::socketError(QAbstractSocket::SocketError)
-{
-    stopListening();
-    if (m_downloadFile.size() > 0) {
-        accept();
+    if (downloadBuffer.size() < 1) {
+        if (!socketErr.isEmpty()) {
+            return ImportResult::error("UDP Socket error: " + socketErr);
+        }
+        return ImportResult::error("No data was received on UDP connection.");
     }
-    else {
-        reject();
-    }
-}
 
-void UdpReceiver::socketRead()
-{
-    while (m_socket->hasPendingDatagrams()) {
-        auto datagram = m_socket->receiveDatagram();
-        m_downloadFile.write(datagram.data());
-    }
-    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
-
-    if (getLimit() > 0 && m_downloadFile.size() >= getLimit()) {
-        disconnect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::socketRead);
-        QTimer::singleShot(10, this, &UdpReceiver::stopListening);
-    }
+    downloadBuffer.seek(0);
+    return ImportResult::result(BitContainer::create(&downloadBuffer), parameters);
 }
 
 void UdpReceiver::on_pb_start_pressed()
 {
-    startListening();
-}
-
-void UdpReceiver::on_pb_stop_pressed()
-{
-    stopListening();
+    emit accepted();
 }

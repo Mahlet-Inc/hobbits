@@ -136,14 +136,20 @@ QSharedPointer<ImportResult> PacketCaptureClient::capturePacketsImpl(QJsonObject
     if (!m_filter.isEmpty()) {
         struct bpf_program filter;
         if (pcap_compile(m_handle, &filter, m_filter.toStdString().c_str(), 1, m_address) == -1) {
+            pcap_close(m_handle);
+            m_handle = nullptr;
             return ImportResult::error("Failed to compile filter:\n" + QString(errbuf));
         }
         if (pcap_setfilter(m_handle, &filter) == -1) {
+            pcap_close(m_handle);
+            m_handle = nullptr;
             return ImportResult::error("Failed to apply filter:\n" + QString(errbuf));
         }
     }
 
     if (!m_file.open()) {
+        pcap_close(m_handle);
+        m_handle = nullptr;
         return ImportResult::error("Failed to open a temporary file buffer for packets");
     }
 

@@ -1,17 +1,17 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-10T16:34:57.900Z
+# Project created by QtCreator 2020-10-13T14:45:34.579Z
 #
 #-------------------------------------------------
 
-QT       += widgets network
+QT       += widgets
 
 QT       -= gui
 
-TARGET = TcpData
+TARGET = Highlight
 TEMPLATE = lib
 
-DEFINES += TCPDATA_LIBRARY
+DEFINES += HIGHLIGHT_LIBRARY
 
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -27,34 +27,32 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         tcpdata.cpp \
-    tcpreceiver.cpp \
-    tcpsender.cpp
+SOURCES +=         highlight.cpp highlightform.cpp
 
-HEADERS +=         tcpdata.h \
-    tcpreceiver.h \
-    tcpsender.h
+HEADERS +=         highlight.h highlightform.h
+
+FORMS +=        highlightform.ui
+
+DISTFILES +=
+
+RESOURCES += 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
 INCLUDEPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
-unix:!mac {
+unix:!mac{
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'$$ORIGIN/../../lib:$$ORIGIN'"
 }
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'@executable_path/../Frameworks'"
 }
 
 unix {
-    target.path = $$(HOME)/.local/share/hobbits/plugins/importerexporters
+    target.path = $$(HOME)/.local/share/hobbits/plugins/analyzers
     INSTALLS += target
 }
-
-FORMS += \
-    tcpreceiver.ui \
-    tcpsender.ui

@@ -1,12 +1,9 @@
 #ifndef %{JS: '%{ClassName}'.toUpperCase()}_H
 #define %{JS: '%{ClassName}'.toUpperCase()}_H
 
-#include "analyzerinterface.h"
 
-namespace Ui
-{
-class %{ClassName};
-}
+#include "analyzerinterface.h"
+#include "parameterdelegateui.h"
 
 class %{ClassName} : public QObject, AnalyzerInterface
 {
@@ -16,27 +13,22 @@ class %{ClassName} : public QObject, AnalyzerInterface
 
 public:
     %{ClassName}();
-    ~%{ClassName}() override;
 
     AnalyzerInterface* createDefaultAnalyzer() override;
-    QString getName() override;
 
-    void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
-    void applyToWidget(QWidget *widget) override;
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
 
-    bool canRecallPluginState(const QJsonObject& pluginState) override;
-    bool setPluginStateInUi(const QJsonObject &pluginState) override;
-    QJsonObject getStateFromUi() override;
-    
-    void previewBits(QSharedPointer<BitContainerPreview> container) override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
+
     QSharedPointer<const AnalyzerResult> analyzeBits(
-        QSharedPointer<const BitContainer> container,
-        const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker) override;
+            QSharedPointer<const BitContainer> container,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    Ui::%{ClassName} *ui;
-    QSharedPointer<PluginCallback> m_pluginCallback;
+    QSharedPointer<ParameterDelegateUi> m_delegate;
 };
 
 #endif // %{JS: '%{ClassName}'.toUpperCase()}_H

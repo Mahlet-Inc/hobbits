@@ -44,11 +44,15 @@ public Q_SLOTS:
     void updateAll();
 
 private:
+    QUuid getIndexId(const QModelIndex &index) const;
     int getContainerRow(BitContainer *bitContainer) const;
     QModelIndex getContainerParentIndex(BitContainer *bitContainer) const;
+    QModelIndex addContainerImpl(QSharedPointer<BitContainer> bitContainer);
+
+    QUuid m_rootUuid;
 
     QMap<QUuid, QSharedPointer<BitContainer>> m_containerMap;
-    QMap<QUuid, QModelIndex> m_containerIndexMap;
+    QMap<QUuid, QList<QSharedPointer<BitContainer>>> m_containerGroups;
 };
 
 #endif // BITCONTAINERTREEMODEL_H

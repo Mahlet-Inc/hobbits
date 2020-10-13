@@ -178,23 +178,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_previewScroll->setBitContainerManager(m_bitContainerManager);
     m_previewScroll->setDisplayHandle(m_displayHandle);
 
-//    m_pluginCallback = QSharedPointer<PluginCallback>(new PluginCallback(m_displayHandle));
-//    connect(
-//            m_pluginCallback.data(),
-//            &PluginCallback::analyzerRunRequested,
-//            this,
-//            &MainWindow::requestAnalyzerRun);
-//    connect(
-//            m_pluginCallback.data(),
-//            &PluginCallback::operatorRunRequested,
-//            this,
-//            &MainWindow::requestOperatorRun);
-//    connect(
-//            m_pluginCallback.data(),
-//            &PluginCallback::operatorStateChanged,
-//            this,
-//            &MainWindow::checkOperatorInput);
-
     // load and initialize plugins
     loadPlugins();
     initializeImporterExporters();
@@ -559,9 +542,17 @@ void MainWindow::loadPlugins()
     }
     for (QSharedPointer<OperatorInterface> op : operators) {
         AbstractParameterEditor *opUi = op->parameterDelegate()->createEditor();
+        if (opUi == nullptr) {
+            continue;
+        }
         int idx = ui->operatorTabs->addTab(opUi, op->name());
         m_operatorMap.insert(idx, op);
         m_operatorUiMap.insert(op, opUi);
+
+        opUi->giveDisplayHandle(m_displayHandle);
+        connect(opUi, &AbstractParameterEditor::accepted, [this, opUi, op]() {
+            this->requestOperatorRun(op->name(), opUi->parameters());
+        });
     }
     ui->operatorTabs->setUpdatesEnabled(true);
 
@@ -584,9 +575,17 @@ void MainWindow::loadPlugins()
 
     for (QSharedPointer<AnalyzerInterface> analyzer : analyzers) {
         AbstractParameterEditor *analysisUi = analyzer->parameterDelegate()->createEditor();
+        if (analysisUi == nullptr) {
+            continue;
+        }
         int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->name());
         m_analyzerMap.insert(idx, analyzer);
         m_analyzerUiMap.insert(analyzer, analysisUi);
+
+        analysisUi->giveDisplayHandle(m_displayHandle);
+        connect(analysisUi, &AbstractParameterEditor::accepted, [this, analysisUi, analyzer] {
+            this->requestAnalyzerRun(analyzer->name(), analysisUi->parameters());
+        });
     }
     ui->analyzerTabs->setUpdatesEnabled(true);
 }
@@ -612,10 +611,7 @@ void MainWindow::activateBitContainer(QSharedPointer<BitContainer> selected, QSh
 
 void MainWindow::currBitContainerChanged()
 {
-    if (m_previewMutex.tryLock()) {
-        sendBitContainerPreview();
-        m_previewMutex.unlock();
-    }
+    sendBitContainerPreview();
     checkOperatorInput();
 }
 
@@ -625,15 +621,19 @@ void MainWindow::sendBitContainerPreview()
     if (!currContainer().isNull()) {
         preview = BitContainerPreview::wrap(currContainer());
     }
-    // TODO: make previews asynchronous
-    for (QSharedPointer<AnalyzerInterface> analyzer : m_pluginManager->analyzers()) {
-        QSharedPointer<PluginActionProgress> progress(new PluginActionProgress());
-        //analyzer->previewBits(preview, progress);
+    for (auto editor : m_analyzerUiMap.values()) {
+        QtConcurrent::run(MainWindow::processBitPreview, preview, editor);
     }
-    for (QSharedPointer<OperatorInterface> op : m_pluginManager->operators()) {
-        QSharedPointer<PluginActionProgress> progress(new PluginActionProgress());
-        //op->previewBits(preview, progress);
+    for (auto editor : m_operatorUiMap.values()) {
+        QtConcurrent::run(MainWindow::processBitPreview, preview, editor);
     }
+}
+
+void MainWindow::processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor* editor)
+{
+    // TODO: show preview progress
+    QSharedPointer<PluginActionProgress> progress(new PluginActionProgress());
+    editor->previewBits(preview, progress);
 }
 
 void MainWindow::setCurrentBitContainer()
@@ -652,7 +652,7 @@ void MainWindow::setCurrentBitContainer()
                 }
                 auto op = m_pluginManager->getOperator(output->pluginName());
                 if (!op.isNull()) {
-                    AbstractParameterEditor *editor = m_operatorUiMap.value(op);
+                    AbstractParameterEditor* editor = m_operatorUiMap.value(op);
                     if (editor != nullptr) {
                         QJsonObject parameters = output->parameters();
                         editor->setParameters(parameters);

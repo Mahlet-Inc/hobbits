@@ -1,15 +1,23 @@
 #include "%{HeaderFileName}"
-#include "ui_%{HeaderFileName}"
+#include "%{FormHeaderFileName}"
 
-%{ClassName}::%{ClassName}() :
-    ui(new Ui::%{ClassName}())
+%{ClassName}::%{ClassName}()
 {
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        // TODO: add parameters like {"myparametername", QJsonValue::Double}
+    };
 
-}
-
-%{ClassName}::~%{ClassName}()
-{
-    delete ui;
+    m_delegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    infos,
+                    [this](const QJsonObject &parameters) {
+                        // TODO: use parameters to describe action better
+                        return QString("Apply %1").arg(this->name());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new %{FormClassName}(delegate);
+                    }));
 }
 
 AnalyzerInterface* %{ClassName}::createDefaultAnalyzer()
@@ -17,66 +25,37 @@ AnalyzerInterface* %{ClassName}::createDefaultAnalyzer()
     return new %{ClassName}();
 }
 
-QString %{ClassName}::getName()
+QString %{ClassName}::name()
 {
     return "%{ClassName}";
 }
 
-void %{ClassName}::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
+QString %{ClassName}::description()
 {
-    // The plugin callback allows the self-triggering of analyzeBits
-    m_pluginCallback = pluginCallback;
+    // TODO: create actual description
+    return "Describes what %{ClassName} does";
 }
 
-void %{ClassName}::applyToWidget(QWidget *widget)
+QStringList %{ClassName}::tags()
 {
-    ui->setupUi(widget);
+    // TODO: add relevant tags
+    return {"Generic"};
 }
 
-bool %{ClassName}::canRecallPluginState(const QJsonObject &pluginState)
+QSharedPointer<ParameterDelegate>  %{ClassName}::parameterDelegate()
 {
-    // If pluginState does not have required fields, return false
-    if(pluginState.isEmpty() == true) {
-        return false;
-    }
-
-    return true;
-}
-
-bool %{ClassName}::setPluginStateInUi(const QJsonObject &pluginState)
-{
-    if (!canRecallPluginState(pluginState)) {
-        return false;
-    }
-
-    // Set the UI fields based on the plugin state
-
-    return true;
-}
-
-QJsonObject %{ClassName}::getStateFromUi()
-{
-    QJsonObject pluginState;
-
-    // Pull data from the input fields and input them into pluginState
-
-    return pluginState;
-}
-
-void %{ClassName}::previewBits(QSharedPointer<BitContainerPreview> container)
-{
-    Q_UNUSED(container)
-    // optionally use the current container to prepare the UI or something
+    return m_delegate;
 }
 
 QSharedPointer<const AnalyzerResult> %{ClassName}::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        const QJsonObject &parameters,
+        QSharedPointer<PluginActionProgress> progress)
 {
-    QSharedPointer<AnalyzerResult> result(new AnalyzerResult());
+    if (!m_delegate->validate(parameters)) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    }
 
-    //Perform analysis
-
-    return result;
+    // TODO: Perform analysis and return result with AnalyzerResult::result
+    return AnalyzerResult::error("Plugin analyze action not implemented");
 }

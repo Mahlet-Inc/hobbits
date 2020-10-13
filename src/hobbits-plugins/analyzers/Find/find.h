@@ -1,17 +1,18 @@
-#ifndef WIDTHFRAMER_H
-#define WIDTHFRAMER_H
+#ifndef FIND_H
+#define FIND_H
+
 
 #include "analyzerinterface.h"
 #include "parameterdelegateui.h"
 
-class WidthFramer : public QObject, AnalyzerInterface
+class Find : public QObject, AnalyzerInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.AnalyzerInterface.WidthFramer")
+    Q_PLUGIN_METADATA(IID "hobbits.AnalyzerInterface.Find")
     Q_INTERFACES(AnalyzerInterface)
 
 public:
-    WidthFramer();
+    Find();
 
     AnalyzerInterface* createDefaultAnalyzer() override;
 
@@ -30,4 +31,4 @@ private:
     QSharedPointer<ParameterDelegateUi> m_delegate;
 };
 
-#endif // WIDTHFRAMER_H
+#endif // FIND_H

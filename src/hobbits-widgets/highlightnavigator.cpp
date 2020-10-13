@@ -18,8 +18,8 @@ HighlightNavigator::HighlightNavigator(QWidget *parent) :
     connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged()));
 
     Q_INIT_RESOURCE(hobbitswidgets);
-    ui->tb_gotoNext->setIcon(QIcon(":/hobbits-core/images/icons/arrow-right.png"));
-    ui->tb_gotoPrevious->setIcon(QIcon(":/hobbits-core/images/icons/arrow-left.png"));
+    ui->tb_gotoNext->setIcon(QIcon(":/images/icons/arrow-right.png"));
+    ui->tb_gotoPrevious->setIcon(QIcon(":/images/icons/arrow-left.png"));
 }
 
 HighlightNavigator::~HighlightNavigator()
@@ -51,7 +51,7 @@ bool HighlightNavigator::selectRow(QString text)
     return true;
 }
 
-void HighlightNavigator::setPluginCallback(QSharedPointer<DisplayHandle> displayHandle)
+void HighlightNavigator::giveDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_displayHandle = displayHandle;
     refresh();

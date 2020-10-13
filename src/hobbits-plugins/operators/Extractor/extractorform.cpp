@@ -9,6 +9,7 @@ ExtractorForm::ExtractorForm(QSharedPointer<ParameterDelegate> delegate):
     ui->setupUi(this);
 
     m_highlightNav = new HighlightNavigator();
+    m_highlightNav->setTitle("");
     ui->sectionLayout->addWidget(m_highlightNav);
     ui->sectionLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
@@ -57,7 +58,7 @@ QJsonObject ExtractorForm::parameters()
     return m_stateHelper->getParametersFromUi();
 }
 
-void ExtractorForm::previewBits(QSharedPointer<BitContainerPreview> container, QSharedPointer<PluginActionProgress> progress)
+void ExtractorForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
     QJsonObject uiState = parameters();
     m_previewContainer = container;

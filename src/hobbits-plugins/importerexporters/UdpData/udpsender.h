@@ -1,44 +1,38 @@
 #ifndef UDPSENDER_H
 #define UDPSENDER_H
 
-#include <QDialog>
 #include <QUdpSocket>
 #include "bitarray.h"
+#include "abstractparametereditor.h"
+#include "parameterdelegate.h"
+#include "parameterhelper.h"
+#include "exportresult.h"
 
 namespace Ui {
 class UdpSender;
 }
 
-class UdpSender : public QDialog
+class UdpSender : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    explicit UdpSender(QSharedPointer<const BitArray> bits, QWidget *parent = nullptr);
-    ~UdpSender();
+    explicit UdpSender(QSharedPointer<ParameterDelegate> delegate);
+    ~UdpSender() override;
 
-    void setHost(QString host);
-    QString getHost() const;
-    void setPort(int port);
-    int getPort() const;
-    qint64 getBytesWritten();
+    QString title() override;
+    bool setParameters(QJsonObject parameters) override;
+    QJsonObject parameters() override;
+    bool isStandaloneDialog() override;
 
-public slots:
-    void sendData();
-    void cancelSendData();
-    void writeNextChunk(qint64 lastChunkSize);
-    void socketError(QAbstractSocket::SocketError);
+    static QSharedPointer<ExportResult> exportData(QSharedPointer<const BitArray> bits, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
 
 private slots:
     void on_pb_send_pressed();
 
-    void on_pb_cancel_pressed();
-
 private:
     Ui::UdpSender *ui;
-    QSharedPointer<const BitArray> m_bits;
-    QSharedPointer<QUdpSocket> m_socket;
-    qint64 m_bytesWritten;
+    QSharedPointer<ParameterHelper> m_paramHelper;
 
 };
 

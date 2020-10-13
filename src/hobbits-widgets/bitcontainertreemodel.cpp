@@ -5,7 +5,8 @@
 BitContainerTreeModel::BitContainerTreeModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-
+    m_rootUuid = QUuid::createUuid();
+    m_containerGroups.insert(m_rootUuid, {});
 }
 
 QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
@@ -21,6 +22,9 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         return QVariant(DisplayHelper::bitRasterThumbnail(container));
+    }
+    else if (role == Qt::UserRole) {
+        return QVariant(container->id());
     }
     return QVariant();
 }
@@ -54,32 +58,12 @@ QModelIndex BitContainerTreeModel::index(
         return QModelIndex();
     }
 
-    if (!parent.isValid()) {
-        int rootContainers = 0;
-        for (QSharedPointer<BitContainer> container : m_containerMap.values()) {
-            if (container->isRootContainer()) {
-                if (rootContainers == row) {
-                    return createIndex(row, column, container.data());
-                }
-                else {
-                    rootContainers++;
-                }
-            }
-        }
-    }
-    else {
-        BitContainer *parentContainer = static_cast<BitContainer*>(parent.internalPointer());
-        int currentChild = 0;
-        for (QUuid childUuid : parentContainer->childUuids()) {
-            if (m_containerMap.contains(childUuid)) {
-                if (currentChild == row) {
-                    return createIndex(row, column, m_containerMap.value(childUuid).data());
-                }
-                else {
-                    currentChild++;
-                }
-            }
-        }
+    QUuid parentId = getIndexId(parent);
+
+    auto group = m_containerGroups.value(parentId);
+    if (group.size() > row) {
+        auto container = group.at(row);
+        return createIndex(row, column, container.data());
     }
     return QModelIndex();
 }
@@ -101,20 +85,7 @@ int BitContainerTreeModel::rowCount(const QModelIndex &parent) const
         return 0;
     }
 
-    if (!parent.isValid()) {
-        int rootContainers = 0;
-        for (QSharedPointer<BitContainer> container : m_containerMap.values()) {
-            if (container->isRootContainer()) {
-                rootContainers++;
-            }
-        }
-        return rootContainers;
-    }
-    else {
-        BitContainer *parentContainer = static_cast<BitContainer*>(parent.internalPointer());
-        // maybe needs to make sure they are there?
-        return parentContainer->childUuids().length();
-    }
+    return m_containerGroups.value(getIndexId(parent)).size();
 }
 
 int BitContainerTreeModel::columnCount(const QModelIndex &parent) const
@@ -128,17 +99,19 @@ void BitContainerTreeModel::updateAll()
     // TODO: this is supposed to do something?
 }
 
+QUuid BitContainerTreeModel::getIndexId(const QModelIndex &index) const
+{
+    auto container = getContainer(index);
+    if (!container.isNull()) {
+        return container->id();
+    }
+    return m_rootUuid;
+}
+
 QModelIndex BitContainerTreeModel::addContainer(QSharedPointer<BitContainer> bitContainer)
 {
-    m_containerMap.insert(bitContainer->id(), bitContainer);
-    QModelIndex parentIndex = getContainerParentIndex(bitContainer.data());
-    int row = getContainerRow(bitContainer.data());
-    beginInsertRows(parentIndex, row, row);
-    endInsertRows();
+    QModelIndex idx = addContainerImpl(bitContainer);
     connect(bitContainer.data(), SIGNAL(changed()), this, SLOT(updateAll()));
-
-    QModelIndex idx = this->index(row, 0, parentIndex);
-    m_containerIndexMap.insert(bitContainer->id(), idx);
 
     emit containerAdded(bitContainer);
 
@@ -154,8 +127,14 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
     beginRemoveRows(parentIndex, row, row);
     // Get a copy of the container as a QSharedPointer so it doesn't get deleted when it is removed from the container
     QSharedPointer<BitContainer> containerPtr = m_containerMap.value(container->id());
+    if (parentIndex.isValid()) {
+        QUuid id = getContainer(parentIndex)->id();
+        m_containerGroups[id].removeAt(row);
+    }
+    else {
+        m_containerGroups[m_rootUuid].removeAt(row);
+    }
     m_containerMap.remove(container->id());
-    m_containerIndexMap.remove(container->id());
     QList<QUuid> detach;
     for (QUuid childUuid : container->childUuids()) {
         detach.append(childUuid);
@@ -164,9 +143,11 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
         if (m_containerMap.contains(childUuid)) {
             m_containerMap.value(childUuid)->detachParent(container->id());
             orphanedContainers.append(m_containerMap.value(childUuid));
+            m_containerMap.remove(childUuid);
         }
     }
     detach.clear();
+    m_containerGroups.remove(container->id());
     for (QUuid parentUuid : container->parentUuids()) {
         detach.append(parentUuid);
     }
@@ -176,9 +157,9 @@ void BitContainerTreeModel::removeContainer(const QModelIndex &index)
         }
     }
     endRemoveRows();
-    if (!orphanedContainers.isEmpty()) {
-        beginInsertRows(QModelIndex(), 0, rowCount() - 1);
-        endInsertRows();
+
+    for (auto orphan : orphanedContainers) {
+        addContainerImpl(orphan);
     }
 }
 
@@ -187,7 +168,8 @@ void BitContainerTreeModel::removeAllContainers()
 {
     beginRemoveRows(QModelIndex(), 0, rowCount()-1);
     m_containerMap.clear();
-    m_containerIndexMap.clear();
+    m_containerGroups.clear();
+    m_containerGroups.insert(m_rootUuid, {});
     endRemoveRows();
 }
 
@@ -209,7 +191,16 @@ QSharedPointer<BitContainer> BitContainerTreeModel::getContainer(const QModelInd
 
 QModelIndex BitContainerTreeModel::getContainerIndex(const QUuid &id) const
 {
-    return m_containerIndexMap.value(id);
+    if (!m_containerMap.contains(id)) {
+        return QModelIndex();
+    }
+    auto container = m_containerMap.value(id);
+
+    int row = getContainerRow(container.data());
+    if (row >= 0) {
+        return createIndex(row, 0, container.data());
+    }
+    return QModelIndex();
 }
 
 QSharedPointer<BitContainer> BitContainerTreeModel::getContainerById(QUuid id) const
@@ -224,24 +215,19 @@ QList<QSharedPointer<BitContainer>> BitContainerTreeModel::getContainers() const
 
 int BitContainerTreeModel::getContainerRow(BitContainer *bitContainer) const
 {
-    if (bitContainer->isRootContainer()) {
-        int row = 0;
-        for (QSharedPointer<BitContainer> container : m_containerMap.values()) {
-            if (container->isRootContainer()) {
-                if (container.data() == bitContainer) {
-                    return row;
-                }
-                row++;
-            }
-        }
+    QUuid parentId = m_rootUuid;
+    if (!bitContainer->isRootContainer()) {
+        parentId = bitContainer->parentUuids().at(0);
     }
-    else {
-        for (QUuid parentUuid : bitContainer->parentUuids()) {
-            if (m_containerMap.contains(parentUuid)) {
-                return m_containerMap.value(parentUuid)->childUuids().indexOf(bitContainer->id());
-            }
+
+    int row = 0;
+    for (QSharedPointer<BitContainer> container : m_containerGroups.value(parentId)) {
+        if (container.data() == bitContainer) {
+            return row;
         }
+        row++;
     }
+
     return -1;
 }
 
@@ -251,13 +237,32 @@ QModelIndex BitContainerTreeModel::getContainerParentIndex(BitContainer *childCo
         return QModelIndex();
     }
 
-    for (QUuid parentUuid : childContainer->parentUuids()) {
-        if (m_containerMap.contains(parentUuid)) {
-            BitContainer *parentContainer = m_containerMap.value(parentUuid).data();
-            int row = getContainerRow(parentContainer);
-            if (row >= 0) {
-                return createIndex(getContainerRow(parentContainer), 0, parentContainer);
-            }
+    return getContainerIndex(childContainer->parentUuids().at(0));
+}
+
+QModelIndex BitContainerTreeModel::addContainerImpl(QSharedPointer<BitContainer> bitContainer)
+{
+    m_containerMap.insert(bitContainer->id(), bitContainer);
+    if (!m_containerGroups.contains(bitContainer->id())) {
+        m_containerGroups.insert(bitContainer->id(), {});
+    }
+
+    if (bitContainer->isRootContainer()) {
+        int row = rowCount(QModelIndex());
+        beginInsertRows(QModelIndex(), row, row);
+        m_containerGroups[m_rootUuid].append(bitContainer);
+        endInsertRows();
+        return this->index(row, 0, QModelIndex());
+    }
+    else {
+        QUuid parentId = bitContainer->parentUuids().at(0);
+        QModelIndex parentIndex = getContainerIndex(parentId);
+        if (parentIndex.isValid()) {
+            int row = rowCount(parentIndex);
+            beginInsertRows(parentIndex, row, row);
+            m_containerGroups[parentId].append(bitContainer);
+            endInsertRows();
+            return this->index(row, 0, parentIndex);
         }
     }
 

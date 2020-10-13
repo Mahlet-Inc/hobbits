@@ -23,7 +23,7 @@ public:
     QString currentlySelectedLabel();
 
 public slots:
-    void setPluginCallback(QSharedPointer<DisplayHandle> displayHandle);
+    void giveDisplayHandle(QSharedPointer<DisplayHandle> displayHandle);
     void setContainer(QSharedPointer<BitContainerPreview> container);
     void setHighlightCategory(QString category);
     void setTitle(QString title);

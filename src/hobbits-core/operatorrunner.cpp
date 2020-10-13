@@ -3,6 +3,7 @@
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "settingsmanager.h"
+#include <QTimer>
 
 OperatorRunner::OperatorRunner(QString pluginName, QString pluginFileLocation) :
     AbstractPluginRunner<const OperatorResult>(pluginName, pluginFileLocation)

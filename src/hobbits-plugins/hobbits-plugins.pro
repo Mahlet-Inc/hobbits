@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-#    analyzers \
+    analyzers \
     displays \
     importerexporters \
     operators

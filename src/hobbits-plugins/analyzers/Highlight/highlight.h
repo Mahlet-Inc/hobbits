@@ -1,17 +1,18 @@
-#ifndef WIDTHFRAMER_H
-#define WIDTHFRAMER_H
+#ifndef HIGHLIGHT_H
+#define HIGHLIGHT_H
+
 
 #include "analyzerinterface.h"
 #include "parameterdelegateui.h"
 
-class WidthFramer : public QObject, AnalyzerInterface
+class Highlight : public QObject, AnalyzerInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.AnalyzerInterface.WidthFramer")
+    Q_PLUGIN_METADATA(IID "hobbits.AnalyzerInterface.Highlight")
     Q_INTERFACES(AnalyzerInterface)
 
 public:
-    WidthFramer();
+    Highlight();
 
     AnalyzerInterface* createDefaultAnalyzer() override;
 
@@ -30,4 +31,4 @@ private:
     QSharedPointer<ParameterDelegateUi> m_delegate;
 };
 
-#endif // WIDTHFRAMER_H
+#endif // HIGHLIGHT_H

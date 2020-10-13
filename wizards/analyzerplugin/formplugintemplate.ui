@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>%{ClassName}</class>
- <widget class="QWidget" name="%{ClassName}">
+ <class>%{FormClassName}</class>
+ <widget class="QWidget" name="%{FormClassName}">
   <property name="geometry">
    <rect>
     <x>0</x>

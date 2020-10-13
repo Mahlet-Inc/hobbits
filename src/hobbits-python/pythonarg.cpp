@@ -3,7 +3,9 @@
 
 PythonArg::PythonArg()
 {
-
+    m_pointer = nullptr;
+    m_stringData = QString();
+    m_integerData = 0;
 }
 
 int PythonArg::integerData() const
@@ -60,7 +62,7 @@ PythonArg *PythonArg::actionProgress(QSharedPointer<PluginActionProgress> progre
 {
     PythonArg *arg = new PythonArg();
     arg->m_type = Type::HobbitsWrapper;
-    arg->m_wrapType = "ActionProgress";
+    arg->m_wrapType = "PluginActionProgress";
     arg->m_argSymbol = "O";
     arg->m_pointer = progress.data();
     return arg;

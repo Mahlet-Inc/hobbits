@@ -3,10 +3,8 @@
 #include "settingsmanager.h"
 
 const QString FIND_COLOR_KEY = "find_color";
-
 const QString FOUND_HIGHLIGHT = "found_patterns";
 const QString FOUND_RESULT_LABEL = "found_result_label";
-
 
 FindAnalyzer::FindAnalyzer() :
     ui(new Ui::FindAnalyzer()),
@@ -78,7 +76,6 @@ void FindAnalyzer::applyToWidget(QWidget *widget)
     ui->verticalLayout->addWidget(m_highlightNav);
     ui->verticalLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-    m_highlightNav->setShouldHighlightSelection(true);
     m_highlightNav->setContainer(m_previewContainer);
     m_highlightNav->setHighlightCategory(FOUND_HIGHLIGHT);
 }

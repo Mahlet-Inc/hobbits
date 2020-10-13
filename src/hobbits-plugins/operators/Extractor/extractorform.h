@@ -24,13 +24,12 @@ public:
     virtual bool setParameters(QJsonObject parameters) override;
     virtual QJsonObject parameters() override;
 
-    virtual void previewBits(QSharedPointer<BitContainerPreview> container,
-                             QSharedPointer<PluginActionProgress> progress) override;
-
 private slots:
     void setHighlightCategory(QString);
 
 private:
+    void previewBitsUiImpl(QSharedPointer<BitContainerPreview> container) override;
+
     Ui::ExtractorForm *ui;
     QSharedPointer<ParameterDelegate> m_delegate;
     QSharedPointer<ParameterHelper> m_stateHelper;

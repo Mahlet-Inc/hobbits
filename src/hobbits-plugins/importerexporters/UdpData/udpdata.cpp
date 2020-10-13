@@ -5,11 +5,40 @@
 
 UdpData::UdpData()
 {
+    QList<ParameterDelegate::ParameterInfo> importInfos = {
+        {"port", QJsonValue::Double},
+        {"max_kb", QJsonValue::Double},
+        {"timeout", QJsonValue::Double}
+    };
 
-}
+    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    importInfos,
+                    [](const QJsonObject &parameters) {
+                        return QString("UDP Listen on port %1").arg(parameters.value("port").toInt());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new UdpReceiver(delegate);
+                    }));
 
-UdpData::~UdpData()
-{
+
+    QList<ParameterDelegate::ParameterInfo> exportInfos = {
+        {"host", QJsonValue::String},
+        {"port", QJsonValue::Double}
+    };
+    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    exportInfos,
+                    [](const QJsonObject &parameters) {
+                        return QString("UDP Send to %1:%2")
+                                .arg(parameters.value("host").toString())
+                                .arg(parameters.value("port").toInt());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new UdpSender(delegate);
+                    }));
 }
 
 ImporterExporterInterface* UdpData::createDefaultImporterExporter()
@@ -22,6 +51,16 @@ QString UdpData::name()
     return "UDP Data";
 }
 
+QString UdpData::description()
+{
+    return "UDP Socket Importing and Exporting";
+}
+
+QStringList UdpData::tags()
+{
+    return {"Generic", "Network"};
+}
+
 bool UdpData::canExport()
 {
     return true;
@@ -32,85 +71,34 @@ bool UdpData::canImport()
     return true;
 }
 
-QString UdpData::getImportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> UdpData::importParameterDelegate()
 {
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
-
-        if (pluginState.contains("limit") && pluginState.value("limit").isDouble()) {
-            int value = pluginState.value("limit").toInt();
-            if (value > 0) {
-                return QString("UDP Listen for %2 KB on port %1").arg(pluginState.value("port").toInt()).arg(double(value)/1000.0);
-            }
-        }
-        return QString("UDP Listen on port %1").arg(pluginState.value("port").toInt());
-    }
-    return "";
+    return m_importDelegate;
 }
 
-QString UdpData::getExportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> UdpData::exportParameterDelegate()
 {
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()
-            && pluginState.contains("host") && pluginState.value("host").isString()) {
-        return QString("UDP Export to %1 on port %2").arg(pluginState.value("host").toString()).arg(pluginState.value("port").toInt());
-    }
-    return "";
+    return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> UdpData::importBits(QJsonObject pluginState)
+QSharedPointer<ImportResult> UdpData::importBits(QJsonObject parameters,
+                                                 QSharedPointer<PluginActionProgress> progress)
 {
-    QSharedPointer<UdpReceiver> receiver = QSharedPointer<UdpReceiver>(new UdpReceiver());
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
-        receiver->setPort(pluginState.value("port").toInt());
-        if (pluginState.contains("limit") && pluginState.value("limit").isDouble()) {
-            receiver->setLimit(pluginState.value("limit").toInt());
-        }
-        receiver->startListening();
+    if (!m_importDelegate->validate(parameters)) {
+        return ImportResult::error("Invalid parameters passed to UDP Import");
     }
 
-    if (receiver->exec()) {
-        QSharedPointer<BitContainer> container;
-        if (receiver->getLimit() > 0) {
-            container = BitContainer::create(receiver->getDownloadedData(), receiver->getLimit() * 8);
-        }
-        else {
-            container = BitContainer::create(receiver->getDownloadedData());
-        }
-        container->setName("UDP Import");
-        QJsonObject state;
-        state.insert("port", receiver->getPort());
-        state.insert("limit", receiver->getLimit());
-        return ImportResult::result(container, state);
-    }
-    else {
-        return ImportResult::error(receiver->getError());
-    }
+    return UdpReceiver::importData(parameters, progress);
 }
 
-QSharedPointer<ExportResult> UdpData::exportBits(
-        QSharedPointer<const BitContainer> container,
-        QJsonObject pluginState)
+QSharedPointer<ExportResult> UdpData::exportBits(QSharedPointer<const BitContainer> container,
+                                                 QJsonObject parameters,
+                                                 QSharedPointer<PluginActionProgress> progress)
 {
-    QSharedPointer<UdpSender> sender = QSharedPointer<UdpSender>(new UdpSender(container->bits()));
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()
-            && pluginState.contains("host") && pluginState.value("host").isString()) {
-        sender->setPort(pluginState.value("port").toInt());
-        sender->setHost(pluginState.value("host").toString());
-        QTimer::singleShot(10, sender.data(), SLOT(sendData()));
-        if (sender->exec()) {
-            return ExportResult::result(pluginState);
-        }
-        else {
-            return ExportResult::error("Failed to export bits over UDP");
-        }
+    if (!m_exportDelegate->validate(parameters)) {
+        return ExportResult::error("Invalid parameters passed to UDP Export");
     }
 
-    if (sender->exec()) {
-        QJsonObject state;
-        state.insert("port", sender->getPort());
-        state.insert("host", sender->getHost());
-        return ExportResult::result(state);
-    }
-    else {
-        return ExportResult::error("Failed to export bits over UDP");
-    }
+    return UdpSender::exportData(container->bits(), parameters, progress);
 }
+

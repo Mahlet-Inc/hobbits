@@ -6,5 +6,5 @@ SUBDIRS += \
     Lfsr \
     HttpData \
     PacketCapture \
-#    TcpData \
-#    UdpData
+    TcpData \
+    UdpData

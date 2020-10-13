@@ -98,6 +98,9 @@ bool ParameterHelper::applyParametersToUi(const QJsonObject &parameters)
             continue;
         }
         if (!param->setInUi(parameters.value(param->info().name))) {
+            if (param->info().optional) {
+                continue;
+            }
             return false;
         }
     }
@@ -111,6 +114,9 @@ QJsonObject ParameterHelper::getParametersFromUi()
     for (auto param : m_parameterInfos) {
         QJsonValue value = param->getFromUi();
         if (value.isUndefined()) {
+            if (param->info().optional) {
+                continue;
+            }
             return QJsonObject();
         }
         pluginState.insert(param->info().name, value);

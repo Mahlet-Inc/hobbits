@@ -4,11 +4,41 @@
 
 TcpData::TcpData()
 {
+    QList<ParameterDelegate::ParameterInfo> importInfos = {
+        {"port", QJsonValue::Double},
+        {"max_kb", QJsonValue::Double},
+        {"timeout", QJsonValue::Double}
+    };
 
-}
+    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    importInfos,
+                    [](const QJsonObject &parameters) {
+                        return QString("TCP Listen on port %1").arg(parameters.value("port").toInt());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new TcpReceiver(delegate);
+                    }));
 
-TcpData::~TcpData()
-{
+
+    QList<ParameterDelegate::ParameterInfo> exportInfos = {
+        {"host", QJsonValue::String},
+        {"port", QJsonValue::Double},
+        {"timeout", QJsonValue::Double}
+    };
+    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
+                new ParameterDelegateUi(
+                    exportInfos,
+                    [](const QJsonObject &parameters) {
+                        return QString("TCP Send to %1:%2")
+                                .arg(parameters.value("host").toString())
+                                .arg(parameters.value("port").toInt());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new TcpSender(delegate);
+                    }));
 }
 
 ImporterExporterInterface* TcpData::createDefaultImporterExporter()
@@ -21,6 +51,16 @@ QString TcpData::name()
     return "TCP Data";
 }
 
+QString TcpData::description()
+{
+    return "TCP Socket Importing and Exporting";
+}
+
+QStringList TcpData::tags()
+{
+    return {"Generic", "Network"};
+}
+
 bool TcpData::canExport()
 {
     return true;
@@ -31,62 +71,33 @@ bool TcpData::canImport()
     return true;
 }
 
-QString TcpData::getImportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> TcpData::importParameterDelegate()
 {
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
-        return QString("TCP Listen on port %1").arg(pluginState.value("port").toInt());
-    }
-    return "";
+    return m_importDelegate;
 }
 
-QString TcpData::getExportLabelForState(QJsonObject pluginState)
+QSharedPointer<ParameterDelegate> TcpData::exportParameterDelegate()
 {
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()
-            && pluginState.contains("host") && pluginState.value("host").isString()) {
-        return QString("TCP Export to %1 on port %2").arg(pluginState.value("host").toString()).arg(pluginState.value("port").toInt());
-    }
-    return "";
+    return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> TcpData::importBits(QJsonObject pluginState)
+QSharedPointer<ImportResult> TcpData::importBits(QJsonObject parameters,
+                                                 QSharedPointer<PluginActionProgress> progress)
 {
-    QSharedPointer<TcpReceiver> receiver = QSharedPointer<TcpReceiver>(new TcpReceiver());
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()) {
-        receiver->setPort(pluginState.value("port").toInt());
-        receiver->startListening();
+    if (!m_importDelegate->validate(parameters)) {
+        return ImportResult::error("Invalid parameters passed to TCP Import");
     }
 
-    if (receiver->exec()) {
-        QSharedPointer<BitContainer> container = BitContainer::create(receiver->getDownloadedData());
-        container->setName("TCP Import");
-        QJsonObject state;
-        state.insert("port", receiver->getPort());
-        return ImportResult::result(container, state);
-    }
-    else {
-        return ImportResult::error(receiver->getError());
-    }
+    return TcpReceiver::importData(parameters, progress);
 }
 
-QSharedPointer<ExportResult> TcpData::exportBits(
-        QSharedPointer<const BitContainer> container,
-        QJsonObject pluginState)
+QSharedPointer<ExportResult> TcpData::exportBits(QSharedPointer<const BitContainer> container,
+                                                 QJsonObject parameters,
+                                                 QSharedPointer<PluginActionProgress> progress)
 {
-    QSharedPointer<TcpSender> sender = QSharedPointer<TcpSender>(new TcpSender(container->bits()));
-    if (pluginState.contains("port") && pluginState.value("port").isDouble()
-            && pluginState.contains("host") && pluginState.value("host").isString()) {
-        sender->setPort(pluginState.value("port").toInt());
-        sender->setHost(pluginState.value("host").toString());
-        sender->sendData();
+    if (!m_exportDelegate->validate(parameters)) {
+        return ExportResult::error("Invalid parameters passed to TCP Export");
     }
 
-    if (sender->exec()) {
-        QJsonObject state;
-        state.insert("port", sender->getPort());
-        state.insert("host", sender->getHost());
-        return ExportResult::result(state);
-    }
-    else {
-        return ExportResult::error("Failed to export bits over TCP");
-    }
+    return TcpSender::exportData(container->bits(), parameters, progress);
 }

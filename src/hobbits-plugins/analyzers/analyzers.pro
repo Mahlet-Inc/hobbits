@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    FindAnalyzer \
+    Find \
     KaitaiStruct \
+    Highlight \
     WidthFramer

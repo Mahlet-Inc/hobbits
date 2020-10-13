@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>UdpSender</class>
- <widget class="QWidget" name="UdpSender">
+ <class>HighlightForm</class>
+ <widget class="QWidget" name="HighlightForm">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>352</width>
-    <height>188</height>
+    <width>604</width>
+    <height>147</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,41 +19,38 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Host:</string>
-       </property>
-       <property name="buddy">
-        <cstring>le_host</cstring>
+        <string>Bit Start:</string>
        </property>
       </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="le_host"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Port:</string>
+        <string>Bit Length:</string>
        </property>
-       <property name="buddy">
-        <cstring>sb_port</cstring>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="sb_start">
+       <property name="maximum">
+        <number>999999999</number>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSpinBox" name="sb_port">
+      <widget class="QSpinBox" name="sb_length">
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
-        <number>65535</number>
+        <number>999999999</number>
+       </property>
+       <property name="value">
+        <number>8</number>
        </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pb_send">
-     <property name="text">
-      <string>Send</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

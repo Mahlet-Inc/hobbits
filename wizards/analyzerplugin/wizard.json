@@ -14,9 +14,12 @@
         { "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
         { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
         { "key": "ClassName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "FormClassName", "value": "%{JS: '%{ClassName}Form'}" },
         { "key": "CppFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
         { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
-        { "key": "UiFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '.ui')}" }
+        { "key": "FormCppFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "FormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "FormUiFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '.ui')}" }
     ],
 
     "pages":
@@ -60,8 +63,16 @@
                     "target": "%{HeaderFileName}"
                 },
                 {
-                    "source": "analyzerplugintemplate.ui",
-                    "target": "%{UiFileName}"
+                    "source": "formplugintemplate.cpp",
+                    "target": "%{FormCppFileName}"
+                },
+                {
+                    "source": "formplugintemplate.h",
+                    "target": "%{FormHeaderFileName}"
+                },
+                {
+                    "source": "formplugintemplate.ui",
+                    "target": "%{FormUiFileName}"
                 }
                 
             ]
