@@ -19,9 +19,6 @@ BatchCreationDialog::BatchCreationDialog(QSharedPointer<BitContainer> container,
 
     connect(ui->rb_after, SIGNAL(toggled(bool)), this, SLOT(adjustToCurrentSelections()));
     connect(ui->rb_before, SIGNAL(toggled(bool)), this, SLOT(adjustToCurrentSelections()));
-    connect(ui->cb_imports, SIGNAL(toggled(bool)), this, SLOT(adjustToCurrentSelections()));
-
-    adjustToCurrentSelections();
 }
 
 BatchCreationDialog::~BatchCreationDialog()
@@ -36,26 +33,8 @@ int BatchCreationDialog::getSelectedBatchMode()
         mode = PluginActionBatch::InclusiveAfter;
     }
     else {
-        mode = PluginActionBatch::InclusiveBefore;
-    }
-
-    if (ui->cb_imports->isChecked()) {
-        mode |= PluginActionBatch::IncludeImporters;
-        if (ui->cb_importStates->isChecked()) {
-            mode |= PluginActionBatch::IncludeImporterState;
-        }
+        mode = PluginActionBatch::InclusiveBefore | PluginActionBatch::IncludeImportersFull;
     }
 
     return mode;
-}
-
-void BatchCreationDialog::adjustToCurrentSelections()
-{
-    if (ui->cb_imports->isChecked()) {
-        ui->cb_importStates->setEnabled(true);
-    }
-    else {
-        ui->cb_importStates->setChecked(false);
-        ui->cb_importStates->setEnabled(false);
-    }
 }
