@@ -17,7 +17,7 @@ public:
     Frame();
     Frame(QSharedPointer<const BitArray> bits, qint64 start, qint64 end);
     Frame(QSharedPointer<const BitArray> bits, Range range);
-    Frame(const Frame &other) = default;
+    Frame(const Frame &) = default;
 
     bool at(qint64 i) const;
     qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = BitArray::Copy) const;

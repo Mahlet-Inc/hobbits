@@ -19,6 +19,7 @@ HeaderFramer::HeaderFramer()
     m_delegate = ParameterDelegateUi::create(
                     infos,
                     [](const QJsonObject &parameters) {
+                        Q_UNUSED(parameters)
                         return QString("Frame by Header");
                     },
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {

@@ -138,7 +138,7 @@ void BatchEditScene::resetBatch()
 
 void BatchEditScene::itemDeleted(QUuid id)
 {
-
+    Q_UNUSED(id)
 }
 
 void BatchEditScene::itemInputSelected(QUuid id)

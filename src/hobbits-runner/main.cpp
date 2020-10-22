@@ -224,6 +224,7 @@ int main(int argc, char *argv[])
                 pluginActionManager.data(),
                 &PluginActionManager::batchFinished,
                 [&a, &err](QUuid id) {
+            Q_UNUSED(id)
             a.exit();
         });
 

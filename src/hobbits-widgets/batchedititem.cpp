@@ -108,13 +108,15 @@ QRectF BatchEditItem::boundingRect() const
 
 void BatchEditItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->fillRect(0, 0, boundingRect().width(), boundingRect().height(), Qt::lightGray);
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    painter->fillRect(0, 0, int(boundingRect().width()), int(boundingRect().height()), Qt::lightGray);
 
     if (this->hasFocus()) {
         painter->setPen(QPen(QColor(40, 130, 230), 4));
         painter->setBrush(Qt::transparent);
 
-        painter->drawRect(0, 0, boundingRect().width(), boundingRect().height());
+        painter->drawRect(0, 0, int(boundingRect().width()), int(boundingRect().height()));
     }
 }
 

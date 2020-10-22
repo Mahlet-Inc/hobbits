@@ -224,5 +224,8 @@ QSharedPointer<ImportResult> Lfsr::importBits(QJsonObject parameters,
 
 QSharedPointer<ExportResult> Lfsr::exportBits(QSharedPointer<const BitContainer> container, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
 {
+    Q_UNUSED(container)
+    Q_UNUSED(parameters)
+    Q_UNUSED(progress)
     return ExportResult::error("LFSR export is not supported.");
 }

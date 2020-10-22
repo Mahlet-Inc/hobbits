@@ -88,6 +88,7 @@ bool sortPoints(
 
 void WidthFramerForm::previewBitsImpl(QSharedPointer<BitContainerPreview> container, QSharedPointer<PluginActionProgress> progress)
 {
+    Q_UNUSED(progress)
     if (container.isNull()) {
         m_autocorrelation = QVector<QPointF>();
     }
@@ -100,6 +101,7 @@ void WidthFramerForm::previewBitsImpl(QSharedPointer<BitContainerPreview> contai
 
 void WidthFramerForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
+    Q_UNUSED(container)
     m_peakSelector->setData(m_autocorrelation);
     setupScoreList();
 }
