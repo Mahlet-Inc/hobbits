@@ -3,12 +3,13 @@
 
 #include "abstractparametereditor.h"
 #include "parameterhelper.h"
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class SimpleParameterEditor;
 }
 
-class SimpleParameterEditor : public AbstractParameterEditor
+class HOBBITSWIDGETSSHARED_EXPORT SimpleParameterEditor : public AbstractParameterEditor
 {
     Q_OBJECT
 

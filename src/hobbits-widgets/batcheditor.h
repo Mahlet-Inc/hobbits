@@ -4,12 +4,13 @@
 #include <QMainWindow>
 #include "hobbitspluginmanager.h"
 #include "batcheditscene.h"
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class BatchEditor;
 }
 
-class BatchEditor : public QMainWindow
+class HOBBITSWIDGETSSHARED_EXPORT BatchEditor : public QMainWindow
 {
     Q_OBJECT
 

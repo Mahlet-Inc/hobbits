@@ -1,7 +1,9 @@
 #ifndef WIDGETSSETTINGS_H
 #define WIDGETSSETTINGS_H
 
-class WidgetsSettings
+#include "hobbits-widgets_global.h"
+
+class HOBBITSWIDGETSSHARED_EXPORT WidgetsSettings
 {
 public:
     WidgetsSettings();

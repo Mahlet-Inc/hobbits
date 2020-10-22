@@ -6,12 +6,13 @@
 #include <QSpinBox>
 #include <QLabel>
 #include <QStandardItemModel>
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class BatchInputDialog;
 }
 
-class BatchInputDialog : public QDialog
+class HOBBITSWIDGETSSHARED_EXPORT BatchInputDialog : public QDialog
 {
     Q_OBJECT
 

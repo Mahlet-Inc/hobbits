@@ -5,8 +5,9 @@
 #include "batchedititemwidget.h"
 #include <QGraphicsObject>
 #include <QMimeData>
+#include "hobbits-widgets_global.h"
 
-class BatchEditItem : public QGraphicsObject
+class HOBBITSWIDGETSSHARED_EXPORT BatchEditItem : public QGraphicsObject
 {
     Q_OBJECT
 public:

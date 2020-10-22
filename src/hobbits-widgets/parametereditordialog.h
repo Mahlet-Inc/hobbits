@@ -3,12 +3,13 @@
 
 #include <QDialog>
 #include "parameterdelegate.h"
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class ParameterEditorDialog;
 }
 
-class ParameterEditorDialog : public QDialog
+class HOBBITSWIDGETSSHARED_EXPORT ParameterEditorDialog : public QDialog
 {
     Q_OBJECT
 

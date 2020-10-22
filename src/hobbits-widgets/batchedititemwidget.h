@@ -3,12 +3,13 @@
 
 #include <QWidget>
 #include "hobbitspluginmanager.h"
+#include "hobbits-widgets_global.h"
 
 namespace Ui {
 class BatchEditItemWidget;
 }
 
-class BatchEditItemWidget : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT BatchEditItemWidget : public QWidget
 {
     Q_OBJECT
 

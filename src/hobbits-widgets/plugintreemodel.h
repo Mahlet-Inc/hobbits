@@ -3,8 +3,9 @@
 
 #include <QAbstractItemModel>
 #include "hobbitspluginmanager.h"
+#include "hobbits-widgets_global.h"
 
-class PluginTreeModel : public QAbstractItemModel
+class HOBBITSWIDGETSSHARED_EXPORT PluginTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 

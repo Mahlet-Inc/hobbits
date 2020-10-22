@@ -2,8 +2,9 @@
 #define BATCHEDITLINK_H
 
 #include "batchedititem.h"
+#include "hobbits-widgets_global.h"
 
-class BatchEditLink: public QGraphicsObject
+class HOBBITSWIDGETSSHARED_EXPORT BatchEditLink: public QGraphicsObject
 {
     Q_OBJECT
 public:

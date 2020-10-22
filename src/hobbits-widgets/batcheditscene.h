@@ -7,8 +7,9 @@
 #include "hobbitspluginmanager.h"
 #include "batchedititem.h"
 #include "batcheditlink.h"
+#include "hobbits-widgets_global.h"
 
-class BatchEditScene : public QGraphicsScene
+class HOBBITSWIDGETSSHARED_EXPORT BatchEditScene : public QGraphicsScene
 {
 public:
     BatchEditScene(QSharedPointer<HobbitsPluginManager> pluginManager);

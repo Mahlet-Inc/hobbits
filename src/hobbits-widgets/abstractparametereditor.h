@@ -5,8 +5,9 @@
 #include "bitcontainerpreview.h"
 #include "pluginactionprogress.h"
 #include "displayhandle.h"
+#include "hobbits-widgets_global.h"
 
-class AbstractParameterEditor : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT AbstractParameterEditor : public QWidget
 {
     Q_OBJECT
 

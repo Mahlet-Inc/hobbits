@@ -2,8 +2,9 @@
 #define PARAMETERDELEGATEUI_H
 
 #include "parameterdelegate.h"
+#include "hobbits-widgets_global.h"
 
-class ParameterDelegateUi : public ParameterDelegate
+class HOBBITSWIDGETSSHARED_EXPORT ParameterDelegateUi : public ParameterDelegate
 {
 public:
     ParameterDelegateUi(

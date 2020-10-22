@@ -4,8 +4,9 @@
 #include "abstractparametereditor.h"
 #include "parameterdelegate.h"
 #include <QFileDialog>
+#include "hobbits-widgets_global.h"
 
-class ParameterEditorFileSelect : public AbstractParameterEditor
+class HOBBITSWIDGETSSHARED_EXPORT ParameterEditorFileSelect : public AbstractParameterEditor
 {
     Q_OBJECT
 
