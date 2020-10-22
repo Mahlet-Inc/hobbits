@@ -575,8 +575,9 @@ bool SpectrogramRenderer::logarithmic() const
 void SpectrogramRenderer::setLogarithmic(bool logarithmic)
 {
     if (!m_logarithmic == logarithmic) {
-        QMutexLocker lock(&m_mutex);
+        m_mutex.lock();
         m_logarithmic = logarithmic;
+        m_mutex.unlock();
         setDirty();
     }
 }
