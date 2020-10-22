@@ -11,7 +11,7 @@
 class HOBBITSCORESHARED_EXPORT MathParser
 {
 public:
-    class ParseResult
+    class HOBBITSCORESHARED_EXPORT ParseResult
     {
     public:
         ParseResult() = default;

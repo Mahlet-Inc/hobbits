@@ -14,7 +14,7 @@
 class HOBBITSCORESHARED_EXPORT PluginActionBatch : public QEnableSharedFromThis<PluginActionBatch>
 {
 public:
-    enum Mode {
+    enum HOBBITSCORESHARED_EXPORT Mode {
         Null = 0x00,
         Inclusive = 0x01,
         Before = 0x02,
@@ -30,7 +30,7 @@ public:
         ActionModeSegment = 0xf0
     };
 
-    class ActionStep {
+    class HOBBITSCORESHARED_EXPORT ActionStep {
     public:
         ActionStep(QUuid id, QSharedPointer<const PluginAction> action) :
             stepId(id),

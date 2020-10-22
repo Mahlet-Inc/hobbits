@@ -28,7 +28,7 @@ class HOBBITSCORESHARED_EXPORT AbstractParameterEditor;
 class HOBBITSCORESHARED_EXPORT ParameterDelegate : public QEnableSharedFromThis<ParameterDelegate>
 {
 public:
-    struct ParameterInfo
+    struct HOBBITSCORESHARED_EXPORT ParameterInfo
     {
         QString name;
         QJsonValue::Type type;

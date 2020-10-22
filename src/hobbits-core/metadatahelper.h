@@ -20,7 +20,7 @@ class HOBBITSCORESHARED_EXPORT MetadataHelper
 public:
     static MetadataHelper& instance();
 
-    struct SampleFormat {
+    struct HOBBITSCORESHARED_EXPORT SampleFormat {
         QString id;
         QString name;
         int wordSize;

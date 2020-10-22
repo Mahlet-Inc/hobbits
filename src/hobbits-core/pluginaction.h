@@ -24,7 +24,7 @@ class BitContainerManager;
 class HOBBITSCORESHARED_EXPORT PluginAction
 {
 public:
-    enum PluginType {
+    enum HOBBITSCORESHARED_EXPORT PluginType {
         Framer = 1 /*Deprecated*/,
         Operator = 2,
         Analyzer = 3,

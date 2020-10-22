@@ -19,7 +19,7 @@ protected slots:
 };
 
 template <class T>
-class AbstractPluginRunner : public AbstractPluginRunnerQObject
+class Q_DECL_EXPORT AbstractPluginRunner : public AbstractPluginRunnerQObject
 {
 public:
     AbstractPluginRunner(QString pluginName, QString pluginFileLocation);
