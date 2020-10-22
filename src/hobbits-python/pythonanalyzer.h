@@ -4,8 +4,9 @@
 #include "analyzerinterface.h"
 #include "parameterdelegate.h"
 #include "pythonpluginconfig.h"
+#include "hobbits-python_global.h"
 
-class PythonAnalyzer : public AnalyzerInterface
+class HOBBITSPYTHONSHARED_EXPORT PythonAnalyzer : public AnalyzerInterface
 {
 public:
     PythonAnalyzer(QSharedPointer<PythonPluginConfig> config);

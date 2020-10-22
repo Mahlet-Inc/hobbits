@@ -4,8 +4,9 @@
 #include <QObject>
 #include <QUuid>
 #include "pluginactionwatcher.h"
+#include "hobbits-core_global.h"
 
-class AbstractPluginRunnerQObject : public QObject {
+class HOBBITSCORESHARED_EXPORT AbstractPluginRunnerQObject : public QObject {
     Q_OBJECT
 
 signals:

@@ -4,8 +4,9 @@
 #include "parameterdelegate.h"
 #include "operatorinterface.h"
 #include "hobbitspluginmanager.h"
+#include "hobbits-python_global.h"
 
-class PythonPluginConfig
+class HOBBITSPYTHONSHARED_EXPORT PythonPluginConfig
 {
 public:
     PythonPluginConfig();

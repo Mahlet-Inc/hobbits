@@ -4,8 +4,9 @@
 #include "operatorinterface.h"
 #include "parameterdelegate.h"
 #include "pythonpluginconfig.h"
+#include "hobbits-python_global.h"
 
-class PythonOperator : public OperatorInterface
+class HOBBITSPYTHONSHARED_EXPORT PythonOperator : public OperatorInterface
 {
 public:
     PythonOperator(QSharedPointer<PythonPluginConfig> config);

@@ -4,8 +4,9 @@
 #include "importexportinterface.h"
 #include "parameterdelegate.h"
 #include "pythonpluginconfig.h"
+#include "hobbits-python_global.h"
 
-class PythonImporter : public ImporterExporterInterface
+class HOBBITSPYTHONSHARED_EXPORT PythonImporter : public ImporterExporterInterface
 {
 public:
     PythonImporter(QSharedPointer<PythonPluginConfig> config);
