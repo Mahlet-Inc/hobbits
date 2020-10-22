@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+    DisplayPrint \
     FileData \
     HexString \
     Lfsr \
