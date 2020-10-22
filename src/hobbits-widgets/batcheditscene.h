@@ -3,6 +3,7 @@
 
 #include <QGraphicsScene>
 #include <QMimeData>
+#include <QKeyEvent>
 #include "hobbitspluginmanager.h"
 #include "batchedititem.h"
 #include "batcheditlink.h"
