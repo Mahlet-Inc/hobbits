@@ -87,6 +87,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
       cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
+      cp $(Build.SourcesDirectory)/src/hobbits-widgets/libhobbits-widgets.*dylib hobbits.app/Contents/Frameworks
       cp $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.*dylib hobbits.app/Contents/Frameworks
       cp -r $(Build.SourcesDirectory)/hobbits_python hobbits.app/Contents/Frameworks/python
       find hobbits.app/Contents/Frameworks/python/lib -name "*.dylib*" -type f -exec chmod +x {} \;
@@ -102,6 +103,7 @@ steps:
       cd $(Build.SourcesDirectory)/src/hobbits-gui
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
       find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-python.1.dylib @rpath/libhobbits-python.1.dylib $@ {} \;
+      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-widgets.1.dylib @rpath/libhobbits-widgets.1.dylib $@ {} \;
 
       cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
       install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
