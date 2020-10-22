@@ -63,7 +63,7 @@ steps:
       cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
       set /p QMAKE_VERSION_ARGS= <qmake_args
-      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS% HOBBITS_PYPATH=$(Build.SourcesDirectory)\hobbits_python -d
+      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS% HOBBITS_PYPATH=$(Build.SourcesDirectory)\hobbits_python
     displayName: 'Run qmake'
 
   - script: |

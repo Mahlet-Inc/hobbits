@@ -66,7 +66,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python -d
+      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
     displayName: 'Run qmake'
 
   - script: |

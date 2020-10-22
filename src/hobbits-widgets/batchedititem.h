@@ -4,6 +4,7 @@
 #include "pluginactionbatch.h"
 #include "batchedititemwidget.h"
 #include <QGraphicsObject>
+#include <QMimeData>
 
 class BatchEditItem : public QGraphicsObject
 {

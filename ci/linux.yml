@@ -41,7 +41,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python -d
+      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
     displayName: 'Run qmake'
 
   - script: |

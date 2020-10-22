@@ -1,5 +1,4 @@
 #include "batchedititem.h"
-#include <QMimeData>
 #include <QGraphicsProxyWidget>
 #include <QPainter>
 
