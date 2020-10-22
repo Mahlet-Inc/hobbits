@@ -1,5 +1,5 @@
 #include <QCommandLineParser>
-#include <QApplication>
+#include <QCoreApplication>
 #include <QTextStream>
 #ifdef Q_OS_UNIX
 #include <iostream>
@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("Hobbits Runner");
     QCoreApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());

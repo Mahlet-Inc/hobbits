@@ -180,7 +180,7 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     QVector<QPointF> results(N / 2);
     results.insert(0, QPointF(0, 0));
     for (int i = 1; i < N / 2; i++) {
-        const double re = abs(fft_out[i][0] / static_cast<double>(N));
+        const double re = std::abs(double(fft_out[i][0] / static_cast<double>(N)));
         results[i] = QPointF(i, re);
     }
 

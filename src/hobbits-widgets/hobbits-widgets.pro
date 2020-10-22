@@ -9,6 +9,9 @@ QT       += widgets
 TARGET = hobbits-widgets
 TEMPLATE = lib
 
+CONFIG += c++11
+CONFIG -= debug_and_release_target
+
 DEFINES += HOBBITSWIDGETS_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
