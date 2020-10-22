@@ -100,17 +100,116 @@ static PyObject* BitArrayPy_set(BitArrayPyObj *self, PyObject *args )
     Py_RETURN_NONE;
 }
 
+static PyObject* BitArrayPy_read_bytes(BitArrayPyObj *self, PyObject *args )
+{
+    long long byteOffset;
+    long long length;
+    if (!PyArg_ParseTuple(args, "LL", &byteOffset, &length)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a byte offset and a length");
+        return nullptr;
+    }
+
+    BitArray* bits = BITS(self->bitsCapsule);
+    if (bits->sizeInBytes() <= byteOffset || byteOffset < 0) {
+        PyErr_SetString(PyExc_IndexError, "provided byte offset is not valid");
+        return nullptr;
+    }
+
+    QByteArray bytes = bits->readBytes(byteOffset, length);
+
+    return PyByteArray_FromStringAndSize(bytes.data(), bytes.length());
+}
+
+static PyObject* BitArrayPy_set_bytes(BitArrayPyObj *self, PyObject *args )
+{
+    long long byteOffset;
+    PyObject *bytearray;
+    if (!PyArg_ParseTuple(args, "LY", &byteOffset, &bytearray)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a byte offset and a bytearray");
+        return nullptr;
+    }
+    if (byteOffset < 0) {
+        PyErr_SetString(PyExc_IndexError, "invalid argument - cannot have a negative byte offset");
+        return nullptr;
+    }
+
+    BitArray* bits = BITS(self->bitsCapsule);
+    QByteArray otherBytes(PyByteArray_AsString(bytearray), int(PyByteArray_Size(bytearray)));
+    QScopedPointer<BitArray> otherBits(new BitArray(otherBytes));
+
+    otherBits->copyBits(0, bits, byteOffset * 8, otherBits->sizeInBits());
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* BitArrayPy_write_to(BitArrayPyObj *self, PyObject *args )
+{
+    const char *filename;
+    if (!PyArg_ParseTuple(args, "s", &filename)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a file name");
+        return nullptr;
+    }
+
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
+        PyErr_SetString(PyExc_TypeError, "file could not be opened for writing");
+        return nullptr;
+    }
+
+    BitArray* bits = BITS(self->bitsCapsule);
+    bits->writeTo(&file);
+
+    file.close();
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* BitArrayPy_read_from(BitArrayPyObj *self, PyObject *args )
+{
+    long long byteOffset;
+    const char *filename;
+    if (!PyArg_ParseTuple(args, "Ls", &byteOffset, &filename)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a byte offset and a file name");
+        return nullptr;
+    }
+
+    if (byteOffset < 0) {
+        PyErr_SetString(PyExc_IndexError, "invalid argument - cannot have a negative byte offset");
+        return nullptr;
+    }
+
+    QFile file(filename);
+    if (!file.open(QFile::ReadOnly)) {
+        PyErr_SetString(PyExc_TypeError, "file could not be opened for reading");
+        return nullptr;
+    }
+    QScopedPointer<BitArray> otherBits(new BitArray(&file));
+    file.close();
+
+
+    BitArray* bits = BITS(self->bitsCapsule);
+    otherBits->copyBits(0, bits, byteOffset * 8, otherBits->sizeInBits());
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef BitArrayPy_methods[] = {
     { "size", PyCFunction(BitArrayPy_size), METH_NOARGS, nullptr },
     { "at", PyCFunction(BitArrayPy_at), METH_VARARGS, nullptr },
     { "resize", PyCFunction(BitArrayPy_resize), METH_VARARGS, nullptr },
     { "set", PyCFunction(BitArrayPy_set), METH_VARARGS, nullptr },
+    { "read_bytes", PyCFunction(BitArrayPy_read_bytes), METH_VARARGS, nullptr },
+    { "set_bytes", PyCFunction(BitArrayPy_set_bytes), METH_VARARGS, nullptr },
+    { "write_to", PyCFunction(BitArrayPy_write_to), METH_VARARGS, nullptr },
+    { "read_from", PyCFunction(BitArrayPy_read_from), METH_VARARGS, nullptr },
     {}  /* Sentinel */
 };
 
 static PyMethodDef ImmutableBitArrayPy_methods[] = {
     { "size", PyCFunction(BitArrayPy_size), METH_NOARGS, nullptr },
     { "at", PyCFunction(BitArrayPy_at), METH_VARARGS, nullptr },
+    { "read_bytes", PyCFunction(BitArrayPy_read_bytes), METH_VARARGS, nullptr },
+    { "write_to", PyCFunction(BitArrayPy_write_to), METH_VARARGS, nullptr },
     {}  /* Sentinel */
 };
 

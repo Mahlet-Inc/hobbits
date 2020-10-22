@@ -35,6 +35,11 @@ public:
 
     QString getPluginLocation(const QString &name) const;
 
+    bool addOperator(QString location, QSharedPointer<OperatorInterface> op);
+    bool addAnalyzer(QString location, QSharedPointer<AnalyzerInterface> analyzer);
+    bool addImporterExporter(QString location, QSharedPointer<ImporterExporterInterface> importerExporter);
+    bool addDisplay(QString location, QSharedPointer<DisplayInterface> display);
+
 private:
     QMap<QString, QSharedPointer<OperatorInterface>> m_operators;
     QMap<QString, QSharedPointer<AnalyzerInterface>> m_analyzers;

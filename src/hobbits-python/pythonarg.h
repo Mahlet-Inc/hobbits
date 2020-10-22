@@ -12,7 +12,8 @@ public:
     enum Type {
         HobbitsWrapper = 0x1,
         String = 0x2,
-        Integer = 0x3
+        Integer = 0x3,
+        Double = 0x4
     };
 
     static PythonArg* bitArray(QSharedPointer<BitArray> bitArray);
@@ -24,6 +25,8 @@ public:
     static PythonArg* constBitInfo(QSharedPointer<const BitInfo> info);
     static PythonArg* qString(QString s);
     static PythonArg* integer(int n);
+    static PythonArg* number(double n);
+    static PythonArg* boolean(bool n);
 
     Type type() const;
     QString argSymbol() const;
@@ -31,6 +34,7 @@ public:
     void *pointer() const;
     QString stringData() const;
     int integerData() const;
+    double doubleData() const;
 
 private:
     PythonArg();
@@ -41,6 +45,7 @@ private:
     void* m_pointer;
     QString m_stringData;
     int m_integerData;
+    double m_doubleData;
 };
 
 #endif // PYTHONARG_H

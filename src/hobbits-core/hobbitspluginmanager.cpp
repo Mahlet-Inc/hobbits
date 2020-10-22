@@ -226,3 +226,43 @@ QString HobbitsPluginManager::getPluginLocation(const QString &name) const
 {
     return m_loadedPluginLocations.value(name);
 }
+
+bool HobbitsPluginManager::addOperator(QString location, QSharedPointer<OperatorInterface> op)
+{
+    if (m_loadedPluginLocations.contains(op->name())) {
+        return false;
+    }
+    m_operators.insert(op->name(), op);
+    m_loadedPluginLocations.insert(op->name(), location);
+    return true;
+}
+
+bool HobbitsPluginManager::addAnalyzer(QString location, QSharedPointer<AnalyzerInterface> analyzer)
+{
+    if (m_loadedPluginLocations.contains(analyzer->name())) {
+        return false;
+    }
+    m_analyzers.insert(analyzer->name(), analyzer);
+    m_loadedPluginLocations.insert(analyzer->name(), location);
+    return true;
+}
+
+bool HobbitsPluginManager::addImporterExporter(QString location, QSharedPointer<ImporterExporterInterface> importerExporter)
+{
+    if (m_loadedPluginLocations.contains(importerExporter->name())) {
+        return false;
+    }
+    m_importerExporters.insert(importerExporter->name(), importerExporter);
+    m_loadedPluginLocations.insert(importerExporter->name(), location);
+    return true;
+}
+
+bool HobbitsPluginManager::addDisplay(QString location, QSharedPointer<DisplayInterface> display)
+{
+    if (m_loadedPluginLocations.contains(display->name())) {
+        return false;
+    }
+    m_displays.insert(display->name(), display);
+    m_loadedPluginLocations.insert(display->name(), location);
+    return true;
+}

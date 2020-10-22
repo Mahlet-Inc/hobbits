@@ -87,9 +87,33 @@ static PyObject* BitInfoPy_get_highlights(BitInfoPyObj *self, PyObject *args, Py
     return listResult;
 }
 
+static PyObject* BitInfoPy_set_metadata(BitInfoPyObj *self, PyObject *args)
+{
+    const char *key;
+    const char *value;
+    if (!PyArg_ParseTuple(args, "ss", &key, &value)) {
+        return nullptr;
+    }
+    BitInfo* info = BITINFO(self->bitInfoCapsule);
+    info->setMetadata(key, QVariant(value));
+    Py_RETURN_NONE;
+}
+
+static PyObject* BitInfoPy_get_metadata(BitInfoPyObj *self, PyObject *args)
+{
+    const char *key;
+    if (!PyArg_ParseTuple(args, "s", addHighlightKwargs, &key)) {
+        return nullptr;
+    }
+    BitInfo* info = BITINFO(self->bitInfoCapsule);
+    return Py_BuildValue("s", info->metadata(key).toString().toStdString().c_str());
+}
+
 static PyMethodDef BitInfoPy_methods[] = {
     { "add_highlight", PyCFunction(BitInfoPy_add_highlight), METH_VARARGS | METH_KEYWORDS, nullptr },
     { "get_highlights", PyCFunction(BitInfoPy_get_highlights), METH_VARARGS | METH_KEYWORDS, nullptr },
+    { "set_metadata", PyCFunction(BitInfoPy_set_metadata), METH_VARARGS, nullptr },
+    { "get_metadata", PyCFunction(BitInfoPy_get_metadata), METH_VARARGS, nullptr },
     {}  /* Sentinel */
 };
 
@@ -99,6 +123,7 @@ static PyMemberDef BitInfoPy_members[] = {
 
 static PyMethodDef ImmutableBitInfoPy_methods[] = {
     { "get_highlights", PyCFunction(BitInfoPy_get_highlights), METH_VARARGS | METH_KEYWORDS, nullptr },
+    { "get_metadata", PyCFunction(BitInfoPy_get_metadata), METH_VARARGS, nullptr },
     {}  /* Sentinel */
 };
 
