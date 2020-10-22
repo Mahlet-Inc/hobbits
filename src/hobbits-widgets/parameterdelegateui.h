@@ -3,7 +3,7 @@
 
 #include "parameterdelegate.h"
 
-class ParameterDelegateUi : public ParameterDelegate, public QEnableSharedFromThis<ParameterDelegateUi>
+class ParameterDelegateUi : public ParameterDelegate
 {
 public:
     ParameterDelegateUi(
@@ -15,11 +15,7 @@ public:
             QList<ParameterInfo> parameterInfos,
             std::function<QString(const QJsonObject&)> actionDescriber,
             std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
-
-    virtual AbstractParameterEditor* createEditor(QSize targetBounds = QSize()) override;
-
 private:
-    std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> m_editorCreator;
 };
 
 #endif // PARAMETERDELEGATEUI_H

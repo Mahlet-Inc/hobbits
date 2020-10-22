@@ -16,6 +16,15 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
     QQueue<QPair<QSharedPointer<const PluginActionLineage>, int>> lineageQueue;
     QQueue<QSharedPointer<const PluginActionLineage>> stageTwoQueue;
 
+    auto firstLineage = lineage;
+    while (firstLineage->getPluginAction()->pluginType() == PluginAction::Analyzer) {
+        auto input = firstLineage->getInputs().at(0);
+        if (input->getPluginAction()->pluginType() == PluginAction::Analyzer) {
+            lineageQueue.enqueue({input, (Mode::Inclusive | (batchMode & Mode::IncludeImportersFull))});
+        }
+        firstLineage = input;
+    }
+
     lineageQueue.enqueue({lineage, batchMode});
     while (!lineageQueue.isEmpty()) {
         auto lineageModePair = lineageQueue.dequeue();
@@ -86,10 +95,9 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
         }
         alreadyAssigned.insert(currLineage->getPluginAction());
 
-        // If it's a "no action" step, it will get a null QUuid input
+        // If it's a "no action" step (anonymous input), it doesn't have inputs
         if (stepMap[currLineage->getPluginAction()]->action->pluginType() == PluginAction::NoAction) {
-            // TODO: what if there's a "no action" that isn't in the beginning?
-            stepMap[currLineage->getPluginAction()]->inputs = {{QUuid(), 0}};
+            stepMap[currLineage->getPluginAction()]->inputs = {};
             continue;
         }
 
@@ -103,7 +111,10 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
                 inputs.append({stepMap.value(input->getPluginAction())->stepId, input->getOutputPosition()});
             }
             else {
-                inputs.append({QUuid(), 0});
+                auto anonymousInput = PluginAction::noAction();
+                auto step = createStep(QUuid::createUuid(), anonymousInput);
+                stepMap.insert(anonymousInput, step);
+                inputs.append({step->stepId, 0});
             }
         }
         stepMap[currLineage->getPluginAction()]->inputs = inputs;
@@ -111,7 +122,10 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::fromLineage(QSharedPointer<
 
 
     QList<QSharedPointer<const ActionStep>> constSteps;
+    int stepCount = 0;
     for (auto step: stepMap.values()) {
+        step->editorPosition = QPointF(300 * (stepCount % 4), 200 * (stepCount / 4));
+        stepCount++;
         constSteps.append(step);
     }
 
@@ -145,6 +159,12 @@ QJsonObject PluginActionBatch::serialize() const
             stepInputs.append(inputObject);
         }
         stepObject.insert("inputs", stepInputs);
+
+        QJsonObject stepPos;
+        stepPos.insert("x", step->editorPosition.x());
+        stepPos.insert("y", step->editorPosition.y());
+        stepObject.insert("editorPosition", stepPos);
+
         steps.append(stepObject);
     }
     obj.insert("steps", steps);
@@ -162,6 +182,7 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::deserialize(QJsonObject dat
 
     QSharedPointer<PluginActionBatch> deserialized;
     QList<QSharedPointer<ActionStep>> steps;
+    int stepCount = 0;
     for (auto step : data.value("steps").toArray()) {
         if (!step.isObject()) {
             return nullBatch;
@@ -206,6 +227,19 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::deserialize(QJsonObject dat
                 deserializedStep->inputs.append({inputId, outputPosition});
             }
         }
+
+        bool posSet = false;
+        if (stepObject.contains("editorPosition") && stepObject.value("editorPosition").isObject()) {
+            QJsonObject posObj = stepObject.value("editorPosition").toObject();
+            if (posObj.contains("x") && posObj.contains("y")) {
+                deserializedStep->editorPosition = QPointF(posObj.value("x").toDouble(), posObj.value("y").toDouble());
+                posSet = true;
+            }
+        }
+        if (!posSet) {
+            deserializedStep->editorPosition = QPointF(300 * (stepCount % 4), 200 * (stepCount / 4));
+        }
+        stepCount++;
     }
 
     QList<QSharedPointer<const ActionStep>> constSteps;
@@ -216,41 +250,12 @@ QSharedPointer<PluginActionBatch> PluginActionBatch::deserialize(QJsonObject dat
     return QSharedPointer<PluginActionBatch>(new PluginActionBatch(constSteps));
 }
 
-int PluginActionBatch::getMinRequiredInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
+int PluginActionBatch::getRequiredInputs() const
 {
     int inputTotal = 0;
     for (auto step : m_actionSteps) {
         if (step->action->pluginType() == PluginAction::NoAction) {
-            inputTotal += 1;
-            continue;
-        }
-        int actionInputs = step->action->minPossibleInputs(pluginManager);
-        int internalInputs = 0;
-        for (auto input : step->inputs) {
-            if (!input.first.isNull()) {
-                internalInputs++;
-            }
-        }
-        if (actionInputs > internalInputs) {
-            inputTotal += actionInputs - internalInputs;
-        }
-    }
-    return inputTotal;
-}
-
-int PluginActionBatch::getMaxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const
-{
-    int inputTotal = 0;
-    for (auto step : m_actionSteps) {
-        int actionInputs = step->action->maxPossibleInputs(pluginManager);
-        int internalInputs = 0;
-        for (auto input : step->inputs) {
-            if (!input.first.isNull()) {
-                internalInputs++;
-            }
-        }
-        if (actionInputs > internalInputs) {
-            inputTotal += actionInputs - internalInputs;
+            inputTotal ++;
         }
     }
     return inputTotal;

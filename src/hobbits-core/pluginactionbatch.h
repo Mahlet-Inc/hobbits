@@ -4,6 +4,7 @@
 #include "bitcontainer.h"
 #include "hobbits-core_global.h"
 #include "pluginactionlineage.h"
+#include <QPointF>
 
 /**
   * @brief The PluginActionBatch class describes a (possibly branching or merging) sequence of plugin actions
@@ -29,8 +30,6 @@ public:
         ActionModeSegment = 0xf0
     };
 
-    static QSharedPointer<PluginActionBatch> fromLineage(QSharedPointer<const PluginActionLineage> lineage, int batchMode);
-
     class ActionStep {
     public:
         ActionStep(QUuid id, QSharedPointer<const PluginAction> action) :
@@ -40,20 +39,23 @@ public:
         QUuid stepId;
         QSharedPointer<const PluginAction> action;
         QList<QPair<QUuid, int>> inputs;
+        QPointF editorPosition;
     };
+
+    PluginActionBatch(QList<QSharedPointer<const ActionStep>> actionSteps);
+    static QSharedPointer<PluginActionBatch> fromLineage(QSharedPointer<const PluginActionLineage> lineage, int batchMode);
+
 
     static QSharedPointer<ActionStep> createStep(QUuid id, QSharedPointer<const PluginAction> action);
 
     QJsonObject serialize() const;
     static QSharedPointer<PluginActionBatch> deserialize(QJsonObject data);
 
-    int getMinRequiredInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
-    int getMaxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
+    int getRequiredInputs() const;
 
     QList<QSharedPointer<const ActionStep>> actionSteps() const;
 
 private:
-    PluginActionBatch(QList<QSharedPointer<const ActionStep>> actionSteps);
     QList<QSharedPointer<const ActionStep>> m_actionSteps;
 };
 

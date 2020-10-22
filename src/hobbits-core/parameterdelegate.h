@@ -24,7 +24,7 @@ class AbstractParameterEditor;
   * expected to provide a ParameterDelegate.
   *
 */
-class HOBBITSCORESHARED_EXPORT ParameterDelegate
+class HOBBITSCORESHARED_EXPORT ParameterDelegate : public QEnableSharedFromThis<ParameterDelegate>
 {
 public:
     struct ParameterInfo
@@ -42,7 +42,15 @@ public:
     };
 
     ParameterDelegate(QList<ParameterInfo> parameterInfos, std::function<QString(const QJsonObject&)> actionDescriber);
+    ParameterDelegate(QList<ParameterInfo> parameterInfos,
+                      std::function<QString(const QJsonObject&)> actionDescriber,
+                      std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
     virtual ~ParameterDelegate() = default;
+
+    static QSharedPointer<ParameterDelegate> create(
+            QList<ParameterInfo> parameterInfos,
+            std::function<QString(const QJsonObject&)> actionDescriber,
+            std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
 
     virtual AbstractParameterEditor* createEditor(QSize targetBounds = QSize());
 
@@ -56,6 +64,7 @@ protected:
     static bool validateAgainstInfos(const QJsonObject &parameters, QList<ParameterInfo> infos);
     QMap<QString, ParameterInfo> m_parameterMap;
     std::function<QString(const QJsonObject&)> m_actionDescriber;
+    std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> m_editorCreator;
 };
 
 #endif // PLUGINSTATEDELEGATE_H

@@ -22,7 +22,7 @@ class HOBBITSCORESHARED_EXPORT BitInfo : public QObject
     Q_OBJECT
 
 public:
-    static QSharedPointer<BitInfo> create(qint64 bitLength, QSharedPointer<const BitInfo> other = QSharedPointer<const BitInfo>(), bool clearFrames = false);
+    static QSharedPointer<BitInfo> create(qint64 bitLength = 0, QSharedPointer<const BitInfo> other = QSharedPointer<const BitInfo>(), bool clearFrames = false);
     static QSharedPointer<BitInfo> copyFromContainer(QSharedPointer<const BitContainer> container, bool clearFrames = false);
 
     void setFrames(QSharedPointer<const RangeSequence> frames);
@@ -39,6 +39,7 @@ public:
     QList<QString> highlightCategories() const;
     bool containsHighlightCategory(QString category) const;
     QVariant metadata(QString key) const;
+    QList<QString> metadataKeys() const;
 
     qint64 frameOffsetContaining(qint64 value, Range indexBounds = Range()) const;
 

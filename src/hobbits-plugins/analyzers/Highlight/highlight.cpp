@@ -14,7 +14,7 @@ Highlight::Highlight()
                 new ParameterDelegateUi(
                     infos,
                     [](const QJsonObject &parameters) {
-                        return QString("Highlight %1 bits at %1")
+                        return QString("Highlight %2 bits at %1")
                                 .arg(parameters.value("length").toInt())
                                 .arg(parameters.value("start").toInt());
                     },

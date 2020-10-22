@@ -102,23 +102,23 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnBits(
     auto result = watcher->result();
 
     QString output = "";
+    bool error = false;
     if (!result->getStdOut().isEmpty()) {
         output += "Python stdout:\n" + result->getStdOut() + "\n\n";
     }
     if (!result->getStdErr().isEmpty()) {
+        error = true;
         output += "Python stderr:\n" + result->getStdErr() + "\n\n";
     }
     if (!result->errors().isEmpty()) {
+        error = true;
         output += "Other errors:\n" + result->errors().join("\n") + "\n\n";
     }
-    if (!output.isEmpty()) {
-        // TODO: communicate this data for the editor in the result
-//        QMetaObject::invokeMethod(
-//                this,
-//                "updateOutputText",
-//                Qt::QueuedConnection,
-//                Q_ARG(QString, output));
+    if (error) {
+        return OperatorResult::error(output);
     }
+
+    outputInfo->setMetadata(name() + " Run Output", output);
 
     QSharedPointer<BitContainer> outputContainer = BitContainer::create(outputBits);
     outputContainer->setInfo(outputInfo);

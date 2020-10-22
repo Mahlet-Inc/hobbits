@@ -1,7 +1,7 @@
 
-QT -= gui
+QT += core gui widgets
 
-CONFIG += c++11 console
+CONFIG += c++11 cmdline
 CONFIG -= app_bundle debug_and_release_target
 
 !contains(DEFINES, HOBBITS_RUNNER_VERSION.*) {
@@ -27,9 +27,9 @@ HEADERS += \
     hobbitsrunnerinfo.h
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-
-INCLUDEPATH += $$PWD/../hobbits-core
-DEPENDPATH += $$PWD/../hobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
+DEPENDPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
 
 defined(HOBBITS_PYPATH, var) {
     message(Building hobbits-gui with python support...)

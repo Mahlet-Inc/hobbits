@@ -13,6 +13,11 @@ PluginAction::PluginAction(PluginType pluginType, QString pluginName, QJsonObjec
 
 }
 
+QSharedPointer<PluginAction> PluginAction::createAction(PluginAction::PluginType pluginType, QString pluginName, QJsonObject pluginState)
+{
+    return QSharedPointer<PluginAction>(new PluginAction(pluginType, pluginName, pluginState));
+}
+
 QSharedPointer<PluginAction> PluginAction::analyzerAction(QString pluginName, QJsonObject pluginState)
 {
     return QSharedPointer<PluginAction>(new PluginAction(PluginAction::Analyzer, pluginName, pluginState));

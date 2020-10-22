@@ -35,6 +35,7 @@ public:
 
     PluginAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
 
+    static QSharedPointer<PluginAction> createAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
     static QSharedPointer<PluginAction> analyzerAction(QString pluginName, QJsonObject pluginState);
     static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState);
     static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState = QJsonObject());

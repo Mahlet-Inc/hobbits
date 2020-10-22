@@ -4,17 +4,38 @@
 
 ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> parameters,
                                      std::function<QString(const QJsonObject&)> actionDescriber) :
-    m_actionDescriber(actionDescriber)
+    ParameterDelegate(parameters,
+                      actionDescriber,
+                      [](QSharedPointer<ParameterDelegate> delegate, QSize targetBounds){
+        Q_UNUSED(delegate)
+        Q_UNUSED(targetBounds)
+        return nullptr;
+    })
+{
+}
+
+ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> parameters,
+                                     std::function<QString (const QJsonObject &)> actionDescriber,
+                                     std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator) :
+    m_actionDescriber(actionDescriber),
+    m_editorCreator(editorCreator)
 {
     for (auto parameter : parameters) {
         m_parameterMap.insert(parameter.name, parameter);
     }
 }
 
+QSharedPointer<ParameterDelegate> ParameterDelegate::create(
+        QList<ParameterDelegate::ParameterInfo> parameterInfos,
+        std::function<QString (const QJsonObject &)> actionDescriber,
+        std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator)
+{
+    return QSharedPointer<ParameterDelegate>(new ParameterDelegate(parameterInfos, actionDescriber, editorCreator));
+}
+
 AbstractParameterEditor* ParameterDelegate::createEditor(QSize targetBounds)
 {
-    Q_UNUSED(targetBounds)
-    return nullptr;
+    return m_editorCreator(sharedFromThis(), targetBounds);
 }
 
 QList<ParameterDelegate::ParameterInfo> ParameterDelegate::parameterInfos() const

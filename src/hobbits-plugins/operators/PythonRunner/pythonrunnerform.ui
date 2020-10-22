@@ -81,9 +81,6 @@ def process_bits(input, output_bits, output_info, progress):
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>te_pythonScript</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

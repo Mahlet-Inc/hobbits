@@ -8,6 +8,7 @@
 #include "pluginactionmanager.h"
 #include "hobbitspluginmanager.h"
 #include "previewscrollbar.h"
+#include "batcheditor.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -103,6 +104,8 @@ private slots:
     static void processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor*  editor);
 
 
+    void on_action_BatchEditor_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -126,6 +129,8 @@ private:
     QSharedPointer<DisplayHandle> m_displayHandle;
     QList<QWidget*> m_currControlWidgets;
     PreviewScrollBar *m_previewScroll;
+
+    BatchEditor *m_batchEditor;
 
     QMenu *m_splitViewMenu;
 };

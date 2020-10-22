@@ -23,8 +23,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        batcheditor.cpp \
         actionrenderprogress.cpp \
+        batchedititem.cpp \
+        batchedititemwidget.cpp \
+        batcheditlink.cpp \
+        batcheditor.cpp \
+        batcheditscene.cpp \
+        batchinputdialog.cpp \
         bitcontainermanagerui.cpp \
         bitcontainertreemodel.cpp \
         highlightnavigator.cpp \
@@ -36,18 +41,26 @@ SOURCES += \
         parametereditordialog.cpp \
         parametereditorfileselect.cpp \
         parameterhelper.cpp \
+        plugintreemodel.cpp \
         previewscrollbar.cpp \
+        simpleparametereditor.cpp \
         widgetssettings.cpp
 
 HEADERS += \
         abstractparametereditor.h \
+        batchedititem.h \
+        batchedititemwidget.h \
+        batcheditlink.h \
         batcheditor.h \
+        batcheditscene.h \
+        batchinputdialog.h \
         bitcontainermanagerui.h \
         hobbits-widgets_global.h \
         parameterdelegateui.h \
         parametereditordialog.h \
         parametereditorfileselect.h \
         parameterhelper.h \
+        plugintreemodel.h \
         previewscrollbar.h \
         actionrenderprogress.h \
         bitcontainertreemodel.h \
@@ -56,11 +69,16 @@ HEADERS += \
         displayhandle.h \
         displayhelper.h \
         highlightnavigator.h \
+        simpleparametereditor.h \
         widgetssettings.h
 
 FORMS += \
+        batchedititemwidget.ui \
+        batcheditor.ui \
+        batchinputdialog.ui \
         highlightnavigator.ui \
-        parametereditordialog.ui
+        parametereditordialog.ui \
+        simpleparametereditor.ui
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
 INCLUDEPATH += $$PWD/../hobbits-core

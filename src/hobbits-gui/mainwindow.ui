@@ -344,6 +344,7 @@
     <addaction name="menuApply_Recent_Batch"/>
     <addaction name="action_Apply_Batch"/>
     <addaction name="action_Save_Batch"/>
+    <addaction name="action_BatchEditor"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -395,6 +396,11 @@
   <action name="action_Save_Batch">
    <property name="text">
     <string>&amp;Save Batch...</string>
+   </property>
+  </action>
+  <action name="action_BatchEditor">
+   <property name="text">
+    <string>Open Batch Editor...</string>
    </property>
   </action>
  </widget>

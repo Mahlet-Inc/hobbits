@@ -1,5 +1,5 @@
 #include <QCommandLineParser>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QTextStream>
 #ifdef Q_OS_UNIX
 #include <iostream>
@@ -11,6 +11,7 @@
 #include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
 #include <QJsonArray>
+#include "pythonpluginconfig.h"
 
 #ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
@@ -18,7 +19,7 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("Hobbits Runner");
     QCoreApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());
@@ -126,15 +127,34 @@ int main(int argc, char *argv[])
     pluginPaths.append(
             SettingsManager::getPluginLoaderSetting(
                     SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
+    QStringList pathBuffer;
     for (QString pluginPath : pluginPaths) {
+
         if (pluginPath.startsWith("~/")) {
             pluginPath.replace(0, 1, QDir::homePath());
         }
         else if (!pluginPath.startsWith("/")) {
             pluginPath = a.applicationDirPath() + "/" + pluginPath;
         }
+        pathBuffer.append(pluginPath);
+    }
+    pluginPaths = pathBuffer;
+
+    for (QString pluginPath : pluginPaths) {
         warnings.append(pluginManager->loadPlugins(pluginPath));
     }
+
+#ifdef HAS_EMBEDDED_PYTHON
+    for (QString pluginPath : pluginPaths) {
+        warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                            Q_UNUSED(size)
+                            Q_UNUSED(delegate)
+                            return nullptr;
+        }));
+    }
+#endif
+
+
     for (auto warning : warnings) {
         err << "Plugin load warning: " << warning << endl;
     }
@@ -142,8 +162,8 @@ int main(int argc, char *argv[])
     // Run
     QString mode = parser.positionalArguments().at(0);
     if (mode == "run") {
-        if (!parser.isSet(batchOption) || !parser.isSet(inputFileOption)) {
-            err << "Error: Cannot run in 'run' mode without a batch and input specified" << endl;
+        if (!parser.isSet(batchOption)) {
+            err << "Error: Cannot run in 'run' mode without a batch specified" << endl;
             err << parser.helpText() << endl;
             return -1;
         }
@@ -218,6 +238,11 @@ int main(int argc, char *argv[])
 
         if (batch.isNull()) {
             err << "Failed to load batch file";
+            return -1;
+        }
+
+        if (batch->getRequiredInputs() > targetContainers.size()) {
+            err << QString("Given batch requires %1 inputs and only %2 were provided.").arg(batch->getRequiredInputs()).arg(targetContainers.size());
             return -1;
         }
 

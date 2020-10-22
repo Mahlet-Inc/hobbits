@@ -19,8 +19,17 @@
 #include "batchcreationdialog.h"
 #include "abstractparametereditor.h"
 #include "parametereditordialog.h"
+#include "batcheditor.h"
+
+#ifdef HAS_EMBEDDED_PYTHON
+#include "pythonpluginconfig.h"
+#include "simpleparametereditor.h"
+#endif
 
 const int MAINWINDOW_STATE_VERSION = 1;
+
+static QString BATCH_EDITOR_SIZE_KEY = "batch_editor_size";
+static QString BATCH_EDITOR_POSITION_KEY = "batch_editor_pos";
 
 MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget *parent) :
     QMainWindow(parent),
@@ -190,6 +199,14 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     // create an initial state
     checkOperatorInput();
     activateBitContainer(currContainer(), QSharedPointer<BitContainer>());
+
+    m_batchEditor = new BatchEditor(m_pluginManager, this);
+    if (SettingsManager::getPrivateSetting(BATCH_EDITOR_SIZE_KEY).isValid()) {
+        m_batchEditor->resize(SettingsManager::getPrivateSetting(BATCH_EDITOR_SIZE_KEY).toSize());
+    }
+    if (SettingsManager::getPrivateSetting(BATCH_EDITOR_POSITION_KEY).isValid()) {
+        m_batchEditor->move(SettingsManager::getPrivateSetting(BATCH_EDITOR_POSITION_KEY).toPoint());
+    }
 }
 
 MainWindow::~MainWindow()
@@ -203,6 +220,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     SettingsManager::setPrivateSetting(SettingsManager::WINDOW_SIZE_KEY, size());
     SettingsManager::setPrivateSetting(SettingsManager::WINDOW_POSITION_KEY, pos());
     SettingsManager::setPrivateSetting(SettingsManager::WINDOW_STATE_KEY, saveState(MAINWINDOW_STATE_VERSION));
+
+    SettingsManager::setPrivateSetting(BATCH_EDITOR_SIZE_KEY, m_batchEditor->size());
+    SettingsManager::setPrivateSetting(BATCH_EDITOR_POSITION_KEY, m_batchEditor->pos());
 
     QStringList sizesAsStrings;
     for (int splitSize : m_displayTabsSplitter->sizes()) {
@@ -383,8 +403,10 @@ void MainWindow::checkCurrentDisplays()
                 displayMap.second->currentIndex());
         if (!currDisplay.isNull()) {
             focusDisplays.insert(currDisplay.data());
-
-            m_currControlWidgets.append(currDisplay->controls(m_displayHandle));
+            auto controls = currDisplay->controls(m_displayHandle);
+            if (controls) {
+                m_currControlWidgets.append(controls);
+            }
         }
     }
     m_displayHandle->setFocusDisplays(focusDisplays);
@@ -502,6 +524,8 @@ void MainWindow::loadPlugins()
     pluginPaths.append(
             SettingsManager::getPluginLoaderSetting(
                     SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
+
+    QStringList pathBuffer;
     for (QString pluginPath : pluginPaths) {
 
         if (pluginPath.startsWith("~/")) {
@@ -510,6 +534,11 @@ void MainWindow::loadPlugins()
         else if (!pluginPath.startsWith("/")) {
             pluginPath = QApplication::applicationDirPath() + "/" + pluginPath;
         }
+        pathBuffer.append(pluginPath);
+    }
+    pluginPaths = pathBuffer;
+
+    for (QString pluginPath : pluginPaths) {
         warnings.append(m_pluginManager->loadPlugins(pluginPath));
     }
 
@@ -520,6 +549,24 @@ void MainWindow::loadPlugins()
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
     }
+
+#ifdef HAS_EMBEDDED_PYTHON
+    warnings.clear();
+    for (QString pluginPath : pluginPaths) {
+        warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, m_pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+            Q_UNUSED(size)
+            return new SimpleParameterEditor(delegate, "Set Parameters");
+        }));
+    }
+
+    if (!warnings.isEmpty()) {
+        QMessageBox msg;
+        msg.setWindowTitle("Python Plugin Load Warnings");
+        msg.setText(warnings.join("\n"));
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    }
+#endif
 
 
     QSet<QString> queued;
@@ -842,34 +889,8 @@ void MainWindow::on_action_Save_Batch_triggered()
         return;
     }
 
-    QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Batch"),
-            SettingsManager::getPrivateSetting(
-                    SettingsManager::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Batch Files (*.hobbits_batch)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
-    if (!fileName.endsWith(".hobbits_batch")) {
-        fileName += ".hobbits_batch";
-    }
-
-
-    QFile file(fileName);
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_BATCH_PATH_KEY,
-            QFileInfo(file).dir().path());
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        warningMessage(
-                QString("Could not open file '%1' for writing").arg(fileName),
-                "Cannot Save Batch");
-        return;
-    }
-
-    QJsonDocument json(batch->serialize());
-    file.write(json.toJson());
+    m_batchEditor->setBatch(batch);
+    m_batchEditor->show();
 }
 
 void MainWindow::applyBatchFile(QString fileName)
@@ -891,8 +912,7 @@ void MainWindow::applyBatchFile(QString fileName)
         return;
     }
 
-    int requiredInputs = batch->getMinRequiredInputs(m_pluginManager);
-    int maxInputs = batch->getMaxPossibleInputs(m_pluginManager);
+    int requiredInputs = batch->getRequiredInputs();
 
     QList<QSharedPointer<BitContainer>> inputs;
     if (requiredInputs == 1 && !currContainer().isNull()) {
@@ -900,27 +920,15 @@ void MainWindow::applyBatchFile(QString fileName)
     }
     else if (requiredInputs > 0) {
         auto selectionDialog = QSharedPointer<ContainerSelectionDialog>(new ContainerSelectionDialog(m_bitContainerManager, this));
-        if (requiredInputs == maxInputs) {
-            selectionDialog->setMessage(QString("Select %1 inputs for the batch").arg(requiredInputs));
-        }
-        else {
-            selectionDialog->setMessage(QString("Select between %1 and %2 inputs for the batch").arg(requiredInputs).arg(maxInputs));
-        }
+        selectionDialog->setMessage(QString("Select %1 inputs for the batch").arg(requiredInputs));
         if (!selectionDialog->exec()) {
             return;
         }
         inputs = selectionDialog->getSelected();
-        if (inputs.size() < requiredInputs) {
+        if (inputs.size() != requiredInputs) {
             warningMessage(
-                    QString("You must select at least %1 input containers (%2 selected)")
+                    QString("You must select %1 input containers (%2 selected)")
                     .arg(requiredInputs).arg(inputs.size()),
-                    "Invalid Input Count");
-            return;
-        }
-        else if (inputs.size() > maxInputs) {
-            warningMessage(
-                    QString("You must select at most %1 input containers (%2 selected)")
-                    .arg(maxInputs).arg(inputs.size()),
                     "Invalid Input Count");
             return;
         }
@@ -1153,4 +1161,9 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
 void MainWindow::on_tb_scrollReset_clicked()
 {
     m_displayHandle->setOffsets(0, 0);
+}
+
+void MainWindow::on_action_BatchEditor_triggered()
+{
+    m_batchEditor->show();
 }

@@ -32,6 +32,13 @@ void PluginActionLineage::recordLineage(
         outputGroup.append(lineage.toWeakRef());
     }
 
+    // if input container is output container (analyzer), don't add output group
+    if (inputContainers.size() == 1
+            && outputContainers.size() == 1
+            && inputContainers.at(0) == outputContainers.at(0)) {
+        return;
+    }
+
     for (auto input: inputContainers) {
         input->actionLineage()->addOutputGroup(outputGroup);
     }

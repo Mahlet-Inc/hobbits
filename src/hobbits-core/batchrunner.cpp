@@ -27,20 +27,17 @@ QSharedPointer<BatchRunner> BatchRunner::create(
     runner->m_batch = batch;
     runner->m_inputContainers = inputContainers;
 
-
     for (auto step: batch->actionSteps()) {
         QList<QPair<QUuid, int>> trueInputs;
-        for (auto input: step->inputs) {
-            if (input.first.isNull()) {
-                QUuid specialInput = QUuid::createUuid();
-                runner->m_stepOutputs.insert(specialInput, {inputContainers.takeFirst()});
-                trueInputs.append({specialInput, 0});
-            }
-            else {
-                trueInputs.append(input);
-            }
+        if (step->action->pluginType() == PluginAction::NoAction) {
+            QUuid specialInput = QUuid::createUuid();
+            runner->m_stepOutputs.insert(specialInput, {inputContainers.takeFirst()});
+            trueInputs.append({specialInput, 0});
+            runner->m_trueStepInputs.insert(step, trueInputs);
         }
-        runner->m_trueStepInputs.insert(step, trueInputs);
+        else {
+            runner->m_trueStepInputs.insert(step, step->inputs);
+        }
     }
 
     return runner;
@@ -92,6 +89,11 @@ void BatchRunner::checkFinishedImporter(QUuid id)
     }
     else {
         auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Importer step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Importer step failed: " + result->errorString());
             this->cancel();
@@ -112,6 +114,11 @@ void BatchRunner::checkFinishedExporter(QUuid id)
     }
     else {
         auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Exporter step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Exporter step failed: " + result->errorString());
             this->cancel();
@@ -132,6 +139,11 @@ void BatchRunner::checkFinishedAnalyzer(QUuid id)
     }
     else {
         auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Analyzer step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Analyzer step failed: " + result->errorString());
             this->cancel();
@@ -152,6 +164,11 @@ void BatchRunner::checkFinishedOperator(QUuid id)
     }
     else {
         auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Operator step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Operator step failed: " + result->errorString());
             this->cancel();
