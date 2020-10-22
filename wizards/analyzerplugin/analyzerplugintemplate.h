@@ -3,7 +3,7 @@
 
 
 #include "analyzerinterface.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 class %{ClassName} : public QObject, AnalyzerInterface
 {
@@ -28,7 +28,7 @@ public:
             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 };
 
 #endif // %{JS: '%{ClassName}'.toUpperCase()}_H

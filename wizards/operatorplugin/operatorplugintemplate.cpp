@@ -1,26 +1,22 @@
-#include "%{JS: '%{HeaderFileName}'.toLowerCase()}"
-#include "ui_%{JS: '%{HeaderFileName}'.toLowerCase()}"
-#include <QObject>
+#include "%{HeaderFileName}"
+#include "%{FormHeaderFileName}"
 
-%{ClassName}::%{ClassName}() :
-    ui(new Ui::%{ClassName}()),
-    m_stateHelper(new PluginStateHelper())
+%{ClassName}::%{ClassName}()
 {
-    // The PluginStateHelper can be used to simplify the setting, getting, and validation
-    // of the plugin state. It can simplify the canRecallPluginState, setPluginStateInUi,
-    // and getStateFromUi methods.
-    // Using PluginStateHelper is completely optional - you can just implement those
-    // methods manually and remove m_stateHelper if desired.
-    m_stateHelper->addParameter("plugin_parameter", QJsonValue::String, [this](QJsonValue value) {
-        // Take the value and apply it to the ui
-        // e.g. ui->parameterLineEdit->setText(value.toString());
-        // Return true if it was able to be set in the ui
-        return true;
-    }, [this]() {
-        // Get the value from the ui
-        // e.g. return QJsonValue(ui->parameterLineEdit->text())
-        return QJsonValue("");
-    });
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        // TODO: add parameters like {"myparametername", QJsonValue::Double}
+    };
+
+    m_delegate = ParameterDelegate::create(
+                    infos,
+                    [this](const QJsonObject &parameters) {
+                        // TODO: use parameters to describe action better
+                        return QString("Apply %1").arg(this->name());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new %{FormClassName}(delegate);
+                    });
 }
 
 OperatorInterface* %{ClassName}::createDefaultOperator()
@@ -28,36 +24,26 @@ OperatorInterface* %{ClassName}::createDefaultOperator()
     return new %{ClassName}();
 }
 
-//Return name of operator
-QString %{ClassName}::getName()
+QString %{ClassName}::name()
 {
     return "%{ClassName}";
 }
 
-void %{ClassName}::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
+QString %{ClassName}::description()
 {
-    // the plugin callback allows the self-triggering of operateOnContainers
-    m_pluginCallback = pluginCallback;
+    // TODO: create actual description
+    return "Describes what %{ClassName} does";
 }
 
-void %{ClassName}::applyToWidget(QWidget *widget)
+QStringList %{ClassName}::tags()
 {
-    ui->setupUi(widget);
+    // TODO: add relevant tags
+    return {"Generic"};
 }
 
-bool %{ClassName}::canRecallPluginState(const QJsonObject &pluginState)
+QSharedPointer<ParameterDelegate>  %{ClassName}::parameterDelegate()
 {
-    return m_stateHelper->validatePluginState(pluginState);
-}
-
-bool %{ClassName}::setPluginStateInUi(const QJsonObject &pluginState)
-{
-    return m_stateHelper->applyPluginStateToUi(pluginState);
-}
-
-QJsonObject %{ClassName}::getStateFromUi()
-{
-    return m_stateHelper->getPluginStateFromUi();
+    return m_delegate;
 }
 
 int %{ClassName}::getMinInputContainers(const QJsonObject &pluginState)
@@ -72,20 +58,15 @@ int %{ClassName}::getMaxInputContainers(const QJsonObject &pluginState)
     return 1;
 }
 
-QSharedPointer<const OperatorResult> %{ClassName}::operateOnContainers(
+QSharedPointer<const OperatorResult> %{ClassName}::operateOnBits(
     QList<QSharedPointer<const BitContainer> > inputContainers,
-    const QJsonObject &recallablePluginState,
-    QSharedPointer<ActionProgress> progressTracker)
+    const QJsonObject &parameters,
+    QSharedPointer<ActionProgress> progress)
 {     
-    QSharedPointer<OperatorResult> result(new OperatorResult());
-    //Perform bit operations here
+    if (!m_delegate->validate(parameters)) {
+        return OperatorResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    }
 
-    return OperatorResult::error("Plugin operation is not implemented!");
-    //return OperatorResult::result({outputContainer}, recallablePluginState);
-}
-
-void %{ClassName}::previewBits(QSharedPointer<BitContainerPreview> container)
-{
-    Q_UNUSED(container)
-    // optionally use the current container to prepare the UI or something
+    // TODO: Perform analysis and return result with OperatorResult::result
+    return OperatorResult::error("Plugin operate action not implemented");
 }

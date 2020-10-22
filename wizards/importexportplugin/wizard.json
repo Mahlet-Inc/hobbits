@@ -14,8 +14,16 @@
         { "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
         { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
         { "key": "ClassName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "ImportFormClassName", "value": "%{JS: '%{ProjectName}ImportForm'}" },
+        { "key": "ExportFormClassName", "value": "%{JS: '%{ProjectName}ExportForm'}" },
         { "key": "CppFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
-        { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" }
+        { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ImportFormCppFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "ImportFormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ImportFormUiFileName", "value": "%{JS: Cpp.classToFileName('%{ImportFormClassName}', '.ui')}" },
+        { "key": "ExportFormCppFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "ExportFormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "ExportFormUiFileName", "value": "%{JS: Cpp.classToFileName('%{ExportFormClassName}', '.ui')}" }
     ],
 
     "pages":
@@ -57,6 +65,30 @@
                 {
                     "source": "importexportplugintemplate.h",
                     "target": "%{HeaderFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.cpp",
+                    "target": "%{ImportFormCppFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.h",
+                    "target": "%{ImportFormHeaderFileName}"
+                },
+                {
+                    "source": "importformplugintemplate.ui",
+                    "target": "%{ImportFormUiFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.cpp",
+                    "target": "%{ExportFormCppFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.h",
+                    "target": "%{ExportFormHeaderFileName}"
+                },
+                {
+                    "source": "exportformplugintemplate.ui",
+                    "target": "%{ExportFormUiFileName}"
                 }
                 
             ]

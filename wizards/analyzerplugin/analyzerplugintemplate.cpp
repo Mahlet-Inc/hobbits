@@ -7,8 +7,7 @@
         // TODO: add parameters like {"myparametername", QJsonValue::Double}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
                     [this](const QJsonObject &parameters) {
                         // TODO: use parameters to describe action better
@@ -17,7 +16,7 @@
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new %{FormClassName}(delegate);
-                    }));
+                    });
 }
 
 AnalyzerInterface* %{ClassName}::createDefaultAnalyzer()
