@@ -8,14 +8,18 @@
 SettingsData::SettingsData()
 {
     QString pythonHome;
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    if (!appDirPath.isEmpty()) {
+        appDirPath += "/";
+    }
 #ifdef Q_OS_LINUX
-    pythonHome = QCoreApplication::applicationDirPath()+"/../python";
+    pythonHome = appDirPath+"../python";
 #endif
 #ifdef Q_OS_MACOS
-    pythonHome = QCoreApplication::applicationDirPath()+"/../Frameworks/python";
+    pythonHome = appDirPath+"../Frameworks/python";
 #endif
 #ifdef Q_OS_WIN
-    pythonHome = QCoreApplication::applicationDirPath();
+    pythonHome = appDirPath;
 #endif
     QString pythonHomeCanonical = QDir(pythonHome).canonicalPath();
     // The canonical path will be empty if it doesn't exist, so we'll fall back on the base path for easier debugging
