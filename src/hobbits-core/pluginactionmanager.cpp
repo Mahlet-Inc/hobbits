@@ -240,19 +240,6 @@ void PluginActionManager::relayErrorFromExporter(QUuid id, QString errorString)
 
 void PluginActionManager::runBatch(QSharedPointer<PluginActionBatch> batch, QList<QSharedPointer<BitContainer>> containers)
 {
-    // TODO: prompt for batches with incomplete input containers
-//    while (containers.size() < batch->getMinRequiredInputs(m_pluginManager)) {
-//        auto result = runImporter(PluginAction::importerAction("File Data"));
-//        if (result.isNull() || result->hasEmptyParameters()) {
-//            emit reportError(QString("Cannot execute batch without %1 additional imported containers").arg(batch->getMinRequiredInputs(m_pluginManager) - containers.size()));
-//            return;
-//        }
-//        if (!result->errorString().isEmpty()) {
-//            emit reportError(result->errorString());
-//            return;
-//        }
-//    }
-
     auto runner = BatchRunner::create(batch, containers);
     m_batchRunners.insert(runner->id(), runner);
     connect(runner.data(), &BatchRunner::finished, this, &PluginActionManager::finishBatch);

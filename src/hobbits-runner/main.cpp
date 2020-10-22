@@ -12,6 +12,7 @@
 #include "settingsmanager.h"
 #include <QJsonArray>
 #include "pythonpluginconfig.h"
+#include <QTimer>
 
 #ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
@@ -246,7 +247,8 @@ int main(int argc, char *argv[])
             return -1;
         }
 
-        pluginActionManager->runBatch(batch, targetContainers);
+        // make sure this runs after the event loop starts
+        QTimer::singleShot(5, [pluginActionManager, batch, targetContainers](){pluginActionManager->runBatch(batch, targetContainers);});
         a.exec();
     }
     else {
