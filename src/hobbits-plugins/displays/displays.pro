@@ -10,5 +10,6 @@ SUBDIRS += \
     FrequencyPlot \
     HexView \
     HilbertPlot \
+    Metadata \
     Spectrogram \
     SymbolRaster
