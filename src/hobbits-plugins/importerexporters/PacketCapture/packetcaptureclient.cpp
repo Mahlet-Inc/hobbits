@@ -6,6 +6,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 PacketCaptureClient::PacketCaptureClient() :
+    m_handle(nullptr),
     m_aborting(0)
 {
 }
