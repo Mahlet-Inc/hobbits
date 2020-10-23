@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QImage>
 #include "displayhelper.h"
+#include <QMouseEvent>
 
 FrequencyPlotWidget::FrequencyPlotWidget(
         QSharedPointer<DisplayHandle> displayHandle,
@@ -11,7 +12,8 @@ FrequencyPlotWidget::FrequencyPlotWidget(
     DisplayBase(displayHandle, pluginRef, parent),
     m_windowSize(10000),
     m_wordSize(8),
-    m_scale(2)
+    m_scale(2),
+    m_mouseHover(-1, -1)
 {
 
 }
@@ -74,6 +76,7 @@ void FrequencyPlotWidget::paintEvent(QPaintEvent*) {
 
 
     QPainter painter(this);
+    painter.save();
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.scale(m_scale, m_scale);
 
@@ -85,10 +88,82 @@ void FrequencyPlotWidget::paintEvent(QPaintEvent*) {
         double amount = double(barFrequencies.at(x))*ratio;
         painter.fillRect(QRectF(x, plotHeight, 1, amount), foreground);
     }
+    painter.restore();
+
+    if (m_mouseHover.x() >= 0 && m_mouseHover.y() >= 0) {
+
+        int barIdx = m_mouseHover.x() / m_scale;
+        int x = m_mouseHover.x();
+        int y = m_mouseHover.y();
+
+        if (!barMax.contains(barIdx)) {
+            return;
+        }
+        if (barIdx >= barFrequencies.size()) {
+            return;
+        }
+
+        quint64 value = barMax.value(barIdx);
+        int frequency = barFrequencies.at(barIdx);
+
+        QString decimal = QString("%1").arg(value, 0, 10);
+        QString hex = QString("0x%1").arg(value, 0, 16);
+        QString freq = QString("Count: %1").arg(frequency);
+
+        int pad = 4;
+        int textHeight = 10 + 3;
+        int boxWidth = 10 * qMax(decimal.size(), freq.size()) + pad*2;
+        int boxHeight = textHeight * 3 + pad*2;
+
+
+        QRect box;
+        if (x > (plotSize * m_scale) / 2) {
+            box.setX(x - pad - boxWidth);
+        }
+        else {
+            box.setX(x + pad);
+        }
+        if (y > (plotHeight * m_scale) / 2) {
+            box.setY(y - pad - boxHeight);
+        }
+        else {
+            box.setY(y + pad);
+        }
+        box.setWidth(boxWidth);
+        box.setHeight(boxHeight);
+
+        painter.save();
+        painter.fillRect(box, QColor(0x00, 0x00, 0x00, 0x99));
+        QFont font = QFont("monospace", 10);
+        font.setStyleStrategy(QFont::ForceIntegerMetrics);
+        painter.setFont(font);
+        painter.setPen(QColor(0xff, 0xff, 0xff));
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawText(box.x() + pad, box.y() + pad, box.width(), textHeight, Qt::AlignLeft, decimal);
+        painter.drawText(box.x() + pad, box.y() + pad + textHeight, box.width(), textHeight, Qt::AlignLeft, hex);
+        painter.drawText(box.x() + pad, box.y() + pad + (2 * textHeight), box.width(), textHeight, Qt::AlignLeft, freq);
+
+        painter.restore();
+    }
+}
+
+void FrequencyPlotWidget::leaveEvent(QEvent *event)
+{
+    m_mouseHover = {-1, -1};
+    repaint();
 }
 
 void FrequencyPlotWidget::mouseMoveEvent(QMouseEvent *event) {
-    Q_UNUSED(event)
+    m_mouseHover = {-1, -1};
+
+    if (m_displayHandle->getContainer().isNull()) {
+        return;
+    }
+
+    m_mouseHover.setX(event->x());
+    m_mouseHover.setY(event->y());
+
+    repaint();
 }
 
 void FrequencyPlotWidget::setWindowSize(int size)
