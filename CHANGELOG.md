@@ -1,3 +1,10 @@
+## [0.40.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.40.0...v0.40.1) (2020-10-23)
+
+
+### Bug Fixes
+
+* prevent packet capture failing due to "already running" ([9efaa52](https://github.com/Mahlet-Inc/hobbits/commit/9efaa520f241368021d594d3057c41a0364d8d8b))
+
 # [0.40.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.39.0...v0.40.0) (2020-10-23)
 
 
