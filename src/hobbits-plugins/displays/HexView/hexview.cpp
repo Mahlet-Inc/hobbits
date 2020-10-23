@@ -12,18 +12,28 @@ DisplayInterface* HexView::createDefaultDisplay()
     return new HexView();
 }
 
-QString HexView::getName()
+QString HexView::name()
 {
     return "Hex";
 }
 
-QWidget* HexView::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString HexView::description()
+{
+    return "Displays data as a hexadecimal string";
+}
+
+QStringList HexView::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* HexView::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* HexView::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* HexView::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

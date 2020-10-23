@@ -7,6 +7,11 @@
 #include "range.h"
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The RangeSequence class is a memory-friendly list of ordered, contiguous Ranges
+  *
+  * \see Range BitInfo
+*/
 class HOBBITSCORESHARED_EXPORT RangeSequence
 {
 public:

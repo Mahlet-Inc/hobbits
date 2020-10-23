@@ -89,7 +89,7 @@ QChar MathParser::hex()
     return '\0';
 }
 
-ParseResult MathParser::wholebin(bool move_back = true)
+MathParser::ParseResult MathParser::wholebin(bool move_back = true)
 {
     QString binaryString = "";
     bool ok;
@@ -109,25 +109,25 @@ ParseResult MathParser::wholebin(bool move_back = true)
                         this->prev();
                     }
                 }
-                return ParseResult(binaryString.toInt(&ok, 2), 1);
+                return MathParser::ParseResult(binaryString.toInt(&ok, 2), 1);
             }
             else {
                 this->prev();
                 this->prev();
-                return ParseResult(-1, -1);
+                return MathParser::ParseResult(-1, -1);
             }
         }
         else {
             this->prev();
-            return ParseResult(-1, -1);
+            return MathParser::ParseResult(-1, -1);
         }
     }
     else {
-        return ParseResult(-1, -1);
+        return MathParser::ParseResult(-1, -1);
     }
 }
 
-ParseResult MathParser::wholehex(bool move_back = true)
+MathParser::ParseResult MathParser::wholehex(bool move_back = true)
 {
     QString hexString = "";
     bool ok;
@@ -147,25 +147,25 @@ ParseResult MathParser::wholehex(bool move_back = true)
                         this->prev();
                     }
                 }
-                return ParseResult(hexString.toLongLong(&ok, 16), 1);
+                return MathParser::ParseResult(hexString.toLongLong(&ok, 16), 1);
             }
             else {
                 this->prev();
                 this->prev();
-                return ParseResult(-1, -1);
+                return MathParser::ParseResult(-1, -1);
             }
         }
         else {
             this->prev();
-            return ParseResult(-1, -1);
+            return MathParser::ParseResult(-1, -1);
         }
     }
     else {
-        return ParseResult(-1, -1);
+        return MathParser::ParseResult(-1, -1);
     }
 }
 
-ParseResult MathParser::wholeoct(bool move_back = true)
+MathParser::ParseResult MathParser::wholeoct(bool move_back = true)
 {
     QString octString = "";
     bool ok;
@@ -185,25 +185,25 @@ ParseResult MathParser::wholeoct(bool move_back = true)
                         this->prev();
                     }
                 }
-                return ParseResult(octString.toLongLong(&ok, 8), 1);
+                return MathParser::ParseResult(octString.toLongLong(&ok, 8), 1);
             }
             else {
                 this->prev();
                 this->prev();
-                return ParseResult(-1, -1);
+                return MathParser::ParseResult(-1, -1);
             }
         }
         else {
             this->prev();
-            return ParseResult(-1, -1);
+            return MathParser::ParseResult(-1, -1);
         }
     }
     else {
-        return ParseResult(-1, -1);
+        return MathParser::ParseResult(-1, -1);
     }
 }
 
-ParseResult MathParser::wholedec(bool move_back = true)
+MathParser::ParseResult MathParser::wholedec(bool move_back = true)
 {
     QString decString = "";
     if (!dec().isNull()) {
@@ -218,12 +218,12 @@ ParseResult MathParser::wholedec(bool move_back = true)
                 this->prev();
             }
         }
-        return ParseResult(decString.toLongLong(), 1);
+        return MathParser::ParseResult(decString.toLongLong(), 1);
     }
-    return ParseResult(-1, -1);
+    return MathParser::ParseResult(-1, -1);
 }
 
-ParseResult MathParser::whole(bool move_back = true)
+MathParser::ParseResult MathParser::whole(bool move_back = true)
 {
     if (wholebin().isValid()) {
         return wholebin(move_back);
@@ -237,15 +237,15 @@ ParseResult MathParser::whole(bool move_back = true)
     if (wholedec().isValid()) {
         return wholedec(move_back);
     }
-    return ParseResult(-1, -1);
+    return MathParser::ParseResult(-1, -1);
 }
 
-ParseResult MathParser::factor(bool move_back = true)
+MathParser::ParseResult MathParser::factor(bool move_back = true)
 {
     if (whole().getVal() != -1) {
         return whole(move_back);
     }
-    return ParseResult(-1, -1);
+    return MathParser::ParseResult(-1, -1);
 }
 
 //
@@ -279,7 +279,7 @@ int precedence(char op)
     return 0;
 }
 
-ParseResult MathParser::factors()
+MathParser::ParseResult MathParser::factors()
 {
     QVector<qlonglong> nums;
     QVector<QChar> allOps;
@@ -295,7 +295,7 @@ ParseResult MathParser::factors()
                 nums.push_back(factor(false).getVal());
             }
             else {
-                return ParseResult(-1, -1);
+                return MathParser::ParseResult(-1, -1);
             }
         }
         // Calculation
@@ -324,10 +324,10 @@ ParseResult MathParser::factors()
             }
         }
 
-        return ParseResult(result, 1);
+        return MathParser::ParseResult(result, 1);
 
     }
-    return ParseResult(-1, -1);
+    return MathParser::ParseResult(-1, -1);
 }
 
 int MathParser::unit()
@@ -396,33 +396,33 @@ int MathParser::unit()
     return -1;
 }
 
-ParseResult MathParser::base()
+MathParser::ParseResult MathParser::base()
 {
     qlonglong f = factors().getVal();
     if (f != -1) {
         if (this->tok() == ';') {
-            return ParseResult(f, 1); // Bits is default unit
+            return MathParser::ParseResult(f, 1); // Bits is default unit
         }
         else {
             int u = this->unit();
             if (u != -1) {
-                return ParseResult(f, u);
+                return MathParser::ParseResult(f, u);
             }
             else {
                 this->prev();
                 this->prev();
-                return ParseResult(-1, -1);
+                return MathParser::ParseResult(-1, -1);
             }
         }
     }
-    return ParseResult(-1, -1);
+    return MathParser::ParseResult(-1, -1);
 }
 
-ParseResult MathParser::parseInput(QString tokens, ParseType t, int start)
+MathParser::ParseResult MathParser::parseInput(QString tokens, ParseType t, int start)
 {
     this->tokens = tokens.simplified().replace(" ", "");
     this->pos = start;
-    ParseResult result;
+    MathParser::ParseResult result;
     switch (t) {
     case Default:
         result = base();
@@ -455,7 +455,36 @@ ParseResult MathParser::parseInput(QString tokens, ParseType t, int start)
     return result;
 }
 
-ParseResult MathParser::parseInput(QString tokens)
+MathParser::ParseResult MathParser::parseInput(QString tokens)
 {
     return this->parseInput(tokens, ParseType::Default);
+}
+
+MathParser::ParseResult::ParseResult(qlonglong val, int mult)
+{
+    this->_val = val;
+    this->_mult = mult;
+}
+
+qlonglong MathParser::ParseResult::getVal()
+{
+    return this->_val;
+}
+
+int MathParser::ParseResult::getMult()
+{
+    return this->_mult;
+}
+
+qlonglong MathParser::ParseResult::getResult()
+{
+    if (this->isValid()) {
+        return this->_val * this->_mult;
+    }
+    return -1;
+}
+
+bool MathParser::ParseResult::isValid()
+{
+    return (this->_mult >= 0 && this->_val >= 0); // No negative results allowed either.
 }

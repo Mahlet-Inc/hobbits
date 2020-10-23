@@ -41,7 +41,7 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python -d
+      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
     displayName: 'Run qmake'
 
   - script: |
@@ -60,6 +60,7 @@ steps:
       cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
       cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
+      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-widgets/libhobbits-widgets.so* release/lib
       cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
       cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
       cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* release/lib
@@ -89,7 +90,7 @@ steps:
       npm ci
       cd tests
       ./prepare_tests.js
-      ./test_hobbits.js ../release/bin/hobbits-runner
+      ./test_hobbits.js ../release/bin/hobbits-runner ../release/python
     displayName: 'Run tests'
 
   - task: CopyFiles@2 

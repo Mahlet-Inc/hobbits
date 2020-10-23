@@ -19,9 +19,6 @@ public:
 
     int getSelectedBatchMode();
 
-private slots:
-    void adjustToCurrentSelections();
-
 private:
     Ui::BatchCreationDialog *ui;
 };

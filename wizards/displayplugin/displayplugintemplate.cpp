@@ -12,18 +12,30 @@ DisplayInterface* %{PluginName}::createDefaultDisplay()
     return new %{PluginName}();
 }
 
-QString %{PluginName}::getName()
+QString %{PluginName}::name()
 {
     return "%{PluginName}";
 }
 
-QWidget* %{PluginName}::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString %{PluginName}::description()
+{
+    // TODO: add description
+    return "%{PluginName}";
+}
+
+QStringList %{PluginName}::tags()
+{
+    // TODO: make tags relevant
+    return {"Generic"};
+}
+
+QWidget* %{PluginName}::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* %{PluginName}::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* %{PluginName}::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;
@@ -35,6 +47,6 @@ void %{PluginName}::initialize(QSharedPointer<DisplayHandle> displayHandle)
         m_displayWidget = new %{DisplayWidgetName}(displayHandle, this);
         m_controlsWidget = new %{ControlWidgetName}();
 
-        // make necessary connections here
+        // TODO: make necessary connections here
     }
 }

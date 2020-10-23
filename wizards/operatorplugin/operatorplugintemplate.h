@@ -20,28 +20,23 @@ public:
     %{ClassName}();
 
     OperatorInterface* createDefaultOperator() override;
-    QString getName() override;
 
-    void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
-    void applyToWidget(QWidget *widget) override;
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
 
-    bool canRecallPluginState(const QJsonObject& pluginState) override;
-    bool setPluginStateInUi(const QJsonObject &pluginState) override;
-    QJsonObject getStateFromUi() override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
     int getMinInputContainers(const QJsonObject &pluginState) override;
     int getMaxInputContainers(const QJsonObject &pluginState) override;
 
-    QSharedPointer<const OperatorResult> operateOnContainers(
-        QList<QSharedPointer<const BitContainer> > inputContainers,
-        const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker) override;
-    void previewBits(QSharedPointer<BitContainerPreview> container) override;
+    QSharedPointer<const OperatorResult> operateOnBits(
+            QList<QSharedPointer<const BitContainer>> inputContainers,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    Ui::%{ClassName} *ui;
-    QSharedPointer<PluginCallback> m_pluginCallback;
-    QSharedPointer<PluginStateHelper> m_stateHelper;
+    QSharedPointer<ParameterDelegate> m_delegate;
 };
 
 #endif // %{JS: '%{ClassName}'.toUpperCase()}_H

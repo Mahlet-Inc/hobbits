@@ -5,28 +5,25 @@ ExportResult::ExportResult()
 
 }
 
-ExportResult* ExportResult::setPluginState(QJsonObject pluginState)
+ExportResult* ExportResult::setParameters(QJsonObject pluginState)
 {
-    m_pluginState = pluginState;
+    m_parameters = pluginState;
     return this;
 }
 
-const QJsonObject ExportResult::pluginState() const
+const QJsonObject ExportResult::parameters() const
 {
-    return m_pluginState;
+    return m_parameters;
 }
 
-bool ExportResult::hasEmptyState() const
+bool ExportResult::hasEmptyParameters() const
 {
-    return m_pluginState.isEmpty();
+    return m_parameters.isEmpty();
 }
 
 QString ExportResult::errorString() const
 {
-    if (m_pluginState.contains("error")) {
-        return m_pluginState.value("error").toString();
-    }
-    return QString();
+    return m_errorString;
 }
 
 QSharedPointer<ExportResult> ExportResult::nullResult()
@@ -34,14 +31,14 @@ QSharedPointer<ExportResult> ExportResult::nullResult()
     return QSharedPointer<ExportResult>(new ExportResult());
 }
 
-QSharedPointer<ExportResult> ExportResult::error(QString error)
+QSharedPointer<ExportResult> ExportResult::error(QString errorString)
 {
-    QJsonObject pluginState;
-    pluginState.insert("error", error);
-    return QSharedPointer<ExportResult>((new ExportResult())->setPluginState(pluginState));
+    auto result = new ExportResult();
+    result->m_errorString = errorString;
+    return QSharedPointer<ExportResult>(result);
 }
 
-QSharedPointer<ExportResult> ExportResult::result(QJsonObject pluginState)
+QSharedPointer<ExportResult> ExportResult::result(QJsonObject parameters)
 {
-    return QSharedPointer<ExportResult>((new ExportResult())->setPluginState(pluginState));
+    return QSharedPointer<ExportResult>((new ExportResult())->setParameters(parameters));
 }

@@ -16,7 +16,7 @@ void PluginActionLineage::recordLineage(
     QList<QWeakPointer<const PluginActionLineage>> outputGroup;
 
     for (auto input: inputContainers) {
-        if (input->getActionLineage().isNull()) {
+        if (input->actionLineage().isNull()) {
             input->setActionLineage(actionlessLineage());
         }
     }
@@ -26,14 +26,21 @@ void PluginActionLineage::recordLineage(
         QSharedPointer<PluginActionLineage> lineage(new PluginActionLineage(pluginAction));
         lineage->setOutputPosition(outputPosition++);
         for (auto input: inputContainers) {
-            lineage->addInput(input->getActionLineage());
+            lineage->addInput(input->actionLineage());
         }
         output->setActionLineage(lineage);
         outputGroup.append(lineage.toWeakRef());
     }
 
+    // if input container is output container (analyzer), don't add output group
+    if (inputContainers.size() == 1
+            && outputContainers.size() == 1
+            && inputContainers.at(0) == outputContainers.at(0)) {
+        return;
+    }
+
     for (auto input: inputContainers) {
-        input->getActionLineage()->addOutputGroup(outputGroup);
+        input->actionLineage()->addOutputGroup(outputGroup);
     }
 }
 
@@ -93,7 +100,7 @@ QList<QSharedPointer<const PluginAction>> PluginActionLineage::outputOperators()
         if (output.isNull()) {
             continue;
         }
-        if (output->getPluginAction()->getPluginType() == PluginAction::Operator) {
+        if (output->getPluginAction()->pluginType() == PluginAction::Operator) {
             outputs.append(output->getPluginAction());
         }
     }

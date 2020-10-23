@@ -11,6 +11,8 @@
 #include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
 #include <QJsonArray>
+#include "pythonpluginconfig.h"
+#include <QTimer>
 
 #ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
@@ -102,11 +104,11 @@ int main(int argc, char *argv[])
 
 
     if (parser.isSet(configFilePathOption)) {
-        SettingsManager::getInstance().setConfigFilePath(parser.value(configFilePathOption));
+        SettingsManager::setConfigFilePath(parser.value(configFilePathOption));
     }
 
     if (parser.isSet(pythonHomePathOption)) {
-        SettingsManager::getInstance().setTransientSetting(SettingsData::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
+        SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
         err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << endl;
     }
 
@@ -124,17 +126,36 @@ int main(int argc, char *argv[])
         pluginPaths.append(parser.value(extraPluginPathOption).split(":"));
     }
     pluginPaths.append(
-            SettingsManager::getInstance().getPluginLoaderSetting(
-                    SettingsData::PLUGIN_PATH_KEY).toString().split(":"));
+            SettingsManager::getPluginLoaderSetting(
+                    SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
+    QStringList pathBuffer;
     for (QString pluginPath : pluginPaths) {
+
         if (pluginPath.startsWith("~/")) {
             pluginPath.replace(0, 1, QDir::homePath());
         }
         else if (!pluginPath.startsWith("/")) {
             pluginPath = a.applicationDirPath() + "/" + pluginPath;
         }
+        pathBuffer.append(pluginPath);
+    }
+    pluginPaths = pathBuffer;
+
+    for (QString pluginPath : pluginPaths) {
         warnings.append(pluginManager->loadPlugins(pluginPath));
     }
+
+#ifdef HAS_EMBEDDED_PYTHON
+    for (QString pluginPath : pluginPaths) {
+        warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                            Q_UNUSED(size)
+                            Q_UNUSED(delegate)
+                            return nullptr;
+        }));
+    }
+#endif
+
+
     for (auto warning : warnings) {
         err << "Plugin load warning: " << warning << endl;
     }
@@ -142,8 +163,8 @@ int main(int argc, char *argv[])
     // Run
     QString mode = parser.positionalArguments().at(0);
     if (mode == "run") {
-        if (!parser.isSet(batchOption) || !parser.isSet(inputFileOption)) {
-            err << "Error: Cannot run in 'run' mode without a batch and input specified" << endl;
+        if (!parser.isSet(batchOption)) {
+            err << "Error: Cannot run in 'run' mode without a batch specified" << endl;
             err << parser.helpText() << endl;
             return -1;
         }
@@ -168,7 +189,7 @@ int main(int argc, char *argv[])
 
         QSharedPointer<BitContainerManager> bitManager = QSharedPointer<BitContainerManager>(new BitContainerManager());
         for (auto container : targetContainers) {
-            bitManager->getTreeModel()->addContainer(container);
+            bitManager->addContainer(container);
         }
         pluginActionManager->setContainerManager(bitManager);
 
@@ -203,6 +224,7 @@ int main(int argc, char *argv[])
                 pluginActionManager.data(),
                 &PluginActionManager::batchFinished,
                 [&a, &err](QUuid id) {
+            Q_UNUSED(id)
             a.exit();
         });
 
@@ -221,7 +243,13 @@ int main(int argc, char *argv[])
             return -1;
         }
 
-        pluginActionManager->runBatch(batch, targetContainers);
+        if (batch->getRequiredInputs() > targetContainers.size()) {
+            err << QString("Given batch requires %1 inputs and only %2 were provided.").arg(batch->getRequiredInputs()).arg(targetContainers.size());
+            return -1;
+        }
+
+        // make sure this runs after the event loop starts
+        QTimer::singleShot(5, [pluginActionManager, batch, targetContainers](){pluginActionManager->runBatch(batch, targetContainers);});
         a.exec();
     }
     else {

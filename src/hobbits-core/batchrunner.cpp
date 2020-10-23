@@ -27,20 +27,17 @@ QSharedPointer<BatchRunner> BatchRunner::create(
     runner->m_batch = batch;
     runner->m_inputContainers = inputContainers;
 
-
     for (auto step: batch->actionSteps()) {
         QList<QPair<QUuid, int>> trueInputs;
-        for (auto input: step->inputs) {
-            if (input.first.isNull()) {
-                QUuid specialInput = QUuid::createUuid();
-                runner->m_stepOutputs.insert(specialInput, {inputContainers.takeFirst()});
-                trueInputs.append({specialInput, 0});
-            }
-            else {
-                trueInputs.append(input);
-            }
+        if (step->action->pluginType() == PluginAction::NoAction) {
+            QUuid specialInput = QUuid::createUuid();
+            runner->m_stepOutputs.insert(specialInput, {inputContainers.takeFirst()});
+            trueInputs.append({specialInput, 0});
+            runner->m_trueStepInputs.insert(step, trueInputs);
         }
-        runner->m_trueStepInputs.insert(step, trueInputs);
+        else {
+            runner->m_trueStepInputs.insert(step, step->inputs);
+        }
     }
 
     return runner;
@@ -78,10 +75,58 @@ void BatchRunner::cancel()
 void BatchRunner::checkDone()
 {
     // check for running jobs then finish
-    if (m_analyzerRunners.isEmpty() && m_operatorRunners.isEmpty()) {
+    if (m_analyzerRunners.isEmpty() && m_operatorRunners.isEmpty() && m_importerRunners.isEmpty()) {
         m_running = false;
         emit finished(m_id);
     }
+}
+
+void BatchRunner::checkFinishedImporter(QUuid id)
+{
+    auto finished = m_importerRunners.take(id);
+    if (finished.first.isNull()) {
+        m_errorList.append(QString("Unexpected importer step ID finished: %1").arg(id.toString()));
+    }
+    else {
+        auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Importer step returned null");
+            this->cancel();
+            return;
+        }
+        if (!result->errorString().isEmpty()) {
+            m_errorList.append("Importer step failed: " + result->errorString());
+            this->cancel();
+            return;
+        }
+
+        m_stepOutputs.insert(finished.first, {result->getContainer()});
+    }
+
+    checkForRunnableSteps();
+}
+
+void BatchRunner::checkFinishedExporter(QUuid id)
+{
+    auto finished = m_exporterRunners.take(id);
+    if (finished.first.isNull()) {
+        m_errorList.append(QString("Unexpected exporter step ID finished: %1").arg(id.toString()));
+    }
+    else {
+        auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Exporter step returned null");
+            this->cancel();
+            return;
+        }
+        if (!result->errorString().isEmpty()) {
+            m_errorList.append("Exporter step failed: " + result->errorString());
+            this->cancel();
+            return;
+        }
+    }
+
+    checkForRunnableSteps();
 }
 
 void BatchRunner::checkFinishedAnalyzer(QUuid id)
@@ -93,7 +138,12 @@ void BatchRunner::checkFinishedAnalyzer(QUuid id)
         m_errorList.append(QString("Unexpected analyzer step ID finished: %1").arg(id.toString()));
     }
     else {
-        auto result = finished.second->getWatcher()->result();
+        auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Analyzer step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Analyzer step failed: " + result->errorString());
             this->cancel();
@@ -113,14 +163,19 @@ void BatchRunner::checkFinishedOperator(QUuid id)
         m_errorList.append(QString("Unexpected operator step ID finished: %1").arg(id.toString()));
     }
     else {
-        auto result = finished.second->getWatcher()->result();
+        auto result = finished.second->watcher()->result();
+        if (result.isNull()) {
+            m_errorList.append("Operator step returned null");
+            this->cancel();
+            return;
+        }
         if (!result->errorString().isEmpty()) {
             m_errorList.append("Operator step failed: " + result->errorString());
             this->cancel();
             return;
         }
 
-        m_stepOutputs.insert(finished.first, result->getOutputContainers());
+        m_stepOutputs.insert(finished.first, result->outputContainers());
     }
 
     checkForRunnableSteps();
@@ -159,7 +214,7 @@ void BatchRunner::checkForRunnableSteps()
     }
 
     // Run each step with available inputs
-    bool hasNewImports = false;
+    bool checkAgain = false;
     for (auto step: runnableSteps) {
         m_ranSteps.insert(step->stepId);
         QList<QSharedPointer<BitContainer>> stepInputs;
@@ -172,48 +227,57 @@ void BatchRunner::checkForRunnableSteps()
             }
             stepInputs.append(source.at(input.second));
         }
-        if (step->action->getPluginType() == PluginAction::NoAction) {
+        if (step->action->pluginType() == PluginAction::NoAction) {
             m_stepOutputs.insert(step->stepId, stepInputs);
-            hasNewImports = true;
+            checkAgain = true;
         }
-        else if (step->action->getPluginType() == PluginAction::Importer) {
-            auto result = m_actionManager->runImporter(step->action);
-            if (!result->errorString().isEmpty()) {
-                m_errorList.append(result->errorString());
+        else if (step->action->pluginType() == PluginAction::Importer) {
+            auto runner = m_actionManager->runImporter(step->action);
+            if (runner.isNull()) {
+                m_errorList.append(QString("Failed to run importer '%1'").arg(step->action->pluginName()));
                 cancel();
                 return;
             }
-            if (result->getContainer().isNull()) {
-                m_errorList.append("Importer did not import anything, cancelling batch");
-                cancel();
-                return;
-            }
-            m_stepOutputs.insert(step->stepId, {result->getContainer()});
-            hasNewImports = true;
+            m_importerRunners.insert(runner->id(), {step->stepId, runner});
+            connect(runner.data(), &ImporterRunner::finished, this, &BatchRunner::checkFinishedImporter);
         }
-        else if (step->action->getPluginType() == PluginAction::Exporter) {
+        else if (step->action->pluginType() == PluginAction::Exporter) {
             if (stepInputs.size() == 1) {
-                auto result = m_actionManager->runExporter(step->action, stepInputs.at(0));
-                if (!result->errorString().isEmpty()) {
-                    m_errorList.append("Export step failed: " + result->errorString());
+                auto runner = m_actionManager->runExporter(step->action, stepInputs.at(0));
+                if (runner.isNull()) {
+                    m_errorList.append(QString("Failed to run exporter '%1'").arg(step->action->pluginName()));
+                    cancel();
+                    return;
                 }
+                m_exporterRunners.insert(runner->id(), {step->stepId, runner});
+                connect(runner.data(), &ExporterRunner::finished, this, &BatchRunner::checkFinishedExporter);
             }
             else {
                 m_errorList.append("Export step failed - a single input container is required");
             }
         }
-        else if (step->action->getPluginType() == PluginAction::Analyzer) {
+        else if (step->action->pluginType() == PluginAction::Analyzer) {
             if (stepInputs.size() != 1) {
                 m_errorList.append(QString("Invalid input specification for analysis step %1").arg(step->stepId.toString()));
                 cancel();
                 return;
             }
             auto runner = m_actionManager->runAnalyzer(step->action, stepInputs.at(0));
+            if (runner.isNull()) {
+                m_errorList.append(QString("Failed to run analyzer '%1'").arg(step->action->pluginName()));
+                cancel();
+                return;
+            }
             m_analyzerRunners.insert(runner->id(), {step->stepId, runner});
             connect(runner.data(), &AnalyzerRunner::finished, this, &BatchRunner::checkFinishedAnalyzer);
         }
-        else if (step->action->getPluginType() == PluginAction::Operator) {
+        else if (step->action->pluginType() == PluginAction::Operator) {
             auto runner = m_actionManager->runOperator(step->action, stepInputs);
+            if (runner.isNull()) {
+                m_errorList.append(QString("Failed to run operator '%1'").arg(step->action->pluginName()));
+                cancel();
+                return;
+            }
             m_operatorRunners.insert(runner->id(), {step->stepId, runner});
             connect(runner.data(), &OperatorRunner::finished, this, &BatchRunner::checkFinishedOperator);
         }
@@ -224,13 +288,14 @@ void BatchRunner::checkForRunnableSteps()
     if (runnableSteps.isEmpty()
             && m_batch->actionSteps().size() > m_ranSteps.size()
             && m_analyzerRunners.isEmpty()
-            && m_operatorRunners.isEmpty()) {
+            && m_operatorRunners.isEmpty()
+            && m_importerRunners.isEmpty()) {
         m_errorList.append("There are steps that cannot run due to missing inputs or missing expected output from other steps");
         cancel();
     }
 
     // if a new container was synchronously imported, immediately check again if other steps can be taken with it
-    if (hasNewImports) {
+    if (checkAgain) {
         checkForRunnableSteps();
     }
 }

@@ -146,6 +146,11 @@ QVariant BitInfo::metadata(QString key) const
     return m_metadata.value(key);
 }
 
+QList<QString> BitInfo::metadataKeys() const
+{
+    return m_metadata.keys();
+}
+
 qint64 BitInfo::frameOffsetContaining(qint64 value, Range indexBounds) const
 {
     return m_frames->indexOf(value, indexBounds);

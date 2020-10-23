@@ -12,18 +12,28 @@ DisplayInterface* HilbertPlot::createDefaultDisplay()
     return new HilbertPlot();
 }
 
-QString HilbertPlot::getName()
+QString HilbertPlot::name()
 {
     return "Hilbert Plot";
 }
 
-QWidget* HilbertPlot::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString HilbertPlot::description()
+{
+    return "Displays byte-based pixels in a fractal pattern to highlight chunks in heterogeneous data";
+}
+
+QStringList HilbertPlot::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* HilbertPlot::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* HilbertPlot::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* HilbertPlot::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

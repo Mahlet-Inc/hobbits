@@ -30,17 +30,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES +=         pythonrunner.cpp \
+    pythonrunnerform.cpp \
     pythonsyntaxhighlighter.cpp
 
 HEADERS +=         pythonrunner.h \
+    pythonrunnerform.h \
     pythonsyntaxhighlighter.h
 
-FORMS +=        pythonrunner.ui
-
+FORMS +=        \
+    pythonrunnerform.ui
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
-INCLUDEPATH += $$PWD/../../../hobbits-core
-DEPENDPATH += $$PWD/../../../hobbits-core
+LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
+DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
 LIBS += -L$$OUT_PWD/../../../hobbits-python/ -lhobbits-python
 INCLUDEPATH += $$PWD/../../../hobbits-python

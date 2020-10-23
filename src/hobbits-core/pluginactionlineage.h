@@ -6,6 +6,11 @@
 
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The PluginActionLineage class logs BitContainer provenance as a series of PluginActions
+  *
+  * \see BitContainer PluginAction
+*/
 class HOBBITSCORESHARED_EXPORT PluginActionLineage : public QEnableSharedFromThis<PluginActionLineage>
 {
 private:

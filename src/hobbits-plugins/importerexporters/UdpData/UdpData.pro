@@ -35,6 +35,11 @@ HEADERS +=         udpdata.h \
     udpreceiver.h \
     udpsender.h
 
+LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
+LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
+DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
+
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 

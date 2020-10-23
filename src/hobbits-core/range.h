@@ -4,6 +4,11 @@
 #include <QDataStream>
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The Range class defines a contiguous range with integer precision
+  *
+  * \see Frame RangeHighlight RangeSequence
+*/
 class HOBBITSCORESHARED_EXPORT Range
 {
 public:

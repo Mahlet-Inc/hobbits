@@ -14,6 +14,16 @@
 class PluginActionLineage;
 class PluginAction;
 
+/**
+  * @brief The BitContainer class manages bitwise data and the metadata associated with it
+  *
+  * The BitContainer class is mostly a simple wrapper around the BitArray and BitInfo classes
+  * which provide bitwise data and metadata management respectively. It also maintains a unique
+  * ID, parent-child relationships, and a PluginActionLineage for reconstructing the steps that
+  * were taken to create the BitContainer.
+  *
+  * \see BitArray BitInfo PluginActionLineage
+*/
 class HOBBITSCORESHARED_EXPORT BitContainer : public QObject
 {
     Q_OBJECT
@@ -42,13 +52,13 @@ public:
     bool nameWasSet() const;
 
     void setActionLineage(QSharedPointer<PluginActionLineage> lineage);
-    QSharedPointer<const PluginActionLineage> getActionLineage() const;
-    QSharedPointer<PluginActionLineage> getActionLineage();
+    QSharedPointer<const PluginActionLineage> actionLineage() const;
+    QSharedPointer<PluginActionLineage> actionLineage();
 
     bool isRootContainer() const;
-    QList<QUuid> getChildUuids() const;
-    QList<QUuid> getParentUuids() const;
-    QUuid getId() const;
+    QList<QUuid> childUuids() const;
+    QList<QUuid> parentUuids() const;
+    QUuid id() const;
     void detachChild(QUuid childId);
     void detachParent(QUuid parentId);
     void addChild(QUuid childId);

@@ -4,15 +4,23 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QMap>
-
 #include "hobbits-core_global.h"
 
+/**
+  * @brief The MetadataHelper class facilitates coordinated usage of BitInfo across plugins
+  *
+  * Since the metadata in BitInfo can be so flexible, it is important for different plugins
+  * to have shared expectations about metadata values that they might encounter or add
+  * during processing.
+  *
+  * \see BitInfo
+*/
 class HOBBITSCORESHARED_EXPORT MetadataHelper
 {
 public:
     static MetadataHelper& instance();
 
-    struct SampleFormat {
+    struct HOBBITSCORESHARED_EXPORT SampleFormat {
         QString id;
         QString name;
         int wordSize;

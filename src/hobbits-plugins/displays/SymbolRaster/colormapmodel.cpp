@@ -33,11 +33,11 @@ ColorMapModel::ColorMapModel(QObject *parent) :
     };
 
     for (auto pair : defaultColors) {
-        QVariant colorVar = SettingsManager::getInstance().getPrivateSetting(pair.first);
+        QVariant colorVar = SettingsManager::getPrivateSetting(pair.first);
         QColor c;
         if (colorVar.isNull() || !colorVar.canConvert<QColor>()) {
             c.setNamedColor(pair.second);
-            SettingsManager::getInstance().setPrivateSetting(pair.first, QVariant(c));
+            SettingsManager::setPrivateSetting(pair.first, QVariant(c));
             m_defaultColors.append(c);
         }
         else {
@@ -158,7 +158,7 @@ bool ColorMapModel::setData(const QModelIndex &index, const QVariant &value, int
                 index.row(),
                 QPair<QString, QColor>(m_mappings.at(index.row()).first, value.value<QColor>()));
 
-        SettingsManager::getInstance().setPrivateSetting(COLOR[index.row() % 8], value);
+        SettingsManager::setPrivateSetting(COLOR[index.row() % 8], value);
 
         emit dataChanged(index, index, QVector<int>() << role);
         return true;

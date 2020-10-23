@@ -2,38 +2,43 @@
 #define ANALYZERINTERFACE_H
 
 #include <QSharedPointer>
-#include <QStringListModel>
-
-#include "actionprogress.h"
+#include "pluginactionprogress.h"
 #include "analyzerresult.h"
 #include "bitcontainer.h"
 #include "bitcontainerpreview.h"
-#include "plugincallback.h"
-
+#include "parameterdelegate.h"
 #include "hobbits-core_global.h"
 
+/**
+  * @brief Implementations of the AnalyzerInterface plugin interface enrich BitContainer metadata
+  *
+  * Analyzer plugins do not change any of the bits in a BitContainer. Instead, they analyze the
+  * bits and existing metadata in order to provide more/better metadata for subsequent plugins
+  * or manual analysis.
+  *
+  * Since Analyzers work with read-only BitContainer objects, they do not require any new copies of
+  * the bits to be created. This is different from the OperatorInterface in which the results
+  * comprise of newly created BitContainer instances.
+  *
+  * \see ParameterDelegate AnalyzerResult BitContainer ActionProgress
+*/
 class HOBBITSCORESHARED_EXPORT AnalyzerInterface
 {
 public:
-    virtual ~AnalyzerInterface()
-    {
-    }
+    virtual ~AnalyzerInterface() = default;
 
-    virtual QString getName() = 0;
     virtual AnalyzerInterface* createDefaultAnalyzer() = 0;
 
-    virtual void applyToWidget(QWidget *widget) = 0;
-    virtual void provideCallback(QSharedPointer<PluginCallback> pluginCallback) = 0;
-    virtual QJsonObject getStateFromUi() = 0;
-    virtual bool canRecallPluginState(const QJsonObject &pluginState) = 0;
-    virtual bool setPluginStateInUi(const QJsonObject &pluginState) = 0;
+    virtual QString name() = 0;
+    virtual QString description() = 0;
+    virtual QStringList tags() = 0;
+
+    virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
 
     virtual QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
-            const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) = 0;
-    virtual void previewBits(QSharedPointer<BitContainerPreview> container) = 0;
-
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) = 0;
 };
 
 Q_DECLARE_INTERFACE(AnalyzerInterface, "hobbits.AnalyzerInterface")

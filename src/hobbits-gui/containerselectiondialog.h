@@ -1,7 +1,7 @@
 #ifndef CONTAINERSELECTIONDIALOG_H
 #define CONTAINERSELECTIONDIALOG_H
 
-#include "bitcontainermanager.h"
+#include "bitcontainermanagerui.h"
 #include <QDialog>
 
 namespace Ui
@@ -14,7 +14,7 @@ class ContainerSelectionDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ContainerSelectionDialog(QSharedPointer<BitContainerManager> manager, QWidget *parent = nullptr);
+    explicit ContainerSelectionDialog(QSharedPointer<BitContainerManagerUi> manager, QWidget *parent = nullptr);
 
     ~ContainerSelectionDialog();
 
@@ -24,7 +24,7 @@ public:
 private:
     Ui::ContainerSelectionDialog *ui;
     QSharedPointer<QItemSelectionModel> m_currSelectionModel;
-    QSharedPointer<BitContainerManager> m_bitManager;
+    QSharedPointer<BitContainerManagerUi> m_bitManager;
 };
 
 #endif // CONTAINERSELECTIONDIALOG_H

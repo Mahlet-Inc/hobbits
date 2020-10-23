@@ -11,49 +11,42 @@ OperatorResult* OperatorResult::setOutputContainers(QList<QSharedPointer<BitCont
     return this;
 }
 
-QList<QSharedPointer<BitContainer>> OperatorResult::getOutputContainers() const
+QList<QSharedPointer<BitContainer>> OperatorResult::outputContainers() const
 {
     return m_outputContainers;
 }
 
-OperatorResult* OperatorResult::setPluginState(QJsonObject pluginState)
+OperatorResult* OperatorResult::setParameters(QJsonObject parameters)
 {
-    m_pluginState = pluginState;
+    m_parameters = parameters;
     return this;
 }
 
-const QJsonObject OperatorResult::getPluginState() const
+const QJsonObject OperatorResult::parameters() const
 {
-    return m_pluginState;
+    return m_parameters;
 }
 
-bool OperatorResult::hasEmptyState() const
+bool OperatorResult::hasEmptyParameters() const
 {
-    return m_pluginState.isEmpty();
+    return m_parameters.isEmpty();
 }
 
 QString OperatorResult::errorString() const
 {
-    if (m_pluginState.contains("error")) {
-        return m_pluginState.value("error").toString();
-    }
-    return QString();
+    return m_errorString;
 }
 
 QSharedPointer<const OperatorResult> OperatorResult::result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState)
 {
     return QSharedPointer<const OperatorResult>(
-                (new OperatorResult())->setOutputContainers(outputContainers)->setPluginState(pluginState)
+                (new OperatorResult())->setOutputContainers(outputContainers)->setParameters(pluginState)
             );
 }
 
-QSharedPointer<const OperatorResult> OperatorResult::error(QString error)
+QSharedPointer<const OperatorResult> OperatorResult::error(QString errorString)
 {
-    return QSharedPointer<const OperatorResult>(
-            (new OperatorResult())->setPluginState(
-                    QJsonObject(
-                            {QPair<QString, QJsonValue>(
-                                    "error",
-                                    QJsonValue(error))}))
-            );
+    auto result = new OperatorResult();
+    result->m_errorString = errorString;
+    return QSharedPointer<const OperatorResult>(result);
 }

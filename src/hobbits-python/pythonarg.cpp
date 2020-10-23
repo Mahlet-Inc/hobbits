@@ -3,12 +3,20 @@
 
 PythonArg::PythonArg()
 {
-
+    m_pointer = nullptr;
+    m_stringData = QString();
+    m_integerData = 0;
+    m_doubleData = 0;
 }
 
 int PythonArg::integerData() const
 {
     return m_integerData;
+}
+
+double PythonArg::doubleData() const
+{
+    return m_doubleData;
 }
 
 QString PythonArg::stringData() const
@@ -56,11 +64,11 @@ PythonArg* PythonArg::constBitArray(QSharedPointer<const BitArray> bitArray)
     return arg;
 }
 
-PythonArg *PythonArg::actionProgress(QSharedPointer<ActionProgress> progress)
+PythonArg *PythonArg::actionProgress(QSharedPointer<PluginActionProgress> progress)
 {
     PythonArg *arg = new PythonArg();
     arg->m_type = Type::HobbitsWrapper;
-    arg->m_wrapType = "ActionProgress";
+    arg->m_wrapType = "PluginActionProgress";
     arg->m_argSymbol = "O";
     arg->m_pointer = progress.data();
     return arg;
@@ -121,5 +129,23 @@ PythonArg *PythonArg::integer(int n)
     arg->m_type = Type::Integer;
     arg->m_argSymbol = "i";
     arg->m_integerData = n;
+    return arg;
+}
+
+PythonArg *PythonArg::number(double n)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::Double;
+    arg->m_argSymbol = "d";
+    arg->m_doubleData = n;
+    return arg;
+}
+
+PythonArg *PythonArg::boolean(bool n)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::Integer;
+    arg->m_argSymbol = "p";
+    arg->m_integerData = n ? 1 : 0;
     return arg;
 }

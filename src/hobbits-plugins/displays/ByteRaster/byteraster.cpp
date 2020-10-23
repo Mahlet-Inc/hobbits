@@ -12,18 +12,28 @@ DisplayInterface* ByteRaster::createDefaultDisplay()
     return new ByteRaster();
 }
 
-QString ByteRaster::getName()
+QString ByteRaster::name()
 {
     return "Byte Raster";
 }
 
-QWidget* ByteRaster::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString ByteRaster::description()
+{
+    return "Displays each byte in the data as a single colored pixel";
+}
+
+QStringList ByteRaster::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* ByteRaster::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* ByteRaster::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* ByteRaster::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

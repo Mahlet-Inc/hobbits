@@ -20,7 +20,7 @@ public:
 
     ~FindAnalyzer() override;
 
-    QString getName() override;
+    QString name() override;
     void previewBits(QSharedPointer<BitContainerPreview> container) override;
     void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
 
@@ -33,7 +33,7 @@ public:
     QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
             const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) override;
+            QSharedPointer<PluginActionProgress> progressTracker) override;
 
 public slots:
     void triggerRun();

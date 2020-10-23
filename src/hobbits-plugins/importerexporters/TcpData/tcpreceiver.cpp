@@ -2,19 +2,15 @@
 #include "ui_tcpreceiver.h"
 #include <QTcpSocket>
 
-TcpReceiver::TcpReceiver(QWidget *parent) :
-    QDialog(parent),
+TcpReceiver::TcpReceiver(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::TcpReceiver),
-    m_server(new QTcpServer(this)),
-    m_socket(nullptr)
+    m_paramHelper(new ParameterHelper(delegate))
 {
     ui->setupUi(this);
-    connect(m_server, &QTcpServer::newConnection, this, &TcpReceiver::manageConnection);
-    m_downloadFile.open();
 
-    setWindowTitle("Import via TCP");
-
-    ui->pb_stop->setEnabled(false);
+    m_paramHelper->addSpinBoxIntParameter("port", ui->sb_port);
+    m_paramHelper->addSpinBoxIntParameter("max_kb", ui->sb_maxLengthKb);
+    m_paramHelper->addSpinBoxIntParameter("timeout", ui->sb_timeout);
 }
 
 TcpReceiver::~TcpReceiver()
@@ -22,97 +18,73 @@ TcpReceiver::~TcpReceiver()
     delete ui;
 }
 
-QTemporaryFile* TcpReceiver::getDownloadedData()
+QString TcpReceiver::title()
 {
-    m_downloadFile.seek(0);
-    return &m_downloadFile;
+    return "Configure TCP Receiver";
 }
 
-int TcpReceiver::getPort()
+bool TcpReceiver::setParameters(QJsonObject parameters)
 {
-    return ui->sb_port->value();
+    return m_paramHelper->applyParametersToUi(parameters);
 }
 
-void TcpReceiver::setPort(int port)
+QJsonObject TcpReceiver::parameters()
 {
-    ui->sb_port->setValue(port);
+    return m_paramHelper->getParametersFromUi();
 }
 
-QString TcpReceiver::getError()
+bool TcpReceiver::isStandaloneDialog()
 {
-    if (m_socket) {
-        return m_socket->errorString();
-    }
-    return m_server->errorString();
+    return true;
 }
 
-void TcpReceiver::startListening()
+QSharedPointer<ImportResult> TcpReceiver::importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    ui->pb_start->setText("Listening...");
-    ui->pb_start->setEnabled(false);
-    ui->pb_stop->setEnabled(true);
-    ui->sb_port->setEnabled(false);
-    m_downloadFile.resize(0);
-    ui->lb_progress->setText(QString("Waiting for connection..."));
-    m_server->listen(QHostAddress::Any, quint16(ui->sb_port->value()));
-}
+    int port = parameters.value("port").toInt();
+    qint64 maxBytes = qint64(parameters.value("max_kb").toInt()) * 1000ll;
+    int timeout = parameters.value("timeout").toInt() * 1000;
 
-void TcpReceiver::stopListening()
-{
-    ui->pb_start->setText("Begin Listening");
-    ui->lb_progress->setText(QString("Server Stopped, %1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
-    ui->pb_start->setEnabled(true);
-    ui->pb_stop->setEnabled(false);
-    ui->sb_port->setEnabled(true);
-    if (m_socket) {
-        m_socket->close();
+    QTemporaryFile downloadBuffer;
+    if (!downloadBuffer.open()) {
+        return ImportResult::error("Failed to open buffer file for downloaded data");
     }
-    m_server->close();
-    if (m_downloadFile.size() > 0) {
-        accept();
-    }
-}
 
-void TcpReceiver::manageConnection()
-{
-    if (!m_server->hasPendingConnections()) {
-        return;
-    }
-    if (m_socket) {
-        disconnect(m_socket, &QTcpSocket::readyRead, this, &TcpReceiver::socketRead);
-        disconnect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
-    }
-    m_socket = m_server->nextPendingConnection();
-    connect(m_socket, &QTcpSocket::readyRead, this, &TcpReceiver::socketRead);
-    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
-    ui->lb_progress->setText(QString("Connection received, waiting for data..."));
-}
+    QScopedPointer<QTcpServer> server(new QTcpServer());
+    server->listen(QHostAddress::Any, quint16(port));
 
-void TcpReceiver::socketError(QAbstractSocket::SocketError)
-{
-    stopListening();
-    if (m_downloadFile.size() > 0) {
-        accept();
+    if (!server->waitForNewConnection(timeout)) {
+        return ImportResult::error("No TCP connection was made before the configured timeout.");
     }
-    else {
-        reject();
-    }
-}
 
-void TcpReceiver::socketRead()
-{
-    while (m_socket->bytesAvailable() > 0) {
-        m_downloadFile.write(m_socket->read(10000));
+    auto socket = server->nextPendingConnection();
+    while (true) {
+        if (downloadBuffer.size() >= maxBytes
+                || progress->isCancelled()
+                || !socket->isOpen()
+                || !socket->waitForReadyRead(timeout)) {
+            break;
+        }
+
+        while (socket->bytesAvailable() > 0) {
+            downloadBuffer.write(socket->read(10 * 1000 * 1000));
+            progress->setProgress(downloadBuffer.size(), maxBytes);
+        }
     }
-    ui->lb_progress->setText(QString("%1 KBs Received").arg(double(m_downloadFile.size())/1000.0, 1, 'f', 3));
+
+    socket->close();
+
+    if (downloadBuffer.size() < 1) {
+        if (!socket->errorString().isEmpty()) {
+            return ImportResult::error("TCP Socket error: " + socket->errorString());
+        }
+        return ImportResult::error("No data was received on TCP connection.");
+    }
+
+    downloadBuffer.seek(0);
+    return ImportResult::result(BitContainer::create(&downloadBuffer), parameters);
 }
 
 void TcpReceiver::on_pb_start_pressed()
 {
-    startListening();
-}
-
-void TcpReceiver::on_pb_stop_pressed()
-{
-    stopListening();
+    emit accepted();
 }

@@ -2,9 +2,6 @@
 #include "pluginactionlineage.h"
 #include "settingsmanager.h"
 #include <QBuffer>
-#include <QDebug>
-#include <QColor>
-#include <QPixmap>
 
 BitContainer::BitContainer() :
     QObject(),
@@ -103,12 +100,12 @@ bool BitContainer::nameWasSet() const
     return m_nameWasSet;
 }
 
-QSharedPointer<const PluginActionLineage> BitContainer::getActionLineage() const
+QSharedPointer<const PluginActionLineage> BitContainer::actionLineage() const
 {
     return m_actionLineage;
 }
 
-QSharedPointer<PluginActionLineage> BitContainer::getActionLineage()
+QSharedPointer<PluginActionLineage> BitContainer::actionLineage()
 {
     return m_actionLineage;
 }
@@ -124,17 +121,17 @@ bool BitContainer::isRootContainer() const
     return m_parents.isEmpty();
 }
 
-QList<QUuid> BitContainer::getChildUuids() const
+QList<QUuid> BitContainer::childUuids() const
 {
     return m_children;
 }
 
-QList<QUuid> BitContainer::getParentUuids() const
+QList<QUuid> BitContainer::parentUuids() const
 {
     return m_parents;
 }
 
-QUuid BitContainer::getId() const
+QUuid BitContainer::id() const
 {
     return m_id;
 }

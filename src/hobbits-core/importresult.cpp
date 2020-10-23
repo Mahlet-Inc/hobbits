@@ -16,28 +16,25 @@ QSharedPointer<BitContainer> ImportResult::getContainer() const
     return m_container;
 }
 
-ImportResult* ImportResult::setPluginState(QJsonObject pluginState)
+ImportResult* ImportResult::setParameters(QJsonObject parameters)
 {
-    m_pluginState = pluginState;
+    m_parameters = parameters;
     return this;
 }
 
-const QJsonObject ImportResult::pluginState() const
+const QJsonObject ImportResult::parameters() const
 {
-    return m_pluginState;
+    return m_parameters;
 }
 
-bool ImportResult::hasEmptyState() const
+bool ImportResult::hasEmptyParameters() const
 {
-    return m_pluginState.isEmpty();
+    return m_parameters.isEmpty();
 }
 
 QString ImportResult::errorString() const
 {
-    if (m_pluginState.contains("error")) {
-        return m_pluginState.value("error").toString();
-    }
-    return QString();
+    return m_errorString;
 }
 
 QSharedPointer<ImportResult> ImportResult::nullResult()
@@ -45,14 +42,14 @@ QSharedPointer<ImportResult> ImportResult::nullResult()
     return QSharedPointer<ImportResult>(new ImportResult());
 }
 
-QSharedPointer<ImportResult> ImportResult::error(QString error)
+QSharedPointer<ImportResult> ImportResult::error(QString errorString)
 {
-    QJsonObject pluginState;
-    pluginState.insert("error", error);
-    return QSharedPointer<ImportResult>((new ImportResult())->setPluginState(pluginState));
+    auto result = new ImportResult();
+    result->m_errorString = errorString;
+    return QSharedPointer<ImportResult>(result);
 }
 
-QSharedPointer<ImportResult> ImportResult::result(QSharedPointer<BitContainer> container, QJsonObject pluginState)
+QSharedPointer<ImportResult> ImportResult::result(QSharedPointer<BitContainer> container, QJsonObject parameters)
 {
-    return QSharedPointer<ImportResult>((new ImportResult())->setContainer(container)->setPluginState(pluginState));
+    return QSharedPointer<ImportResult>((new ImportResult())->setContainer(container)->setParameters(parameters));
 }

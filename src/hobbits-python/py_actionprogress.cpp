@@ -1,9 +1,9 @@
 #include "py_actionprogress.h"
-#include "actionprogress.h"
+#include "pluginactionprogress.h"
 
 #include <structmember.h>
 
-#define PROGRESS(X) static_cast<ActionProgress*>(PyCapsule_GetPointer(X, nullptr))
+#define PROGRESS(X) static_cast<PluginActionProgress*>(PyCapsule_GetPointer(X, nullptr))
 
 typedef struct {
     PyObject_HEAD
@@ -41,8 +41,8 @@ static int PyActionProgress_init(PyActionProgressObj *self, PyObject *args, PyOb
 
 static PyObject* PyActionProgress_is_cancelled(PyActionProgressObj *self, PyObject *Py_UNUSED(ignored))
 {
-    ActionProgress* progress = PROGRESS(self->progressCapsule);
-    return PyBool_FromLong(progress->getCancelled());
+    PluginActionProgress* progress = PROGRESS(self->progressCapsule);
+    return PyBool_FromLong(progress->isCancelled());
 }
 
 static PyObject* PyActionProgress_set_progress_percent(PyActionProgressObj *self, PyObject *args )
@@ -53,7 +53,7 @@ static PyObject* PyActionProgress_set_progress_percent(PyActionProgressObj *self
         return nullptr;
     }
 
-    ActionProgress* progress = PROGRESS(self->progressCapsule);
+    PluginActionProgress* progress = PROGRESS(self->progressCapsule);
     progress->setProgressPercent(percent);
     Py_RETURN_NONE;
 }
@@ -67,7 +67,7 @@ static PyObject* PyActionProgress_set_progress(PyActionProgressObj *self, PyObje
         return nullptr;
     }
 
-    ActionProgress* progress = PROGRESS(self->progressCapsule);
+    PluginActionProgress* progress = PROGRESS(self->progressCapsule);
     progress->setProgress(current, max);
     Py_RETURN_NONE;
 }
@@ -86,7 +86,7 @@ static PyMemberDef PyActionProgress_members[] = {
 extern PyTypeObject PyActionProgress = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
-    "hobbits.ActionProgress", // const char *tp_name; /* For printing, in format "<module>.<name>" */
+    "hobbits.PluginActionProgress", // const char *tp_name; /* For printing, in format "<module>.<name>" */
     sizeof(PyActionProgressObj), // Py_ssize_t tp_basicsize, ; /* For allocation */
     0, //tp_itemsize
 
@@ -119,7 +119,7 @@ extern PyTypeObject PyActionProgress = {
     /* Flags to define presence of optional/expanded features */
     Py_TPFLAGS_DEFAULT, // unsigned long tp_flags;
 
-    "Hobbits Action Progress", // const char *tp_doc; /* Documentation string */
+    "Hobbits Plugin Action Progress", // const char *tp_doc; /* Documentation string */
 
     /* Assigned meaning in release 2.0 */
     /* call function for all accessible objects */

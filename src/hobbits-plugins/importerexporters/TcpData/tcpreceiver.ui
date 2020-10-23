@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TcpReceiver</class>
- <widget class="QDialog" name="TcpReceiver">
+ <widget class="QWidget" name="TcpReceiver">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>137</height>
+    <width>399</width>
+    <height>212</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Port</string>
+        <string>Port:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -36,28 +36,69 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
+     <item row="4" column="0" colspan="2">
       <widget class="QPushButton" name="pb_start">
        <property name="text">
         <string>Begin Listening</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="lb_progress">
+     <item row="3" column="0">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>0.0 KB received</string>
+        <string>Max Length:</string>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="pb_stop">
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="sb_maxLengthKb">
+       <property name="suffix">
+        <string> KB</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>1000000000</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Stop</string>
+        <string>Timeout:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="sb_timeout">
+       <property name="suffix">
+        <string> seconds</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>1000000</number>
+       </property>
+       <property name="value">
+        <number>10</number>
        </property>
       </widget>
      </item>
@@ -68,7 +109,6 @@
  <tabstops>
   <tabstop>sb_port</tabstop>
   <tabstop>pb_start</tabstop>
-  <tabstop>pb_stop</tabstop>
  </tabstops>
  <resources/>
  <connections/>

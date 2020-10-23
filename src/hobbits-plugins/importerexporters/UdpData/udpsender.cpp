@@ -1,19 +1,14 @@
 #include "udpsender.h"
 #include "ui_udpsender.h"
 
-UdpSender::UdpSender(QSharedPointer<const BitArray> bits, QWidget *parent) :
-    QDialog(parent),
+UdpSender::UdpSender(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::UdpSender),
-    m_bits(bits),
-    m_socket(new QUdpSocket()),
-    m_bytesWritten(0)
+    m_paramHelper(new ParameterHelper(delegate))
 {
     ui->setupUi(this);
-    ui->pb_cancel->setEnabled(false);
 
-    connect(m_socket.data(), &QUdpSocket::bytesWritten, this, &UdpSender::writeNextChunk);
-
-    setWindowTitle("Export via UDP");
+    m_paramHelper->addLineEditStringParameter("host", ui->le_host);
+    m_paramHelper->addSpinBoxIntParameter("port", ui->sb_port);
 }
 
 UdpSender::~UdpSender()
@@ -21,85 +16,56 @@ UdpSender::~UdpSender()
     delete ui;
 }
 
-void UdpSender::setHost(QString host)
+QString UdpSender::title()
 {
-    ui->le_host->setText(host);
+    return "Configure UDP Export Connnection";
 }
 
-QString UdpSender::getHost() const
+bool UdpSender::setParameters(QJsonObject parameters)
 {
-    return ui->le_host->text();
+    return m_paramHelper->applyParametersToUi(parameters);
 }
 
-void UdpSender::setPort(int port)
+QJsonObject UdpSender::parameters()
 {
-    ui->sb_port->setValue(port);
+    return m_paramHelper->getParametersFromUi();
 }
 
-int UdpSender::getPort() const
+bool UdpSender::isStandaloneDialog()
 {
-    return ui->sb_port->value();
+    return true;
 }
 
-qint64 UdpSender::getBytesWritten()
+#define UDPWRITEBUFFSIZE 512
+QSharedPointer<ExportResult> UdpSender::exportData(QSharedPointer<const BitArray> bits, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    return m_bytesWritten;
-}
+    QHostAddress host(parameters.value("host").toString());
+    quint16 port = quint16(parameters.value("port").toInt());
 
-void UdpSender::sendData()
-{
-    ui->pb_send->setText("Sending...");
-    ui->pb_send->setEnabled(false);
-    ui->pb_cancel->setEnabled(true);
-    ui->le_host->setEnabled(false);
-    ui->sb_port->setEnabled(false);
-    writeNextChunk(0);
-}
+    auto socket = new QUdpSocket();
 
-void UdpSender::writeNextChunk(qint64 lastChunkSize)
-{
-    if (m_bits->sizeInBytes() < 1) {
-        reject();
+    qint64 bytesWritten = 0;
+    char writeBuffer[UDPWRITEBUFFSIZE];
+
+    while (bits->sizeInBytes() > bytesWritten) {
+        qint64 size = bits->readBytes(writeBuffer, bytesWritten, UDPWRITEBUFFSIZE);
+        qint64 written = socket->writeDatagram(writeBuffer, size, host, port);
+        if (written < 1) {
+            socket->close();
+            socket->deleteLater();
+            return ExportResult::error("Failed to write datagram");
+        }
+        bytesWritten += written;
+        progress->setProgress(bytesWritten, bits->sizeInBytes());
     }
-    m_bytesWritten += lastChunkSize;
-    ui->pg_sent->setValue(int(100.0 * double(m_bytesWritten) / double(m_bits->sizeInBytes())));
 
-    if (m_bits->sizeInBytes() > m_bytesWritten) {
-        int bufferSize = 1024;
-        char *buffer = new char[bufferSize];
-        qint64 size = m_bits->readBytes(buffer, m_bytesWritten, bufferSize);
-        m_socket->writeDatagram(buffer, size, QHostAddress(ui->le_host->text()), quint16(ui->sb_port->value()));
-    }
-    else {
-        cancelSendData();
-        accept();
-    }
-}
-
-void UdpSender::socketError(QAbstractSocket::SocketError)
-{
-    cancelSendData();
-    reject();
-}
-
-void UdpSender::cancelSendData()
-{
-    m_socket->close();
-    ui->pb_send->setText("Send");
-    ui->pb_send->setEnabled(true);
-    ui->pb_cancel->setEnabled(false);
-    ui->le_host->setEnabled(true);
-    ui->sb_port->setEnabled(true);
+    socket->close();
+    socket->deleteLater();
+    return ExportResult::result(parameters);
 }
 
 void UdpSender::on_pb_send_pressed()
 {
-    sendData();
-}
-
-void UdpSender::on_pb_cancel_pressed()
-{
-    cancelSendData();
-    accept();
+    emit accepted();
 }
 

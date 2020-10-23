@@ -13,15 +13,19 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLineEdit" name="le_searchString">
-     <property name="placeholderText">
-      <string>Search String (e.g. 0xf6f6 or 0b110)</string>
-     </property>
-    </widget>
-   </item>
-  </layout>
+  <widget class="QLineEdit" name="le_searchString">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>221</y>
+     <width>145</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="placeholderText">
+    <string>Search String (e.g. 0xf6f6 or 0b110)</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

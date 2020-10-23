@@ -3,46 +3,41 @@
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "settingsmanager.h"
+#include <QTimer>
+
+OperatorRunner::OperatorRunner(QString pluginName, QString pluginFileLocation) :
+    AbstractPluginRunner<const OperatorResult>(pluginName, pluginFileLocation)
+{
+
+}
 
 QSharedPointer<OperatorRunner> OperatorRunner::create(
         QSharedPointer<const HobbitsPluginManager> pluginManager,
         QSharedPointer<BitContainerManager> containerManager,
         QSharedPointer<const PluginAction> action)
 {
-    if (action->getPluginType() != PluginAction::Operator) {
+    if (action->pluginType() != PluginAction::Operator) {
         return nullptr;
     }
-    auto plugin = pluginManager->getOperator(action->getPluginName());
+    auto plugin = pluginManager->getOperator(action->pluginName());
     if (!plugin) {
         return nullptr;
     }
 
-    auto runner = QSharedPointer<OperatorRunner>(new OperatorRunner());
+    auto runner = QSharedPointer<OperatorRunner>(new OperatorRunner(plugin->name(), pluginManager->getPluginLocation(plugin->name())));
 
-    runner->m_id = QUuid::createUuid();
     runner->m_op = plugin;
     runner->m_action = action;
-    runner->m_pluginFileLocation = pluginManager->getPluginLocation(plugin->getName());
     runner->m_containerManager = containerManager;
 
     return runner;
 }
 
-QUuid OperatorRunner::id() const
+QSharedPointer<PluginActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunner::run(QList<QSharedPointer<BitContainer>> inputContainers)
 {
-    return m_id;
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunner::getWatcher()
-{
-    return m_actionWatcher;
-}
-
-QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunner::run(QList<QSharedPointer<BitContainer>> inputContainers)
-{
-    if (!m_actionWatcher.isNull() && m_actionWatcher->watcher()->future().isRunning()) {
-        emit reportError(m_id, QString("Operator runner is already running"));
-        return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
+    auto parameters = m_action->parameters();
+    if (!commonPreRun(parameters)) {
+        return QSharedPointer<PluginActionWatcher<QSharedPointer<const OperatorResult>>>();
     }
 
     QList<QSharedPointer<const BitContainer>> inputContainersConst;
@@ -50,111 +45,55 @@ QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>> OperatorRunn
         inputContainersConst.append(input);
     }
 
-    auto pluginState = m_action->getPluginState();
-
-    if (pluginState.isEmpty()) {
-        pluginState = m_op->getStateFromUi();
-        if (pluginState.isEmpty() || pluginState.contains("error")) {
-            if (pluginState.contains("error")) {
-                emit reportError(m_id, QString("Plugin '%1' reported an error with its current state: '%2'").arg(
-                        m_op->getName()).arg(pluginState.value("error").toString()));
-            }
-            else if (pluginState.isEmpty()) {
-                emit reportError(m_id, QString(
-                        "Plugin '%1' is in an invalid state and can't be executed.  Double check the input fields.").arg(
-                                         m_op->getName()));
-            }
-            return QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>();
-        }
-    }
-
-    QVariant previousRunning = SettingsManager::getInstance().getPrivateSetting(SettingsData::PLUGINS_RUNNING_KEY);
-    QStringList runningPlugins;
-    if (previousRunning.isValid() && previousRunning.canConvert<QStringList>()) {
-        runningPlugins = previousRunning.toStringList();
-    }
-    runningPlugins.append(m_pluginFileLocation);
-    SettingsManager::getInstance().setPrivateSetting(SettingsData::PLUGINS_RUNNING_KEY, QVariant(runningPlugins));
-
-    QSharedPointer<ActionProgress> progress(new ActionProgress());
-
+    QSharedPointer<PluginActionProgress> progress(new PluginActionProgress());
     auto future = QtConcurrent::run(
             QThreadPool::globalInstance(),
             OperatorRunner::operatorCall,
             m_op,
             inputContainersConst,
-            pluginState,
+            parameters,
             progress);
 
-    m_actionWatcher = QSharedPointer<ActionWatcher<QSharedPointer<const OperatorResult>>>(
-            new ActionWatcher<QSharedPointer<const OperatorResult>>(
-                    future,
-                    progress));
 
     m_inputContainers = inputContainers;
-    m_outputContainers.clear();
-
-    connect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
-    connect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, [this](int progress) {
-        this->progress(m_id, progress);
-    });
-
-    return m_actionWatcher;
+    return commonRunSetup(future, progress);
 }
 
 void OperatorRunner::postProcess()
 {
-    disconnect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
-    disconnect(m_actionWatcher->progress().data(), &ActionProgress::progressPercentChanged, nullptr, nullptr);
 
-    QSharedPointer<const OperatorResult> result = m_actionWatcher->watcher()->future().result();
-
-    if (result.isNull()) {
-        QString errorString = QString("Plugin '%1' failed to execute.  Double check the input fields.").arg(m_op->getName());
-        emit reportError(m_id, errorString);
-        emit finished(m_id);
+    if (!commonPostRun()) {
         return;
     }
-
-    if (!result->errorString().isEmpty()) {
-        QString errorString = QString("Plugin '%1' reported an error with its processing: %2").arg(m_op->getName()).arg(
-                    result->errorString());
-        emit reportError(m_id, errorString);
-        emit finished(m_id);
-        return;
-    }
-
-    // Set output containers
-    m_outputContainers = result->getOutputContainers();
 
     // Apply action lineage
-    if (!result->hasEmptyState()) {
+    if (!m_result->hasEmptyParameters()) {
         QSharedPointer<PluginAction> action =
             QSharedPointer<PluginAction>(
                     new PluginAction(
                             PluginAction::Operator,
-                            m_op->getName(),
-                            result->getPluginState()));
-        PluginActionLineage::recordLineage(action, m_inputContainers, result->getOutputContainers());
+                            m_op->name(),
+                            m_result->parameters()));
+        PluginActionLineage::recordLineage(action, m_inputContainers, m_result->outputContainers());
     }
 
     // Set Parent/Child Relationships
     for (QSharedPointer<BitContainer> inputContainer : m_inputContainers) {
-        for (QSharedPointer<BitContainer> outputContainer : result->getOutputContainers()) {
-            inputContainer->addChild(outputContainer->getId());
-            outputContainer->addParent(inputContainer->getId());
+        for (QSharedPointer<BitContainer> outputContainer : m_result->outputContainers()) {
+            inputContainer->addChild(outputContainer->id());
+            outputContainer->addParent(inputContainer->id());
         }
     }
 
     // Add output containers to container manager
-    if (result->getOutputContainers().size() > 0) {
+    if (m_result->outputContainers().size() > 0) {
         int number = 1;
-        for (QSharedPointer<BitContainer> output : result->getOutputContainers()) {
-            QString containerName = m_op->getName() + " Output";
+        for (QSharedPointer<BitContainer> output : m_result->outputContainers()) {
+            QString containerName = m_op->name() + " Output";
             if (output->nameWasSet()) {
                 containerName = output->name();
             }
-            if (result->getOutputContainers().length() > 1) {
+            if (m_result->outputContainers().length() > 1) {
                 output->setName(QString("%2: %1").arg(containerName).arg(number));
             }
             else {
@@ -165,12 +104,14 @@ void OperatorRunner::postProcess()
     }
 
     if (!m_containerManager.isNull()) {
-        QModelIndex lastIndex;
-        for (QSharedPointer<BitContainer> output : result->getOutputContainers()) {
-            lastIndex = m_containerManager->getTreeModel()->addContainer(output);
+        QSharedPointer<BitContainer> lastContainer;
+        for (QSharedPointer<BitContainer> output : m_result->outputContainers()) {
+            if (m_containerManager->addContainer(output)) {
+                lastContainer = output;
+            }
         }
-        if (lastIndex.isValid()) {
-            m_containerManager->getCurrSelectionModel()->setCurrentIndex(lastIndex, QItemSelectionModel::ClearAndSelect);
+        if (!lastContainer.isNull()) {
+            m_containerManager->selectContainer(lastContainer);
         }
     }
 
@@ -180,14 +121,14 @@ void OperatorRunner::postProcess()
 QSharedPointer<const OperatorResult> OperatorRunner::operatorCall(
         QSharedPointer<OperatorInterface> op,
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        QJsonObject pluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        QJsonObject parameters,
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
     try {
-        return op->operateOnContainers(inputContainers, pluginState, progressTracker);
+        return op->operateOnBits(inputContainers, parameters, progressTracker);
     } catch (std::exception &e) {
-        return OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(op->getName()).arg(e.what()));
+        return OperatorResult::error(QString("Exception encountered in plugin %1: %2").arg(op->name()).arg(e.what()));
     } catch (...) {
-        return OperatorResult::error(QString("Unexpected exception in plugin %1").arg(op->getName()));
+        return OperatorResult::error(QString("Unexpected exception in plugin %1").arg(op->name()));
     }
 }

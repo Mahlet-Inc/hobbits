@@ -1,37 +1,39 @@
 #ifndef HTTPDATA_H
 #define HTTPDATA_H
 
-#include "httptransceiver.h"
+#include "parameterdelegateui.h"
 #include "importexportinterface.h"
 
-class HttpData : public QObject, ImportExportInterface
+class HttpData : public QObject, ImporterExporterInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.ImportExportInterface.HttpData")
-    Q_INTERFACES(ImportExportInterface)
+    Q_PLUGIN_METADATA(IID "hobbits.ImporterExporterInterface.HttpData")
+    Q_INTERFACES(ImporterExporterInterface)
 
 public:
     HttpData();
 
-    ~HttpData() override;
+    ImporterExporterInterface* createDefaultImporterExporter() override;
 
-    ImportExportInterface* createDefaultImporterExporter() override;
-
-    QString getName() override;
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
 
     bool canExport() override;
     bool canImport() override;
 
-    QString getImportLabelForState(QJsonObject pluginState) override;
-    QString getExportLabelForState(QJsonObject pluginState) override;
+    virtual QSharedPointer<ParameterDelegate> importParameterDelegate() override;
+    virtual QSharedPointer<ParameterDelegate> exportParameterDelegate() override;
 
-    QSharedPointer<ImportResult> importBits(QJsonObject pluginState) override;
-    QSharedPointer<ExportResult> exportBits(
-            QSharedPointer<const BitContainer> container,
-            QJsonObject pluginState) override;
+    QSharedPointer<ImportResult> importBits(QJsonObject parameters,
+                                            QSharedPointer<PluginActionProgress> progress) override;
+    QSharedPointer<ExportResult> exportBits(QSharedPointer<const BitContainer> container,
+                                            QJsonObject parameters,
+                                            QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    HttpTransceiver *http;
+    QSharedPointer<ParameterDelegateUi> m_importDelegate;
+    QSharedPointer<ParameterDelegateUi> m_exportDelegate;
 };
 
 #endif // HTTPDATA_H

@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QMutex>
 #include "pythonresult.h"
-#include "actionwatcher.h"
+#include "pluginactionwatcher.h"
 #include "bitarray.h"
 #include "pythonrequest.h"
 
@@ -18,13 +18,13 @@ public:
     static HobbitsPython& getInstance();
     static QString pythonVersion();
 
-    QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
+    QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
             QSharedPointer<PythonRequest> request,
             bool includeActionProgressArg = true);
 
-    QSharedPointer<ActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
+    QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(
             QSharedPointer<PythonRequest> request,
-            QSharedPointer<ActionProgress> progress);
+            QSharedPointer<PluginActionProgress> progress);
 
     // copying dependencies from a resource into a temp folder might be used in many python run staging scenarios
     static void recursiveDirCopy(QString src, QString dest);

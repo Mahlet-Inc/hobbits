@@ -3,10 +3,13 @@
 
 #include "bitcontainer.h"
 #include <QObject>
-
 #include "hobbits-core_global.h"
 
-/// A proxy class for BitContainers that prevents bit editing, but allows limited metadata editing
+/**
+  * @brief The BitContainerPreview class is a proxy class for BitContainers that prevents bit editing, but allows limited metadata editing
+  *
+  * \see BitContainer
+*/
 class HOBBITSCORESHARED_EXPORT BitContainerPreview : public QObject
 {
     Q_OBJECT

@@ -1,44 +1,38 @@
 #ifndef TCPRECEIVER_H
 #define TCPRECEIVER_H
 
-#include <QDialog>
 #include <QTcpServer>
 #include <QTemporaryFile>
+#include "abstractparametereditor.h"
+#include "parameterdelegate.h"
+#include "parameterhelper.h"
+#include "importresult.h"
 
 namespace Ui {
 class TcpReceiver;
 }
 
-class TcpReceiver : public QDialog
+class TcpReceiver : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    explicit TcpReceiver(QWidget *parent = nullptr);
-    ~TcpReceiver();
+    explicit TcpReceiver(QSharedPointer<ParameterDelegate> delegate);
+    ~TcpReceiver() override;
 
-    QTemporaryFile* getDownloadedData();
-    int getPort();
-    void setPort(int);
-    QString getError();
+    QString title() override;
+    bool setParameters(QJsonObject parameters) override;
+    QJsonObject parameters() override;
+    bool isStandaloneDialog() override;
 
-public slots:
-    void startListening();
-    void stopListening();
+    static QSharedPointer<ImportResult> importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
 
 private slots:
-    void manageConnection();
-    void socketError(QAbstractSocket::SocketError);
-    void socketRead();
-
     void on_pb_start_pressed();
-    void on_pb_stop_pressed();
 
 private:
     Ui::TcpReceiver *ui;
-    QTcpServer *m_server;
-    QTcpSocket* m_socket;
-    QTemporaryFile m_downloadFile;
+    QSharedPointer<ParameterHelper> m_paramHelper;
 };
 
 #endif // TCPRECEIVER_H

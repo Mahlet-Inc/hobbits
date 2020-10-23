@@ -73,12 +73,14 @@ void SpectrogramControls::on_hs_sensitivity_valueChanged(int value)
 }
 
 
-void SpectrogramControls::on_sb_sampleRate_valueChanged(double arg1)
+void SpectrogramControls::on_sb_sampleRate_valueChanged(double value)
 {
+    Q_UNUSED(value)
     emit sampleRateSet(ui->sb_sampleRate->value() * ui->cb_rateUnits->currentData().toDouble());
 }
 
 void SpectrogramControls::on_cb_rateUnits_currentIndexChanged(int index)
 {
+    Q_UNUSED(index)
     emit sampleRateSet(ui->sb_sampleRate->value() * ui->cb_rateUnits->currentData().toDouble());
 }

@@ -12,18 +12,28 @@ DisplayInterface* DotPlot::createDefaultDisplay()
     return new DotPlot();
 }
 
-QString DotPlot::getName()
+QString DotPlot::name()
 {
     return "Dot Plot";
 }
 
-QWidget* DotPlot::getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle)
+QString DotPlot::description()
+{
+    return "Displays n-bit word repetition on a Cartesian plane (e.g. if word 2 equals word 7, (2, 7) is marked)";
+}
+
+QStringList DotPlot::tags()
+{
+    return {"Generic"};
+}
+
+QWidget* DotPlot::display(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_displayWidget;
 }
 
-QWidget* DotPlot::getControlsWidget(QSharedPointer<DisplayHandle> displayHandle)
+QWidget* DotPlot::controls(QSharedPointer<DisplayHandle> displayHandle)
 {
     initialize(displayHandle);
     return m_controlsWidget;

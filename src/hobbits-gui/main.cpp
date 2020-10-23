@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     }
 
     if (parser.isSet(pythonHomeOption)) {
-        SettingsManager::getInstance().setTransientSetting(SettingsData::PYTHON_HOME_KEY, parser.value(pythonHomeOption));
+        SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomeOption));
     }
 
     MainWindow w(extraPluginPath, configFilePath);

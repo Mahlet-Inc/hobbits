@@ -29,8 +29,12 @@ SOURCES += \
         py_bitcontainer.cpp \
         py_bitinfo.cpp \
         py_hobbits.cpp \
+        pythonanalyzer.cpp \
         pythonarg.cpp \
+        pythonimporter.cpp \
         pythoninterpreter.cpp \
+        pythonoperator.cpp \
+        pythonpluginconfig.cpp \
         pythonrequest.cpp \
         pythonresult.cpp
 
@@ -42,8 +46,12 @@ HEADERS += \
         py_bitcontainer.h \
         py_bitinfo.h \
         py_hobbits.h \
+        pythonanalyzer.h \
         pythonarg.h \
+        pythonimporter.h \
         pythoninterpreter.h \
+        pythonoperator.h \
+        pythonpluginconfig.h \
         pythonrequest.h \
         pythonresult.h
 

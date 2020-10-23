@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
-    <height>184</height>
+    <width>352</width>
+    <height>188</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Host</string>
+        <string>Host:</string>
        </property>
        <property name="buddy">
         <cstring>le_host</cstring>
@@ -32,7 +32,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Port</string>
+        <string>Port:</string>
        </property>
        <property name="buddy">
         <cstring>sb_port</cstring>
@@ -43,24 +43,6 @@
       <widget class="QSpinBox" name="sb_port">
        <property name="maximum">
         <number>65535</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QProgressBar" name="pg_sent">
-       <property name="value">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pb_cancel">
-       <property name="text">
-        <string>Cancel</string>
        </property>
       </widget>
      </item>

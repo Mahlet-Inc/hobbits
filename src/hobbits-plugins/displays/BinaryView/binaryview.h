@@ -15,12 +15,14 @@ class BinaryView : public QObject, DisplayInterface
 public:
     BinaryView();
 
-    DisplayInterface* createDefaultDisplay();
+    DisplayInterface* createDefaultDisplay() override;
 
-    QString getName();
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
 
-    QWidget* getDisplayWidget(QSharedPointer<DisplayHandle> displayHandle);
-    QWidget* getControlsWidget(QSharedPointer<DisplayHandle> displayHandle);
+    QWidget* display(QSharedPointer<DisplayHandle> displayHandle) override;
+    QWidget* controls(QSharedPointer<DisplayHandle> displayHandle) override;
 
 private:
     void initialize(QSharedPointer<DisplayHandle> displayHandle);

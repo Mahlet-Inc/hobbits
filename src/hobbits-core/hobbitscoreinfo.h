@@ -2,7 +2,6 @@
 #define HOBBITSCOREINFO_H
 
 #include <QString>
-
 #include "hobbits-core_global.h"
 
 namespace HobbitsCoreInfo

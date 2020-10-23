@@ -1,5 +1,4 @@
 #include "pythonrunner.h"
-#include "ui_pythonrunner.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QMetaObject>
@@ -8,76 +7,52 @@
 #include <QProcessEnvironment>
 #include <QTemporaryDir>
 #include <QStandardPaths>
-
-#include "pythonsyntaxhighlighter.h"
-
 #include "settingsmanager.h"
 #include "hobbitspython.h"
+#include "pythonrunnerform.h"
 
-PythonRunner::PythonRunner() :
-    ui(new Ui::PythonRunner()),
-    m_stateHelper(new PluginStateHelper()),
-    m_hasUi(false)
+PythonRunner::PythonRunner()
 {
-    m_stateHelper->addTextEditStringParameter("script", [this](){return ui->te_pythonScript;});
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        { "script", QJsonValue::String }
+    };
+
+    m_delegate = ParameterDelegateUi::create(
+                    infos,
+                    [](const QJsonObject &parameters) {
+                        Q_UNUSED(parameters)
+                        return QString("Python Run");
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new PythonRunnerForm(delegate);
+                    });
 }
 
-// Return name of operator
-QString PythonRunner::getName()
+
+OperatorInterface* PythonRunner::createDefaultOperator()
+{
+    return new PythonRunner();
+}
+
+QString PythonRunner::name()
 {
     return "Python Runner";
 }
 
-void PythonRunner::provideCallback(QSharedPointer<PluginCallback> pluginCallback)
+QString PythonRunner::description()
 {
-    // the plugin callback allows the self-triggering of operateOnContainers
-    m_pluginCallback = pluginCallback;
+    return "Run arbitrary Python code on the data using a Python API";
 }
 
-void PythonRunner::applyToWidget(QWidget *widget)
+QStringList PythonRunner::tags()
 {
-    ui->setupUi(widget);
-    m_hasUi = true;
-
-    ui->te_pluginOutput->hide();
-
-    connect(ui->pb_scriptHelp, SIGNAL(pressed()), this, SLOT(openHelpDialog()));
-
-    new PythonSyntaxHighlighter(ui->te_pythonScript->document());
+    return {"Generic"};
 }
 
-void PythonRunner::openHelpDialog()
+QSharedPointer<ParameterDelegate> PythonRunner::parameterDelegate()
 {
-    QMessageBox msg;
-    msg.setWindowTitle("Python Runner API");
-    QString docs;
-    docs += "BitArray.<strong>size</strong>()<br/>";
-    docs += "The length of the container in bits<br/><br/>";
-    docs += "BitArray.<strong>at</strong>(<em>position</em>)<br/>";
-    docs += "Gets the bit value at the given position<br/><br/>";
-    docs += "BitArray.<strong>set</strong>(<em>position</em>, <em>value</em>)<br/>";
-    docs += "Sets the bit value at the given position<br/><br/>";
-    docs += "BitArray.<strong>resize</strong>(<em>length</em>)<br/>";
-    docs += "Sets the container's length in bits<br/><br/>";
-    msg.setTextFormat(Qt::TextFormat::RichText);
-    msg.setText(docs);
-    msg.setDefaultButton(QMessageBox::Ok);
-    msg.exec();
-}
-
-QJsonObject PythonRunner::getStateFromUi()
-{
-    return m_stateHelper->getPluginStateFromUi();
-}
-
-bool PythonRunner::setPluginStateInUi(const QJsonObject &pluginState)
-{
-    return m_stateHelper->applyPluginStateToUi(pluginState);
-}
-
-bool PythonRunner::canRecallPluginState(const QJsonObject &pluginState)
-{
-    return m_stateHelper->validatePluginState(pluginState);
+    return m_delegate;
 }
 
 int PythonRunner::getMinInputContainers(const QJsonObject &pluginState)
@@ -92,17 +67,15 @@ int PythonRunner::getMaxInputContainers(const QJsonObject &pluginState)
     return 1;
 }
 
-QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
+QSharedPointer<const OperatorResult> PythonRunner::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        const QJsonObject &parameters,
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
-
-    QMetaObject::invokeMethod(this, "clearOutputText", Qt::QueuedConnection);
     if (inputContainers.length() != 1) {
         return OperatorResult::error("Requires a single input bit container");
     }
-    if (!canRecallPluginState(recallablePluginState)) {
+    if (!m_delegate->validate(parameters)) {
         return OperatorResult::error("Invalid plugin state");
     }
 
@@ -115,7 +88,7 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     if (!userScriptFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return OperatorResult::error("Could not write script to temporary directory");
     }
-    userScriptFile.write(recallablePluginState.value("script").toString().toLatin1());
+    userScriptFile.write(parameters.value("script").toString().toLatin1());
     userScriptFile.close();
 
     auto outputBits = QSharedPointer<BitArray>(new BitArray());
@@ -129,52 +102,27 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnContainers(
     auto result = watcher->result();
 
     QString output = "";
+    bool error = false;
     if (!result->getStdOut().isEmpty()) {
         output += "Python stdout:\n" + result->getStdOut() + "\n\n";
     }
     if (!result->getStdErr().isEmpty()) {
+        error = true;
         output += "Python stderr:\n" + result->getStdErr() + "\n\n";
     }
     if (!result->errors().isEmpty()) {
+        error = true;
         output += "Other errors:\n" + result->errors().join("\n") + "\n\n";
     }
-    if (!output.isEmpty()) {
-        QMetaObject::invokeMethod(
-                this,
-                "updateOutputText",
-                Qt::QueuedConnection,
-                Q_ARG(QString, output));
+    if (error) {
+        return OperatorResult::error(output);
     }
+
+    outputInfo->setMetadata(name() + " Run Output", output);
 
     QSharedPointer<BitContainer> outputContainer = BitContainer::create(outputBits);
     outputContainer->setInfo(outputInfo);
     outputContainer->setName(QString("python <- %1").arg(inputContainers.at(0)->name()));
 
-    return OperatorResult::result({outputContainer}, recallablePluginState);
-}
-
-void PythonRunner::previewBits(QSharedPointer<BitContainerPreview> container)
-{
-    Q_UNUSED(container)
-}
-
-OperatorInterface* PythonRunner::createDefaultOperator()
-{
-    return new PythonRunner();
-}
-
-void PythonRunner::updateOutputText(QString text)
-{
-    if (m_hasUi) {
-        ui->te_pluginOutput->appendPlainText(text);
-        ui->te_pluginOutput->show();
-    }
-}
-
-void PythonRunner::clearOutputText()
-{
-    if (m_hasUi) {
-        ui->te_pluginOutput->hide();
-        ui->te_pluginOutput->clear();
-    }
+    return OperatorResult::result({outputContainer}, parameters);
 }

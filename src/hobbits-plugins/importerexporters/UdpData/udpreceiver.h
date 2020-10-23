@@ -1,44 +1,38 @@
 #ifndef UDPRECEIVER_H
 #define UDPRECEIVER_H
 
-#include <QDialog>
 #include <QUdpSocket>
 #include <QTemporaryFile>
+#include "abstractparametereditor.h"
+#include "parameterdelegate.h"
+#include "parameterhelper.h"
+#include "importresult.h"
 
 namespace Ui {
 class UdpReceiver;
 }
 
-class UdpReceiver : public QDialog
+class UdpReceiver : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    explicit UdpReceiver(QWidget *parent = nullptr);
-    ~UdpReceiver();
+    explicit UdpReceiver(QSharedPointer<ParameterDelegate> delegate);
+    ~UdpReceiver() override;
 
-    QTemporaryFile* getDownloadedData();
-    int getPort();
-    void setPort(int);
-    int getLimit();
-    void setLimit(int bytes);
-    QString getError();
+    QString title() override;
+    bool setParameters(QJsonObject parameters) override;
+    QJsonObject parameters() override;
+    bool isStandaloneDialog() override;
 
-public slots:
-    void startListening();
-    void stopListening();
+    static QSharedPointer<ImportResult> importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
 
 private slots:
-    void socketError(QAbstractSocket::SocketError);
-    void socketRead();
-
     void on_pb_start_pressed();
-    void on_pb_stop_pressed();
 
 private:
     Ui::UdpReceiver *ui;
-    QUdpSocket* m_socket;
-    QTemporaryFile m_downloadFile;
+    QSharedPointer<ParameterHelper> m_paramHelper;
 };
 
 #endif // UDPRECEIVER_H

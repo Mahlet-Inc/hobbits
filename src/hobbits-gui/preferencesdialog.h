@@ -2,7 +2,7 @@
 #define PREFERENCESDIALOG_H
 
 #include "hobbitspluginmanager.h"
-#include "settingsdata.h"
+#include "settingsmanager.h"
 #include <QDialog>
 #include <QLayoutItem>
 

@@ -3,10 +3,8 @@
 #include "settingsmanager.h"
 
 const QString FIND_COLOR_KEY = "find_color";
-
 const QString FOUND_HIGHLIGHT = "found_patterns";
 const QString FOUND_RESULT_LABEL = "found_result_label";
-
 
 FindAnalyzer::FindAnalyzer() :
     ui(new Ui::FindAnalyzer()),
@@ -25,7 +23,7 @@ FindAnalyzer::~FindAnalyzer()
     delete ui;
 }
 
-QString FindAnalyzer::getName()
+QString FindAnalyzer::name()
 {
     return "Find";
 }
@@ -60,7 +58,7 @@ void FindAnalyzer::provideCallback(QSharedPointer<PluginCallback> pluginCallback
 void FindAnalyzer::triggerRun()
 {
     if (!m_pluginCallback.isNull()) {
-        m_pluginCallback->requestAnalyzerRun(this->getName(), this->getStateFromUi());
+        m_pluginCallback->requestAnalyzerRun(this->name(), this->getStateFromUi());
     }
 }
 
@@ -78,7 +76,6 @@ void FindAnalyzer::applyToWidget(QWidget *widget)
     ui->verticalLayout->addWidget(m_highlightNav);
     ui->verticalLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-    m_highlightNav->setShouldHighlightSelection(true);
     m_highlightNav->setContainer(m_previewContainer);
     m_highlightNav->setHighlightCategory(FOUND_HIGHLIGHT);
 }
@@ -120,7 +117,7 @@ QSharedPointer<BitArray> FindAnalyzer::getFindBits(const QJsonObject &pluginStat
 QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         QSharedPointer<const BitContainer> container,
         const QJsonObject &recallablePluginState,
-        QSharedPointer<ActionProgress> progressTracker)
+        QSharedPointer<PluginActionProgress> progressTracker)
 {
     QSharedPointer<BitArray> findBits = getFindBits(recallablePluginState);
     QSharedPointer<const BitArray> bits = container->bits();
@@ -155,7 +152,7 @@ QSharedPointer<const AnalyzerResult> FindAnalyzer::analyzeBits(
         }
 
         progressTracker->setProgress(start, bits->sizeInBits());
-        if (progressTracker->getCancelled()) {
+        if (progressTracker->isCancelled()) {
             return AnalyzerResult::error("Processing cancelled");
         }
     }

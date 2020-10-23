@@ -2,53 +2,43 @@
 #define BITSERROR_H
 
 #include "operatorinterface.h"
-#include "pluginstatehelper.h"
-
-namespace Ui
-{
-class BitsError;
-}
+#include "parameterdelegateui.h"
 
 class BitsError : public QObject, OperatorInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.OperatorInterface.3.BitsError")
+    Q_PLUGIN_METADATA(IID "hobbits.OperatorInterface.BitsError")
     Q_INTERFACES(OperatorInterface)
 
 public:
     BitsError();
 
-    QString getName() override;
-
     OperatorInterface* createDefaultOperator() override;
-    void applyToWidget(QWidget *widget) override;
-    void provideCallback(QSharedPointer<PluginCallback> pluginCallback) override;
 
-    bool canRecallPluginState(const QJsonObject &pluginState) override;
-    virtual bool setPluginStateInUi(const QJsonObject &pluginState) override;
-    QJsonObject getStateFromUi() override;
+    QString name() override;
+    QString description() override;
+    QStringList tags() override;
+
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
     int getMinInputContainers(const QJsonObject &pluginState) override;
     int getMaxInputContainers(const QJsonObject &pluginState) override;
 
-    QSharedPointer<const OperatorResult> operateOnContainers(
+    QSharedPointer<const OperatorResult> operateOnBits(
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &recallablePluginState,
-            QSharedPointer<ActionProgress> progressTracker) override;
-    void previewBits(QSharedPointer<BitContainerPreview> container) override;
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
 
 private:
     QSharedPointer<const OperatorResult> getGaussianErrorBits(QSharedPointer<const BitContainer> input,
                                                       double ber,
                                                       const QJsonObject &recallablePluginState,
-                                                      QSharedPointer<ActionProgress> progressTracker);
+                                                      QSharedPointer<PluginActionProgress> progressTracker);
     QSharedPointer<const OperatorResult> getPeriodicErrorBits(QSharedPointer<const BitContainer> input,
                                                       double ber,
                                                       const QJsonObject &recallablePluginState,
-                                                      QSharedPointer<ActionProgress> progressTracker);
-    Ui::BitsError *ui;
-    QSharedPointer<PluginCallback> m_pluginCallback;
-    QSharedPointer<PluginStateHelper> m_stateHelper;
+                                                      QSharedPointer<PluginActionProgress> progressTracker);
+    QSharedPointer<ParameterDelegateUi> m_delegate;
 
 };
 

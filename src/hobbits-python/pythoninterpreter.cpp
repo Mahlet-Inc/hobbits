@@ -70,7 +70,7 @@ void PythonInterpreter::initialize()
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
 
-    std::wstring wsPyHome = SettingsManager::getInstance().getTransientSetting(SettingsData::PYTHON_HOME_KEY).toString().toStdWString();
+    std::wstring wsPyHome = SettingsManager::getTransientSetting(SettingsManager::PYTHON_HOME_KEY).toString().toStdWString();
     QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
     wcscpy(pyHome.data(), wsPyHome.c_str());
     config.home = pyHome.data();
@@ -145,13 +145,13 @@ QSharedPointer<PythonResult> PythonInterpreter::_runProcessScript(QSharedPointer
             for (int i = 0; i < request->args().size(); i++) {
                 PyObject *arg = parseArg(hobbitsModule.obj(), request->args().at(i));
                 if (arg == nullptr) {
-                    errors.append(QString("Failed to parse arg %1").arg(i));
+                    errors.append(QString("Failed to parse arg %1").arg(i+1));
                     return finish(stdoutFile, stderrFile, errors);
                 }
                 int setCode = PyTuple_SetItem(args.obj(), i, arg);
                 if (setCode != 0) {
                     errorCheckAndPrint();
-                    errors.append(QString("Failed to set arg %1 in position").arg(i));
+                    errors.append(QString("Failed to set arg %1 in position").arg(i+1));
                     return finish(stdoutFile, stderrFile, errors);
                 }
             }
@@ -211,6 +211,9 @@ PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
     }
     else if (arg->type() == PythonArg::Integer) {
         return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->integerData());
+    }
+    else if (arg->type() == PythonArg::Double) {
+        return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->doubleData());
     }
     else {
         return nullptr;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>333</width>
-    <height>196</height>
+    <width>329</width>
+    <height>136</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,23 +38,6 @@
     <widget class="QRadioButton" name="rb_before">
      <property name="text">
       <string>Actions Before Selected Container</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cb_imports">
-     <property name="text">
-      <string>Import Actions</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cb_importStates">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Import Action State (e.g. specific file name)</string>
      </property>
     </widget>
    </item>
