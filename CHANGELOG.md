@@ -1,3 +1,15 @@
+# [0.41.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.40.1...v0.41.0) (2020-10-23)
+
+
+### Bug Fixes
+
+* handle larger word sizes correctly in Frequency Plot ([81fb8a7](https://github.com/Mahlet-Inc/hobbits/commit/81fb8a72c2a98c5a4360b3e2149620ba43ee10b3))
+
+
+### Features
+
+* add simple hover data to frequency plot ([7f8b113](https://github.com/Mahlet-Inc/hobbits/commit/7f8b113be0d727642a8a26228551d9091deafb15))
+
 ## [0.40.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.40.0...v0.40.1) (2020-10-23)
 
 
