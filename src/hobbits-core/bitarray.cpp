@@ -222,7 +222,7 @@ quint64 BitArray::parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleE
     quint64 word = 0;
     for (qint64 i = 0; i < wordBitSize; i++) {
         if (this->at(bitOffset + i)) {
-            word += 1 << (wordBitSize - i - 1);
+            word += 1ull << (wordBitSize - i - 1);
         }
     }
     if (littleEndian && wordBitSize % 8 == 0) {
