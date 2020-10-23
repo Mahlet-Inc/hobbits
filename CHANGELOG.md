@@ -1,3 +1,20 @@
+# [0.40.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.39.0...v0.40.0) (2020-10-23)
+
+
+### Bug Fixes
+
+* avoid bad python path in some situations in linux ([6bc32b3](https://github.com/Mahlet-Inc/hobbits/commit/6bc32b383826410dff9f8873a1138634b1c8c446))
+* prevent spectrogram renderer deadlock bug ([1f403a2](https://github.com/Mahlet-Inc/hobbits/commit/1f403a2c9410fd0b28560223f0edb180fb042ace))
+
+
+### Features
+
+* [api] revise plugin interfaces (hopefully close to 1.0 now) ([da0a893](https://github.com/Mahlet-Inc/hobbits/commit/da0a8933f295aeebe20f3b5aafaee921abaee131))
+* add DisplayPrint exporter plugin for saving display images ([585806e](https://github.com/Mahlet-Inc/hobbits/commit/585806e08fcf001f45a84062f628080bbb3df98f))
+* add metadata display core plugin ([cde80f0](https://github.com/Mahlet-Inc/hobbits/commit/cde80f0d1477988953991866422cdf3cd48f846a))
+* add pure python plugin interfaces and loader ([72633d4](https://github.com/Mahlet-Inc/hobbits/commit/72633d4c83eeecb8baf1dde8cd96b3c8127f1262))
+* add visual batch editor with flow chart layout ([50ed7c7](https://github.com/Mahlet-Inc/hobbits/commit/50ed7c744251eba70331f0790f2d304c018bb3ac))
+
 # [0.39.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.38.1...v0.39.0) (2020-09-25)
 
 
