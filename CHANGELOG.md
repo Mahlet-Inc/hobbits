@@ -1,3 +1,10 @@
+## [0.41.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.0...v0.41.1) (2020-10-28)
+
+
+### Bug Fixes
+
+* [plugin] fix bug with custom kaitai struct running ([37e8a55](https://github.com/Mahlet-Inc/hobbits/commit/37e8a55e8ab079352d624841965a0638bd3456fa))
+
 # [0.41.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.40.1...v0.41.0) (2020-10-23)
 
 
