@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include "settingsmanager.h"
 #include <QDirIterator>
+#include "kaitaistruct.h"
 
 KaitaiStructForm::KaitaiStructForm(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::KaitaiStructForm()),
@@ -13,9 +14,7 @@ KaitaiStructForm::KaitaiStructForm(QSharedPointer<ParameterDelegate> delegate) :
 {
     ui->setupUi(this);
 
-    m_paramHelper->addTextEditStringParameter("katai_struct_yaml", ui->te_ksy);
-
-    m_paramHelper->addParameter("katai_struct_yaml",
+    m_paramHelper->addParameter(PARAM_KSY,
     [this](QJsonValue value) {
         if (value.toString().isEmpty()) {
             return false;
@@ -31,7 +30,7 @@ KaitaiStructForm::KaitaiStructForm(QSharedPointer<ParameterDelegate> delegate) :
         return QJsonValue(ui->te_ksy->toPlainText());
     });
 
-    m_paramHelper->addParameter("precompiled_py_file",
+    m_paramHelper->addParameter(PARAM_PY,
     [this](QJsonValue value) {
         if (value.toString().isEmpty()) {
             return false;
@@ -161,6 +160,7 @@ void KaitaiStructForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> con
     m_highlightNav->setContainer(container);
     if (container.isNull()) {
         m_highlightNav->setTitle("");
+        ui->te_output->clear();
     }
     else {
         QString resultLabel = container->info()->metadata(KAITAI_RESULT_LABEL).toString();
@@ -169,5 +169,17 @@ void KaitaiStructForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> con
             resultLabel += "...";
         }
         m_highlightNav->setTitle(resultLabel);
+
+        QString outText = "";
+        QVariant kscOutput = container->info()->metadata(KSC_OUT_LABEL);
+        if (kscOutput.isValid()) {
+            outText += kscOutput.toString() + "\n\n";
+        }
+        QVariant pyOutput = container->info()->metadata(PYTHON_OUT_LABEL);
+        if (pyOutput.isValid()) {
+            outText += pyOutput.toString();
+        }
+        ui->te_output->setPlainText(outText);
+
     }
 }
