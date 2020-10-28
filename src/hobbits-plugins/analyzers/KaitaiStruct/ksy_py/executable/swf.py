@@ -61,7 +61,7 @@ class Swf(KaitaiStruct):
 
     def _read(self):
         self._debug['compression']['start'] = self._io.pos()
-        self.compression = KaitaiStream.resolve_enum(self._root.Compressions, self._io.read_u1())
+        self.compression = KaitaiStream.resolve_enum(Swf.Compressions, self._io.read_u1())
         self._debug['compression']['end'] = self._io.pos()
         self._debug['signature']['start'] = self._io.pos()
         self.signature = self._io.read_bytes(2)
@@ -74,20 +74,20 @@ class Swf(KaitaiStruct):
         self._debug['len_file']['start'] = self._io.pos()
         self.len_file = self._io.read_u4le()
         self._debug['len_file']['end'] = self._io.pos()
-        if self.compression == self._root.Compressions.none:
+        if self.compression == Swf.Compressions.none:
             self._debug['plain_body']['start'] = self._io.pos()
             self._raw_plain_body = self._io.read_bytes_full()
             _io__raw_plain_body = KaitaiStream(BytesIO(self._raw_plain_body))
-            self.plain_body = self._root.SwfBody(_io__raw_plain_body, self, self._root)
+            self.plain_body = Swf.SwfBody(_io__raw_plain_body, self, self._root)
             self.plain_body._read()
             self._debug['plain_body']['end'] = self._io.pos()
 
-        if self.compression == self._root.Compressions.zlib:
+        if self.compression == Swf.Compressions.zlib:
             self._debug['zlib_body']['start'] = self._io.pos()
             self._raw__raw_zlib_body = self._io.read_bytes_full()
             self._raw_zlib_body = zlib.decompress(self._raw__raw_zlib_body)
             _io__raw_zlib_body = KaitaiStream(BytesIO(self._raw_zlib_body))
-            self.zlib_body = self._root.SwfBody(_io__raw_zlib_body, self, self._root)
+            self.zlib_body = Swf.SwfBody(_io__raw_zlib_body, self, self._root)
             self.zlib_body._read()
             self._debug['zlib_body']['end'] = self._io.pos()
 
@@ -142,7 +142,7 @@ class Swf(KaitaiStruct):
 
         def _read(self):
             self._debug['rect']['start'] = self._io.pos()
-            self.rect = self._root.Rect(self._io, self, self._root)
+            self.rect = Swf.Rect(self._io, self, self._root)
             self.rect._read()
             self._debug['rect']['end'] = self._io.pos()
             self._debug['frame_rate']['start'] = self._io.pos()
@@ -153,7 +153,7 @@ class Swf(KaitaiStruct):
             self._debug['frame_count']['end'] = self._io.pos()
             if self._root.version >= 8:
                 self._debug['file_attributes_tag']['start'] = self._io.pos()
-                self.file_attributes_tag = self._root.Tag(self._io, self, self._root)
+                self.file_attributes_tag = Swf.Tag(self._io, self, self._root)
                 self.file_attributes_tag._read()
                 self._debug['file_attributes_tag']['end'] = self._io.pos()
 
@@ -164,7 +164,7 @@ class Swf(KaitaiStruct):
                 if not 'arr' in self._debug['tags']:
                     self._debug['tags']['arr'] = []
                 self._debug['tags']['arr'].append({'start': self._io.pos()})
-                _t_tags = self._root.Tag(self._io, self, self._root)
+                _t_tags = Swf.Tag(self._io, self, self._root)
                 _t_tags._read()
                 self.tags.append(_t_tags)
                 self._debug['tags']['arr'][len(self.tags) - 1]['end'] = self._io.pos()
@@ -216,40 +216,40 @@ class Swf(KaitaiStruct):
 
         def _read(self):
             self._debug['record_header']['start'] = self._io.pos()
-            self.record_header = self._root.RecordHeader(self._io, self, self._root)
+            self.record_header = Swf.RecordHeader(self._io, self, self._root)
             self.record_header._read()
             self._debug['record_header']['end'] = self._io.pos()
             self._debug['tag_body']['start'] = self._io.pos()
             _on = self.record_header.tag_type
-            if _on == self._root.TagType.define_sound:
+            if _on == Swf.TagType.define_sound:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.DefineSoundBody(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.DefineSoundBody(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
-            elif _on == self._root.TagType.set_background_color:
+            elif _on == Swf.TagType.set_background_color:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.Rgb(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.Rgb(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
-            elif _on == self._root.TagType.script_limits:
+            elif _on == Swf.TagType.script_limits:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.ScriptLimitsBody(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.ScriptLimitsBody(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
-            elif _on == self._root.TagType.do_abc:
+            elif _on == Swf.TagType.do_abc:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.DoAbcBody(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.DoAbcBody(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
-            elif _on == self._root.TagType.export_assets:
+            elif _on == Swf.TagType.export_assets:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.SymbolClassBody(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.SymbolClassBody(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
-            elif _on == self._root.TagType.symbol_class:
+            elif _on == Swf.TagType.symbol_class:
                 self._raw_tag_body = self._io.read_bytes(self.record_header.len)
                 _io__raw_tag_body = KaitaiStream(BytesIO(self._raw_tag_body))
-                self.tag_body = self._root.SymbolClassBody(_io__raw_tag_body, self, self._root)
+                self.tag_body = Swf.SymbolClassBody(_io__raw_tag_body, self, self._root)
                 self.tag_body._read()
             else:
                 self.tag_body = self._io.read_bytes(self.record_header.len)
@@ -274,7 +274,7 @@ class Swf(KaitaiStruct):
                 if not 'arr' in self._debug['symbols']:
                     self._debug['symbols']['arr'] = []
                 self._debug['symbols']['arr'].append({'start': self._io.pos()})
-                _t_symbols = self._root.SymbolClassBody.Symbol(self._io, self, self._root)
+                _t_symbols = Swf.SymbolClassBody.Symbol(self._io, self, self._root)
                 _t_symbols._read()
                 self.symbols[i] = _t_symbols
                 self._debug['symbols']['arr'][i]['end'] = self._io.pos()
@@ -326,16 +326,16 @@ class Swf(KaitaiStruct):
             self.id = self._io.read_u2le()
             self._debug['id']['end'] = self._io.pos()
             self._debug['format']['start'] = self._io.pos()
-            self.format = self._io.read_bits_int(4)
+            self.format = self._io.read_bits_int_be(4)
             self._debug['format']['end'] = self._io.pos()
             self._debug['sampling_rate']['start'] = self._io.pos()
-            self.sampling_rate = KaitaiStream.resolve_enum(self._root.DefineSoundBody.SamplingRates, self._io.read_bits_int(2))
+            self.sampling_rate = KaitaiStream.resolve_enum(Swf.DefineSoundBody.SamplingRates, self._io.read_bits_int_be(2))
             self._debug['sampling_rate']['end'] = self._io.pos()
             self._debug['bits_per_sample']['start'] = self._io.pos()
-            self.bits_per_sample = KaitaiStream.resolve_enum(self._root.DefineSoundBody.Bps, self._io.read_bits_int(1))
+            self.bits_per_sample = KaitaiStream.resolve_enum(Swf.DefineSoundBody.Bps, self._io.read_bits_int_be(1))
             self._debug['bits_per_sample']['end'] = self._io.pos()
             self._debug['num_channels']['start'] = self._io.pos()
-            self.num_channels = KaitaiStream.resolve_enum(self._root.DefineSoundBody.Channels, self._io.read_bits_int(1))
+            self.num_channels = KaitaiStream.resolve_enum(Swf.DefineSoundBody.Channels, self._io.read_bits_int_be(1))
             self._debug['num_channels']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['num_samples']['start'] = self._io.pos()
@@ -366,7 +366,7 @@ class Swf(KaitaiStruct):
             if hasattr(self, '_m_tag_type'):
                 return self._m_tag_type if hasattr(self, '_m_tag_type') else None
 
-            self._m_tag_type = KaitaiStream.resolve_enum(self._root.TagType, (self.tag_code_and_length >> 6))
+            self._m_tag_type = KaitaiStream.resolve_enum(Swf.TagType, (self.tag_code_and_length >> 6))
             return self._m_tag_type if hasattr(self, '_m_tag_type') else None
 
         @property

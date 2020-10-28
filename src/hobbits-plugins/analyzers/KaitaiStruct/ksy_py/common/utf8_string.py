@@ -44,7 +44,7 @@ class Utf8String(KaitaiStruct):
             if not 'arr' in self._debug['codepoints']:
                 self._debug['codepoints']['arr'] = []
             self._debug['codepoints']['arr'].append({'start': self._io.pos()})
-            _t_codepoints = self._root.Utf8Codepoint(self._io, self, self._root)
+            _t_codepoints = Utf8String.Utf8Codepoint(self._io, self, self._root)
             _t_codepoints._read()
             self.codepoints.append(_t_codepoints)
             self._debug['codepoints']['arr'][len(self.codepoints) - 1]['end'] = self._io.pos()

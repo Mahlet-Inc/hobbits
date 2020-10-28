@@ -32,7 +32,7 @@ class SomeIpSdEntries(KaitaiStruct):
             if not 'arr' in self._debug['entries']:
                 self._debug['entries']['arr'] = []
             self._debug['entries']['arr'].append({'start': self._io.pos()})
-            _t_entries = self._root.SdEntry(self._io, self, self._root)
+            _t_entries = SomeIpSdEntries.SdEntry(self._io, self, self._root)
             _t_entries._read()
             self.entries.append(_t_entries)
             self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -56,22 +56,22 @@ class SomeIpSdEntries(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.SdEntry.SdEntryHeader(self._io, self, self._root)
+            self.header = SomeIpSdEntries.SdEntry.SdEntryHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.header.type
-            if _on == self._root.SdEntry.EntryTypes.find:
-                self.content = self._root.SdEntry.SdServiceEntry(self._io, self, self._root)
+            if _on == SomeIpSdEntries.SdEntry.EntryTypes.find:
+                self.content = SomeIpSdEntries.SdEntry.SdServiceEntry(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdEntry.EntryTypes.offer:
-                self.content = self._root.SdEntry.SdServiceEntry(self._io, self, self._root)
+            elif _on == SomeIpSdEntries.SdEntry.EntryTypes.offer:
+                self.content = SomeIpSdEntries.SdEntry.SdServiceEntry(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdEntry.EntryTypes.subscribe:
-                self.content = self._root.SdEntry.SdEventgroupEntry(self._io, self, self._root)
+            elif _on == SomeIpSdEntries.SdEntry.EntryTypes.subscribe:
+                self.content = SomeIpSdEntries.SdEntry.SdEventgroupEntry(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdEntry.EntryTypes.subscribe_ack:
-                self.content = self._root.SdEntry.SdEventgroupEntry(self._io, self, self._root)
+            elif _on == SomeIpSdEntries.SdEntry.EntryTypes.subscribe_ack:
+                self.content = SomeIpSdEntries.SdEntry.SdEventgroupEntry(self._io, self, self._root)
                 self.content._read()
             self._debug['content']['end'] = self._io.pos()
 
@@ -85,7 +85,7 @@ class SomeIpSdEntries(KaitaiStruct):
 
             def _read(self):
                 self._debug['type']['start'] = self._io.pos()
-                self.type = KaitaiStream.resolve_enum(self._root.SdEntry.EntryTypes, self._io.read_u1())
+                self.type = KaitaiStream.resolve_enum(SomeIpSdEntries.SdEntry.EntryTypes, self._io.read_u1())
                 self._debug['type']['end'] = self._io.pos()
                 self._debug['index_first_options']['start'] = self._io.pos()
                 self.index_first_options = self._io.read_u1()
@@ -94,10 +94,10 @@ class SomeIpSdEntries(KaitaiStruct):
                 self.index_second_options = self._io.read_u1()
                 self._debug['index_second_options']['end'] = self._io.pos()
                 self._debug['number_first_options']['start'] = self._io.pos()
-                self.number_first_options = self._io.read_bits_int(4)
+                self.number_first_options = self._io.read_bits_int_be(4)
                 self._debug['number_first_options']['end'] = self._io.pos()
                 self._debug['number_second_options']['start'] = self._io.pos()
-                self.number_second_options = self._io.read_bits_int(4)
+                self.number_second_options = self._io.read_bits_int_be(4)
                 self._debug['number_second_options']['end'] = self._io.pos()
                 self._io.align_to_byte()
                 self._debug['service_id']['start'] = self._io.pos()
@@ -110,7 +110,7 @@ class SomeIpSdEntries(KaitaiStruct):
                 self.major_version = self._io.read_u1()
                 self._debug['major_version']['end'] = self._io.pos()
                 self._debug['ttl']['start'] = self._io.pos()
-                self.ttl = self._io.read_bits_int(24)
+                self.ttl = self._io.read_bits_int_be(24)
                 self._debug['ttl']['end'] = self._io.pos()
 
 
@@ -141,13 +141,13 @@ class SomeIpSdEntries(KaitaiStruct):
                 self.reserved = self._io.read_u1()
                 self._debug['reserved']['end'] = self._io.pos()
                 self._debug['initial_data_requested']['start'] = self._io.pos()
-                self.initial_data_requested = self._io.read_bits_int(1) != 0
+                self.initial_data_requested = self._io.read_bits_int_be(1) != 0
                 self._debug['initial_data_requested']['end'] = self._io.pos()
                 self._debug['reserved2']['start'] = self._io.pos()
-                self.reserved2 = self._io.read_bits_int(3)
+                self.reserved2 = self._io.read_bits_int_be(3)
                 self._debug['reserved2']['end'] = self._io.pos()
                 self._debug['counter']['start'] = self._io.pos()
-                self.counter = self._io.read_bits_int(4)
+                self.counter = self._io.read_bits_int_be(4)
                 self._debug['counter']['end'] = self._io.pos()
                 self._io.align_to_byte()
                 self._debug['event_group_id']['start'] = self._io.pos()

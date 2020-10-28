@@ -19,7 +19,7 @@ class QuakeMdl(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.MdlHeader(self._io, self, self._root)
+        self.header = QuakeMdl.MdlHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['skins']['start'] = self._io.pos()
@@ -28,7 +28,7 @@ class QuakeMdl(KaitaiStruct):
             if not 'arr' in self._debug['skins']:
                 self._debug['skins']['arr'] = []
             self._debug['skins']['arr'].append({'start': self._io.pos()})
-            _t_skins = self._root.MdlSkin(self._io, self, self._root)
+            _t_skins = QuakeMdl.MdlSkin(self._io, self, self._root)
             _t_skins._read()
             self.skins[i] = _t_skins
             self._debug['skins']['arr'][i]['end'] = self._io.pos()
@@ -40,7 +40,7 @@ class QuakeMdl(KaitaiStruct):
             if not 'arr' in self._debug['texture_coordinates']:
                 self._debug['texture_coordinates']['arr'] = []
             self._debug['texture_coordinates']['arr'].append({'start': self._io.pos()})
-            _t_texture_coordinates = self._root.MdlTexcoord(self._io, self, self._root)
+            _t_texture_coordinates = QuakeMdl.MdlTexcoord(self._io, self, self._root)
             _t_texture_coordinates._read()
             self.texture_coordinates[i] = _t_texture_coordinates
             self._debug['texture_coordinates']['arr'][i]['end'] = self._io.pos()
@@ -52,7 +52,7 @@ class QuakeMdl(KaitaiStruct):
             if not 'arr' in self._debug['triangles']:
                 self._debug['triangles']['arr'] = []
             self._debug['triangles']['arr'].append({'start': self._io.pos()})
-            _t_triangles = self._root.MdlTriangle(self._io, self, self._root)
+            _t_triangles = QuakeMdl.MdlTriangle(self._io, self, self._root)
             _t_triangles._read()
             self.triangles[i] = _t_triangles
             self._debug['triangles']['arr'][i]['end'] = self._io.pos()
@@ -64,7 +64,7 @@ class QuakeMdl(KaitaiStruct):
             if not 'arr' in self._debug['frames']:
                 self._debug['frames']['arr'] = []
             self._debug['frames']['arr'].append({'start': self._io.pos()})
-            _t_frames = self._root.MdlFrame(self._io, self, self._root)
+            _t_frames = QuakeMdl.MdlFrame(self._io, self, self._root)
             _t_frames._read()
             self.frames[i] = _t_frames
             self._debug['frames']['arr'][i]['end'] = self._io.pos()
@@ -135,18 +135,18 @@ class QuakeMdl(KaitaiStruct):
             if not self.version_must_be_6 == b"\x06\x00\x00\x00":
                 raise kaitaistruct.ValidationNotEqualError(b"\x06\x00\x00\x00", self.version_must_be_6, self._io, u"/types/mdl_header/seq/1")
             self._debug['scale']['start'] = self._io.pos()
-            self.scale = self._root.Vec3(self._io, self, self._root)
+            self.scale = QuakeMdl.Vec3(self._io, self, self._root)
             self.scale._read()
             self._debug['scale']['end'] = self._io.pos()
             self._debug['origin']['start'] = self._io.pos()
-            self.origin = self._root.Vec3(self._io, self, self._root)
+            self.origin = QuakeMdl.Vec3(self._io, self, self._root)
             self.origin._read()
             self._debug['origin']['end'] = self._io.pos()
             self._debug['radius']['start'] = self._io.pos()
             self.radius = self._io.read_f4le()
             self._debug['radius']['end'] = self._io.pos()
             self._debug['eye_position']['start'] = self._io.pos()
-            self.eye_position = self._root.Vec3(self._io, self, self._root)
+            self.eye_position = QuakeMdl.Vec3(self._io, self, self._root)
             self.eye_position._read()
             self._debug['eye_position']['end'] = self._io.pos()
             self._debug['num_skins']['start'] = self._io.pos()
@@ -256,13 +256,13 @@ class QuakeMdl(KaitaiStruct):
             self._debug['type']['end'] = self._io.pos()
             if self.type != 0:
                 self._debug['min']['start'] = self._io.pos()
-                self.min = self._root.MdlVertex(self._io, self, self._root)
+                self.min = QuakeMdl.MdlVertex(self._io, self, self._root)
                 self.min._read()
                 self._debug['min']['end'] = self._io.pos()
 
             if self.type != 0:
                 self._debug['max']['start'] = self._io.pos()
-                self.max = self._root.MdlVertex(self._io, self, self._root)
+                self.max = QuakeMdl.MdlVertex(self._io, self, self._root)
                 self.max._read()
                 self._debug['max']['end'] = self._io.pos()
 
@@ -284,7 +284,7 @@ class QuakeMdl(KaitaiStruct):
                 if not 'arr' in self._debug['frames']:
                     self._debug['frames']['arr'] = []
                 self._debug['frames']['arr'].append({'start': self._io.pos()})
-                _t_frames = self._root.MdlSimpleFrame(self._io, self, self._root)
+                _t_frames = QuakeMdl.MdlSimpleFrame(self._io, self, self._root)
                 _t_frames._read()
                 self.frames[i] = _t_frames
                 self._debug['frames']['arr'][i]['end'] = self._io.pos()
@@ -310,11 +310,11 @@ class QuakeMdl(KaitaiStruct):
 
         def _read(self):
             self._debug['bbox_min']['start'] = self._io.pos()
-            self.bbox_min = self._root.MdlVertex(self._io, self, self._root)
+            self.bbox_min = QuakeMdl.MdlVertex(self._io, self, self._root)
             self.bbox_min._read()
             self._debug['bbox_min']['end'] = self._io.pos()
             self._debug['bbox_max']['start'] = self._io.pos()
-            self.bbox_max = self._root.MdlVertex(self._io, self, self._root)
+            self.bbox_max = QuakeMdl.MdlVertex(self._io, self, self._root)
             self.bbox_max._read()
             self._debug['bbox_max']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
@@ -326,7 +326,7 @@ class QuakeMdl(KaitaiStruct):
                 if not 'arr' in self._debug['vertices']:
                     self._debug['vertices']['arr'] = []
                 self._debug['vertices']['arr'].append({'start': self._io.pos()})
-                _t_vertices = self._root.MdlVertex(self._io, self, self._root)
+                _t_vertices = QuakeMdl.MdlVertex(self._io, self, self._root)
                 _t_vertices._read()
                 self.vertices[i] = _t_vertices
                 self._debug['vertices']['arr'][i]['end'] = self._io.pos()

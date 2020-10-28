@@ -28,15 +28,15 @@ class AndroidImg(KaitaiStruct):
         if not self.magic == b"\x41\x4E\x44\x52\x4F\x49\x44\x21":
             raise kaitaistruct.ValidationNotEqualError(b"\x41\x4E\x44\x52\x4F\x49\x44\x21", self.magic, self._io, u"/seq/0")
         self._debug['kernel']['start'] = self._io.pos()
-        self.kernel = self._root.Load(self._io, self, self._root)
+        self.kernel = AndroidImg.Load(self._io, self, self._root)
         self.kernel._read()
         self._debug['kernel']['end'] = self._io.pos()
         self._debug['ramdisk']['start'] = self._io.pos()
-        self.ramdisk = self._root.Load(self._io, self, self._root)
+        self.ramdisk = AndroidImg.Load(self._io, self, self._root)
         self.ramdisk._read()
         self._debug['ramdisk']['end'] = self._io.pos()
         self._debug['second']['start'] = self._io.pos()
-        self.second = self._root.Load(self._io, self, self._root)
+        self.second = AndroidImg.Load(self._io, self, self._root)
         self.second._read()
         self._debug['second']['end'] = self._io.pos()
         self._debug['tags_load']['start'] = self._io.pos()
@@ -49,7 +49,7 @@ class AndroidImg(KaitaiStruct):
         self.header_version = self._io.read_u4le()
         self._debug['header_version']['end'] = self._io.pos()
         self._debug['os_version']['start'] = self._io.pos()
-        self.os_version = self._root.OsVersion(self._io, self, self._root)
+        self.os_version = AndroidImg.OsVersion(self._io, self, self._root)
         self.os_version._read()
         self._debug['os_version']['end'] = self._io.pos()
         self._debug['name']['start'] = self._io.pos()
@@ -66,7 +66,7 @@ class AndroidImg(KaitaiStruct):
         self._debug['extra_cmdline']['end'] = self._io.pos()
         if self.header_version > 0:
             self._debug['recovery_dtbo']['start'] = self._io.pos()
-            self.recovery_dtbo = self._root.SizeOffset(self._io, self, self._root)
+            self.recovery_dtbo = AndroidImg.SizeOffset(self._io, self, self._root)
             self.recovery_dtbo._read()
             self._debug['recovery_dtbo']['end'] = self._io.pos()
 
@@ -77,7 +77,7 @@ class AndroidImg(KaitaiStruct):
 
         if self.header_version > 1:
             self._debug['dtb']['start'] = self._io.pos()
-            self.dtb = self._root.LoadLong(self._io, self, self._root)
+            self.dtb = AndroidImg.LoadLong(self._io, self, self._root)
             self.dtb._read()
             self._debug['dtb']['end'] = self._io.pos()
 

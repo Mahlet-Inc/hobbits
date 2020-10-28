@@ -28,7 +28,7 @@ class Tsm(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = Tsm.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
 
@@ -91,7 +91,7 @@ class Tsm(KaitaiStruct):
                     if not 'arr' in self._debug['index_entries']:
                         self._debug['index_entries']['arr'] = []
                     self._debug['index_entries']['arr'].append({'start': self._io.pos()})
-                    _t_index_entries = self._root.Index.IndexHeader.IndexEntry(self._io, self, self._root)
+                    _t_index_entries = Tsm.Index.IndexHeader.IndexEntry(self._io, self, self._root)
                     _t_index_entries._read()
                     self.index_entries[i] = _t_index_entries
                     self._debug['index_entries']['arr'][i]['end'] = self._io.pos()
@@ -146,7 +146,7 @@ class Tsm(KaitaiStruct):
                     _pos = io.pos()
                     io.seek(self.block_offset)
                     self._debug['_m_block']['start'] = io.pos()
-                    self._m_block = self._root.Index.IndexHeader.IndexEntry.BlockEntry(io, self, self._root)
+                    self._m_block = Tsm.Index.IndexHeader.IndexEntry.BlockEntry(io, self, self._root)
                     self._m_block._read()
                     self._debug['_m_block']['end'] = io.pos()
                     io.seek(_pos)
@@ -168,7 +168,7 @@ class Tsm(KaitaiStruct):
                 if not 'arr' in self._debug['_m_entries']:
                     self._debug['_m_entries']['arr'] = []
                 self._debug['_m_entries']['arr'].append({'start': self._io.pos()})
-                _t__m_entries = self._root.Index.IndexHeader(self._io, self, self._root)
+                _t__m_entries = Tsm.Index.IndexHeader(self._io, self, self._root)
                 _t__m_entries._read()
                 _ = _t__m_entries
                 self._m_entries.append(_)
@@ -189,7 +189,7 @@ class Tsm(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek((self._io.size() - 8))
         self._debug['_m_index']['start'] = self._io.pos()
-        self._m_index = self._root.Index(self._io, self, self._root)
+        self._m_index = Tsm.Index(self._io, self, self._root)
         self._m_index._read()
         self._debug['_m_index']['end'] = self._io.pos()
         self._io.seek(_pos)

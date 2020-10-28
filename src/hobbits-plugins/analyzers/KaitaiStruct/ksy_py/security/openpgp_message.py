@@ -201,7 +201,7 @@ class OpenpgpMessage(KaitaiStruct):
             if not 'arr' in self._debug['packets']:
                 self._debug['packets']['arr'] = []
             self._debug['packets']['arr'].append({'start': self._io.pos()})
-            _t_packets = self._root.Packet(self._io, self, self._root)
+            _t_packets = OpenpgpMessage.Packet(self._io, self, self._root)
             _t_packets._read()
             self.packets.append(_t_packets)
             self._debug['packets']['arr'][len(self.packets) - 1]['end'] = self._io.pos()
@@ -225,7 +225,7 @@ class OpenpgpMessage(KaitaiStruct):
                 if not 'arr' in self._debug['algorithm']:
                     self._debug['algorithm']['arr'] = []
                 self._debug['algorithm']['arr'].append({'start': self._io.pos()})
-                self.algorithm.append(KaitaiStream.resolve_enum(self._root.HashAlgorithms, self._io.read_u1()))
+                self.algorithm.append(KaitaiStream.resolve_enum(OpenpgpMessage.HashAlgorithms, self._io.read_u1()))
                 self._debug['algorithm']['arr'][len(self.algorithm) - 1]['end'] = self._io.pos()
                 i += 1
 
@@ -248,7 +248,7 @@ class OpenpgpMessage(KaitaiStruct):
                 if not 'arr' in self._debug['algorithm']:
                     self._debug['algorithm']['arr'] = []
                 self._debug['algorithm']['arr'].append({'start': self._io.pos()})
-                self.algorithm.append(KaitaiStream.resolve_enum(self._root.CompressionAlgorithms, self._io.read_u1()))
+                self.algorithm.append(KaitaiStream.resolve_enum(OpenpgpMessage.CompressionAlgorithms, self._io.read_u1()))
                 self._debug['algorithm']['arr'][len(self.algorithm) - 1]['end'] = self._io.pos()
                 i += 1
 
@@ -279,7 +279,7 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['public_key']['start'] = self._io.pos()
-            self.public_key = self._root.PublicKeyPacket(self._io, self, self._root)
+            self.public_key = OpenpgpMessage.PublicKeyPacket(self._io, self, self._root)
             self.public_key._read()
             self._debug['public_key']['end'] = self._io.pos()
             self._debug['string_to_key']['start'] = self._io.pos()
@@ -287,7 +287,7 @@ class OpenpgpMessage(KaitaiStruct):
             self._debug['string_to_key']['end'] = self._io.pos()
             if self.string_to_key >= 254:
                 self._debug['symmetric_encryption_algorithm']['start'] = self._io.pos()
-                self.symmetric_encryption_algorithm = KaitaiStream.resolve_enum(self._root.SymmetricKeyAlgorithm, self._io.read_u1())
+                self.symmetric_encryption_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.SymmetricKeyAlgorithm, self._io.read_u1())
                 self._debug['symmetric_encryption_algorithm']['end'] = self._io.pos()
 
             self._debug['secret_key']['start'] = self._io.pos()
@@ -311,7 +311,7 @@ class OpenpgpMessage(KaitaiStruct):
                 if not 'arr' in self._debug['flag']:
                     self._debug['flag']['arr'] = []
                 self._debug['flag']['arr'].append({'start': self._io.pos()})
-                self.flag.append(KaitaiStream.resolve_enum(self._root.ServerFlags, self._io.read_u1()))
+                self.flag.append(KaitaiStream.resolve_enum(OpenpgpMessage.ServerFlags, self._io.read_u1()))
                 self._debug['flag']['arr'][len(self.flag) - 1]['end'] = self._io.pos()
                 i += 1
 
@@ -348,7 +348,7 @@ class OpenpgpMessage(KaitaiStruct):
                 if not 'arr' in self._debug['subpacketss']:
                     self._debug['subpacketss']['arr'] = []
                 self._debug['subpacketss']['arr'].append({'start': self._io.pos()})
-                _t_subpacketss = self._root.Subpacket(self._io, self, self._root)
+                _t_subpacketss = OpenpgpMessage.Subpacket(self._io, self, self._root)
                 _t_subpacketss._read()
                 self.subpacketss.append(_t_subpacketss)
                 self._debug['subpacketss']['arr'][len(self.subpacketss) - 1]['end'] = self._io.pos()
@@ -370,7 +370,7 @@ class OpenpgpMessage(KaitaiStruct):
             self.class = self._io.read_u1()
             self._debug['class']['end'] = self._io.pos()
             self._debug['public_key_algorithm']['start'] = self._io.pos()
-            self.public_key_algorithm = KaitaiStream.resolve_enum(self._root.PublicKeyAlgorithms, self._io.read_u1())
+            self.public_key_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.PublicKeyAlgorithms, self._io.read_u1())
             self._debug['public_key_algorithm']['end'] = self._io.pos()
             self._debug['fingerprint']['start'] = self._io.pos()
             self.fingerprint = self._io.read_bytes(20)
@@ -415,10 +415,10 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['public_key_algorithm']['start'] = self._io.pos()
-            self.public_key_algorithm = KaitaiStream.resolve_enum(self._root.PublicKeyAlgorithms, self._io.read_u1())
+            self.public_key_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.PublicKeyAlgorithms, self._io.read_u1())
             self._debug['public_key_algorithm']['end'] = self._io.pos()
             self._debug['hash_algorithm']['start'] = self._io.pos()
-            self.hash_algorithm = KaitaiStream.resolve_enum(self._root.HashAlgorithms, self._io.read_u1())
+            self.hash_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.HashAlgorithms, self._io.read_u1())
             self._debug['hash_algorithm']['end'] = self._io.pos()
             self._debug['hash']['start'] = self._io.pos()
             self.hash = self._io.read_bytes_full()
@@ -441,7 +441,7 @@ class OpenpgpMessage(KaitaiStruct):
                 if not 'arr' in self._debug['flag']:
                     self._debug['flag']['arr'] = []
                 self._debug['flag']['arr'].append({'start': self._io.pos()})
-                self.flag.append(KaitaiStream.resolve_enum(self._root.KeyFlags, self._io.read_u1()))
+                self.flag.append(KaitaiStream.resolve_enum(OpenpgpMessage.KeyFlags, self._io.read_u1()))
                 self._debug['flag']['arr'][len(self.flag) - 1]['end'] = self._io.pos()
                 i += 1
 
@@ -486,123 +486,123 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['len']['start'] = self._io.pos()
-            self.len = self._root.LenSubpacket(self._io, self, self._root)
+            self.len = OpenpgpMessage.LenSubpacket(self._io, self, self._root)
             self.len._read()
             self._debug['len']['end'] = self._io.pos()
             self._debug['subpacket_type']['start'] = self._io.pos()
-            self.subpacket_type = KaitaiStream.resolve_enum(self._root.SubpacketTypes, self._io.read_u1())
+            self.subpacket_type = KaitaiStream.resolve_enum(OpenpgpMessage.SubpacketTypes, self._io.read_u1())
             self._debug['subpacket_type']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.subpacket_type
-            if _on == self._root.SubpacketTypes.preferred_key_server:
+            if _on == OpenpgpMessage.SubpacketTypes.preferred_key_server:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.PreferredKeyServer(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.PreferredKeyServer(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.issuer:
+            elif _on == OpenpgpMessage.SubpacketTypes.issuer:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.Issuer(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.Issuer(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.revocable:
+            elif _on == OpenpgpMessage.SubpacketTypes.revocable:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.Revocable(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.Revocable(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.signature_target:
+            elif _on == OpenpgpMessage.SubpacketTypes.signature_target:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.SignatureTarget(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.SignatureTarget(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.regular_expression:
+            elif _on == OpenpgpMessage.SubpacketTypes.regular_expression:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.RegularExpression(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.RegularExpression(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.exportable_certification:
+            elif _on == OpenpgpMessage.SubpacketTypes.exportable_certification:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.ExportableCertification(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.ExportableCertification(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.reason_for_revocation:
+            elif _on == OpenpgpMessage.SubpacketTypes.reason_for_revocation:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.ReasonForRevocation(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.ReasonForRevocation(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.key_server_preferences:
+            elif _on == OpenpgpMessage.SubpacketTypes.key_server_preferences:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.KeyServerPreferences(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.KeyServerPreferences(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.signature_creation_time:
+            elif _on == OpenpgpMessage.SubpacketTypes.signature_creation_time:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.SignatureCreationTime(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.SignatureCreationTime(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.preferred_hash_algorithms:
+            elif _on == OpenpgpMessage.SubpacketTypes.preferred_hash_algorithms:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.PreferredHashAlgorithms(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.PreferredHashAlgorithms(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.trust_signature:
+            elif _on == OpenpgpMessage.SubpacketTypes.trust_signature:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.TrustSignature(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.TrustSignature(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.key_expiration_time:
+            elif _on == OpenpgpMessage.SubpacketTypes.key_expiration_time:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.KeyExpirationTime(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.KeyExpirationTime(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.key_flags:
+            elif _on == OpenpgpMessage.SubpacketTypes.key_flags:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.KeyFlags(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.KeyFlags(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.signature_expiration_time:
+            elif _on == OpenpgpMessage.SubpacketTypes.signature_expiration_time:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.SignatureExpirationTime(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.SignatureExpirationTime(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.features:
+            elif _on == OpenpgpMessage.SubpacketTypes.features:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.Features(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.Features(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.signers_user_id:
+            elif _on == OpenpgpMessage.SubpacketTypes.signers_user_id:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.SignersUserId(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.SignersUserId(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.notation_data:
+            elif _on == OpenpgpMessage.SubpacketTypes.notation_data:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.NotationData(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.NotationData(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.revocation_key:
+            elif _on == OpenpgpMessage.SubpacketTypes.revocation_key:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.RevocationKey(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.RevocationKey(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.preferred_compression_algorithms:
+            elif _on == OpenpgpMessage.SubpacketTypes.preferred_compression_algorithms:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.PreferredCompressionAlgorithms(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.PreferredCompressionAlgorithms(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.policy_uri:
+            elif _on == OpenpgpMessage.SubpacketTypes.policy_uri:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.PolicyUri(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.PolicyUri(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.primary_user_id:
+            elif _on == OpenpgpMessage.SubpacketTypes.primary_user_id:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.PrimaryUserId(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.PrimaryUserId(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.SubpacketTypes.embedded_signature:
+            elif _on == OpenpgpMessage.SubpacketTypes.embedded_signature:
                 self._raw_content = self._io.read_bytes((self.len.len - 1))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.EmbeddedSignature(_io__raw_content, self, self._root)
+                self.content = OpenpgpMessage.EmbeddedSignature(_io__raw_content, self, self._root)
                 self.content._read()
             else:
                 self.content = self._io.read_bytes((self.len.len - 1))
@@ -629,35 +629,35 @@ class OpenpgpMessage(KaitaiStruct):
             self._debug['len']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self._parent.packet_type_old
-            if _on == self._root.PacketTags.public_key_packet:
+            if _on == OpenpgpMessage.PacketTags.public_key_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.PublicKeyPacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.PublicKeyPacket(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PacketTags.public_subkey_packet:
+            elif _on == OpenpgpMessage.PacketTags.public_subkey_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.PublicKeyPacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.PublicKeyPacket(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PacketTags.user_id_packet:
+            elif _on == OpenpgpMessage.PacketTags.user_id_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.UserIdPacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.UserIdPacket(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PacketTags.signature_packet:
+            elif _on == OpenpgpMessage.PacketTags.signature_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SignaturePacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.SignaturePacket(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PacketTags.secret_subkey_packet:
+            elif _on == OpenpgpMessage.PacketTags.secret_subkey_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.PublicKeyPacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.PublicKeyPacket(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PacketTags.secret_key_packet:
+            elif _on == OpenpgpMessage.PacketTags.secret_key_packet:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SecretKeyPacket(_io__raw_body, self, self._root)
+                self.body = OpenpgpMessage.SecretKeyPacket(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len)
@@ -736,10 +736,10 @@ class OpenpgpMessage(KaitaiStruct):
             self.signature_type = self._io.read_u1()
             self._debug['signature_type']['end'] = self._io.pos()
             self._debug['public_key_algorithm']['start'] = self._io.pos()
-            self.public_key_algorithm = KaitaiStream.resolve_enum(self._root.PublicKeyAlgorithms, self._io.read_u1())
+            self.public_key_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.PublicKeyAlgorithms, self._io.read_u1())
             self._debug['public_key_algorithm']['end'] = self._io.pos()
             self._debug['hash_algorithm']['start'] = self._io.pos()
-            self.hash_algorithm = KaitaiStream.resolve_enum(self._root.HashAlgorithms, self._io.read_u1())
+            self.hash_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.HashAlgorithms, self._io.read_u1())
             self._debug['hash_algorithm']['end'] = self._io.pos()
             self._debug['len_hashed_subpacket']['start'] = self._io.pos()
             self.len_hashed_subpacket = self._io.read_u2be()
@@ -747,7 +747,7 @@ class OpenpgpMessage(KaitaiStruct):
             self._debug['hashed_subpackets']['start'] = self._io.pos()
             self._raw_hashed_subpackets = self._io.read_bytes(self.len_hashed_subpacket)
             _io__raw_hashed_subpackets = KaitaiStream(BytesIO(self._raw_hashed_subpackets))
-            self.hashed_subpackets = self._root.Subpackets(_io__raw_hashed_subpackets, self, self._root)
+            self.hashed_subpackets = OpenpgpMessage.Subpackets(_io__raw_hashed_subpackets, self, self._root)
             self.hashed_subpackets._read()
             self._debug['hashed_subpackets']['end'] = self._io.pos()
             self._debug['len_unhashed_subpacket']['start'] = self._io.pos()
@@ -756,7 +756,7 @@ class OpenpgpMessage(KaitaiStruct):
             self._debug['unhashed_subpackets']['start'] = self._io.pos()
             self._raw_unhashed_subpackets = self._io.read_bytes(self.len_unhashed_subpacket)
             _io__raw_unhashed_subpackets = KaitaiStream(BytesIO(self._raw_unhashed_subpackets))
-            self.unhashed_subpackets = self._root.Subpackets(_io__raw_unhashed_subpackets, self, self._root)
+            self.unhashed_subpackets = OpenpgpMessage.Subpackets(_io__raw_unhashed_subpackets, self, self._root)
             self.unhashed_subpackets._read()
             self._debug['unhashed_subpackets']['end'] = self._io.pos()
             self._debug['left_signed_hash']['start'] = self._io.pos()
@@ -794,7 +794,7 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['signature_packet']['start'] = self._io.pos()
-            self.signature_packet = self._root.SignaturePacket(self._io, self, self._root)
+            self.signature_packet = OpenpgpMessage.SignaturePacket(self._io, self, self._root)
             self.signature_packet._read()
             self._debug['signature_packet']['end'] = self._io.pos()
 
@@ -823,7 +823,7 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['revocation_code']['start'] = self._io.pos()
-            self.revocation_code = KaitaiStream.resolve_enum(self._root.RevocationCodes, self._io.read_u1())
+            self.revocation_code = KaitaiStream.resolve_enum(OpenpgpMessage.RevocationCodes, self._io.read_u1())
             self._debug['revocation_code']['end'] = self._io.pos()
             self._debug['reason']['start'] = self._io.pos()
             self.reason = (self._io.read_bytes_full()).decode(u"UTF-8")
@@ -904,7 +904,7 @@ class OpenpgpMessage(KaitaiStruct):
             self.timestamp = self._io.read_u4be()
             self._debug['timestamp']['end'] = self._io.pos()
             self._debug['public_key_algorithm']['start'] = self._io.pos()
-            self.public_key_algorithm = KaitaiStream.resolve_enum(self._root.PublicKeyAlgorithms, self._io.read_u1())
+            self.public_key_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.PublicKeyAlgorithms, self._io.read_u1())
             self._debug['public_key_algorithm']['end'] = self._io.pos()
             self._debug['len_alg']['start'] = self._io.pos()
             self.len_alg = self._io.read_u2be()
@@ -944,31 +944,31 @@ class OpenpgpMessage(KaitaiStruct):
 
         def _read(self):
             self._debug['one']['start'] = self._io.pos()
-            self.one = self._io.read_bits_int(1) != 0
+            self.one = self._io.read_bits_int_be(1) != 0
             self._debug['one']['end'] = self._io.pos()
             self._debug['new_packet_format']['start'] = self._io.pos()
-            self.new_packet_format = self._io.read_bits_int(1) != 0
+            self.new_packet_format = self._io.read_bits_int_be(1) != 0
             self._debug['new_packet_format']['end'] = self._io.pos()
             if self.new_packet_format:
                 self._debug['packet_type_new']['start'] = self._io.pos()
-                self.packet_type_new = KaitaiStream.resolve_enum(self._root.PacketTags, self._io.read_bits_int(6))
+                self.packet_type_new = KaitaiStream.resolve_enum(OpenpgpMessage.PacketTags, self._io.read_bits_int_be(6))
                 self._debug['packet_type_new']['end'] = self._io.pos()
 
             if not (self.new_packet_format):
                 self._debug['packet_type_old']['start'] = self._io.pos()
-                self.packet_type_old = KaitaiStream.resolve_enum(self._root.PacketTags, self._io.read_bits_int(4))
+                self.packet_type_old = KaitaiStream.resolve_enum(OpenpgpMessage.PacketTags, self._io.read_bits_int_be(4))
                 self._debug['packet_type_old']['end'] = self._io.pos()
 
             if not (self.new_packet_format):
                 self._debug['len_type']['start'] = self._io.pos()
-                self.len_type = self._io.read_bits_int(2)
+                self.len_type = self._io.read_bits_int_be(2)
                 self._debug['len_type']['end'] = self._io.pos()
 
             self._io.align_to_byte()
             self._debug['body']['start'] = self._io.pos()
             _on = self.new_packet_format
             if _on == False:
-                self.body = self._root.OldPacket(self._io, self, self._root)
+                self.body = OpenpgpMessage.OldPacket(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 

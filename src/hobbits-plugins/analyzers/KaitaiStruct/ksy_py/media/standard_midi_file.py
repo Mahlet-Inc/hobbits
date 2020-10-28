@@ -36,7 +36,7 @@ class StandardMidiFile(KaitaiStruct):
 
     def _read(self):
         self._debug['hdr']['start'] = self._io.pos()
-        self.hdr = self._root.Header(self._io, self, self._root)
+        self.hdr = StandardMidiFile.Header(self._io, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
         self._debug['tracks']['start'] = self._io.pos()
@@ -45,7 +45,7 @@ class StandardMidiFile(KaitaiStruct):
             if not 'arr' in self._debug['tracks']:
                 self._debug['tracks']['arr'] = []
             self._debug['tracks']['arr'].append({'start': self._io.pos()})
-            _t_tracks = self._root.Track(self._io, self, self._root)
+            _t_tracks = StandardMidiFile.Track(self._io, self, self._root)
             _t_tracks._read()
             self.tracks[i] = _t_tracks
             self._debug['tracks']['arr'][i]['end'] = self._io.pos()
@@ -68,7 +68,7 @@ class StandardMidiFile(KaitaiStruct):
                 if not 'arr' in self._debug['event']:
                     self._debug['event']['arr'] = []
                 self._debug['event']['arr'].append({'start': self._io.pos()})
-                _t_event = self._root.TrackEvent(self._io, self, self._root)
+                _t_event = StandardMidiFile.TrackEvent(self._io, self, self._root)
                 _t_event._read()
                 self.event.append(_t_event)
                 self._debug['event']['arr'][len(self.event) - 1]['end'] = self._io.pos()
@@ -95,38 +95,38 @@ class StandardMidiFile(KaitaiStruct):
             self._debug['event_header']['end'] = self._io.pos()
             if self.event_header == 255:
                 self._debug['meta_event_body']['start'] = self._io.pos()
-                self.meta_event_body = self._root.MetaEventBody(self._io, self, self._root)
+                self.meta_event_body = StandardMidiFile.MetaEventBody(self._io, self, self._root)
                 self.meta_event_body._read()
                 self._debug['meta_event_body']['end'] = self._io.pos()
 
             if self.event_header == 240:
                 self._debug['sysex_body']['start'] = self._io.pos()
-                self.sysex_body = self._root.SysexEventBody(self._io, self, self._root)
+                self.sysex_body = StandardMidiFile.SysexEventBody(self._io, self, self._root)
                 self.sysex_body._read()
                 self._debug['sysex_body']['end'] = self._io.pos()
 
             self._debug['event_body']['start'] = self._io.pos()
             _on = self.event_type
             if _on == 224:
-                self.event_body = self._root.PitchBendEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.PitchBendEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 144:
-                self.event_body = self._root.NoteOnEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.NoteOnEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 208:
-                self.event_body = self._root.ChannelPressureEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.ChannelPressureEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 192:
-                self.event_body = self._root.ProgramChangeEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.ProgramChangeEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 160:
-                self.event_body = self._root.PolyphonicPressureEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.PolyphonicPressureEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 176:
-                self.event_body = self._root.ControllerEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.ControllerEvent(self._io, self, self._root)
                 self.event_body._read()
             elif _on == 128:
-                self.event_body = self._root.NoteOffEvent(self._io, self, self._root)
+                self.event_body = StandardMidiFile.NoteOffEvent(self._io, self, self._root)
                 self.event_body._read()
             self._debug['event_body']['end'] = self._io.pos()
 
@@ -250,7 +250,7 @@ class StandardMidiFile(KaitaiStruct):
             self._debug['events']['start'] = self._io.pos()
             self._raw_events = self._io.read_bytes(self.len_events)
             _io__raw_events = KaitaiStream(BytesIO(self._raw_events))
-            self.events = self._root.TrackEvents(_io__raw_events, self, self._root)
+            self.events = StandardMidiFile.TrackEvents(_io__raw_events, self, self._root)
             self.events._read()
             self._debug['events']['end'] = self._io.pos()
 
@@ -282,7 +282,7 @@ class StandardMidiFile(KaitaiStruct):
 
         def _read(self):
             self._debug['meta_type']['start'] = self._io.pos()
-            self.meta_type = KaitaiStream.resolve_enum(self._root.MetaEventBody.MetaTypeEnum, self._io.read_u1())
+            self.meta_type = KaitaiStream.resolve_enum(StandardMidiFile.MetaEventBody.MetaTypeEnum, self._io.read_u1())
             self._debug['meta_type']['end'] = self._io.pos()
             self._debug['len']['start'] = self._io.pos()
             self.len = vlq_base128_be.VlqBase128Be(self._io)

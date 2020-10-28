@@ -18,19 +18,23 @@ def dump_struct(s, sections, prefix=""):
             })
             dump_struct(item, sections, label)
     elif isinstance(s, KaitaiStruct):
-        print("ks")
+        print(vars(s))
         if hasattr(s, "_debug"):
             for name, descr in s._debug.items():
+                print(f"name desc: {name} , {descr}")
                 prop = getattr(s, name)
-                if not isinstance(prop, KaitaiStruct):
-                    label = prefix + "." + name if prefix else name
-                    sections.append({
-                        "start": descr["start"],
-                        "end": descr["end"],
-                        "label": label,
-                        "parent": prefix
-                    })
-                    dump_struct(prop, sections, label)
+                print(prop)
+                if isinstance(prop, KaitaiStruct):
+                    print(vars(prop))
+                print("")
+                label = prefix + "." + name if prefix else name
+                sections.append({
+                    "start": descr["start"],
+                    "end": descr["end"],
+                    "label": label,
+                    "parent": prefix
+                })
+                dump_struct(prop, sections, label)
 
 def parse_data(input_filename, output_filename, action_progress):
     # locate the compiled struct module
@@ -52,11 +56,11 @@ def parse_data(input_filename, output_filename, action_progress):
 
     action_progress.set_progress_percent(70)
 
-    print(vars(target))
-
     # write the parser result to the output
     sections = []
     dump_struct(target, sections)
+
+    print(sections)
 
     action_progress.set_progress_percent(80)
 

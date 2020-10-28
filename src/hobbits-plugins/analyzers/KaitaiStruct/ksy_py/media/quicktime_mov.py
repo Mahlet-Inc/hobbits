@@ -158,7 +158,7 @@ class QuicktimeMov(KaitaiStruct):
 
     def _read(self):
         self._debug['atoms']['start'] = self._io.pos()
-        self.atoms = self._root.AtomList(self._io, self, self._root)
+        self.atoms = QuicktimeMov.AtomList(self._io, self, self._root)
         self.atoms._read()
         self._debug['atoms']['end'] = self._io.pos()
 
@@ -194,11 +194,11 @@ class QuicktimeMov(KaitaiStruct):
             self.duration = self._io.read_u4be()
             self._debug['duration']['end'] = self._io.pos()
             self._debug['preferred_rate']['start'] = self._io.pos()
-            self.preferred_rate = self._root.Fixed32(self._io, self, self._root)
+            self.preferred_rate = QuicktimeMov.Fixed32(self._io, self, self._root)
             self.preferred_rate._read()
             self._debug['preferred_rate']['end'] = self._io.pos()
             self._debug['preferred_volume']['start'] = self._io.pos()
-            self.preferred_volume = self._root.Fixed16(self._io, self, self._root)
+            self.preferred_volume = QuicktimeMov.Fixed16(self._io, self, self._root)
             self.preferred_volume._read()
             self._debug['preferred_volume']['end'] = self._io.pos()
             self._debug['reserved1']['start'] = self._io.pos()
@@ -244,7 +244,7 @@ class QuicktimeMov(KaitaiStruct):
 
         def _read(self):
             self._debug['major_brand']['start'] = self._io.pos()
-            self.major_brand = KaitaiStream.resolve_enum(self._root.Brand, self._io.read_u4be())
+            self.major_brand = KaitaiStream.resolve_enum(QuicktimeMov.Brand, self._io.read_u4be())
             self._debug['major_brand']['end'] = self._io.pos()
             self._debug['minor_version']['start'] = self._io.pos()
             self.minor_version = self._io.read_bytes(4)
@@ -256,7 +256,7 @@ class QuicktimeMov(KaitaiStruct):
                 if not 'arr' in self._debug['compatible_brands']:
                     self._debug['compatible_brands']['arr'] = []
                 self._debug['compatible_brands']['arr'].append({'start': self._io.pos()})
-                self.compatible_brands.append(KaitaiStream.resolve_enum(self._root.Brand, self._io.read_u4be()))
+                self.compatible_brands.append(KaitaiStream.resolve_enum(QuicktimeMov.Brand, self._io.read_u4be()))
                 self._debug['compatible_brands']['arr'][len(self.compatible_brands) - 1]['end'] = self._io.pos()
                 i += 1
 
@@ -312,7 +312,7 @@ class QuicktimeMov(KaitaiStruct):
             self.len32 = self._io.read_u4be()
             self._debug['len32']['end'] = self._io.pos()
             self._debug['atom_type']['start'] = self._io.pos()
-            self.atom_type = KaitaiStream.resolve_enum(self._root.AtomType, self._io.read_u4be())
+            self.atom_type = KaitaiStream.resolve_enum(QuicktimeMov.AtomType, self._io.read_u4be())
             self._debug['atom_type']['end'] = self._io.pos()
             if self.len32 == 1:
                 self._debug['len64']['start'] = self._io.pos()
@@ -321,60 +321,60 @@ class QuicktimeMov(KaitaiStruct):
 
             self._debug['body']['start'] = self._io.pos()
             _on = self.atom_type
-            if _on == self._root.AtomType.moof:
+            if _on == QuicktimeMov.AtomType.moof:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.tkhd:
+            elif _on == QuicktimeMov.AtomType.tkhd:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.TkhdBody(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.TkhdBody(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.stbl:
+            elif _on == QuicktimeMov.AtomType.stbl:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.traf:
+            elif _on == QuicktimeMov.AtomType.traf:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.minf:
+            elif _on == QuicktimeMov.AtomType.minf:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.trak:
+            elif _on == QuicktimeMov.AtomType.trak:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.moov:
+            elif _on == QuicktimeMov.AtomType.moov:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.mdia:
+            elif _on == QuicktimeMov.AtomType.mdia:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.dinf:
+            elif _on == QuicktimeMov.AtomType.dinf:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.AtomList(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.AtomList(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.mvhd:
+            elif _on == QuicktimeMov.AtomType.mvhd:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.MvhdBody(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.MvhdBody(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.AtomType.ftyp:
+            elif _on == QuicktimeMov.AtomType.ftyp:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.FtypBody(_io__raw_body, self, self._root)
+                self.body = QuicktimeMov.FtypBody(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len)
@@ -442,11 +442,11 @@ class QuicktimeMov(KaitaiStruct):
             self.matrix = self._io.read_bytes(36)
             self._debug['matrix']['end'] = self._io.pos()
             self._debug['width']['start'] = self._io.pos()
-            self.width = self._root.Fixed32(self._io, self, self._root)
+            self.width = QuicktimeMov.Fixed32(self._io, self, self._root)
             self.width._read()
             self._debug['width']['end'] = self._io.pos()
             self._debug['height']['start'] = self._io.pos()
-            self.height = self._root.Fixed32(self._io, self, self._root)
+            self.height = QuicktimeMov.Fixed32(self._io, self, self._root)
             self.height._read()
             self._debug['height']['end'] = self._io.pos()
 
@@ -467,7 +467,7 @@ class QuicktimeMov(KaitaiStruct):
                 if not 'arr' in self._debug['items']:
                     self._debug['items']['arr'] = []
                 self._debug['items']['arr'].append({'start': self._io.pos()})
-                _t_items = self._root.Atom(self._io, self, self._root)
+                _t_items = QuicktimeMov.Atom(self._io, self, self._root)
                 _t_items._read()
                 self.items.append(_t_items)
                 self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()

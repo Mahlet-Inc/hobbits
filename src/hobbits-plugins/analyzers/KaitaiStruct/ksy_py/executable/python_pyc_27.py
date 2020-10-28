@@ -55,7 +55,7 @@ class PythonPyc27(KaitaiStruct):
 
     def _read(self):
         self._debug['version_magic']['start'] = self._io.pos()
-        self.version_magic = KaitaiStream.resolve_enum(self._root.Version, self._io.read_u2le())
+        self.version_magic = KaitaiStream.resolve_enum(PythonPyc27.Version, self._io.read_u2le())
         self._debug['version_magic']['end'] = self._io.pos()
         self._debug['crlf']['start'] = self._io.pos()
         self.crlf = self._io.read_u2le()
@@ -64,7 +64,7 @@ class PythonPyc27(KaitaiStruct):
         self.modification_timestamp = self._io.read_u4le()
         self._debug['modification_timestamp']['end'] = self._io.pos()
         self._debug['body']['start'] = self._io.pos()
-        self.body = self._root.PyObject(self._io, self, self._root)
+        self.body = PythonPyc27.PyObject(self._io, self, self._root)
         self.body._read()
         self._debug['body']['end'] = self._io.pos()
 
@@ -92,45 +92,45 @@ class PythonPyc27(KaitaiStruct):
             self.stack_size = self._io.read_u4le()
             self._debug['stack_size']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = KaitaiStream.resolve_enum(self._root.CodeObject.FlagsEnum, self._io.read_u4le())
+            self.flags = KaitaiStream.resolve_enum(PythonPyc27.CodeObject.FlagsEnum, self._io.read_u4le())
             self._debug['flags']['end'] = self._io.pos()
             self._debug['code']['start'] = self._io.pos()
-            self.code = self._root.Assembly(self._io, self, self._root)
+            self.code = PythonPyc27.Assembly(self._io, self, self._root)
             self.code._read()
             self._debug['code']['end'] = self._io.pos()
             self._debug['consts']['start'] = self._io.pos()
-            self.consts = self._root.PyObject(self._io, self, self._root)
+            self.consts = PythonPyc27.PyObject(self._io, self, self._root)
             self.consts._read()
             self._debug['consts']['end'] = self._io.pos()
             self._debug['names']['start'] = self._io.pos()
-            self.names = self._root.PyObject(self._io, self, self._root)
+            self.names = PythonPyc27.PyObject(self._io, self, self._root)
             self.names._read()
             self._debug['names']['end'] = self._io.pos()
             self._debug['var_names']['start'] = self._io.pos()
-            self.var_names = self._root.PyObject(self._io, self, self._root)
+            self.var_names = PythonPyc27.PyObject(self._io, self, self._root)
             self.var_names._read()
             self._debug['var_names']['end'] = self._io.pos()
             self._debug['free_vars']['start'] = self._io.pos()
-            self.free_vars = self._root.PyObject(self._io, self, self._root)
+            self.free_vars = PythonPyc27.PyObject(self._io, self, self._root)
             self.free_vars._read()
             self._debug['free_vars']['end'] = self._io.pos()
             self._debug['cell_vars']['start'] = self._io.pos()
-            self.cell_vars = self._root.PyObject(self._io, self, self._root)
+            self.cell_vars = PythonPyc27.PyObject(self._io, self, self._root)
             self.cell_vars._read()
             self._debug['cell_vars']['end'] = self._io.pos()
             self._debug['filename']['start'] = self._io.pos()
-            self.filename = self._root.PyObject(self._io, self, self._root)
+            self.filename = PythonPyc27.PyObject(self._io, self, self._root)
             self.filename._read()
             self._debug['filename']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.PyObject(self._io, self, self._root)
+            self.name = PythonPyc27.PyObject(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['first_line_no']['start'] = self._io.pos()
             self.first_line_no = self._io.read_u4le()
             self._debug['first_line_no']['end'] = self._io.pos()
             self._debug['lnotab']['start'] = self._io.pos()
-            self.lnotab = self._root.PyObject(self._io, self, self._root)
+            self.lnotab = PythonPyc27.PyObject(self._io, self, self._root)
             self.lnotab._read()
             self._debug['lnotab']['end'] = self._io.pos()
 
@@ -155,7 +155,7 @@ class PythonPyc27(KaitaiStruct):
             self._debug['items']['start'] = self._io.pos()
             self._raw_items = self._io.read_bytes(self.length)
             _io__raw_items = KaitaiStream(BytesIO(self._raw_items))
-            self.items = self._root.OpArgs(_io__raw_items, self, self._root)
+            self.items = PythonPyc27.OpArgs(_io__raw_items, self, self._root)
             self.items._read()
             self._debug['items']['end'] = self._io.pos()
 
@@ -291,9 +291,9 @@ class PythonPyc27(KaitaiStruct):
 
         def _read(self):
             self._debug['op_code']['start'] = self._io.pos()
-            self.op_code = KaitaiStream.resolve_enum(self._root.OpArg.OpCodeEnum, self._io.read_u1())
+            self.op_code = KaitaiStream.resolve_enum(PythonPyc27.OpArg.OpCodeEnum, self._io.read_u1())
             self._debug['op_code']['end'] = self._io.pos()
-            if self.op_code.value >= self._root.OpArg.OpCodeEnum.store_name.value:
+            if self.op_code.value >= PythonPyc27.OpArg.OpCodeEnum.store_name.value:
                 self._debug['arg']['start'] = self._io.pos()
                 self.arg = self._io.read_u2le()
                 self._debug['arg']['end'] = self._io.pos()
@@ -322,35 +322,35 @@ class PythonPyc27(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.PyObject.ObjectType, self._io.read_u1())
+            self.type = KaitaiStream.resolve_enum(PythonPyc27.PyObject.ObjectType, self._io.read_u1())
             self._debug['type']['end'] = self._io.pos()
             self._debug['value']['start'] = self._io.pos()
             _on = self.type
-            if _on == self._root.PyObject.ObjectType.string:
-                self.value = self._root.PyObject.PyString(self._io, self, self._root)
+            if _on == PythonPyc27.PyObject.ObjectType.string:
+                self.value = PythonPyc27.PyObject.PyString(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.tuple:
-                self.value = self._root.PyObject.Tuple(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.tuple:
+                self.value = PythonPyc27.PyObject.Tuple(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.int:
+            elif _on == PythonPyc27.PyObject.ObjectType.int:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.PyObject.ObjectType.py_true:
-                self.value = self._root.PyObject.PyTrue(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.py_true:
+                self.value = PythonPyc27.PyObject.PyTrue(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.py_false:
-                self.value = self._root.PyObject.PyFalse(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.py_false:
+                self.value = PythonPyc27.PyObject.PyFalse(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.none:
-                self.value = self._root.PyObject.PyNone(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.none:
+                self.value = PythonPyc27.PyObject.PyNone(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.string_ref:
-                self.value = self._root.PyObject.StringRef(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.string_ref:
+                self.value = PythonPyc27.PyObject.StringRef(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.code_object:
-                self.value = self._root.CodeObject(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.code_object:
+                self.value = PythonPyc27.CodeObject(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.PyObject.ObjectType.interned:
-                self.value = self._root.PyObject.InternedString(self._io, self, self._root)
+            elif _on == PythonPyc27.PyObject.ObjectType.interned:
+                self.value = PythonPyc27.PyObject.InternedString(self._io, self, self._root)
                 self.value._read()
             self._debug['value']['end'] = self._io.pos()
 
@@ -422,7 +422,7 @@ class PythonPyc27(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.PyObject(self._io, self, self._root)
+                    _t_items = PythonPyc27.PyObject(self._io, self, self._root)
                     _t_items._read()
                     self.items[i] = _t_items
                     self._debug['items']['arr'][i]['end'] = self._io.pos()
@@ -498,7 +498,7 @@ class PythonPyc27(KaitaiStruct):
                 if not 'arr' in self._debug['items']:
                     self._debug['items']['arr'] = []
                 self._debug['items']['arr'].append({'start': self._io.pos()})
-                _t_items = self._root.OpArg(self._io, self, self._root)
+                _t_items = PythonPyc27.OpArg(self._io, self, self._root)
                 _t_items._read()
                 self.items.append(_t_items)
                 self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()

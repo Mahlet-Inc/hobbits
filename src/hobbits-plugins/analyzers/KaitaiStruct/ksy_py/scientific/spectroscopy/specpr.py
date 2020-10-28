@@ -42,7 +42,7 @@ class Specpr(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = Specpr.Record(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -60,15 +60,15 @@ class Specpr(KaitaiStruct):
 
         def _read(self):
             self._debug['ids']['start'] = self._io.pos()
-            self.ids = self._root.Identifiers(self._io, self, self._root)
+            self.ids = Specpr.Identifiers(self._io, self, self._root)
             self.ids._read()
             self._debug['ids']['end'] = self._io.pos()
             self._debug['iscta']['start'] = self._io.pos()
-            self.iscta = self._root.CoarseTimestamp(self._io, self, self._root)
+            self.iscta = Specpr.CoarseTimestamp(self._io, self, self._root)
             self.iscta._read()
             self._debug['iscta']['end'] = self._io.pos()
             self._debug['isctb']['start'] = self._io.pos()
-            self.isctb = self._root.CoarseTimestamp(self._io, self, self._root)
+            self.isctb = Specpr.CoarseTimestamp(self._io, self, self._root)
             self.isctb._read()
             self._debug['isctb']['end'] = self._io.pos()
             self._debug['jdatea']['start'] = self._io.pos()
@@ -78,7 +78,7 @@ class Specpr(KaitaiStruct):
             self.jdateb = self._io.read_s4be()
             self._debug['jdateb']['end'] = self._io.pos()
             self._debug['istb']['start'] = self._io.pos()
-            self.istb = self._root.CoarseTimestamp(self._io, self, self._root)
+            self.istb = Specpr.CoarseTimestamp(self._io, self, self._root)
             self.istb._read()
             self._debug['istb']['end'] = self._io.pos()
             self._debug['isra']['start'] = self._io.pos()
@@ -135,11 +135,11 @@ class Specpr(KaitaiStruct):
             self.nruns = self._io.read_s4be()
             self._debug['nruns']['end'] = self._io.pos()
             self._debug['siangl']['start'] = self._io.pos()
-            self.siangl = self._root.IllumAngle(self._io, self, self._root)
+            self.siangl = Specpr.IllumAngle(self._io, self, self._root)
             self.siangl._read()
             self._debug['siangl']['end'] = self._io.pos()
             self._debug['seangl']['start'] = self._io.pos()
-            self.seangl = self._root.IllumAngle(self._io, self, self._root)
+            self.seangl = Specpr.IllumAngle(self._io, self, self._root)
             self.seangl._read()
             self._debug['seangl']['end'] = self._io.pos()
             self._debug['sphase']['start'] = self._io.pos()
@@ -217,25 +217,25 @@ class Specpr(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(26)
+            self.reserved = self._io.read_bits_int_be(26)
             self._debug['reserved']['end'] = self._io.pos()
             self._debug['isctb_type']['start'] = self._io.pos()
-            self.isctb_type = self._io.read_bits_int(1) != 0
+            self.isctb_type = self._io.read_bits_int_be(1) != 0
             self._debug['isctb_type']['end'] = self._io.pos()
             self._debug['iscta_type']['start'] = self._io.pos()
-            self.iscta_type = self._io.read_bits_int(1) != 0
+            self.iscta_type = self._io.read_bits_int_be(1) != 0
             self._debug['iscta_type']['end'] = self._io.pos()
             self._debug['coordinate_mode']['start'] = self._io.pos()
-            self.coordinate_mode = self._io.read_bits_int(1) != 0
+            self.coordinate_mode = self._io.read_bits_int_be(1) != 0
             self._debug['coordinate_mode']['end'] = self._io.pos()
             self._debug['errors']['start'] = self._io.pos()
-            self.errors = self._io.read_bits_int(1) != 0
+            self.errors = self._io.read_bits_int_be(1) != 0
             self._debug['errors']['end'] = self._io.pos()
             self._debug['text']['start'] = self._io.pos()
-            self.text = self._io.read_bits_int(1) != 0
+            self.text = self._io.read_bits_int_be(1) != 0
             self._debug['text']['end'] = self._io.pos()
             self._debug['continuation']['start'] = self._io.pos()
-            self.continuation = self._io.read_bits_int(1) != 0
+            self.continuation = self._io.read_bits_int_be(1) != 0
             self._debug['continuation']['end'] = self._io.pos()
 
         @property
@@ -243,7 +243,7 @@ class Specpr(KaitaiStruct):
             if hasattr(self, '_m_type'):
                 return self._m_type if hasattr(self, '_m_type') else None
 
-            self._m_type = KaitaiStream.resolve_enum(self._root.RecordType, ((int(self.text) * 1) + (int(self.continuation) * 2)))
+            self._m_type = KaitaiStream.resolve_enum(Specpr.RecordType, ((int(self.text) * 1) + (int(self.continuation) * 2)))
             return self._m_type if hasattr(self, '_m_type') else None
 
 
@@ -333,7 +333,7 @@ class Specpr(KaitaiStruct):
 
         def _read(self):
             self._debug['ids']['start'] = self._io.pos()
-            self.ids = self._root.Identifiers(self._io, self, self._root)
+            self.ids = Specpr.Identifiers(self._io, self, self._root)
             self.ids._read()
             self._debug['ids']['end'] = self._io.pos()
             self._debug['itxtpt']['start'] = self._io.pos()
@@ -357,30 +357,30 @@ class Specpr(KaitaiStruct):
 
         def _read(self):
             self._debug['icflag']['start'] = self._io.pos()
-            self.icflag = self._root.Icflag(self._io, self, self._root)
+            self.icflag = Specpr.Icflag(self._io, self, self._root)
             self.icflag._read()
             self._debug['icflag']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.icflag.type
-            if _on == self._root.RecordType.data_initial:
+            if _on == Specpr.RecordType.data_initial:
                 self._raw_content = self._io.read_bytes((1536 - 4))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.DataInitial(_io__raw_content, self, self._root)
+                self.content = Specpr.DataInitial(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.RecordType.data_continuation:
+            elif _on == Specpr.RecordType.data_continuation:
                 self._raw_content = self._io.read_bytes((1536 - 4))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.DataContinuation(_io__raw_content, self, self._root)
+                self.content = Specpr.DataContinuation(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.RecordType.text_continuation:
+            elif _on == Specpr.RecordType.text_continuation:
                 self._raw_content = self._io.read_bytes((1536 - 4))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.TextContinuation(_io__raw_content, self, self._root)
+                self.content = Specpr.TextContinuation(_io__raw_content, self, self._root)
                 self.content._read()
-            elif _on == self._root.RecordType.text_initial:
+            elif _on == Specpr.RecordType.text_initial:
                 self._raw_content = self._io.read_bytes((1536 - 4))
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.TextInitial(_io__raw_content, self, self._root)
+                self.content = Specpr.TextInitial(_io__raw_content, self, self._root)
                 self.content._read()
             else:
                 self.content = self._io.read_bytes((1536 - 4))

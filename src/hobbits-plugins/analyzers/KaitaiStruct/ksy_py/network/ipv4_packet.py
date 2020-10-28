@@ -52,7 +52,7 @@ class Ipv4Packet(KaitaiStruct):
         self._debug['options']['start'] = self._io.pos()
         self._raw_options = self._io.read_bytes((self.ihl_bytes - 20))
         _io__raw_options = KaitaiStream(BytesIO(self._raw_options))
-        self.options = self._root.Ipv4Options(_io__raw_options, self, self._root)
+        self.options = Ipv4Packet.Ipv4Options(_io__raw_options, self, self._root)
         self.options._read()
         self._debug['options']['end'] = self._io.pos()
         self._debug['body']['start'] = self._io.pos()
@@ -78,7 +78,7 @@ class Ipv4Packet(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Ipv4Option(self._io, self, self._root)
+                _t_entries = Ipv4Packet.Ipv4Option(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()

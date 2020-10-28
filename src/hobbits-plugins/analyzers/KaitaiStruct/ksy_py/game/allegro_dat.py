@@ -38,7 +38,7 @@ class AllegroDat(KaitaiStruct):
 
     def _read(self):
         self._debug['pack_magic']['start'] = self._io.pos()
-        self.pack_magic = KaitaiStream.resolve_enum(self._root.PackEnum, self._io.read_u4be())
+        self.pack_magic = KaitaiStream.resolve_enum(AllegroDat.PackEnum, self._io.read_u4be())
         self._debug['pack_magic']['end'] = self._io.pos()
         self._debug['dat_magic']['start'] = self._io.pos()
         self.dat_magic = self._io.read_bytes(4)
@@ -54,7 +54,7 @@ class AllegroDat(KaitaiStruct):
             if not 'arr' in self._debug['objects']:
                 self._debug['objects']['arr'] = []
             self._debug['objects']['arr'].append({'start': self._io.pos()})
-            _t_objects = self._root.DatObject(self._io, self, self._root)
+            _t_objects = AllegroDat.DatObject(self._io, self, self._root)
             _t_objects._read()
             self.objects[i] = _t_objects
             self._debug['objects']['arr'][i]['end'] = self._io.pos()
@@ -123,13 +123,13 @@ class AllegroDat(KaitaiStruct):
             self._debug['body']['start'] = self._io.pos()
             _on = self.font_size
             if _on == 8:
-                self.body = self._root.DatFont8(self._io, self, self._root)
+                self.body = AllegroDat.DatFont8(self._io, self, self._root)
                 self.body._read()
             elif _on == 16:
-                self.body = self._root.DatFont16(self._io, self, self._root)
+                self.body = AllegroDat.DatFont16(self._io, self, self._root)
                 self.body._read()
             elif _on == 0:
-                self.body = self._root.DatFont39(self._io, self, self._root)
+                self.body = AllegroDat.DatFont39(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 
@@ -174,7 +174,7 @@ class AllegroDat(KaitaiStruct):
                 if not 'arr' in self._debug['properties']:
                     self._debug['properties']['arr'] = []
                 self._debug['properties']['arr'].append({'start': self._io.pos()})
-                _t_properties = self._root.Property(self._io, self, self._root)
+                _t_properties = AllegroDat.Property(self._io, self, self._root)
                 _t_properties._read()
                 _ = _t_properties
                 self.properties.append(_)
@@ -194,17 +194,17 @@ class AllegroDat(KaitaiStruct):
             if _on == u"BMP ":
                 self._raw_body = self._io.read_bytes(self.len_compressed)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DatBitmap(_io__raw_body, self, self._root)
+                self.body = AllegroDat.DatBitmap(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"RLE ":
                 self._raw_body = self._io.read_bytes(self.len_compressed)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DatRleSprite(_io__raw_body, self, self._root)
+                self.body = AllegroDat.DatRleSprite(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"FONT":
                 self._raw_body = self._io.read_bytes(self.len_compressed)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DatFont(_io__raw_body, self, self._root)
+                self.body = AllegroDat.DatFont(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len_compressed)
@@ -241,7 +241,7 @@ class AllegroDat(KaitaiStruct):
                 if not 'arr' in self._debug['ranges']:
                     self._debug['ranges']['arr'] = []
                 self._debug['ranges']['arr'].append({'start': self._io.pos()})
-                _t_ranges = self._root.DatFont39.Range(self._io, self, self._root)
+                _t_ranges = AllegroDat.DatFont39.Range(self._io, self, self._root)
                 _t_ranges._read()
                 self.ranges[i] = _t_ranges
                 self._debug['ranges']['arr'][i]['end'] = self._io.pos()
@@ -272,7 +272,7 @@ class AllegroDat(KaitaiStruct):
                     if not 'arr' in self._debug['chars']:
                         self._debug['chars']['arr'] = []
                     self._debug['chars']['arr'].append({'start': self._io.pos()})
-                    _t_chars = self._root.DatFont39.FontChar(self._io, self, self._root)
+                    _t_chars = AllegroDat.DatFont39.FontChar(self._io, self, self._root)
                     _t_chars._read()
                     self.chars[i] = _t_chars
                     self._debug['chars']['arr'][i]['end'] = self._io.pos()

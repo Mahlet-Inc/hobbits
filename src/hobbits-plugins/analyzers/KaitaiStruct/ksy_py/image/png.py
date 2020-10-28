@@ -50,7 +50,7 @@ class Png(KaitaiStruct):
         if not self.ihdr_type == b"\x49\x48\x44\x52":
             raise kaitaistruct.ValidationNotEqualError(b"\x49\x48\x44\x52", self.ihdr_type, self._io, u"/seq/2")
         self._debug['ihdr']['start'] = self._io.pos()
-        self.ihdr = self._root.IhdrChunk(self._io, self, self._root)
+        self.ihdr = Png.IhdrChunk(self._io, self, self._root)
         self.ihdr._read()
         self._debug['ihdr']['end'] = self._io.pos()
         self._debug['ihdr_crc']['start'] = self._io.pos()
@@ -63,7 +63,7 @@ class Png(KaitaiStruct):
             if not 'arr' in self._debug['chunks']:
                 self._debug['chunks']['arr'] = []
             self._debug['chunks']['arr'].append({'start': self._io.pos()})
-            _t_chunks = self._root.Chunk(self._io, self, self._root)
+            _t_chunks = Png.Chunk(self._io, self, self._root)
             _t_chunks._read()
             _ = _t_chunks
             self.chunks.append(_)
@@ -113,52 +113,52 @@ class Png(KaitaiStruct):
             if _on == u"iTXt":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.InternationalTextChunk(_io__raw_body, self, self._root)
+                self.body = Png.InternationalTextChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"gAMA":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.GamaChunk(_io__raw_body, self, self._root)
+                self.body = Png.GamaChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"tIME":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.TimeChunk(_io__raw_body, self, self._root)
+                self.body = Png.TimeChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"PLTE":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.PlteChunk(_io__raw_body, self, self._root)
+                self.body = Png.PlteChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"bKGD":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.BkgdChunk(_io__raw_body, self, self._root)
+                self.body = Png.BkgdChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"pHYs":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.PhysChunk(_io__raw_body, self, self._root)
+                self.body = Png.PhysChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"tEXt":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.TextChunk(_io__raw_body, self, self._root)
+                self.body = Png.TextChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"cHRM":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.ChrmChunk(_io__raw_body, self, self._root)
+                self.body = Png.ChrmChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"sRGB":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SrgbChunk(_io__raw_body, self, self._root)
+                self.body = Png.SrgbChunk(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == u"zTXt":
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CompressedTextChunk(_io__raw_body, self, self._root)
+                self.body = Png.CompressedTextChunk(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len)
@@ -245,19 +245,19 @@ class Png(KaitaiStruct):
 
         def _read(self):
             self._debug['white_point']['start'] = self._io.pos()
-            self.white_point = self._root.Point(self._io, self, self._root)
+            self.white_point = Png.Point(self._io, self, self._root)
             self.white_point._read()
             self._debug['white_point']['end'] = self._io.pos()
             self._debug['red']['start'] = self._io.pos()
-            self.red = self._root.Point(self._io, self, self._root)
+            self.red = Png.Point(self._io, self, self._root)
             self.red._read()
             self._debug['red']['end'] = self._io.pos()
             self._debug['green']['start'] = self._io.pos()
-            self.green = self._root.Point(self._io, self, self._root)
+            self.green = Png.Point(self._io, self, self._root)
             self.green._read()
             self._debug['green']['end'] = self._io.pos()
             self._debug['blue']['start'] = self._io.pos()
-            self.blue = self._root.Point(self._io, self, self._root)
+            self.blue = Png.Point(self._io, self, self._root)
             self.blue._read()
             self._debug['blue']['end'] = self._io.pos()
 
@@ -285,7 +285,7 @@ class Png(KaitaiStruct):
             self.bit_depth = self._io.read_u1()
             self._debug['bit_depth']['end'] = self._io.pos()
             self._debug['color_type']['start'] = self._io.pos()
-            self.color_type = KaitaiStream.resolve_enum(self._root.ColorType, self._io.read_u1())
+            self.color_type = KaitaiStream.resolve_enum(Png.ColorType, self._io.read_u1())
             self._debug['color_type']['end'] = self._io.pos()
             self._debug['compression_method']['start'] = self._io.pos()
             self.compression_method = self._io.read_u1()
@@ -318,7 +318,7 @@ class Png(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Rgb(self._io, self, self._root)
+                _t_entries = Png.Rgb(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -347,7 +347,7 @@ class Png(KaitaiStruct):
 
         def _read(self):
             self._debug['render_intent']['start'] = self._io.pos()
-            self.render_intent = KaitaiStream.resolve_enum(self._root.SrgbChunk.Intent, self._io.read_u1())
+            self.render_intent = KaitaiStream.resolve_enum(Png.SrgbChunk.Intent, self._io.read_u1())
             self._debug['render_intent']['end'] = self._io.pos()
 
 
@@ -371,7 +371,7 @@ class Png(KaitaiStruct):
             self.keyword = (self._io.read_bytes_term(0, False, True, True)).decode(u"UTF-8")
             self._debug['keyword']['end'] = self._io.pos()
             self._debug['compression_method']['start'] = self._io.pos()
-            self.compression_method = KaitaiStream.resolve_enum(self._root.CompressionMethods, self._io.read_u1())
+            self.compression_method = KaitaiStream.resolve_enum(Png.CompressionMethods, self._io.read_u1())
             self._debug['compression_method']['end'] = self._io.pos()
             self._debug['text_datastream']['start'] = self._io.pos()
             self._raw_text_datastream = self._io.read_bytes_full()
@@ -443,20 +443,20 @@ class Png(KaitaiStruct):
         def _read(self):
             self._debug['bkgd']['start'] = self._io.pos()
             _on = self._root.ihdr.color_type
-            if _on == self._root.ColorType.indexed:
-                self.bkgd = self._root.BkgdIndexed(self._io, self, self._root)
+            if _on == Png.ColorType.indexed:
+                self.bkgd = Png.BkgdIndexed(self._io, self, self._root)
                 self.bkgd._read()
-            elif _on == self._root.ColorType.truecolor_alpha:
-                self.bkgd = self._root.BkgdTruecolor(self._io, self, self._root)
+            elif _on == Png.ColorType.truecolor_alpha:
+                self.bkgd = Png.BkgdTruecolor(self._io, self, self._root)
                 self.bkgd._read()
-            elif _on == self._root.ColorType.greyscale_alpha:
-                self.bkgd = self._root.BkgdGreyscale(self._io, self, self._root)
+            elif _on == Png.ColorType.greyscale_alpha:
+                self.bkgd = Png.BkgdGreyscale(self._io, self, self._root)
                 self.bkgd._read()
-            elif _on == self._root.ColorType.truecolor:
-                self.bkgd = self._root.BkgdTruecolor(self._io, self, self._root)
+            elif _on == Png.ColorType.truecolor:
+                self.bkgd = Png.BkgdTruecolor(self._io, self, self._root)
                 self.bkgd._read()
-            elif _on == self._root.ColorType.greyscale:
-                self.bkgd = self._root.BkgdGreyscale(self._io, self, self._root)
+            elif _on == Png.ColorType.greyscale:
+                self.bkgd = Png.BkgdGreyscale(self._io, self, self._root)
                 self.bkgd._read()
             self._debug['bkgd']['end'] = self._io.pos()
 
@@ -483,7 +483,7 @@ class Png(KaitaiStruct):
             self.pixels_per_unit_y = self._io.read_u4be()
             self._debug['pixels_per_unit_y']['end'] = self._io.pos()
             self._debug['unit']['start'] = self._io.pos()
-            self.unit = KaitaiStream.resolve_enum(self._root.PhysUnit, self._io.read_u1())
+            self.unit = KaitaiStream.resolve_enum(Png.PhysUnit, self._io.read_u1())
             self._debug['unit']['end'] = self._io.pos()
 
 
@@ -511,7 +511,7 @@ class Png(KaitaiStruct):
             self.compression_flag = self._io.read_u1()
             self._debug['compression_flag']['end'] = self._io.pos()
             self._debug['compression_method']['start'] = self._io.pos()
-            self.compression_method = KaitaiStream.resolve_enum(self._root.CompressionMethods, self._io.read_u1())
+            self.compression_method = KaitaiStream.resolve_enum(Png.CompressionMethods, self._io.read_u1())
             self._debug['compression_method']['end'] = self._io.pos()
             self._debug['language_tag']['start'] = self._io.pos()
             self.language_tag = (self._io.read_bytes_term(0, False, True, True)).decode(u"ASCII")

@@ -38,7 +38,7 @@ class MonomakhSaprChg(KaitaiStruct):
             if not 'arr' in self._debug['ent']:
                 self._debug['ent']['arr'] = []
             self._debug['ent']['arr'].append({'start': self._io.pos()})
-            _t_ent = self._root.Block(self._io, self, self._root)
+            _t_ent = MonomakhSaprChg.Block(self._io, self, self._root)
             _t_ent._read()
             self.ent.append(_t_ent)
             self._debug['ent']['arr'][len(self.ent) - 1]['end'] = self._io.pos()

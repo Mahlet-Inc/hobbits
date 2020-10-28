@@ -46,7 +46,7 @@ class ZxSpectrumTap(KaitaiStruct):
             if not 'arr' in self._debug['blocks']:
                 self._debug['blocks']['arr'] = []
             self._debug['blocks']['arr'].append({'start': self._io.pos()})
-            _t_blocks = self._root.Block(self._io, self, self._root)
+            _t_blocks = ZxSpectrumTap.Block(self._io, self, self._root)
             _t_blocks._read()
             self.blocks.append(_t_blocks)
             self._debug['blocks']['arr'][len(self.blocks) - 1]['end'] = self._io.pos()
@@ -67,11 +67,11 @@ class ZxSpectrumTap(KaitaiStruct):
             self.len_block = self._io.read_u2le()
             self._debug['len_block']['end'] = self._io.pos()
             self._debug['flag']['start'] = self._io.pos()
-            self.flag = KaitaiStream.resolve_enum(self._root.FlagEnum, self._io.read_u1())
+            self.flag = KaitaiStream.resolve_enum(ZxSpectrumTap.FlagEnum, self._io.read_u1())
             self._debug['flag']['end'] = self._io.pos()
-            if  ((self.len_block == 19) and (self.flag == self._root.FlagEnum.header)) :
+            if  ((self.len_block == 19) and (self.flag == ZxSpectrumTap.FlagEnum.header)) :
                 self._debug['header']['start'] = self._io.pos()
-                self.header = self._root.Header(self._io, self, self._root)
+                self.header = ZxSpectrumTap.Header(self._io, self, self._root)
                 self.header._read()
                 self._debug['header']['end'] = self._io.pos()
 
@@ -80,7 +80,7 @@ class ZxSpectrumTap(KaitaiStruct):
                 self.data = self._io.read_bytes((self.header.len_data + 4))
                 self._debug['data']['end'] = self._io.pos()
 
-            if self.flag == self._root.FlagEnum.data:
+            if self.flag == ZxSpectrumTap.FlagEnum.data:
                 self._debug['headerless_data']['start'] = self._io.pos()
                 self.headerless_data = self._io.read_bytes((self.len_block - 1))
                 self._debug['headerless_data']['end'] = self._io.pos()
@@ -131,7 +131,7 @@ class ZxSpectrumTap(KaitaiStruct):
 
         def _read(self):
             self._debug['header_type']['start'] = self._io.pos()
-            self.header_type = KaitaiStream.resolve_enum(self._root.HeaderTypeEnum, self._io.read_u1())
+            self.header_type = KaitaiStream.resolve_enum(ZxSpectrumTap.HeaderTypeEnum, self._io.read_u1())
             self._debug['header_type']['end'] = self._io.pos()
             self._debug['filename']['start'] = self._io.pos()
             self.filename = KaitaiStream.bytes_strip_right(self._io.read_bytes(10), 32)
@@ -141,17 +141,17 @@ class ZxSpectrumTap(KaitaiStruct):
             self._debug['len_data']['end'] = self._io.pos()
             self._debug['params']['start'] = self._io.pos()
             _on = self.header_type
-            if _on == self._root.HeaderTypeEnum.program:
-                self.params = self._root.ProgramParams(self._io, self, self._root)
+            if _on == ZxSpectrumTap.HeaderTypeEnum.program:
+                self.params = ZxSpectrumTap.ProgramParams(self._io, self, self._root)
                 self.params._read()
-            elif _on == self._root.HeaderTypeEnum.num_array:
-                self.params = self._root.ArrayParams(self._io, self, self._root)
+            elif _on == ZxSpectrumTap.HeaderTypeEnum.num_array:
+                self.params = ZxSpectrumTap.ArrayParams(self._io, self, self._root)
                 self.params._read()
-            elif _on == self._root.HeaderTypeEnum.char_array:
-                self.params = self._root.ArrayParams(self._io, self, self._root)
+            elif _on == ZxSpectrumTap.HeaderTypeEnum.char_array:
+                self.params = ZxSpectrumTap.ArrayParams(self._io, self, self._root)
                 self.params._read()
-            elif _on == self._root.HeaderTypeEnum.bytes:
-                self.params = self._root.BytesParams(self._io, self, self._root)
+            elif _on == ZxSpectrumTap.HeaderTypeEnum.bytes:
+                self.params = ZxSpectrumTap.BytesParams(self._io, self, self._root)
                 self.params._read()
             self._debug['params']['end'] = self._io.pos()
             self._debug['checksum']['start'] = self._io.pos()

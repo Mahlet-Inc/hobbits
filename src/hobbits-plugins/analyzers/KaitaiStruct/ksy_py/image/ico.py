@@ -40,7 +40,7 @@ class Ico(KaitaiStruct):
             if not 'arr' in self._debug['images']:
                 self._debug['images']['arr'] = []
             self._debug['images']['arr'].append({'start': self._io.pos()})
-            _t_images = self._root.IconDirEntry(self._io, self, self._root)
+            _t_images = Ico.IconDirEntry(self._io, self, self._root)
             _t_images._read()
             self.images[i] = _t_images
             self._debug['images']['arr'][i]['end'] = self._io.pos()

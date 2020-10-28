@@ -30,7 +30,7 @@ class Hccapx(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.HccapxRecord(self._io, self, self._root)
+            _t_records = Hccapx.HccapxRecord(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -56,10 +56,10 @@ class Hccapx(KaitaiStruct):
             self.version = self._io.read_u4le()
             self._debug['version']['end'] = self._io.pos()
             self._debug['ignore_replay_counter']['start'] = self._io.pos()
-            self.ignore_replay_counter = self._io.read_bits_int(1) != 0
+            self.ignore_replay_counter = self._io.read_bits_int_be(1) != 0
             self._debug['ignore_replay_counter']['end'] = self._io.pos()
             self._debug['message_pair']['start'] = self._io.pos()
-            self.message_pair = self._io.read_bits_int(7)
+            self.message_pair = self._io.read_bits_int_be(7)
             self._debug['message_pair']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['len_essid']['start'] = self._io.pos()

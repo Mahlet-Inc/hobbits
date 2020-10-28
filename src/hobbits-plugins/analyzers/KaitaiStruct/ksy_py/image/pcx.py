@@ -32,7 +32,7 @@ class Pcx(KaitaiStruct):
         self._debug['hdr']['start'] = self._io.pos()
         self._raw_hdr = self._io.read_bytes(128)
         _io__raw_hdr = KaitaiStream(BytesIO(self._raw_hdr))
-        self.hdr = self._root.Header(_io__raw_hdr, self, self._root)
+        self.hdr = Pcx.Header(_io__raw_hdr, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
 
@@ -55,10 +55,10 @@ class Pcx(KaitaiStruct):
             if not self.magic == b"\x0A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x0A", self.magic, self._io, u"/types/header/seq/0")
             self._debug['version']['start'] = self._io.pos()
-            self.version = KaitaiStream.resolve_enum(self._root.Versions, self._io.read_u1())
+            self.version = KaitaiStream.resolve_enum(Pcx.Versions, self._io.read_u1())
             self._debug['version']['end'] = self._io.pos()
             self._debug['encoding']['start'] = self._io.pos()
-            self.encoding = KaitaiStream.resolve_enum(self._root.Encodings, self._io.read_u1())
+            self.encoding = KaitaiStream.resolve_enum(Pcx.Encodings, self._io.read_u1())
             self._debug['encoding']['end'] = self._io.pos()
             self._debug['bits_per_pixel']['start'] = self._io.pos()
             self.bits_per_pixel = self._io.read_u1()
@@ -126,7 +126,7 @@ class Pcx(KaitaiStruct):
                 if not 'arr' in self._debug['colors']:
                     self._debug['colors']['arr'] = []
                 self._debug['colors']['arr'].append({'start': self._io.pos()})
-                _t_colors = self._root.Rgb(self._io, self, self._root)
+                _t_colors = Pcx.Rgb(self._io, self, self._root)
                 _t_colors._read()
                 self.colors[i] = _t_colors
                 self._debug['colors']['arr'][i]['end'] = self._io.pos()
@@ -163,11 +163,11 @@ class Pcx(KaitaiStruct):
         if hasattr(self, '_m_palette_256'):
             return self._m_palette_256 if hasattr(self, '_m_palette_256') else None
 
-        if  ((self.hdr.version == self._root.Versions.v3_0) and (self.hdr.bits_per_pixel == 8) and (self.hdr.num_planes == 1)) :
+        if  ((self.hdr.version == Pcx.Versions.v3_0) and (self.hdr.bits_per_pixel == 8) and (self.hdr.num_planes == 1)) :
             _pos = self._io.pos()
             self._io.seek((self._io.size() - 769))
             self._debug['_m_palette_256']['start'] = self._io.pos()
-            self._m_palette_256 = self._root.TPalette256(self._io, self, self._root)
+            self._m_palette_256 = Pcx.TPalette256(self._io, self, self._root)
             self._m_palette_256._read()
             self._debug['_m_palette_256']['end'] = self._io.pos()
             self._io.seek(_pos)

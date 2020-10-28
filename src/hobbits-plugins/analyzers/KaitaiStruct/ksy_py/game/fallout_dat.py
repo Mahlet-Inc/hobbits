@@ -41,7 +41,7 @@ class FalloutDat(KaitaiStruct):
             if not 'arr' in self._debug['folder_names']:
                 self._debug['folder_names']['arr'] = []
             self._debug['folder_names']['arr'].append({'start': self._io.pos()})
-            _t_folder_names = self._root.Pstr(self._io, self, self._root)
+            _t_folder_names = FalloutDat.Pstr(self._io, self, self._root)
             _t_folder_names._read()
             self.folder_names[i] = _t_folder_names
             self._debug['folder_names']['arr'][i]['end'] = self._io.pos()
@@ -53,7 +53,7 @@ class FalloutDat(KaitaiStruct):
             if not 'arr' in self._debug['folders']:
                 self._debug['folders']['arr'] = []
             self._debug['folders']['arr'].append({'start': self._io.pos()})
-            _t_folders = self._root.Folder(self._io, self, self._root)
+            _t_folders = FalloutDat.Folder(self._io, self, self._root)
             _t_folders._read()
             self.folders[i] = _t_folders
             self._debug['folders']['arr'][i]['end'] = self._io.pos()
@@ -104,7 +104,7 @@ class FalloutDat(KaitaiStruct):
                 if not 'arr' in self._debug['files']:
                     self._debug['files']['arr'] = []
                 self._debug['files']['arr'].append({'start': self._io.pos()})
-                _t_files = self._root.File(self._io, self, self._root)
+                _t_files = FalloutDat.File(self._io, self, self._root)
                 _t_files._read()
                 self.files[i] = _t_files
                 self._debug['files']['arr'][i]['end'] = self._io.pos()
@@ -122,11 +122,11 @@ class FalloutDat(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.Pstr(self._io, self, self._root)
+            self.name = FalloutDat.Pstr(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = KaitaiStream.resolve_enum(self._root.Compression, self._io.read_u4be())
+            self.flags = KaitaiStream.resolve_enum(FalloutDat.Compression, self._io.read_u4be())
             self._debug['flags']['end'] = self._io.pos()
             self._debug['offset']['start'] = self._io.pos()
             self.offset = self._io.read_u4be()
@@ -147,7 +147,7 @@ class FalloutDat(KaitaiStruct):
             _pos = io.pos()
             io.seek(self.offset)
             self._debug['_m_contents']['start'] = io.pos()
-            self._m_contents = io.read_bytes((self.size_unpacked if self.flags == self._root.Compression.none else self.size_packed))
+            self._m_contents = io.read_bytes((self.size_unpacked if self.flags == FalloutDat.Compression.none else self.size_packed))
             self._debug['_m_contents']['end'] = io.pos()
             io.seek(_pos)
             return self._m_contents if hasattr(self, '_m_contents') else None

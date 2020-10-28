@@ -83,7 +83,7 @@ class PharWithoutStub(KaitaiStruct):
 
     def _read(self):
         self._debug['manifest']['start'] = self._io.pos()
-        self.manifest = self._root.Manifest(self._io, self, self._root)
+        self.manifest = PharWithoutStub.Manifest(self._io, self, self._root)
         self.manifest._read()
         self._debug['manifest']['end'] = self._io.pos()
         self._debug['files']['start'] = self._io.pos()
@@ -100,7 +100,7 @@ class PharWithoutStub(KaitaiStruct):
             self._debug['signature']['start'] = self._io.pos()
             self._raw_signature = self._io.read_bytes_full()
             _io__raw_signature = KaitaiStream(BytesIO(self._raw_signature))
-            self.signature = self._root.Signature(_io__raw_signature, self, self._root)
+            self.signature = PharWithoutStub.Signature(_io__raw_signature, self, self._root)
             self.signature._read()
             self._debug['signature']['end'] = self._io.pos()
 
@@ -147,7 +147,7 @@ class PharWithoutStub(KaitaiStruct):
             self.data = self._io.read_bytes(((self._io.size() - self._io.pos()) - 8))
             self._debug['data']['end'] = self._io.pos()
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.SignatureType, self._io.read_u4le())
+            self.type = KaitaiStream.resolve_enum(PharWithoutStub.SignatureType, self._io.read_u4le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['magic']['start'] = self._io.pos()
             self.magic = self._io.read_bytes(4)
@@ -240,16 +240,16 @@ class PharWithoutStub(KaitaiStruct):
 
         def _read(self):
             self._debug['release']['start'] = self._io.pos()
-            self.release = self._io.read_bits_int(4)
+            self.release = self._io.read_bits_int_be(4)
             self._debug['release']['end'] = self._io.pos()
             self._debug['major']['start'] = self._io.pos()
-            self.major = self._io.read_bits_int(4)
+            self.major = self._io.read_bits_int_be(4)
             self._debug['major']['end'] = self._io.pos()
             self._debug['minor']['start'] = self._io.pos()
-            self.minor = self._io.read_bits_int(4)
+            self.minor = self._io.read_bits_int_be(4)
             self._debug['minor']['end'] = self._io.pos()
             self._debug['unused']['start'] = self._io.pos()
-            self.unused = self._io.read_bits_int(4)
+            self.unused = self._io.read_bits_int_be(4)
             self._debug['unused']['end'] = self._io.pos()
 
 
@@ -314,11 +314,11 @@ class PharWithoutStub(KaitaiStruct):
             self.num_files = self._io.read_u4le()
             self._debug['num_files']['end'] = self._io.pos()
             self._debug['api_version']['start'] = self._io.pos()
-            self.api_version = self._root.ApiVersion(self._io, self, self._root)
+            self.api_version = PharWithoutStub.ApiVersion(self._io, self, self._root)
             self.api_version._read()
             self._debug['api_version']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.GlobalFlags(self._io, self, self._root)
+            self.flags = PharWithoutStub.GlobalFlags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['len_alias']['start'] = self._io.pos()
@@ -334,7 +334,7 @@ class PharWithoutStub(KaitaiStruct):
                 self._debug['metadata']['start'] = self._io.pos()
                 self._raw_metadata = self._io.read_bytes(self.len_metadata)
                 _io__raw_metadata = KaitaiStream(BytesIO(self._raw_metadata))
-                self.metadata = self._root.SerializedValue(_io__raw_metadata, self, self._root)
+                self.metadata = PharWithoutStub.SerializedValue(_io__raw_metadata, self, self._root)
                 self.metadata._read()
                 self._debug['metadata']['end'] = self._io.pos()
 
@@ -344,7 +344,7 @@ class PharWithoutStub(KaitaiStruct):
                 if not 'arr' in self._debug['file_entries']:
                     self._debug['file_entries']['arr'] = []
                 self._debug['file_entries']['arr'].append({'start': self._io.pos()})
-                _t_file_entries = self._root.FileEntry(self._io, self, self._root)
+                _t_file_entries = PharWithoutStub.FileEntry(self._io, self, self._root)
                 _t_file_entries._read()
                 self.file_entries[i] = _t_file_entries
                 self._debug['file_entries']['arr'][i]['end'] = self._io.pos()
@@ -380,7 +380,7 @@ class PharWithoutStub(KaitaiStruct):
             self.crc32 = self._io.read_u4le()
             self._debug['crc32']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.FileFlags(self._io, self, self._root)
+            self.flags = PharWithoutStub.FileFlags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['len_metadata']['start'] = self._io.pos()
@@ -390,7 +390,7 @@ class PharWithoutStub(KaitaiStruct):
                 self._debug['metadata']['start'] = self._io.pos()
                 self._raw_metadata = self._io.read_bytes(self.len_metadata)
                 _io__raw_metadata = KaitaiStream(BytesIO(self._raw_metadata))
-                self.metadata = self._root.SerializedValue(_io__raw_metadata, self, self._root)
+                self.metadata = PharWithoutStub.SerializedValue(_io__raw_metadata, self, self._root)
                 self.metadata._read()
                 self._debug['metadata']['end'] = self._io.pos()
 

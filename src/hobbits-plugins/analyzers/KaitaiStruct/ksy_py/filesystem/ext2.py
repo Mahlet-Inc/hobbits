@@ -90,10 +90,10 @@ class Ext2(KaitaiStruct):
             if not self.magic == b"\x53\xEF":
                 raise kaitaistruct.ValidationNotEqualError(b"\x53\xEF", self.magic, self._io, u"/types/super_block_struct/seq/15")
             self._debug['state']['start'] = self._io.pos()
-            self.state = KaitaiStream.resolve_enum(self._root.SuperBlockStruct.StateEnum, self._io.read_u2le())
+            self.state = KaitaiStream.resolve_enum(Ext2.SuperBlockStruct.StateEnum, self._io.read_u2le())
             self._debug['state']['end'] = self._io.pos()
             self._debug['errors']['start'] = self._io.pos()
-            self.errors = KaitaiStream.resolve_enum(self._root.SuperBlockStruct.ErrorsEnum, self._io.read_u2le())
+            self.errors = KaitaiStream.resolve_enum(Ext2.SuperBlockStruct.ErrorsEnum, self._io.read_u2le())
             self._debug['errors']['end'] = self._io.pos()
             self._debug['minor_rev_level']['start'] = self._io.pos()
             self.minor_rev_level = self._io.read_u2le()
@@ -227,7 +227,7 @@ class Ext2(KaitaiStruct):
             self.name_len = self._io.read_u1()
             self._debug['name_len']['end'] = self._io.pos()
             self._debug['file_type']['start'] = self._io.pos()
-            self.file_type = KaitaiStream.resolve_enum(self._root.DirEntry.FileTypeEnum, self._io.read_u1())
+            self.file_type = KaitaiStream.resolve_enum(Ext2.DirEntry.FileTypeEnum, self._io.read_u1())
             self._debug['file_type']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
             self.name = (self._io.read_bytes(self.name_len)).decode(u"UTF-8")
@@ -296,7 +296,7 @@ class Ext2(KaitaiStruct):
                 if not 'arr' in self._debug['block']:
                     self._debug['block']['arr'] = []
                 self._debug['block']['arr'].append({'start': self._io.pos()})
-                _t_block = self._root.BlockPtr(self._io, self, self._root)
+                _t_block = Ext2.BlockPtr(self._io, self, self._root)
                 _t_block._read()
                 self.block[i] = _t_block
                 self._debug['block']['arr'][i]['end'] = self._io.pos()
@@ -327,7 +327,7 @@ class Ext2(KaitaiStruct):
             _pos = io.pos()
             io.seek(0)
             self._debug['_m_as_dir']['start'] = io.pos()
-            self._m_as_dir = self._root.Dir(io, self, self._root)
+            self._m_as_dir = Ext2.Dir(io, self, self._root)
             self._m_as_dir._read()
             self._debug['_m_as_dir']['end'] = io.pos()
             io.seek(_pos)
@@ -357,7 +357,7 @@ class Ext2(KaitaiStruct):
             self._debug['_m_body']['start'] = self._io.pos()
             self._raw__m_body = self._io.read_bytes(self._root.bg1.super_block.block_size)
             _io__raw__m_body = KaitaiStream(BytesIO(self._raw__m_body))
-            self._m_body = self._root.RawBlock(_io__raw__m_body, self, self._root)
+            self._m_body = Ext2.RawBlock(_io__raw__m_body, self, self._root)
             self._m_body._read()
             self._debug['_m_body']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -380,7 +380,7 @@ class Ext2(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.DirEntry(self._io, self, self._root)
+                _t_entries = Ext2.DirEntry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -401,7 +401,7 @@ class Ext2(KaitaiStruct):
             self._debug['super_block']['start'] = self._io.pos()
             self._raw_super_block = self._io.read_bytes(1024)
             _io__raw_super_block = KaitaiStream(BytesIO(self._raw_super_block))
-            self.super_block = self._root.SuperBlockStruct(_io__raw_super_block, self, self._root)
+            self.super_block = Ext2.SuperBlockStruct(_io__raw_super_block, self, self._root)
             self.super_block._read()
             self._debug['super_block']['end'] = self._io.pos()
             self._debug['block_groups']['start'] = self._io.pos()
@@ -410,7 +410,7 @@ class Ext2(KaitaiStruct):
                 if not 'arr' in self._debug['block_groups']:
                     self._debug['block_groups']['arr'] = []
                 self._debug['block_groups']['arr'].append({'start': self._io.pos()})
-                _t_block_groups = self._root.Bgd(self._io, self, self._root)
+                _t_block_groups = Ext2.Bgd(self._io, self, self._root)
                 _t_block_groups._read()
                 self.block_groups[i] = _t_block_groups
                 self._debug['block_groups']['arr'][i]['end'] = self._io.pos()
@@ -488,7 +488,7 @@ class Ext2(KaitaiStruct):
                 if not 'arr' in self._debug['_m_inodes']:
                     self._debug['_m_inodes']['arr'] = []
                 self._debug['_m_inodes']['arr'].append({'start': self._io.pos()})
-                _t__m_inodes = self._root.Inode(self._io, self, self._root)
+                _t__m_inodes = Ext2.Inode(self._io, self, self._root)
                 _t__m_inodes._read()
                 self._m_inodes[i] = _t__m_inodes
                 self._debug['_m_inodes']['arr'][i]['end'] = self._io.pos()
@@ -520,7 +520,7 @@ class Ext2(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek(1024)
         self._debug['_m_bg1']['start'] = self._io.pos()
-        self._m_bg1 = self._root.BlockGroup(self._io, self, self._root)
+        self._m_bg1 = Ext2.BlockGroup(self._io, self, self._root)
         self._m_bg1._read()
         self._debug['_m_bg1']['end'] = self._io.pos()
         self._io.seek(_pos)

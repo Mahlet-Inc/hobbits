@@ -33,7 +33,7 @@ class NtMdtPal(KaitaiStruct):
             if not 'arr' in self._debug['meta']:
                 self._debug['meta']['arr'] = []
             self._debug['meta']['arr'].append({'start': self._io.pos()})
-            _t_meta = self._root.Meta(self._io, self, self._root)
+            _t_meta = NtMdtPal.Meta(self._io, self, self._root)
             _t_meta._read()
             self.meta[i] = _t_meta
             self._debug['meta']['arr'][i]['end'] = self._io.pos()
@@ -48,7 +48,7 @@ class NtMdtPal(KaitaiStruct):
             if not 'arr' in self._debug['tables']:
                 self._debug['tables']['arr'] = []
             self._debug['tables']['arr'].append({'start': self._io.pos()})
-            _t_tables = self._root.ColTable(i, self._io, self, self._root)
+            _t_tables = NtMdtPal.ColTable(i, self._io, self, self._root)
             _t_tables._read()
             self.tables[i] = _t_tables
             self._debug['tables']['arr'][i]['end'] = self._io.pos()
@@ -144,7 +144,7 @@ class NtMdtPal(KaitaiStruct):
                 if not 'arr' in self._debug['colors']:
                     self._debug['colors']['arr'] = []
                 self._debug['colors']['arr'].append({'start': self._io.pos()})
-                _t_colors = self._root.Color(self._io, self, self._root)
+                _t_colors = NtMdtPal.Color(self._io, self, self._root)
                 _t_colors._read()
                 self.colors[i] = _t_colors
                 self._debug['colors']['arr'][i]['end'] = self._io.pos()

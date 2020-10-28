@@ -33,7 +33,7 @@ class Lzh(KaitaiStruct):
             if not 'arr' in self._debug['entries']:
                 self._debug['entries']['arr'] = []
             self._debug['entries']['arr'].append({'start': self._io.pos()})
-            _t_entries = self._root.Record(self._io, self, self._root)
+            _t_entries = Lzh.Record(self._io, self, self._root)
             _t_entries._read()
             self.entries.append(_t_entries)
             self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -55,7 +55,7 @@ class Lzh(KaitaiStruct):
             self._debug['header_len']['end'] = self._io.pos()
             if self.header_len > 0:
                 self._debug['file_record']['start'] = self._io.pos()
-                self.file_record = self._root.FileRecord(self._io, self, self._root)
+                self.file_record = Lzh.FileRecord(self._io, self, self._root)
                 self.file_record._read()
                 self._debug['file_record']['end'] = self._io.pos()
 
@@ -73,7 +73,7 @@ class Lzh(KaitaiStruct):
             self._debug['header']['start'] = self._io.pos()
             self._raw_header = self._io.read_bytes((self._parent.header_len - 1))
             _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-            self.header = self._root.Header(_io__raw_header, self, self._root)
+            self.header = Lzh.Header(_io__raw_header, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             if self.header.header1.lha_level == 0:
@@ -96,7 +96,7 @@ class Lzh(KaitaiStruct):
 
         def _read(self):
             self._debug['header1']['start'] = self._io.pos()
-            self.header1 = self._root.Header1(self._io, self, self._root)
+            self.header1 = Lzh.Header1(self._io, self, self._root)
             self.header1._read()
             self._debug['header1']['end'] = self._io.pos()
             if self.header1.lha_level == 0:

@@ -45,7 +45,7 @@ class WindowsEvtLog(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = WindowsEvtLog.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['records']['start'] = self._io.pos()
@@ -55,7 +55,7 @@ class WindowsEvtLog(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = WindowsEvtLog.Record(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -106,7 +106,7 @@ class WindowsEvtLog(KaitaiStruct):
             self.len_file_max = self._io.read_u4le()
             self._debug['len_file_max']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.Header.Flags(self._io, self, self._root)
+            self.flags = WindowsEvtLog.Header.Flags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['retention']['start'] = self._io.pos()
@@ -126,19 +126,19 @@ class WindowsEvtLog(KaitaiStruct):
 
             def _read(self):
                 self._debug['reserved']['start'] = self._io.pos()
-                self.reserved = self._io.read_bits_int(28)
+                self.reserved = self._io.read_bits_int_be(28)
                 self._debug['reserved']['end'] = self._io.pos()
                 self._debug['archive']['start'] = self._io.pos()
-                self.archive = self._io.read_bits_int(1) != 0
+                self.archive = self._io.read_bits_int_be(1) != 0
                 self._debug['archive']['end'] = self._io.pos()
                 self._debug['log_full']['start'] = self._io.pos()
-                self.log_full = self._io.read_bits_int(1) != 0
+                self.log_full = self._io.read_bits_int_be(1) != 0
                 self._debug['log_full']['end'] = self._io.pos()
                 self._debug['wrap']['start'] = self._io.pos()
-                self.wrap = self._io.read_bits_int(1) != 0
+                self.wrap = self._io.read_bits_int_be(1) != 0
                 self._debug['wrap']['end'] = self._io.pos()
                 self._debug['dirty']['start'] = self._io.pos()
-                self.dirty = self._io.read_bits_int(1) != 0
+                self.dirty = self._io.read_bits_int_be(1) != 0
                 self._debug['dirty']['end'] = self._io.pos()
 
 
@@ -167,12 +167,12 @@ class WindowsEvtLog(KaitaiStruct):
             if _on == 1699505740:
                 self._raw_body = self._io.read_bytes((self.len_record - 12))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.RecordBody(_io__raw_body, self, self._root)
+                self.body = WindowsEvtLog.RecordBody(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == 286331153:
                 self._raw_body = self._io.read_bytes((self.len_record - 12))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CursorRecordBody(_io__raw_body, self, self._root)
+                self.body = WindowsEvtLog.CursorRecordBody(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes((self.len_record - 12))
@@ -215,7 +215,7 @@ class WindowsEvtLog(KaitaiStruct):
             self.event_id = self._io.read_u4le()
             self._debug['event_id']['end'] = self._io.pos()
             self._debug['event_type']['start'] = self._io.pos()
-            self.event_type = KaitaiStream.resolve_enum(self._root.RecordBody.EventTypes, self._io.read_u2le())
+            self.event_type = KaitaiStream.resolve_enum(WindowsEvtLog.RecordBody.EventTypes, self._io.read_u2le())
             self._debug['event_type']['end'] = self._io.pos()
             self._debug['num_strings']['start'] = self._io.pos()
             self.num_strings = self._io.read_u2le()

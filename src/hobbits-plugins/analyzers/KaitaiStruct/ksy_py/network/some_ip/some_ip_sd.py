@@ -31,7 +31,7 @@ class SomeIpSd(KaitaiStruct):
 
     def _read(self):
         self._debug['flags']['start'] = self._io.pos()
-        self.flags = self._root.SdFlags(self._io, self, self._root)
+        self.flags = SomeIpSd.SdFlags(self._io, self, self._root)
         self.flags._read()
         self._debug['flags']['end'] = self._io.pos()
         self._debug['reserved']['start'] = self._io.pos()
@@ -70,16 +70,16 @@ class SomeIpSd(KaitaiStruct):
 
         def _read(self):
             self._debug['reboot']['start'] = self._io.pos()
-            self.reboot = self._io.read_bits_int(1) != 0
+            self.reboot = self._io.read_bits_int_be(1) != 0
             self._debug['reboot']['end'] = self._io.pos()
             self._debug['unicast']['start'] = self._io.pos()
-            self.unicast = self._io.read_bits_int(1) != 0
+            self.unicast = self._io.read_bits_int_be(1) != 0
             self._debug['unicast']['end'] = self._io.pos()
             self._debug['initial_data']['start'] = self._io.pos()
-            self.initial_data = self._io.read_bits_int(1) != 0
+            self.initial_data = self._io.read_bits_int_be(1) != 0
             self._debug['initial_data']['end'] = self._io.pos()
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(5)
+            self.reserved = self._io.read_bits_int_be(5)
             self._debug['reserved']['end'] = self._io.pos()
 
 

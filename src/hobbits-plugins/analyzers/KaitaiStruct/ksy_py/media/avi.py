@@ -65,7 +65,7 @@ class Avi(KaitaiStruct):
         self._debug['data']['start'] = self._io.pos()
         self._raw_data = self._io.read_bytes((self.file_size - 4))
         _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-        self.data = self._root.Blocks(_io__raw_data, self, self._root)
+        self.data = Avi.Blocks(_io__raw_data, self, self._root)
         self.data._read()
         self._debug['data']['end'] = self._io.pos()
 
@@ -79,10 +79,10 @@ class Avi(KaitaiStruct):
 
         def _read(self):
             self._debug['list_type']['start'] = self._io.pos()
-            self.list_type = KaitaiStream.resolve_enum(self._root.ChunkType, self._io.read_u4le())
+            self.list_type = KaitaiStream.resolve_enum(Avi.ChunkType, self._io.read_u4le())
             self._debug['list_type']['end'] = self._io.pos()
             self._debug['data']['start'] = self._io.pos()
-            self.data = self._root.Blocks(self._io, self, self._root)
+            self.data = Avi.Blocks(self._io, self, self._root)
             self.data._read()
             self._debug['data']['end'] = self._io.pos()
 
@@ -126,7 +126,7 @@ class Avi(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Block(self._io, self, self._root)
+                _t_entries = Avi.Block(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -194,27 +194,27 @@ class Avi(KaitaiStruct):
 
         def _read(self):
             self._debug['four_cc']['start'] = self._io.pos()
-            self.four_cc = KaitaiStream.resolve_enum(self._root.ChunkType, self._io.read_u4le())
+            self.four_cc = KaitaiStream.resolve_enum(Avi.ChunkType, self._io.read_u4le())
             self._debug['four_cc']['end'] = self._io.pos()
             self._debug['block_size']['start'] = self._io.pos()
             self.block_size = self._io.read_u4le()
             self._debug['block_size']['end'] = self._io.pos()
             self._debug['data']['start'] = self._io.pos()
             _on = self.four_cc
-            if _on == self._root.ChunkType.list:
+            if _on == Avi.ChunkType.list:
                 self._raw_data = self._io.read_bytes(self.block_size)
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.ListBody(_io__raw_data, self, self._root)
+                self.data = Avi.ListBody(_io__raw_data, self, self._root)
                 self.data._read()
-            elif _on == self._root.ChunkType.avih:
+            elif _on == Avi.ChunkType.avih:
                 self._raw_data = self._io.read_bytes(self.block_size)
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.AvihBody(_io__raw_data, self, self._root)
+                self.data = Avi.AvihBody(_io__raw_data, self, self._root)
                 self.data._read()
-            elif _on == self._root.ChunkType.strh:
+            elif _on == Avi.ChunkType.strh:
                 self._raw_data = self._io.read_bytes(self.block_size)
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.StrhBody(_io__raw_data, self, self._root)
+                self.data = Avi.StrhBody(_io__raw_data, self, self._root)
                 self.data._read()
             else:
                 self.data = self._io.read_bytes(self.block_size)
@@ -236,10 +236,10 @@ class Avi(KaitaiStruct):
 
         def _read(self):
             self._debug['fcc_type']['start'] = self._io.pos()
-            self.fcc_type = KaitaiStream.resolve_enum(self._root.StreamType, self._io.read_u4le())
+            self.fcc_type = KaitaiStream.resolve_enum(Avi.StreamType, self._io.read_u4le())
             self._debug['fcc_type']['end'] = self._io.pos()
             self._debug['fcc_handler']['start'] = self._io.pos()
-            self.fcc_handler = KaitaiStream.resolve_enum(self._root.HandlerType, self._io.read_u4le())
+            self.fcc_handler = KaitaiStream.resolve_enum(Avi.HandlerType, self._io.read_u4le())
             self._debug['fcc_handler']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
             self.flags = self._io.read_u4le()
@@ -275,7 +275,7 @@ class Avi(KaitaiStruct):
             self.sample_size = self._io.read_u4le()
             self._debug['sample_size']['end'] = self._io.pos()
             self._debug['frame']['start'] = self._io.pos()
-            self.frame = self._root.Rect(self._io, self, self._root)
+            self.frame = Avi.Rect(self._io, self, self._root)
             self.frame._read()
             self._debug['frame']['end'] = self._io.pos()
 

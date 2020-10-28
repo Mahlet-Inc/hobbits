@@ -51,7 +51,7 @@ class DnsPacket(KaitaiStruct):
         self.transaction_id = self._io.read_u2be()
         self._debug['transaction_id']['end'] = self._io.pos()
         self._debug['flags']['start'] = self._io.pos()
-        self.flags = self._root.PacketFlags(self._io, self, self._root)
+        self.flags = DnsPacket.PacketFlags(self._io, self, self._root)
         self.flags._read()
         self._debug['flags']['end'] = self._io.pos()
         if self.flags.is_opcode_valid:
@@ -81,7 +81,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['queries']:
                     self._debug['queries']['arr'] = []
                 self._debug['queries']['arr'].append({'start': self._io.pos()})
-                _t_queries = self._root.Query(self._io, self, self._root)
+                _t_queries = DnsPacket.Query(self._io, self, self._root)
                 _t_queries._read()
                 self.queries[i] = _t_queries
                 self._debug['queries']['arr'][i]['end'] = self._io.pos()
@@ -95,7 +95,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['answers']:
                     self._debug['answers']['arr'] = []
                 self._debug['answers']['arr'].append({'start': self._io.pos()})
-                _t_answers = self._root.Answer(self._io, self, self._root)
+                _t_answers = DnsPacket.Answer(self._io, self, self._root)
                 _t_answers._read()
                 self.answers[i] = _t_answers
                 self._debug['answers']['arr'][i]['end'] = self._io.pos()
@@ -109,7 +109,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['authorities']:
                     self._debug['authorities']['arr'] = []
                 self._debug['authorities']['arr'].append({'start': self._io.pos()})
-                _t_authorities = self._root.Answer(self._io, self, self._root)
+                _t_authorities = DnsPacket.Answer(self._io, self, self._root)
                 _t_authorities._read()
                 self.authorities[i] = _t_authorities
                 self._debug['authorities']['arr'][i]['end'] = self._io.pos()
@@ -123,7 +123,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['additionals']:
                     self._debug['additionals']['arr'] = []
                 self._debug['additionals']['arr'].append({'start': self._io.pos()})
-                _t_additionals = self._root.Answer(self._io, self, self._root)
+                _t_additionals = DnsPacket.Answer(self._io, self, self._root)
                 _t_additionals._read()
                 self.additionals[i] = _t_additionals
                 self._debug['additionals']['arr'][i]['end'] = self._io.pos()
@@ -144,7 +144,7 @@ class DnsPacket(KaitaiStruct):
             self.preference = self._io.read_u2be()
             self._debug['preference']['end'] = self._io.pos()
             self._debug['mx']['start'] = self._io.pos()
-            self.mx = self._root.DomainName(self._io, self, self._root)
+            self.mx = DnsPacket.DomainName(self._io, self, self._root)
             self.mx._read()
             self._debug['mx']['end'] = self._io.pos()
 
@@ -171,7 +171,7 @@ class DnsPacket(KaitaiStruct):
             _pos = io.pos()
             io.seek((self.value + ((self._parent.length - 192) << 8)))
             self._debug['_m_contents']['start'] = io.pos()
-            self._m_contents = self._root.DomainName(io, self, self._root)
+            self._m_contents = DnsPacket.DomainName(io, self, self._root)
             self._m_contents._read()
             self._debug['_m_contents']['end'] = io.pos()
             io.seek(_pos)
@@ -192,7 +192,7 @@ class DnsPacket(KaitaiStruct):
             self._debug['length']['end'] = self._io.pos()
             if self.is_pointer:
                 self._debug['pointer']['start'] = self._io.pos()
-                self.pointer = self._root.PointerStruct(self._io, self, self._root)
+                self.pointer = DnsPacket.PointerStruct(self._io, self, self._root)
                 self.pointer._read()
                 self._debug['pointer']['end'] = self._io.pos()
 
@@ -221,14 +221,14 @@ class DnsPacket(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.DomainName(self._io, self, self._root)
+            self.name = DnsPacket.DomainName(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.TypeType, self._io.read_u2be())
+            self.type = KaitaiStream.resolve_enum(DnsPacket.TypeType, self._io.read_u2be())
             self._debug['type']['end'] = self._io.pos()
             self._debug['query_class']['start'] = self._io.pos()
-            self.query_class = KaitaiStream.resolve_enum(self._root.ClassType, self._io.read_u2be())
+            self.query_class = KaitaiStream.resolve_enum(DnsPacket.ClassType, self._io.read_u2be())
             self._debug['query_class']['end'] = self._io.pos()
 
 
@@ -248,7 +248,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['name']:
                     self._debug['name']['arr'] = []
                 self._debug['name']['arr'].append({'start': self._io.pos()})
-                _t_name = self._root.Label(self._io, self, self._root)
+                _t_name = DnsPacket.Label(self._io, self, self._root)
                 _t_name._read()
                 _ = _t_name
                 self.name.append(_)
@@ -292,7 +292,7 @@ class DnsPacket(KaitaiStruct):
             self.port = self._io.read_u2be()
             self._debug['port']['end'] = self._io.pos()
             self._debug['target']['start'] = self._io.pos()
-            self.target = self._root.DomainName(self._io, self, self._root)
+            self.target = DnsPacket.DomainName(self._io, self, self._root)
             self.target._read()
             self._debug['target']['end'] = self._io.pos()
 
@@ -330,7 +330,7 @@ class DnsPacket(KaitaiStruct):
                 if not 'arr' in self._debug['data']:
                     self._debug['data']['arr'] = []
                 self._debug['data']['arr'].append({'start': self._io.pos()})
-                _t_data = self._root.Txt(self._io, self, self._root)
+                _t_data = DnsPacket.Txt(self._io, self, self._root)
                 _t_data._read()
                 self.data.append(_t_data)
                 self._debug['data']['arr'][len(self.data) - 1]['end'] = self._io.pos()
@@ -363,14 +363,14 @@ class DnsPacket(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.DomainName(self._io, self, self._root)
+            self.name = DnsPacket.DomainName(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.TypeType, self._io.read_u2be())
+            self.type = KaitaiStream.resolve_enum(DnsPacket.TypeType, self._io.read_u2be())
             self._debug['type']['end'] = self._io.pos()
             self._debug['answer_class']['start'] = self._io.pos()
-            self.answer_class = KaitaiStream.resolve_enum(self._root.ClassType, self._io.read_u2be())
+            self.answer_class = KaitaiStream.resolve_enum(DnsPacket.ClassType, self._io.read_u2be())
             self._debug['answer_class']['end'] = self._io.pos()
             self._debug['ttl']['start'] = self._io.pos()
             self.ttl = self._io.read_s4be()
@@ -380,50 +380,50 @@ class DnsPacket(KaitaiStruct):
             self._debug['rdlength']['end'] = self._io.pos()
             self._debug['payload']['start'] = self._io.pos()
             _on = self.type
-            if _on == self._root.TypeType.srv:
+            if _on == DnsPacket.TypeType.srv:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.Service(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.Service(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.a:
+            elif _on == DnsPacket.TypeType.a:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.Address(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.Address(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.cname:
+            elif _on == DnsPacket.TypeType.cname:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.DomainName(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.DomainName(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.ns:
+            elif _on == DnsPacket.TypeType.ns:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.DomainName(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.DomainName(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.soa:
+            elif _on == DnsPacket.TypeType.soa:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.AuthorityInfo(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.AuthorityInfo(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.mx:
+            elif _on == DnsPacket.TypeType.mx:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.MxInfo(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.MxInfo(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.txt:
+            elif _on == DnsPacket.TypeType.txt:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.TxtBody(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.TxtBody(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.ptr:
+            elif _on == DnsPacket.TypeType.ptr:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.DomainName(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.DomainName(_io__raw_payload, self, self._root)
                 self.payload._read()
-            elif _on == self._root.TypeType.aaaa:
+            elif _on == DnsPacket.TypeType.aaaa:
                 self._raw_payload = self._io.read_bytes(self.rdlength)
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.AddressV6(_io__raw_payload, self, self._root)
+                self.payload = DnsPacket.AddressV6(_io__raw_payload, self, self._root)
                 self.payload._read()
             else:
                 self.payload = self._io.read_bytes(self.rdlength)
@@ -542,11 +542,11 @@ class DnsPacket(KaitaiStruct):
 
         def _read(self):
             self._debug['primary_ns']['start'] = self._io.pos()
-            self.primary_ns = self._root.DomainName(self._io, self, self._root)
+            self.primary_ns = DnsPacket.DomainName(self._io, self, self._root)
             self.primary_ns._read()
             self._debug['primary_ns']['end'] = self._io.pos()
             self._debug['resoponsible_mailbox']['start'] = self._io.pos()
-            self.resoponsible_mailbox = self._root.DomainName(self._io, self, self._root)
+            self.resoponsible_mailbox = DnsPacket.DomainName(self._io, self, self._root)
             self.resoponsible_mailbox._read()
             self._debug['resoponsible_mailbox']['end'] = self._io.pos()
             self._debug['serial']['start'] = self._io.pos()

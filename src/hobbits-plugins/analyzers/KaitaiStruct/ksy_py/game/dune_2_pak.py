@@ -21,7 +21,7 @@ class Dune2Pak(KaitaiStruct):
         self._debug['dir']['start'] = self._io.pos()
         self._raw_dir = self._io.read_bytes(self.dir_size)
         _io__raw_dir = KaitaiStream(BytesIO(self._raw_dir))
-        self.dir = self._root.Files(_io__raw_dir, self, self._root)
+        self.dir = Dune2Pak.Files(_io__raw_dir, self, self._root)
         self.dir._read()
         self._debug['dir']['end'] = self._io.pos()
 
@@ -41,7 +41,7 @@ class Dune2Pak(KaitaiStruct):
                 if not 'arr' in self._debug['files']:
                     self._debug['files']['arr'] = []
                 self._debug['files']['arr'].append({'start': self._io.pos()})
-                _t_files = self._root.File(i, self._io, self, self._root)
+                _t_files = Dune2Pak.File(i, self._io, self, self._root)
                 _t_files._read()
                 self.files.append(_t_files)
                 self._debug['files']['arr'][len(self.files) - 1]['end'] = self._io.pos()

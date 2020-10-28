@@ -19,13 +19,13 @@ class Dbf(KaitaiStruct):
 
     def _read(self):
         self._debug['header1']['start'] = self._io.pos()
-        self.header1 = self._root.Header1(self._io, self, self._root)
+        self.header1 = Dbf.Header1(self._io, self, self._root)
         self.header1._read()
         self._debug['header1']['end'] = self._io.pos()
         self._debug['header2']['start'] = self._io.pos()
         self._raw_header2 = self._io.read_bytes((self.header1.len_header - 12))
         _io__raw_header2 = KaitaiStream(BytesIO(self._raw_header2))
-        self.header2 = self._root.Header2(_io__raw_header2, self, self._root)
+        self.header2 = Dbf.Header2(_io__raw_header2, self, self._root)
         self.header2._read()
         self._debug['header2']['end'] = self._io.pos()
         self._debug['records']['start'] = self._io.pos()
@@ -50,13 +50,13 @@ class Dbf(KaitaiStruct):
         def _read(self):
             if self._root.header1.dbase_level == 3:
                 self._debug['header_dbase_3']['start'] = self._io.pos()
-                self.header_dbase_3 = self._root.HeaderDbase3(self._io, self, self._root)
+                self.header_dbase_3 = Dbf.HeaderDbase3(self._io, self, self._root)
                 self.header_dbase_3._read()
                 self._debug['header_dbase_3']['end'] = self._io.pos()
 
             if self._root.header1.dbase_level == 7:
                 self._debug['header_dbase_7']['start'] = self._io.pos()
-                self.header_dbase_7 = self._root.HeaderDbase7(self._io, self, self._root)
+                self.header_dbase_7 = Dbf.HeaderDbase7(self._io, self, self._root)
                 self.header_dbase_7._read()
                 self._debug['header_dbase_7']['end'] = self._io.pos()
 
@@ -66,7 +66,7 @@ class Dbf(KaitaiStruct):
                 if not 'arr' in self._debug['fields']:
                     self._debug['fields']['arr'] = []
                 self._debug['fields']['arr'].append({'start': self._io.pos()})
-                _t_fields = self._root.Field(self._io, self, self._root)
+                _t_fields = Dbf.Field(self._io, self, self._root)
                 _t_fields._read()
                 self.fields[i] = _t_fields
                 self._debug['fields']['arr'][i]['end'] = self._io.pos()

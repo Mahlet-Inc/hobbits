@@ -34,7 +34,7 @@ class SomeIpSdOptions(KaitaiStruct):
             if not 'arr' in self._debug['entries']:
                 self._debug['entries']['arr'] = []
             self._debug['entries']['arr'].append({'start': self._io.pos()})
-            _t_entries = self._root.SdOption(self._io, self, self._root)
+            _t_entries = SomeIpSdOptions.SdOption(self._io, self, self._root)
             _t_entries._read()
             self.entries.append(_t_entries)
             self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -62,34 +62,34 @@ class SomeIpSdOptions(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.SdOption.SdOptionHeader(self._io, self, self._root)
+            self.header = SomeIpSdOptions.SdOption.SdOptionHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.header.type
-            if _on == self._root.SdOption.OptionTypes.load_balancing_option:
-                self.content = self._root.SdOption.SdLoadBalancingOption(self._io, self, self._root)
+            if _on == SomeIpSdOptions.SdOption.OptionTypes.load_balancing_option:
+                self.content = SomeIpSdOptions.SdOption.SdLoadBalancingOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.configuration_option:
-                self.content = self._root.SdOption.SdConfigurationOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.configuration_option:
+                self.content = SomeIpSdOptions.SdOption.SdConfigurationOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv4_sd_endpoint_option:
-                self.content = self._root.SdOption.SdIpv4SdEndpointOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv4_sd_endpoint_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv4SdEndpointOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv4_endpoint_option:
-                self.content = self._root.SdOption.SdIpv4EndpointOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv4_endpoint_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv4EndpointOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv6_sd_endpoint_option:
-                self.content = self._root.SdOption.SdIpv6SdEndpointOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv6_sd_endpoint_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv6SdEndpointOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv4_multicast_option:
-                self.content = self._root.SdOption.SdIpv4MulticastOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv4_multicast_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv4MulticastOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv6_endpoint_option:
-                self.content = self._root.SdOption.SdIpv6EndpointOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv6_endpoint_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv6EndpointOption(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.SdOption.OptionTypes.ipv6_multicast_option:
-                self.content = self._root.SdOption.SdIpv6MulticastOption(self._io, self, self._root)
+            elif _on == SomeIpSdOptions.SdOption.OptionTypes.ipv6_multicast_option:
+                self.content = SomeIpSdOptions.SdOption.SdIpv6MulticastOption(self._io, self, self._root)
                 self.content._read()
             self._debug['content']['end'] = self._io.pos()
 
@@ -106,7 +106,7 @@ class SomeIpSdOptions(KaitaiStruct):
                 self.length = self._io.read_u2be()
                 self._debug['length']['end'] = self._io.pos()
                 self._debug['type']['start'] = self._io.pos()
-                self.type = KaitaiStream.resolve_enum(self._root.SdOption.OptionTypes, self._io.read_u1())
+                self.type = KaitaiStream.resolve_enum(SomeIpSdOptions.SdOption.OptionTypes, self._io.read_u1())
                 self._debug['type']['end'] = self._io.pos()
 
 
@@ -126,7 +126,7 @@ class SomeIpSdOptions(KaitaiStruct):
                     self._debug['config']['start'] = self._io.pos()
                     self._raw_config = self._io.read_bytes(self.length)
                     _io__raw_config = KaitaiStream(BytesIO(self._raw_config))
-                    self.config = self._root.SdOption.SdConfigKvPair(_io__raw_config, self, self._root)
+                    self.config = SomeIpSdOptions.SdOption.SdConfigKvPair(_io__raw_config, self, self._root)
                     self.config._read()
                     self._debug['config']['end'] = self._io.pos()
 
@@ -148,7 +148,7 @@ class SomeIpSdOptions(KaitaiStruct):
                     if not 'arr' in self._debug['config_strings']:
                         self._debug['config_strings']['arr'] = []
                     self._debug['config_strings']['arr'].append({'start': self._io.pos()})
-                    _t_config_strings = self._root.SdOption.SdConfigString(self._io, self, self._root)
+                    _t_config_strings = SomeIpSdOptions.SdOption.SdConfigString(self._io, self, self._root)
                     _t_config_strings._read()
                     self.config_strings.append(_t_config_strings)
                     self._debug['config_strings']['arr'][len(self.config_strings) - 1]['end'] = self._io.pos()
@@ -172,7 +172,7 @@ class SomeIpSdOptions(KaitaiStruct):
                 self._debug['configurations']['start'] = self._io.pos()
                 self._raw_configurations = self._io.read_bytes((self._parent.header.length - 1))
                 _io__raw_configurations = KaitaiStream(BytesIO(self._raw_configurations))
-                self.configurations = self._root.SdOption.SdConfigStringsContainer(_io__raw_configurations, self, self._root)
+                self.configurations = SomeIpSdOptions.SdOption.SdConfigStringsContainer(_io__raw_configurations, self, self._root)
                 self.configurations._read()
                 self._debug['configurations']['end'] = self._io.pos()
 

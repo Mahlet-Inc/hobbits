@@ -57,10 +57,10 @@ class Gzip(KaitaiStruct):
         if not self.magic == b"\x1F\x8B":
             raise kaitaistruct.ValidationNotEqualError(b"\x1F\x8B", self.magic, self._io, u"/seq/0")
         self._debug['compression_method']['start'] = self._io.pos()
-        self.compression_method = KaitaiStream.resolve_enum(self._root.CompressionMethods, self._io.read_u1())
+        self.compression_method = KaitaiStream.resolve_enum(Gzip.CompressionMethods, self._io.read_u1())
         self._debug['compression_method']['end'] = self._io.pos()
         self._debug['flags']['start'] = self._io.pos()
-        self.flags = self._root.Flags(self._io, self, self._root)
+        self.flags = Gzip.Flags(self._io, self, self._root)
         self.flags._read()
         self._debug['flags']['end'] = self._io.pos()
         self._debug['mod_time']['start'] = self._io.pos()
@@ -68,16 +68,16 @@ class Gzip(KaitaiStruct):
         self._debug['mod_time']['end'] = self._io.pos()
         self._debug['extra_flags']['start'] = self._io.pos()
         _on = self.compression_method
-        if _on == self._root.CompressionMethods.deflate:
-            self.extra_flags = self._root.ExtraFlagsDeflate(self._io, self, self._root)
+        if _on == Gzip.CompressionMethods.deflate:
+            self.extra_flags = Gzip.ExtraFlagsDeflate(self._io, self, self._root)
             self.extra_flags._read()
         self._debug['extra_flags']['end'] = self._io.pos()
         self._debug['os']['start'] = self._io.pos()
-        self.os = KaitaiStream.resolve_enum(self._root.Oses, self._io.read_u1())
+        self.os = KaitaiStream.resolve_enum(Gzip.Oses, self._io.read_u1())
         self._debug['os']['end'] = self._io.pos()
         if self.flags.has_extra:
             self._debug['extras']['start'] = self._io.pos()
-            self.extras = self._root.Extras(self._io, self, self._root)
+            self.extras = Gzip.Extras(self._io, self, self._root)
             self.extras._read()
             self._debug['extras']['end'] = self._io.pos()
 
@@ -116,22 +116,22 @@ class Gzip(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(3)
+            self.reserved1 = self._io.read_bits_int_be(3)
             self._debug['reserved1']['end'] = self._io.pos()
             self._debug['has_comment']['start'] = self._io.pos()
-            self.has_comment = self._io.read_bits_int(1) != 0
+            self.has_comment = self._io.read_bits_int_be(1) != 0
             self._debug['has_comment']['end'] = self._io.pos()
             self._debug['has_name']['start'] = self._io.pos()
-            self.has_name = self._io.read_bits_int(1) != 0
+            self.has_name = self._io.read_bits_int_be(1) != 0
             self._debug['has_name']['end'] = self._io.pos()
             self._debug['has_extra']['start'] = self._io.pos()
-            self.has_extra = self._io.read_bits_int(1) != 0
+            self.has_extra = self._io.read_bits_int_be(1) != 0
             self._debug['has_extra']['end'] = self._io.pos()
             self._debug['has_header_crc']['start'] = self._io.pos()
-            self.has_header_crc = self._io.read_bits_int(1) != 0
+            self.has_header_crc = self._io.read_bits_int_be(1) != 0
             self._debug['has_header_crc']['end'] = self._io.pos()
             self._debug['is_text']['start'] = self._io.pos()
-            self.is_text = self._io.read_bits_int(1) != 0
+            self.is_text = self._io.read_bits_int_be(1) != 0
             self._debug['is_text']['end'] = self._io.pos()
 
 
@@ -149,7 +149,7 @@ class Gzip(KaitaiStruct):
 
         def _read(self):
             self._debug['compression_strength']['start'] = self._io.pos()
-            self.compression_strength = KaitaiStream.resolve_enum(self._root.ExtraFlagsDeflate.CompressionStrengths, self._io.read_u1())
+            self.compression_strength = KaitaiStream.resolve_enum(Gzip.ExtraFlagsDeflate.CompressionStrengths, self._io.read_u1())
             self._debug['compression_strength']['end'] = self._io.pos()
 
 
@@ -171,7 +171,7 @@ class Gzip(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Subfield(self._io, self, self._root)
+                _t_entries = Gzip.Subfield(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -224,7 +224,7 @@ class Gzip(KaitaiStruct):
             self._debug['subfields']['start'] = self._io.pos()
             self._raw_subfields = self._io.read_bytes(self.len_subfields)
             _io__raw_subfields = KaitaiStream(BytesIO(self._raw_subfields))
-            self.subfields = self._root.Subfields(_io__raw_subfields, self, self._root)
+            self.subfields = Gzip.Subfields(_io__raw_subfields, self, self._root)
             self.subfields._read()
             self._debug['subfields']['end'] = self._io.pos()
 

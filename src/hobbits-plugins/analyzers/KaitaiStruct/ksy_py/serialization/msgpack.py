@@ -117,7 +117,7 @@ class Msgpack(KaitaiStruct):
                 if not 'arr' in self._debug['map_elements']:
                     self._debug['map_elements']['arr'] = []
                 self._debug['map_elements']['arr'].append({'start': self._io.pos()})
-                _t_map_elements = self._root.MapTuple(self._io, self, self._root)
+                _t_map_elements = Msgpack.MapTuple(self._io, self, self._root)
                 _t_map_elements._read()
                 self.map_elements[i] = _t_map_elements
                 self._debug['map_elements']['arr'][i]['end'] = self._io.pos()

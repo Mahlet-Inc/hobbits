@@ -57,7 +57,7 @@ class Dcmp0(KaitaiStruct):
             if not 'arr' in self._debug['chunks']:
                 self._debug['chunks']['arr'] = []
             self._debug['chunks']['arr'].append({'start': self._io.pos()})
-            _t_chunks = self._root.Chunk(self._io, self, self._root)
+            _t_chunks = Dcmp0.Chunk(self._io, self, self._root)
             _t_chunks._read()
             _ = _t_chunks
             self.chunks.append(_)
@@ -99,21 +99,21 @@ class Dcmp0(KaitaiStruct):
             self.tag = self._io.read_u1()
             self._debug['tag']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
-            _on = (self._root.Chunk.TagKind.literal if  ((self.tag >= 0) and (self.tag <= 31))  else (self._root.Chunk.TagKind.backreference if  ((self.tag >= 32) and (self.tag <= 74))  else (self._root.Chunk.TagKind.table_lookup if  ((self.tag >= 75) and (self.tag <= 253))  else (self._root.Chunk.TagKind.extended if self.tag == 254 else (self._root.Chunk.TagKind.end if self.tag == 255 else self._root.Chunk.TagKind.invalid)))))
-            if _on == self._root.Chunk.TagKind.extended:
-                self.body = self._root.Chunk.ExtendedBody(self._io, self, self._root)
+            _on = (Dcmp0.Chunk.TagKind.literal if  ((self.tag >= 0) and (self.tag <= 31))  else (Dcmp0.Chunk.TagKind.backreference if  ((self.tag >= 32) and (self.tag <= 74))  else (Dcmp0.Chunk.TagKind.table_lookup if  ((self.tag >= 75) and (self.tag <= 253))  else (Dcmp0.Chunk.TagKind.extended if self.tag == 254 else (Dcmp0.Chunk.TagKind.end if self.tag == 255 else Dcmp0.Chunk.TagKind.invalid)))))
+            if _on == Dcmp0.Chunk.TagKind.extended:
+                self.body = Dcmp0.Chunk.ExtendedBody(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Chunk.TagKind.literal:
-                self.body = self._root.Chunk.LiteralBody(self.tag, self._io, self, self._root)
+            elif _on == Dcmp0.Chunk.TagKind.literal:
+                self.body = Dcmp0.Chunk.LiteralBody(self.tag, self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Chunk.TagKind.end:
-                self.body = self._root.Chunk.EndBody(self._io, self, self._root)
+            elif _on == Dcmp0.Chunk.TagKind.end:
+                self.body = Dcmp0.Chunk.EndBody(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Chunk.TagKind.table_lookup:
-                self.body = self._root.Chunk.TableLookupBody(self.tag, self._io, self, self._root)
+            elif _on == Dcmp0.Chunk.TagKind.table_lookup:
+                self.body = Dcmp0.Chunk.TableLookupBody(self.tag, self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Chunk.TagKind.backreference:
-                self.body = self._root.Chunk.BackreferenceBody(self.tag, self._io, self, self._root)
+            elif _on == Dcmp0.Chunk.TagKind.backreference:
+                self.body = Dcmp0.Chunk.BackreferenceBody(self.tag, self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 
@@ -370,19 +370,19 @@ class Dcmp0(KaitaiStruct):
                 self._debug['body']['start'] = self._io.pos()
                 _on = self.tag
                 if _on == 0:
-                    self.body = self._root.Chunk.ExtendedBody.JumpTableBody(self._io, self, self._root)
+                    self.body = Dcmp0.Chunk.ExtendedBody.JumpTableBody(self._io, self, self._root)
                     self.body._read()
                 elif _on == 4:
-                    self.body = self._root.Chunk.ExtendedBody.DeltaEncoding16BitBody(self._io, self, self._root)
+                    self.body = Dcmp0.Chunk.ExtendedBody.DeltaEncoding16BitBody(self._io, self, self._root)
                     self.body._read()
                 elif _on == 6:
-                    self.body = self._root.Chunk.ExtendedBody.DeltaEncoding32BitBody(self._io, self, self._root)
+                    self.body = Dcmp0.Chunk.ExtendedBody.DeltaEncoding32BitBody(self._io, self, self._root)
                     self.body._read()
                 elif _on == 3:
-                    self.body = self._root.Chunk.ExtendedBody.RepeatBody(self.tag, self._io, self, self._root)
+                    self.body = Dcmp0.Chunk.ExtendedBody.RepeatBody(self.tag, self._io, self, self._root)
                     self.body._read()
                 elif _on == 2:
-                    self.body = self._root.Chunk.ExtendedBody.RepeatBody(self.tag, self._io, self, self._root)
+                    self.body = Dcmp0.Chunk.ExtendedBody.RepeatBody(self.tag, self._io, self, self._root)
                     self.body._read()
                 self._debug['body']['end'] = self._io.pos()
 

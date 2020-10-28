@@ -47,7 +47,7 @@ class AppleSingleDouble(KaitaiStruct):
 
     def _read(self):
         self._debug['magic']['start'] = self._io.pos()
-        self.magic = KaitaiStream.resolve_enum(self._root.FileType, self._io.read_u4be())
+        self.magic = KaitaiStream.resolve_enum(AppleSingleDouble.FileType, self._io.read_u4be())
         self._debug['magic']['end'] = self._io.pos()
         self._debug['version']['start'] = self._io.pos()
         self.version = self._io.read_u4be()
@@ -64,7 +64,7 @@ class AppleSingleDouble(KaitaiStruct):
             if not 'arr' in self._debug['entries']:
                 self._debug['entries']['arr'] = []
             self._debug['entries']['arr'].append({'start': self._io.pos()})
-            _t_entries = self._root.Entry(self._io, self, self._root)
+            _t_entries = AppleSingleDouble.Entry(self._io, self, self._root)
             _t_entries._read()
             self.entries[i] = _t_entries
             self._debug['entries']['arr'][i]['end'] = self._io.pos()
@@ -97,7 +97,7 @@ class AppleSingleDouble(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.Entry.Types, self._io.read_u4be())
+            self.type = KaitaiStream.resolve_enum(AppleSingleDouble.Entry.Types, self._io.read_u4be())
             self._debug['type']['end'] = self._io.pos()
             self._debug['ofs_body']['start'] = self._io.pos()
             self.ofs_body = self._io.read_u4be()
@@ -115,10 +115,10 @@ class AppleSingleDouble(KaitaiStruct):
             self._io.seek(self.ofs_body)
             self._debug['_m_body']['start'] = self._io.pos()
             _on = self.type
-            if _on == self._root.Entry.Types.finder_info:
+            if _on == AppleSingleDouble.Entry.Types.finder_info:
                 self._raw__m_body = self._io.read_bytes(self.len_body)
                 _io__raw__m_body = KaitaiStream(BytesIO(self._raw__m_body))
-                self._m_body = self._root.FinderInfo(_io__raw__m_body, self, self._root)
+                self._m_body = AppleSingleDouble.FinderInfo(_io__raw__m_body, self, self._root)
                 self._m_body._read()
             else:
                 self._m_body = self._io.read_bytes(self.len_body)
@@ -151,7 +151,7 @@ class AppleSingleDouble(KaitaiStruct):
             self.flags = self._io.read_u2be()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['location']['start'] = self._io.pos()
-            self.location = self._root.Point(self._io, self, self._root)
+            self.location = AppleSingleDouble.Point(self._io, self, self._root)
             self.location._read()
             self._debug['location']['end'] = self._io.pos()
             self._debug['folder_id']['start'] = self._io.pos()

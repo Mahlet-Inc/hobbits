@@ -161,7 +161,7 @@ class ApmPartitionTable(KaitaiStruct):
         self._debug['_m_partition_lookup']['start'] = io.pos()
         self._raw__m_partition_lookup = io.read_bytes(self.sector_size)
         _io__raw__m_partition_lookup = KaitaiStream(BytesIO(self._raw__m_partition_lookup))
-        self._m_partition_lookup = self._root.PartitionEntry(_io__raw__m_partition_lookup, self, self._root)
+        self._m_partition_lookup = ApmPartitionTable.PartitionEntry(_io__raw__m_partition_lookup, self, self._root)
         self._m_partition_lookup._read()
         self._debug['_m_partition_lookup']['end'] = io.pos()
         io.seek(_pos)
@@ -184,7 +184,7 @@ class ApmPartitionTable(KaitaiStruct):
             self._debug['_m_partition_entries']['arr'].append({'start': io.pos()})
             self._raw__m_partition_entries[i] = io.read_bytes(self.sector_size)
             _io__raw__m_partition_entries = KaitaiStream(BytesIO(self._raw__m_partition_entries[i]))
-            _t__m_partition_entries = self._root.PartitionEntry(_io__raw__m_partition_entries, self, self._root)
+            _t__m_partition_entries = ApmPartitionTable.PartitionEntry(_io__raw__m_partition_entries, self, self._root)
             _t__m_partition_entries._read()
             self._m_partition_entries[i] = _t__m_partition_entries
             self._debug['_m_partition_entries']['arr'][i]['end'] = io.pos()

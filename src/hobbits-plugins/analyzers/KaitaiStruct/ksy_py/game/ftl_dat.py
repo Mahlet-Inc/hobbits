@@ -27,7 +27,7 @@ class FtlDat(KaitaiStruct):
             if not 'arr' in self._debug['files']:
                 self._debug['files']['arr'] = []
             self._debug['files']['arr'].append({'start': self._io.pos()})
-            _t_files = self._root.File(self._io, self, self._root)
+            _t_files = FtlDat.File(self._io, self, self._root)
             _t_files._read()
             self.files[i] = _t_files
             self._debug['files']['arr'][i]['end'] = self._io.pos()
@@ -56,7 +56,7 @@ class FtlDat(KaitaiStruct):
                 _pos = self._io.pos()
                 self._io.seek(self.ofs_meta)
                 self._debug['_m_meta']['start'] = self._io.pos()
-                self._m_meta = self._root.Meta(self._io, self, self._root)
+                self._m_meta = FtlDat.Meta(self._io, self, self._root)
                 self._m_meta._read()
                 self._debug['_m_meta']['end'] = self._io.pos()
                 self._io.seek(_pos)

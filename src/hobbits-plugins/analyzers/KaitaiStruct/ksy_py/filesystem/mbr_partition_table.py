@@ -37,7 +37,7 @@ class MbrPartitionTable(KaitaiStruct):
             if not 'arr' in self._debug['partitions']:
                 self._debug['partitions']['arr'] = []
             self._debug['partitions']['arr'].append({'start': self._io.pos()})
-            _t_partitions = self._root.PartitionEntry(self._io, self, self._root)
+            _t_partitions = MbrPartitionTable.PartitionEntry(self._io, self, self._root)
             _t_partitions._read()
             self.partitions[i] = _t_partitions
             self._debug['partitions']['arr'][i]['end'] = self._io.pos()
@@ -62,14 +62,14 @@ class MbrPartitionTable(KaitaiStruct):
             self.status = self._io.read_u1()
             self._debug['status']['end'] = self._io.pos()
             self._debug['chs_start']['start'] = self._io.pos()
-            self.chs_start = self._root.Chs(self._io, self, self._root)
+            self.chs_start = MbrPartitionTable.Chs(self._io, self, self._root)
             self.chs_start._read()
             self._debug['chs_start']['end'] = self._io.pos()
             self._debug['partition_type']['start'] = self._io.pos()
             self.partition_type = self._io.read_u1()
             self._debug['partition_type']['end'] = self._io.pos()
             self._debug['chs_end']['start'] = self._io.pos()
-            self.chs_end = self._root.Chs(self._io, self, self._root)
+            self.chs_end = MbrPartitionTable.Chs(self._io, self, self._root)
             self.chs_end._read()
             self._debug['chs_end']['end'] = self._io.pos()
             self._debug['lba_start']['start'] = self._io.pos()

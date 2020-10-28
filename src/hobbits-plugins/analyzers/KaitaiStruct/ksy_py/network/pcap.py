@@ -136,7 +136,7 @@ class Pcap(KaitaiStruct):
 
     def _read(self):
         self._debug['hdr']['start'] = self._io.pos()
-        self.hdr = self._root.Header(self._io, self, self._root)
+        self.hdr = Pcap.Header(self._io, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
         self._debug['packets']['start'] = self._io.pos()
@@ -146,7 +146,7 @@ class Pcap(KaitaiStruct):
             if not 'arr' in self._debug['packets']:
                 self._debug['packets']['arr'] = []
             self._debug['packets']['arr'].append({'start': self._io.pos()})
-            _t_packets = self._root.Packet(self._io, self, self._root)
+            _t_packets = Pcap.Packet(self._io, self, self._root)
             _t_packets._read()
             self.packets.append(_t_packets)
             self._debug['packets']['arr'][len(self.packets) - 1]['end'] = self._io.pos()
@@ -188,7 +188,7 @@ class Pcap(KaitaiStruct):
             self.snaplen = self._io.read_u4le()
             self._debug['snaplen']['end'] = self._io.pos()
             self._debug['network']['start'] = self._io.pos()
-            self.network = KaitaiStream.resolve_enum(self._root.Linktype, self._io.read_u4le())
+            self.network = KaitaiStream.resolve_enum(Pcap.Linktype, self._io.read_u4le())
             self._debug['network']['end'] = self._io.pos()
 
 
@@ -219,12 +219,12 @@ class Pcap(KaitaiStruct):
             self._debug['orig_len']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self._root.hdr.network
-            if _on == self._root.Linktype.ppi:
+            if _on == Pcap.Linktype.ppi:
                 self._raw_body = self._io.read_bytes(self.incl_len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
                 self.body = packet_ppi.PacketPpi(_io__raw_body)
                 self.body._read()
-            elif _on == self._root.Linktype.ethernet:
+            elif _on == Pcap.Linktype.ethernet:
                 self._raw_body = self._io.read_bytes(self.incl_len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
                 self.body = ethernet_frame.EthernetFrame(_io__raw_body)

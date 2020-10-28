@@ -26,7 +26,7 @@ class Ttf(KaitaiStruct):
 
     def _read(self):
         self._debug['offset_table']['start'] = self._io.pos()
-        self.offset_table = self._root.OffsetTable(self._io, self, self._root)
+        self.offset_table = Ttf.OffsetTable(self._io, self, self._root)
         self.offset_table._read()
         self._debug['offset_table']['end'] = self._io.pos()
         self._debug['directory_table']['start'] = self._io.pos()
@@ -35,7 +35,7 @@ class Ttf(KaitaiStruct):
             if not 'arr' in self._debug['directory_table']:
                 self._debug['directory_table']['arr'] = []
             self._debug['directory_table']['arr'].append({'start': self._io.pos()})
-            _t_directory_table = self._root.DirTableEntry(self._io, self, self._root)
+            _t_directory_table = Ttf.DirTableEntry(self._io, self, self._root)
             _t_directory_table._read()
             self.directory_table[i] = _t_directory_table
             self._debug['directory_table']['arr'][i]['end'] = self._io.pos()
@@ -52,11 +52,11 @@ class Ttf(KaitaiStruct):
 
         def _read(self):
             self._debug['format']['start'] = self._io.pos()
-            self.format = self._root.Fixed(self._io, self, self._root)
+            self.format = Ttf.Fixed(self._io, self, self._root)
             self.format._read()
             self._debug['format']['end'] = self._io.pos()
             self._debug['italic_angle']['start'] = self._io.pos()
-            self.italic_angle = self._root.Fixed(self._io, self, self._root)
+            self.italic_angle = Ttf.Fixed(self._io, self, self._root)
             self.italic_angle._read()
             self._debug['italic_angle']['end'] = self._io.pos()
             self._debug['underline_position']['start'] = self._io.pos()
@@ -82,7 +82,7 @@ class Ttf(KaitaiStruct):
             self._debug['max_mem_type1']['end'] = self._io.pos()
             if  ((self.format.major == 2) and (self.format.minor == 0)) :
                 self._debug['format20']['start'] = self._io.pos()
-                self.format20 = self._root.Post.Format20(self._io, self, self._root)
+                self.format20 = Ttf.Post.Format20(self._io, self, self._root)
                 self.format20._read()
                 self._debug['format20']['end'] = self._io.pos()
 
@@ -116,7 +116,7 @@ class Ttf(KaitaiStruct):
                     if not 'arr' in self._debug['glyph_names']:
                         self._debug['glyph_names']['arr'] = []
                     self._debug['glyph_names']['arr'].append({'start': self._io.pos()})
-                    _t_glyph_names = self._root.Post.Format20.PascalString(self._io, self, self._root)
+                    _t_glyph_names = Ttf.Post.Format20.PascalString(self._io, self, self._root)
                     _t_glyph_names._read()
                     _ = _t_glyph_names
                     self.glyph_names.append(_)
@@ -209,7 +209,7 @@ class Ttf(KaitaiStruct):
                 if not 'arr' in self._debug['name_records']:
                     self._debug['name_records']['arr'] = []
                 self._debug['name_records']['arr'].append({'start': self._io.pos()})
-                _t_name_records = self._root.Name.NameRecord(self._io, self, self._root)
+                _t_name_records = Ttf.Name.NameRecord(self._io, self, self._root)
                 _t_name_records._read()
                 self.name_records[i] = _t_name_records
                 self._debug['name_records']['arr'][i]['end'] = self._io.pos()
@@ -226,7 +226,7 @@ class Ttf(KaitaiStruct):
 
             def _read(self):
                 self._debug['platform_id']['start'] = self._io.pos()
-                self.platform_id = KaitaiStream.resolve_enum(self._root.Name.Platforms, self._io.read_u2be())
+                self.platform_id = KaitaiStream.resolve_enum(Ttf.Name.Platforms, self._io.read_u2be())
                 self._debug['platform_id']['end'] = self._io.pos()
                 self._debug['encoding_id']['start'] = self._io.pos()
                 self.encoding_id = self._io.read_u2be()
@@ -235,7 +235,7 @@ class Ttf(KaitaiStruct):
                 self.language_id = self._io.read_u2be()
                 self._debug['language_id']['end'] = self._io.pos()
                 self._debug['name_id']['start'] = self._io.pos()
-                self.name_id = KaitaiStream.resolve_enum(self._root.Name.Names, self._io.read_u2be())
+                self.name_id = KaitaiStream.resolve_enum(Ttf.Name.Names, self._io.read_u2be())
                 self._debug['name_id']['end'] = self._io.pos()
                 self._debug['len_str']['start'] = self._io.pos()
                 self.len_str = self._io.read_u2be()
@@ -296,11 +296,11 @@ class Ttf(KaitaiStruct):
 
         def _read(self):
             self._debug['version']['start'] = self._io.pos()
-            self.version = self._root.Fixed(self._io, self, self._root)
+            self.version = Ttf.Fixed(self._io, self, self._root)
             self.version._read()
             self._debug['version']['end'] = self._io.pos()
             self._debug['font_revision']['start'] = self._io.pos()
-            self.font_revision = self._root.Fixed(self._io, self, self._root)
+            self.font_revision = Ttf.Fixed(self._io, self, self._root)
             self.font_revision._read()
             self._debug['font_revision']['end'] = self._io.pos()
             self._debug['checksum_adjustment']['start'] = self._io.pos()
@@ -312,7 +312,7 @@ class Ttf(KaitaiStruct):
             if not self.magic_number == b"\x5F\x0F\x3C\xF5":
                 raise kaitaistruct.ValidationNotEqualError(b"\x5F\x0F\x3C\xF5", self.magic_number, self._io, u"/types/head/seq/3")
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = KaitaiStream.resolve_enum(self._root.Head.Flags, self._io.read_u2be())
+            self.flags = KaitaiStream.resolve_enum(Ttf.Head.Flags, self._io.read_u2be())
             self._debug['flags']['end'] = self._io.pos()
             self._debug['units_per_em']['start'] = self._io.pos()
             self.units_per_em = self._io.read_u2be()
@@ -342,7 +342,7 @@ class Ttf(KaitaiStruct):
             self.lowest_rec_ppem = self._io.read_u2be()
             self._debug['lowest_rec_ppem']['end'] = self._io.pos()
             self._debug['font_direction_hint']['start'] = self._io.pos()
-            self.font_direction_hint = KaitaiStream.resolve_enum(self._root.Head.FontDirectionHint, self._io.read_s2be())
+            self.font_direction_hint = KaitaiStream.resolve_enum(Ttf.Head.FontDirectionHint, self._io.read_s2be())
             self._debug['font_direction_hint']['end'] = self._io.pos()
             self._debug['index_to_loc_format']['start'] = self._io.pos()
             self.index_to_loc_format = self._io.read_s2be()
@@ -376,7 +376,7 @@ class Ttf(KaitaiStruct):
 
         def _read(self):
             self._debug['version']['start'] = self._io.pos()
-            self.version = self._root.Fixed(self._io, self, self._root)
+            self.version = Ttf.Fixed(self._io, self, self._root)
             self.version._read()
             self._debug['version']['end'] = self._io.pos()
             self._debug['ascender']['start'] = self._io.pos()
@@ -454,7 +454,7 @@ class Ttf(KaitaiStruct):
                 if not 'arr' in self._debug['subtables']:
                     self._debug['subtables']['arr'] = []
                 self._debug['subtables']['arr'].append({'start': self._io.pos()})
-                _t_subtables = self._root.Kern.Subtable(self._io, self, self._root)
+                _t_subtables = Ttf.Kern.Subtable(self._io, self, self._root)
                 _t_subtables._read()
                 self.subtables[i] = _t_subtables
                 self._debug['subtables']['arr'][i]['end'] = self._io.pos()
@@ -480,24 +480,24 @@ class Ttf(KaitaiStruct):
                 self.format = self._io.read_u1()
                 self._debug['format']['end'] = self._io.pos()
                 self._debug['reserved']['start'] = self._io.pos()
-                self.reserved = self._io.read_bits_int(4)
+                self.reserved = self._io.read_bits_int_be(4)
                 self._debug['reserved']['end'] = self._io.pos()
                 self._debug['is_override']['start'] = self._io.pos()
-                self.is_override = self._io.read_bits_int(1) != 0
+                self.is_override = self._io.read_bits_int_be(1) != 0
                 self._debug['is_override']['end'] = self._io.pos()
                 self._debug['is_cross_stream']['start'] = self._io.pos()
-                self.is_cross_stream = self._io.read_bits_int(1) != 0
+                self.is_cross_stream = self._io.read_bits_int_be(1) != 0
                 self._debug['is_cross_stream']['end'] = self._io.pos()
                 self._debug['is_minimum']['start'] = self._io.pos()
-                self.is_minimum = self._io.read_bits_int(1) != 0
+                self.is_minimum = self._io.read_bits_int_be(1) != 0
                 self._debug['is_minimum']['end'] = self._io.pos()
                 self._debug['is_horizontal']['start'] = self._io.pos()
-                self.is_horizontal = self._io.read_bits_int(1) != 0
+                self.is_horizontal = self._io.read_bits_int_be(1) != 0
                 self._debug['is_horizontal']['end'] = self._io.pos()
                 self._io.align_to_byte()
                 if self.format == 0:
                     self._debug['format0']['start'] = self._io.pos()
-                    self.format0 = self._root.Kern.Subtable.Format0(self._io, self, self._root)
+                    self.format0 = Ttf.Kern.Subtable.Format0(self._io, self, self._root)
                     self.format0._read()
                     self._debug['format0']['end'] = self._io.pos()
 
@@ -529,7 +529,7 @@ class Ttf(KaitaiStruct):
                         if not 'arr' in self._debug['kerning_pairs']:
                             self._debug['kerning_pairs']['arr'] = []
                         self._debug['kerning_pairs']['arr'].append({'start': self._io.pos()})
-                        _t_kerning_pairs = self._root.Kern.Subtable.Format0.KerningPair(self._io, self, self._root)
+                        _t_kerning_pairs = Ttf.Kern.Subtable.Format0.KerningPair(self._io, self, self._root)
                         _t_kerning_pairs._read()
                         self.kerning_pairs[i] = _t_kerning_pairs
                         self._debug['kerning_pairs']['arr'][i]['end'] = self._io.pos()
@@ -594,62 +594,62 @@ class Ttf(KaitaiStruct):
             if _on == u"head":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Head(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Head(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"cvt ":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Cvt(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Cvt(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"prep":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Prep(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Prep(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"kern":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Kern(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Kern(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"hhea":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Hhea(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Hhea(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"post":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Post(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Post(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"OS/2":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Os2(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Os2(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"name":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Name(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Name(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"maxp":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Maxp(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Maxp(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"glyf":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Glyf(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Glyf(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"fpgm":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Fpgm(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Fpgm(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             elif _on == u"cmap":
                 self._raw__m_value = io.read_bytes(self.length)
                 _io__raw__m_value = KaitaiStream(BytesIO(self._raw__m_value))
-                self._m_value = self._root.Cmap(_io__raw__m_value, self, self._root)
+                self._m_value = Ttf.Cmap(_io__raw__m_value, self, self._root)
                 self._m_value._read()
             else:
                 self._m_value = io.read_bytes(self.length)
@@ -711,13 +711,13 @@ class Ttf(KaitaiStruct):
             self.x_avg_char_width = self._io.read_s2be()
             self._debug['x_avg_char_width']['end'] = self._io.pos()
             self._debug['weight_class']['start'] = self._io.pos()
-            self.weight_class = KaitaiStream.resolve_enum(self._root.Os2.WeightClass, self._io.read_u2be())
+            self.weight_class = KaitaiStream.resolve_enum(Ttf.Os2.WeightClass, self._io.read_u2be())
             self._debug['weight_class']['end'] = self._io.pos()
             self._debug['width_class']['start'] = self._io.pos()
-            self.width_class = KaitaiStream.resolve_enum(self._root.Os2.WidthClass, self._io.read_u2be())
+            self.width_class = KaitaiStream.resolve_enum(Ttf.Os2.WidthClass, self._io.read_u2be())
             self._debug['width_class']['end'] = self._io.pos()
             self._debug['fs_type']['start'] = self._io.pos()
-            self.fs_type = KaitaiStream.resolve_enum(self._root.Os2.FsType, self._io.read_s2be())
+            self.fs_type = KaitaiStream.resolve_enum(Ttf.Os2.FsType, self._io.read_s2be())
             self._debug['fs_type']['end'] = self._io.pos()
             self._debug['y_subscript_x_size']['start'] = self._io.pos()
             self.y_subscript_x_size = self._io.read_s2be()
@@ -753,18 +753,18 @@ class Ttf(KaitaiStruct):
             self.s_family_class = self._io.read_s2be()
             self._debug['s_family_class']['end'] = self._io.pos()
             self._debug['panose']['start'] = self._io.pos()
-            self.panose = self._root.Os2.Panose(self._io, self, self._root)
+            self.panose = Ttf.Os2.Panose(self._io, self, self._root)
             self.panose._read()
             self._debug['panose']['end'] = self._io.pos()
             self._debug['unicode_range']['start'] = self._io.pos()
-            self.unicode_range = self._root.Os2.UnicodeRange(self._io, self, self._root)
+            self.unicode_range = Ttf.Os2.UnicodeRange(self._io, self, self._root)
             self.unicode_range._read()
             self._debug['unicode_range']['end'] = self._io.pos()
             self._debug['ach_vend_id']['start'] = self._io.pos()
             self.ach_vend_id = (self._io.read_bytes(4)).decode(u"ascii")
             self._debug['ach_vend_id']['end'] = self._io.pos()
             self._debug['selection']['start'] = self._io.pos()
-            self.selection = KaitaiStream.resolve_enum(self._root.Os2.FsSelection, self._io.read_u2be())
+            self.selection = KaitaiStream.resolve_enum(Ttf.Os2.FsSelection, self._io.read_u2be())
             self._debug['selection']['end'] = self._io.pos()
             self._debug['first_char_index']['start'] = self._io.pos()
             self.first_char_index = self._io.read_u2be()
@@ -788,7 +788,7 @@ class Ttf(KaitaiStruct):
             self.win_descent = self._io.read_u2be()
             self._debug['win_descent']['end'] = self._io.pos()
             self._debug['code_page_range']['start'] = self._io.pos()
-            self.code_page_range = self._root.Os2.CodePageRange(self._io, self, self._root)
+            self.code_page_range = Ttf.Os2.CodePageRange(self._io, self, self._root)
             self.code_page_range._read()
             self._debug['code_page_range']['end'] = self._io.pos()
 
@@ -935,34 +935,34 @@ class Ttf(KaitaiStruct):
 
             def _read(self):
                 self._debug['family_type']['start'] = self._io.pos()
-                self.family_type = KaitaiStream.resolve_enum(self._root.Os2.Panose.FamilyKind, self._io.read_u1())
+                self.family_type = KaitaiStream.resolve_enum(Ttf.Os2.Panose.FamilyKind, self._io.read_u1())
                 self._debug['family_type']['end'] = self._io.pos()
                 self._debug['serif_style']['start'] = self._io.pos()
-                self.serif_style = KaitaiStream.resolve_enum(self._root.Os2.Panose.SerifStyle, self._io.read_u1())
+                self.serif_style = KaitaiStream.resolve_enum(Ttf.Os2.Panose.SerifStyle, self._io.read_u1())
                 self._debug['serif_style']['end'] = self._io.pos()
                 self._debug['weight']['start'] = self._io.pos()
-                self.weight = KaitaiStream.resolve_enum(self._root.Os2.Panose.Weight, self._io.read_u1())
+                self.weight = KaitaiStream.resolve_enum(Ttf.Os2.Panose.Weight, self._io.read_u1())
                 self._debug['weight']['end'] = self._io.pos()
                 self._debug['proportion']['start'] = self._io.pos()
-                self.proportion = KaitaiStream.resolve_enum(self._root.Os2.Panose.Proportion, self._io.read_u1())
+                self.proportion = KaitaiStream.resolve_enum(Ttf.Os2.Panose.Proportion, self._io.read_u1())
                 self._debug['proportion']['end'] = self._io.pos()
                 self._debug['contrast']['start'] = self._io.pos()
-                self.contrast = KaitaiStream.resolve_enum(self._root.Os2.Panose.Contrast, self._io.read_u1())
+                self.contrast = KaitaiStream.resolve_enum(Ttf.Os2.Panose.Contrast, self._io.read_u1())
                 self._debug['contrast']['end'] = self._io.pos()
                 self._debug['stroke_variation']['start'] = self._io.pos()
-                self.stroke_variation = KaitaiStream.resolve_enum(self._root.Os2.Panose.StrokeVariation, self._io.read_u1())
+                self.stroke_variation = KaitaiStream.resolve_enum(Ttf.Os2.Panose.StrokeVariation, self._io.read_u1())
                 self._debug['stroke_variation']['end'] = self._io.pos()
                 self._debug['arm_style']['start'] = self._io.pos()
-                self.arm_style = KaitaiStream.resolve_enum(self._root.Os2.Panose.ArmStyle, self._io.read_u1())
+                self.arm_style = KaitaiStream.resolve_enum(Ttf.Os2.Panose.ArmStyle, self._io.read_u1())
                 self._debug['arm_style']['end'] = self._io.pos()
                 self._debug['letter_form']['start'] = self._io.pos()
-                self.letter_form = KaitaiStream.resolve_enum(self._root.Os2.Panose.LetterForm, self._io.read_u1())
+                self.letter_form = KaitaiStream.resolve_enum(Ttf.Os2.Panose.LetterForm, self._io.read_u1())
                 self._debug['letter_form']['end'] = self._io.pos()
                 self._debug['midline']['start'] = self._io.pos()
-                self.midline = KaitaiStream.resolve_enum(self._root.Os2.Panose.Midline, self._io.read_u1())
+                self.midline = KaitaiStream.resolve_enum(Ttf.Os2.Panose.Midline, self._io.read_u1())
                 self._debug['midline']['end'] = self._io.pos()
                 self._debug['x_height']['start'] = self._io.pos()
-                self.x_height = KaitaiStream.resolve_enum(self._root.Os2.Panose.XHeight, self._io.read_u1())
+                self.x_height = KaitaiStream.resolve_enum(Ttf.Os2.Panose.XHeight, self._io.read_u1())
                 self._debug['x_height']['end'] = self._io.pos()
 
 
@@ -976,214 +976,214 @@ class Ttf(KaitaiStruct):
 
             def _read(self):
                 self._debug['basic_latin']['start'] = self._io.pos()
-                self.basic_latin = self._io.read_bits_int(1) != 0
+                self.basic_latin = self._io.read_bits_int_be(1) != 0
                 self._debug['basic_latin']['end'] = self._io.pos()
                 self._debug['latin_1_supplement']['start'] = self._io.pos()
-                self.latin_1_supplement = self._io.read_bits_int(1) != 0
+                self.latin_1_supplement = self._io.read_bits_int_be(1) != 0
                 self._debug['latin_1_supplement']['end'] = self._io.pos()
                 self._debug['latin_extended_a']['start'] = self._io.pos()
-                self.latin_extended_a = self._io.read_bits_int(1) != 0
+                self.latin_extended_a = self._io.read_bits_int_be(1) != 0
                 self._debug['latin_extended_a']['end'] = self._io.pos()
                 self._debug['latin_extended_b']['start'] = self._io.pos()
-                self.latin_extended_b = self._io.read_bits_int(1) != 0
+                self.latin_extended_b = self._io.read_bits_int_be(1) != 0
                 self._debug['latin_extended_b']['end'] = self._io.pos()
                 self._debug['ipa_extensions']['start'] = self._io.pos()
-                self.ipa_extensions = self._io.read_bits_int(1) != 0
+                self.ipa_extensions = self._io.read_bits_int_be(1) != 0
                 self._debug['ipa_extensions']['end'] = self._io.pos()
                 self._debug['spacing_modifier_letters']['start'] = self._io.pos()
-                self.spacing_modifier_letters = self._io.read_bits_int(1) != 0
+                self.spacing_modifier_letters = self._io.read_bits_int_be(1) != 0
                 self._debug['spacing_modifier_letters']['end'] = self._io.pos()
                 self._debug['combining_diacritical_marks']['start'] = self._io.pos()
-                self.combining_diacritical_marks = self._io.read_bits_int(1) != 0
+                self.combining_diacritical_marks = self._io.read_bits_int_be(1) != 0
                 self._debug['combining_diacritical_marks']['end'] = self._io.pos()
                 self._debug['basic_greek']['start'] = self._io.pos()
-                self.basic_greek = self._io.read_bits_int(1) != 0
+                self.basic_greek = self._io.read_bits_int_be(1) != 0
                 self._debug['basic_greek']['end'] = self._io.pos()
                 self._debug['greek_symbols_and_coptic']['start'] = self._io.pos()
-                self.greek_symbols_and_coptic = self._io.read_bits_int(1) != 0
+                self.greek_symbols_and_coptic = self._io.read_bits_int_be(1) != 0
                 self._debug['greek_symbols_and_coptic']['end'] = self._io.pos()
                 self._debug['cyrillic']['start'] = self._io.pos()
-                self.cyrillic = self._io.read_bits_int(1) != 0
+                self.cyrillic = self._io.read_bits_int_be(1) != 0
                 self._debug['cyrillic']['end'] = self._io.pos()
                 self._debug['armenian']['start'] = self._io.pos()
-                self.armenian = self._io.read_bits_int(1) != 0
+                self.armenian = self._io.read_bits_int_be(1) != 0
                 self._debug['armenian']['end'] = self._io.pos()
                 self._debug['basic_hebrew']['start'] = self._io.pos()
-                self.basic_hebrew = self._io.read_bits_int(1) != 0
+                self.basic_hebrew = self._io.read_bits_int_be(1) != 0
                 self._debug['basic_hebrew']['end'] = self._io.pos()
                 self._debug['hebrew_extended']['start'] = self._io.pos()
-                self.hebrew_extended = self._io.read_bits_int(1) != 0
+                self.hebrew_extended = self._io.read_bits_int_be(1) != 0
                 self._debug['hebrew_extended']['end'] = self._io.pos()
                 self._debug['basic_arabic']['start'] = self._io.pos()
-                self.basic_arabic = self._io.read_bits_int(1) != 0
+                self.basic_arabic = self._io.read_bits_int_be(1) != 0
                 self._debug['basic_arabic']['end'] = self._io.pos()
                 self._debug['arabic_extended']['start'] = self._io.pos()
-                self.arabic_extended = self._io.read_bits_int(1) != 0
+                self.arabic_extended = self._io.read_bits_int_be(1) != 0
                 self._debug['arabic_extended']['end'] = self._io.pos()
                 self._debug['devanagari']['start'] = self._io.pos()
-                self.devanagari = self._io.read_bits_int(1) != 0
+                self.devanagari = self._io.read_bits_int_be(1) != 0
                 self._debug['devanagari']['end'] = self._io.pos()
                 self._debug['bengali']['start'] = self._io.pos()
-                self.bengali = self._io.read_bits_int(1) != 0
+                self.bengali = self._io.read_bits_int_be(1) != 0
                 self._debug['bengali']['end'] = self._io.pos()
                 self._debug['gurmukhi']['start'] = self._io.pos()
-                self.gurmukhi = self._io.read_bits_int(1) != 0
+                self.gurmukhi = self._io.read_bits_int_be(1) != 0
                 self._debug['gurmukhi']['end'] = self._io.pos()
                 self._debug['gujarati']['start'] = self._io.pos()
-                self.gujarati = self._io.read_bits_int(1) != 0
+                self.gujarati = self._io.read_bits_int_be(1) != 0
                 self._debug['gujarati']['end'] = self._io.pos()
                 self._debug['oriya']['start'] = self._io.pos()
-                self.oriya = self._io.read_bits_int(1) != 0
+                self.oriya = self._io.read_bits_int_be(1) != 0
                 self._debug['oriya']['end'] = self._io.pos()
                 self._debug['tamil']['start'] = self._io.pos()
-                self.tamil = self._io.read_bits_int(1) != 0
+                self.tamil = self._io.read_bits_int_be(1) != 0
                 self._debug['tamil']['end'] = self._io.pos()
                 self._debug['telugu']['start'] = self._io.pos()
-                self.telugu = self._io.read_bits_int(1) != 0
+                self.telugu = self._io.read_bits_int_be(1) != 0
                 self._debug['telugu']['end'] = self._io.pos()
                 self._debug['kannada']['start'] = self._io.pos()
-                self.kannada = self._io.read_bits_int(1) != 0
+                self.kannada = self._io.read_bits_int_be(1) != 0
                 self._debug['kannada']['end'] = self._io.pos()
                 self._debug['malayalam']['start'] = self._io.pos()
-                self.malayalam = self._io.read_bits_int(1) != 0
+                self.malayalam = self._io.read_bits_int_be(1) != 0
                 self._debug['malayalam']['end'] = self._io.pos()
                 self._debug['thai']['start'] = self._io.pos()
-                self.thai = self._io.read_bits_int(1) != 0
+                self.thai = self._io.read_bits_int_be(1) != 0
                 self._debug['thai']['end'] = self._io.pos()
                 self._debug['lao']['start'] = self._io.pos()
-                self.lao = self._io.read_bits_int(1) != 0
+                self.lao = self._io.read_bits_int_be(1) != 0
                 self._debug['lao']['end'] = self._io.pos()
                 self._debug['basic_georgian']['start'] = self._io.pos()
-                self.basic_georgian = self._io.read_bits_int(1) != 0
+                self.basic_georgian = self._io.read_bits_int_be(1) != 0
                 self._debug['basic_georgian']['end'] = self._io.pos()
                 self._debug['georgian_extended']['start'] = self._io.pos()
-                self.georgian_extended = self._io.read_bits_int(1) != 0
+                self.georgian_extended = self._io.read_bits_int_be(1) != 0
                 self._debug['georgian_extended']['end'] = self._io.pos()
                 self._debug['hangul_jamo']['start'] = self._io.pos()
-                self.hangul_jamo = self._io.read_bits_int(1) != 0
+                self.hangul_jamo = self._io.read_bits_int_be(1) != 0
                 self._debug['hangul_jamo']['end'] = self._io.pos()
                 self._debug['latin_extended_additional']['start'] = self._io.pos()
-                self.latin_extended_additional = self._io.read_bits_int(1) != 0
+                self.latin_extended_additional = self._io.read_bits_int_be(1) != 0
                 self._debug['latin_extended_additional']['end'] = self._io.pos()
                 self._debug['greek_extended']['start'] = self._io.pos()
-                self.greek_extended = self._io.read_bits_int(1) != 0
+                self.greek_extended = self._io.read_bits_int_be(1) != 0
                 self._debug['greek_extended']['end'] = self._io.pos()
                 self._debug['general_punctuation']['start'] = self._io.pos()
-                self.general_punctuation = self._io.read_bits_int(1) != 0
+                self.general_punctuation = self._io.read_bits_int_be(1) != 0
                 self._debug['general_punctuation']['end'] = self._io.pos()
                 self._debug['superscripts_and_subscripts']['start'] = self._io.pos()
-                self.superscripts_and_subscripts = self._io.read_bits_int(1) != 0
+                self.superscripts_and_subscripts = self._io.read_bits_int_be(1) != 0
                 self._debug['superscripts_and_subscripts']['end'] = self._io.pos()
                 self._debug['currency_symbols']['start'] = self._io.pos()
-                self.currency_symbols = self._io.read_bits_int(1) != 0
+                self.currency_symbols = self._io.read_bits_int_be(1) != 0
                 self._debug['currency_symbols']['end'] = self._io.pos()
                 self._debug['combining_diacritical_marks_for_symbols']['start'] = self._io.pos()
-                self.combining_diacritical_marks_for_symbols = self._io.read_bits_int(1) != 0
+                self.combining_diacritical_marks_for_symbols = self._io.read_bits_int_be(1) != 0
                 self._debug['combining_diacritical_marks_for_symbols']['end'] = self._io.pos()
                 self._debug['letterlike_symbols']['start'] = self._io.pos()
-                self.letterlike_symbols = self._io.read_bits_int(1) != 0
+                self.letterlike_symbols = self._io.read_bits_int_be(1) != 0
                 self._debug['letterlike_symbols']['end'] = self._io.pos()
                 self._debug['number_forms']['start'] = self._io.pos()
-                self.number_forms = self._io.read_bits_int(1) != 0
+                self.number_forms = self._io.read_bits_int_be(1) != 0
                 self._debug['number_forms']['end'] = self._io.pos()
                 self._debug['arrows']['start'] = self._io.pos()
-                self.arrows = self._io.read_bits_int(1) != 0
+                self.arrows = self._io.read_bits_int_be(1) != 0
                 self._debug['arrows']['end'] = self._io.pos()
                 self._debug['mathematical_operators']['start'] = self._io.pos()
-                self.mathematical_operators = self._io.read_bits_int(1) != 0
+                self.mathematical_operators = self._io.read_bits_int_be(1) != 0
                 self._debug['mathematical_operators']['end'] = self._io.pos()
                 self._debug['miscellaneous_technical']['start'] = self._io.pos()
-                self.miscellaneous_technical = self._io.read_bits_int(1) != 0
+                self.miscellaneous_technical = self._io.read_bits_int_be(1) != 0
                 self._debug['miscellaneous_technical']['end'] = self._io.pos()
                 self._debug['control_pictures']['start'] = self._io.pos()
-                self.control_pictures = self._io.read_bits_int(1) != 0
+                self.control_pictures = self._io.read_bits_int_be(1) != 0
                 self._debug['control_pictures']['end'] = self._io.pos()
                 self._debug['optical_character_recognition']['start'] = self._io.pos()
-                self.optical_character_recognition = self._io.read_bits_int(1) != 0
+                self.optical_character_recognition = self._io.read_bits_int_be(1) != 0
                 self._debug['optical_character_recognition']['end'] = self._io.pos()
                 self._debug['enclosed_alphanumerics']['start'] = self._io.pos()
-                self.enclosed_alphanumerics = self._io.read_bits_int(1) != 0
+                self.enclosed_alphanumerics = self._io.read_bits_int_be(1) != 0
                 self._debug['enclosed_alphanumerics']['end'] = self._io.pos()
                 self._debug['box_drawing']['start'] = self._io.pos()
-                self.box_drawing = self._io.read_bits_int(1) != 0
+                self.box_drawing = self._io.read_bits_int_be(1) != 0
                 self._debug['box_drawing']['end'] = self._io.pos()
                 self._debug['block_elements']['start'] = self._io.pos()
-                self.block_elements = self._io.read_bits_int(1) != 0
+                self.block_elements = self._io.read_bits_int_be(1) != 0
                 self._debug['block_elements']['end'] = self._io.pos()
                 self._debug['geometric_shapes']['start'] = self._io.pos()
-                self.geometric_shapes = self._io.read_bits_int(1) != 0
+                self.geometric_shapes = self._io.read_bits_int_be(1) != 0
                 self._debug['geometric_shapes']['end'] = self._io.pos()
                 self._debug['miscellaneous_symbols']['start'] = self._io.pos()
-                self.miscellaneous_symbols = self._io.read_bits_int(1) != 0
+                self.miscellaneous_symbols = self._io.read_bits_int_be(1) != 0
                 self._debug['miscellaneous_symbols']['end'] = self._io.pos()
                 self._debug['dingbats']['start'] = self._io.pos()
-                self.dingbats = self._io.read_bits_int(1) != 0
+                self.dingbats = self._io.read_bits_int_be(1) != 0
                 self._debug['dingbats']['end'] = self._io.pos()
                 self._debug['cjk_symbols_and_punctuation']['start'] = self._io.pos()
-                self.cjk_symbols_and_punctuation = self._io.read_bits_int(1) != 0
+                self.cjk_symbols_and_punctuation = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_symbols_and_punctuation']['end'] = self._io.pos()
                 self._debug['hiragana']['start'] = self._io.pos()
-                self.hiragana = self._io.read_bits_int(1) != 0
+                self.hiragana = self._io.read_bits_int_be(1) != 0
                 self._debug['hiragana']['end'] = self._io.pos()
                 self._debug['katakana']['start'] = self._io.pos()
-                self.katakana = self._io.read_bits_int(1) != 0
+                self.katakana = self._io.read_bits_int_be(1) != 0
                 self._debug['katakana']['end'] = self._io.pos()
                 self._debug['bopomofo']['start'] = self._io.pos()
-                self.bopomofo = self._io.read_bits_int(1) != 0
+                self.bopomofo = self._io.read_bits_int_be(1) != 0
                 self._debug['bopomofo']['end'] = self._io.pos()
                 self._debug['hangul_compatibility_jamo']['start'] = self._io.pos()
-                self.hangul_compatibility_jamo = self._io.read_bits_int(1) != 0
+                self.hangul_compatibility_jamo = self._io.read_bits_int_be(1) != 0
                 self._debug['hangul_compatibility_jamo']['end'] = self._io.pos()
                 self._debug['cjk_miscellaneous']['start'] = self._io.pos()
-                self.cjk_miscellaneous = self._io.read_bits_int(1) != 0
+                self.cjk_miscellaneous = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_miscellaneous']['end'] = self._io.pos()
                 self._debug['enclosed_cjk_letters_and_months']['start'] = self._io.pos()
-                self.enclosed_cjk_letters_and_months = self._io.read_bits_int(1) != 0
+                self.enclosed_cjk_letters_and_months = self._io.read_bits_int_be(1) != 0
                 self._debug['enclosed_cjk_letters_and_months']['end'] = self._io.pos()
                 self._debug['cjk_compatibility']['start'] = self._io.pos()
-                self.cjk_compatibility = self._io.read_bits_int(1) != 0
+                self.cjk_compatibility = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_compatibility']['end'] = self._io.pos()
                 self._debug['hangul']['start'] = self._io.pos()
-                self.hangul = self._io.read_bits_int(1) != 0
+                self.hangul = self._io.read_bits_int_be(1) != 0
                 self._debug['hangul']['end'] = self._io.pos()
                 self._debug['reserved_for_unicode_subranges1']['start'] = self._io.pos()
-                self.reserved_for_unicode_subranges1 = self._io.read_bits_int(1) != 0
+                self.reserved_for_unicode_subranges1 = self._io.read_bits_int_be(1) != 0
                 self._debug['reserved_for_unicode_subranges1']['end'] = self._io.pos()
                 self._debug['reserved_for_unicode_subranges2']['start'] = self._io.pos()
-                self.reserved_for_unicode_subranges2 = self._io.read_bits_int(1) != 0
+                self.reserved_for_unicode_subranges2 = self._io.read_bits_int_be(1) != 0
                 self._debug['reserved_for_unicode_subranges2']['end'] = self._io.pos()
                 self._debug['cjk_unified_ideographs']['start'] = self._io.pos()
-                self.cjk_unified_ideographs = self._io.read_bits_int(1) != 0
+                self.cjk_unified_ideographs = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_unified_ideographs']['end'] = self._io.pos()
                 self._debug['private_use_area']['start'] = self._io.pos()
-                self.private_use_area = self._io.read_bits_int(1) != 0
+                self.private_use_area = self._io.read_bits_int_be(1) != 0
                 self._debug['private_use_area']['end'] = self._io.pos()
                 self._debug['cjk_compatibility_ideographs']['start'] = self._io.pos()
-                self.cjk_compatibility_ideographs = self._io.read_bits_int(1) != 0
+                self.cjk_compatibility_ideographs = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_compatibility_ideographs']['end'] = self._io.pos()
                 self._debug['alphabetic_presentation_forms']['start'] = self._io.pos()
-                self.alphabetic_presentation_forms = self._io.read_bits_int(1) != 0
+                self.alphabetic_presentation_forms = self._io.read_bits_int_be(1) != 0
                 self._debug['alphabetic_presentation_forms']['end'] = self._io.pos()
                 self._debug['arabic_presentation_forms_a']['start'] = self._io.pos()
-                self.arabic_presentation_forms_a = self._io.read_bits_int(1) != 0
+                self.arabic_presentation_forms_a = self._io.read_bits_int_be(1) != 0
                 self._debug['arabic_presentation_forms_a']['end'] = self._io.pos()
                 self._debug['combining_half_marks']['start'] = self._io.pos()
-                self.combining_half_marks = self._io.read_bits_int(1) != 0
+                self.combining_half_marks = self._io.read_bits_int_be(1) != 0
                 self._debug['combining_half_marks']['end'] = self._io.pos()
                 self._debug['cjk_compatibility_forms']['start'] = self._io.pos()
-                self.cjk_compatibility_forms = self._io.read_bits_int(1) != 0
+                self.cjk_compatibility_forms = self._io.read_bits_int_be(1) != 0
                 self._debug['cjk_compatibility_forms']['end'] = self._io.pos()
                 self._debug['small_form_variants']['start'] = self._io.pos()
-                self.small_form_variants = self._io.read_bits_int(1) != 0
+                self.small_form_variants = self._io.read_bits_int_be(1) != 0
                 self._debug['small_form_variants']['end'] = self._io.pos()
                 self._debug['arabic_presentation_forms_b']['start'] = self._io.pos()
-                self.arabic_presentation_forms_b = self._io.read_bits_int(1) != 0
+                self.arabic_presentation_forms_b = self._io.read_bits_int_be(1) != 0
                 self._debug['arabic_presentation_forms_b']['end'] = self._io.pos()
                 self._debug['halfwidth_and_fullwidth_forms']['start'] = self._io.pos()
-                self.halfwidth_and_fullwidth_forms = self._io.read_bits_int(1) != 0
+                self.halfwidth_and_fullwidth_forms = self._io.read_bits_int_be(1) != 0
                 self._debug['halfwidth_and_fullwidth_forms']['end'] = self._io.pos()
                 self._debug['specials']['start'] = self._io.pos()
-                self.specials = self._io.read_bits_int(1) != 0
+                self.specials = self._io.read_bits_int_be(1) != 0
                 self._debug['specials']['end'] = self._io.pos()
                 self._io.align_to_byte()
                 self._debug['reserved']['start'] = self._io.pos()
@@ -1201,112 +1201,112 @@ class Ttf(KaitaiStruct):
 
             def _read(self):
                 self._debug['symbol_character_set']['start'] = self._io.pos()
-                self.symbol_character_set = self._io.read_bits_int(1) != 0
+                self.symbol_character_set = self._io.read_bits_int_be(1) != 0
                 self._debug['symbol_character_set']['end'] = self._io.pos()
                 self._debug['oem_character_set']['start'] = self._io.pos()
-                self.oem_character_set = self._io.read_bits_int(1) != 0
+                self.oem_character_set = self._io.read_bits_int_be(1) != 0
                 self._debug['oem_character_set']['end'] = self._io.pos()
                 self._debug['macintosh_character_set']['start'] = self._io.pos()
-                self.macintosh_character_set = self._io.read_bits_int(1) != 0
+                self.macintosh_character_set = self._io.read_bits_int_be(1) != 0
                 self._debug['macintosh_character_set']['end'] = self._io.pos()
                 self._debug['reserved_for_alternate_ansi_oem']['start'] = self._io.pos()
-                self.reserved_for_alternate_ansi_oem = self._io.read_bits_int(7)
+                self.reserved_for_alternate_ansi_oem = self._io.read_bits_int_be(7)
                 self._debug['reserved_for_alternate_ansi_oem']['end'] = self._io.pos()
                 self._debug['cp1361_korean_johab']['start'] = self._io.pos()
-                self.cp1361_korean_johab = self._io.read_bits_int(1) != 0
+                self.cp1361_korean_johab = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1361_korean_johab']['end'] = self._io.pos()
                 self._debug['cp950_chinese_traditional_chars_taiwan_and_hong_kong']['start'] = self._io.pos()
-                self.cp950_chinese_traditional_chars_taiwan_and_hong_kong = self._io.read_bits_int(1) != 0
+                self.cp950_chinese_traditional_chars_taiwan_and_hong_kong = self._io.read_bits_int_be(1) != 0
                 self._debug['cp950_chinese_traditional_chars_taiwan_and_hong_kong']['end'] = self._io.pos()
                 self._debug['cp949_korean_wansung']['start'] = self._io.pos()
-                self.cp949_korean_wansung = self._io.read_bits_int(1) != 0
+                self.cp949_korean_wansung = self._io.read_bits_int_be(1) != 0
                 self._debug['cp949_korean_wansung']['end'] = self._io.pos()
                 self._debug['cp936_chinese_simplified_chars_prc_and_singapore']['start'] = self._io.pos()
-                self.cp936_chinese_simplified_chars_prc_and_singapore = self._io.read_bits_int(1) != 0
+                self.cp936_chinese_simplified_chars_prc_and_singapore = self._io.read_bits_int_be(1) != 0
                 self._debug['cp936_chinese_simplified_chars_prc_and_singapore']['end'] = self._io.pos()
                 self._debug['cp932_jis_japan']['start'] = self._io.pos()
-                self.cp932_jis_japan = self._io.read_bits_int(1) != 0
+                self.cp932_jis_japan = self._io.read_bits_int_be(1) != 0
                 self._debug['cp932_jis_japan']['end'] = self._io.pos()
                 self._debug['cp874_thai']['start'] = self._io.pos()
-                self.cp874_thai = self._io.read_bits_int(1) != 0
+                self.cp874_thai = self._io.read_bits_int_be(1) != 0
                 self._debug['cp874_thai']['end'] = self._io.pos()
                 self._debug['reserved_for_alternate_ansi']['start'] = self._io.pos()
-                self.reserved_for_alternate_ansi = self._io.read_bits_int(8)
+                self.reserved_for_alternate_ansi = self._io.read_bits_int_be(8)
                 self._debug['reserved_for_alternate_ansi']['end'] = self._io.pos()
                 self._debug['cp1257_windows_baltic']['start'] = self._io.pos()
-                self.cp1257_windows_baltic = self._io.read_bits_int(1) != 0
+                self.cp1257_windows_baltic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1257_windows_baltic']['end'] = self._io.pos()
                 self._debug['cp1256_arabic']['start'] = self._io.pos()
-                self.cp1256_arabic = self._io.read_bits_int(1) != 0
+                self.cp1256_arabic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1256_arabic']['end'] = self._io.pos()
                 self._debug['cp1255_hebrew']['start'] = self._io.pos()
-                self.cp1255_hebrew = self._io.read_bits_int(1) != 0
+                self.cp1255_hebrew = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1255_hebrew']['end'] = self._io.pos()
                 self._debug['cp1254_turkish']['start'] = self._io.pos()
-                self.cp1254_turkish = self._io.read_bits_int(1) != 0
+                self.cp1254_turkish = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1254_turkish']['end'] = self._io.pos()
                 self._debug['cp1253_greek']['start'] = self._io.pos()
-                self.cp1253_greek = self._io.read_bits_int(1) != 0
+                self.cp1253_greek = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1253_greek']['end'] = self._io.pos()
                 self._debug['cp1251_cyrillic']['start'] = self._io.pos()
-                self.cp1251_cyrillic = self._io.read_bits_int(1) != 0
+                self.cp1251_cyrillic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1251_cyrillic']['end'] = self._io.pos()
                 self._debug['cp1250_latin_2_eastern_europe']['start'] = self._io.pos()
-                self.cp1250_latin_2_eastern_europe = self._io.read_bits_int(1) != 0
+                self.cp1250_latin_2_eastern_europe = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1250_latin_2_eastern_europe']['end'] = self._io.pos()
                 self._debug['cp1252_latin_1']['start'] = self._io.pos()
-                self.cp1252_latin_1 = self._io.read_bits_int(1) != 0
+                self.cp1252_latin_1 = self._io.read_bits_int_be(1) != 0
                 self._debug['cp1252_latin_1']['end'] = self._io.pos()
                 self._debug['cp437_us']['start'] = self._io.pos()
-                self.cp437_us = self._io.read_bits_int(1) != 0
+                self.cp437_us = self._io.read_bits_int_be(1) != 0
                 self._debug['cp437_us']['end'] = self._io.pos()
                 self._debug['cp850_we_latin_1']['start'] = self._io.pos()
-                self.cp850_we_latin_1 = self._io.read_bits_int(1) != 0
+                self.cp850_we_latin_1 = self._io.read_bits_int_be(1) != 0
                 self._debug['cp850_we_latin_1']['end'] = self._io.pos()
                 self._debug['cp708_arabic_asmo_708']['start'] = self._io.pos()
-                self.cp708_arabic_asmo_708 = self._io.read_bits_int(1) != 0
+                self.cp708_arabic_asmo_708 = self._io.read_bits_int_be(1) != 0
                 self._debug['cp708_arabic_asmo_708']['end'] = self._io.pos()
                 self._debug['cp737_greek_former_437_g']['start'] = self._io.pos()
-                self.cp737_greek_former_437_g = self._io.read_bits_int(1) != 0
+                self.cp737_greek_former_437_g = self._io.read_bits_int_be(1) != 0
                 self._debug['cp737_greek_former_437_g']['end'] = self._io.pos()
                 self._debug['cp775_ms_dos_baltic']['start'] = self._io.pos()
-                self.cp775_ms_dos_baltic = self._io.read_bits_int(1) != 0
+                self.cp775_ms_dos_baltic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp775_ms_dos_baltic']['end'] = self._io.pos()
                 self._debug['cp852_latin_2']['start'] = self._io.pos()
-                self.cp852_latin_2 = self._io.read_bits_int(1) != 0
+                self.cp852_latin_2 = self._io.read_bits_int_be(1) != 0
                 self._debug['cp852_latin_2']['end'] = self._io.pos()
                 self._debug['cp855_ibm_cyrillic_primarily_russian']['start'] = self._io.pos()
-                self.cp855_ibm_cyrillic_primarily_russian = self._io.read_bits_int(1) != 0
+                self.cp855_ibm_cyrillic_primarily_russian = self._io.read_bits_int_be(1) != 0
                 self._debug['cp855_ibm_cyrillic_primarily_russian']['end'] = self._io.pos()
                 self._debug['cp857_ibm_turkish']['start'] = self._io.pos()
-                self.cp857_ibm_turkish = self._io.read_bits_int(1) != 0
+                self.cp857_ibm_turkish = self._io.read_bits_int_be(1) != 0
                 self._debug['cp857_ibm_turkish']['end'] = self._io.pos()
                 self._debug['cp860_ms_dos_portuguese']['start'] = self._io.pos()
-                self.cp860_ms_dos_portuguese = self._io.read_bits_int(1) != 0
+                self.cp860_ms_dos_portuguese = self._io.read_bits_int_be(1) != 0
                 self._debug['cp860_ms_dos_portuguese']['end'] = self._io.pos()
                 self._debug['cp861_ms_dos_icelandic']['start'] = self._io.pos()
-                self.cp861_ms_dos_icelandic = self._io.read_bits_int(1) != 0
+                self.cp861_ms_dos_icelandic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp861_ms_dos_icelandic']['end'] = self._io.pos()
                 self._debug['cp862_hebrew']['start'] = self._io.pos()
-                self.cp862_hebrew = self._io.read_bits_int(1) != 0
+                self.cp862_hebrew = self._io.read_bits_int_be(1) != 0
                 self._debug['cp862_hebrew']['end'] = self._io.pos()
                 self._debug['cp863_ms_dos_canadian_french']['start'] = self._io.pos()
-                self.cp863_ms_dos_canadian_french = self._io.read_bits_int(1) != 0
+                self.cp863_ms_dos_canadian_french = self._io.read_bits_int_be(1) != 0
                 self._debug['cp863_ms_dos_canadian_french']['end'] = self._io.pos()
                 self._debug['cp864_arabic']['start'] = self._io.pos()
-                self.cp864_arabic = self._io.read_bits_int(1) != 0
+                self.cp864_arabic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp864_arabic']['end'] = self._io.pos()
                 self._debug['cp865_ms_dos_nordic']['start'] = self._io.pos()
-                self.cp865_ms_dos_nordic = self._io.read_bits_int(1) != 0
+                self.cp865_ms_dos_nordic = self._io.read_bits_int_be(1) != 0
                 self._debug['cp865_ms_dos_nordic']['end'] = self._io.pos()
                 self._debug['cp866_ms_dos_russian']['start'] = self._io.pos()
-                self.cp866_ms_dos_russian = self._io.read_bits_int(1) != 0
+                self.cp866_ms_dos_russian = self._io.read_bits_int_be(1) != 0
                 self._debug['cp866_ms_dos_russian']['end'] = self._io.pos()
                 self._debug['cp869_ibm_greek']['start'] = self._io.pos()
-                self.cp869_ibm_greek = self._io.read_bits_int(1) != 0
+                self.cp869_ibm_greek = self._io.read_bits_int_be(1) != 0
                 self._debug['cp869_ibm_greek']['end'] = self._io.pos()
                 self._debug['reserved_for_oem']['start'] = self._io.pos()
-                self.reserved_for_oem = self._io.read_bits_int(16)
+                self.reserved_for_oem = self._io.read_bits_int_be(16)
                 self._debug['reserved_for_oem']['end'] = self._io.pos()
 
 
@@ -1354,7 +1354,7 @@ class Ttf(KaitaiStruct):
             self._debug['y_max']['end'] = self._io.pos()
             if self.number_of_contours > 0:
                 self._debug['value']['start'] = self._io.pos()
-                self.value = self._root.Glyf.SimpleGlyph(self._io, self, self._root)
+                self.value = Ttf.Glyf.SimpleGlyph(self._io, self, self._root)
                 self.value._read()
                 self._debug['value']['end'] = self._io.pos()
 
@@ -1390,7 +1390,7 @@ class Ttf(KaitaiStruct):
                     if not 'arr' in self._debug['flags']:
                         self._debug['flags']['arr'] = []
                     self._debug['flags']['arr'].append({'start': self._io.pos()})
-                    _t_flags = self._root.Glyf.SimpleGlyph.Flag(self._io, self, self._root)
+                    _t_flags = Ttf.Glyf.SimpleGlyph.Flag(self._io, self, self._root)
                     _t_flags._read()
                     self.flags[i] = _t_flags
                     self._debug['flags']['arr'][i]['end'] = self._io.pos()
@@ -1407,25 +1407,25 @@ class Ttf(KaitaiStruct):
 
                 def _read(self):
                     self._debug['reserved']['start'] = self._io.pos()
-                    self.reserved = self._io.read_bits_int(2)
+                    self.reserved = self._io.read_bits_int_be(2)
                     self._debug['reserved']['end'] = self._io.pos()
                     self._debug['y_is_same']['start'] = self._io.pos()
-                    self.y_is_same = self._io.read_bits_int(1) != 0
+                    self.y_is_same = self._io.read_bits_int_be(1) != 0
                     self._debug['y_is_same']['end'] = self._io.pos()
                     self._debug['x_is_same']['start'] = self._io.pos()
-                    self.x_is_same = self._io.read_bits_int(1) != 0
+                    self.x_is_same = self._io.read_bits_int_be(1) != 0
                     self._debug['x_is_same']['end'] = self._io.pos()
                     self._debug['repeat']['start'] = self._io.pos()
-                    self.repeat = self._io.read_bits_int(1) != 0
+                    self.repeat = self._io.read_bits_int_be(1) != 0
                     self._debug['repeat']['end'] = self._io.pos()
                     self._debug['y_short_vector']['start'] = self._io.pos()
-                    self.y_short_vector = self._io.read_bits_int(1) != 0
+                    self.y_short_vector = self._io.read_bits_int_be(1) != 0
                     self._debug['y_short_vector']['end'] = self._io.pos()
                     self._debug['x_short_vector']['start'] = self._io.pos()
-                    self.x_short_vector = self._io.read_bits_int(1) != 0
+                    self.x_short_vector = self._io.read_bits_int_be(1) != 0
                     self._debug['x_short_vector']['end'] = self._io.pos()
                     self._debug['on_curve']['start'] = self._io.pos()
-                    self.on_curve = self._io.read_bits_int(1) != 0
+                    self.on_curve = self._io.read_bits_int_be(1) != 0
                     self._debug['on_curve']['end'] = self._io.pos()
                     self._io.align_to_byte()
                     if self.repeat:
@@ -1480,7 +1480,7 @@ class Ttf(KaitaiStruct):
 
         def _read(self):
             self._debug['table_version_number']['start'] = self._io.pos()
-            self.table_version_number = self._root.Fixed(self._io, self, self._root)
+            self.table_version_number = Ttf.Fixed(self._io, self, self._root)
             self.table_version_number._read()
             self._debug['table_version_number']['end'] = self._io.pos()
             self._debug['num_glyphs']['start'] = self._io.pos()
@@ -1537,7 +1537,7 @@ class Ttf(KaitaiStruct):
 
         def _read(self):
             self._debug['sfnt_version']['start'] = self._io.pos()
-            self.sfnt_version = self._root.Fixed(self._io, self, self._root)
+            self.sfnt_version = Ttf.Fixed(self._io, self, self._root)
             self.sfnt_version._read()
             self._debug['sfnt_version']['end'] = self._io.pos()
             self._debug['num_tables']['start'] = self._io.pos()
@@ -1577,7 +1577,7 @@ class Ttf(KaitaiStruct):
                 if not 'arr' in self._debug['tables']:
                     self._debug['tables']['arr'] = []
                 self._debug['tables']['arr'].append({'start': self._io.pos()})
-                _t_tables = self._root.Cmap.SubtableHeader(self._io, self, self._root)
+                _t_tables = Ttf.Cmap.SubtableHeader(self._io, self, self._root)
                 _t_tables._read()
                 self.tables[i] = _t_tables
                 self._debug['tables']['arr'][i]['end'] = self._io.pos()
@@ -1612,7 +1612,7 @@ class Ttf(KaitaiStruct):
                 _pos = io.pos()
                 io.seek(self.subtable_offset)
                 self._debug['_m_table']['start'] = io.pos()
-                self._m_table = self._root.Cmap.Subtable(io, self, self._root)
+                self._m_table = Ttf.Cmap.Subtable(io, self, self._root)
                 self._m_table._read()
                 self._debug['_m_table']['end'] = io.pos()
                 io.seek(_pos)
@@ -1635,7 +1635,7 @@ class Ttf(KaitaiStruct):
 
             def _read(self):
                 self._debug['format']['start'] = self._io.pos()
-                self.format = KaitaiStream.resolve_enum(self._root.Cmap.Subtable.SubtableFormat, self._io.read_u2be())
+                self.format = KaitaiStream.resolve_enum(Ttf.Cmap.Subtable.SubtableFormat, self._io.read_u2be())
                 self._debug['format']['end'] = self._io.pos()
                 self._debug['length']['start'] = self._io.pos()
                 self.length = self._io.read_u2be()
@@ -1645,25 +1645,25 @@ class Ttf(KaitaiStruct):
                 self._debug['version']['end'] = self._io.pos()
                 self._debug['value']['start'] = self._io.pos()
                 _on = self.format
-                if _on == self._root.Cmap.Subtable.SubtableFormat.byte_encoding_table:
+                if _on == Ttf.Cmap.Subtable.SubtableFormat.byte_encoding_table:
                     self._raw_value = self._io.read_bytes((self.length - 6))
                     _io__raw_value = KaitaiStream(BytesIO(self._raw_value))
-                    self.value = self._root.Cmap.Subtable.ByteEncodingTable(_io__raw_value, self, self._root)
+                    self.value = Ttf.Cmap.Subtable.ByteEncodingTable(_io__raw_value, self, self._root)
                     self.value._read()
-                elif _on == self._root.Cmap.Subtable.SubtableFormat.segment_mapping_to_delta_values:
+                elif _on == Ttf.Cmap.Subtable.SubtableFormat.segment_mapping_to_delta_values:
                     self._raw_value = self._io.read_bytes((self.length - 6))
                     _io__raw_value = KaitaiStream(BytesIO(self._raw_value))
-                    self.value = self._root.Cmap.Subtable.SegmentMappingToDeltaValues(_io__raw_value, self, self._root)
+                    self.value = Ttf.Cmap.Subtable.SegmentMappingToDeltaValues(_io__raw_value, self, self._root)
                     self.value._read()
-                elif _on == self._root.Cmap.Subtable.SubtableFormat.high_byte_mapping_through_table:
+                elif _on == Ttf.Cmap.Subtable.SubtableFormat.high_byte_mapping_through_table:
                     self._raw_value = self._io.read_bytes((self.length - 6))
                     _io__raw_value = KaitaiStream(BytesIO(self._raw_value))
-                    self.value = self._root.Cmap.Subtable.HighByteMappingThroughTable(_io__raw_value, self, self._root)
+                    self.value = Ttf.Cmap.Subtable.HighByteMappingThroughTable(_io__raw_value, self, self._root)
                     self.value._read()
-                elif _on == self._root.Cmap.Subtable.SubtableFormat.trimmed_table_mapping:
+                elif _on == Ttf.Cmap.Subtable.SubtableFormat.trimmed_table_mapping:
                     self._raw_value = self._io.read_bytes((self.length - 6))
                     _io__raw_value = KaitaiStream(BytesIO(self._raw_value))
-                    self.value = self._root.Cmap.Subtable.TrimmedTableMapping(_io__raw_value, self, self._root)
+                    self.value = Ttf.Cmap.Subtable.TrimmedTableMapping(_io__raw_value, self, self._root)
                     self.value._read()
                 else:
                     self.value = self._io.read_bytes((self.length - 6))

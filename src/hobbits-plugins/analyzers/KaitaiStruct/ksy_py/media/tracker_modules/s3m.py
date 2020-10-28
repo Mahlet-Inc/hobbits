@@ -85,10 +85,10 @@ class S3m(KaitaiStruct):
         self.initial_tempo = self._io.read_u1()
         self._debug['initial_tempo']['end'] = self._io.pos()
         self._debug['is_stereo']['start'] = self._io.pos()
-        self.is_stereo = self._io.read_bits_int(1) != 0
+        self.is_stereo = self._io.read_bits_int_be(1) != 0
         self._debug['is_stereo']['end'] = self._io.pos()
         self._debug['master_volume']['start'] = self._io.pos()
-        self.master_volume = self._io.read_bits_int(7)
+        self.master_volume = self._io.read_bits_int_be(7)
         self._debug['master_volume']['end'] = self._io.pos()
         self._io.align_to_byte()
         self._debug['ultra_click_removal']['start'] = self._io.pos()
@@ -109,7 +109,7 @@ class S3m(KaitaiStruct):
             if not 'arr' in self._debug['channels']:
                 self._debug['channels']['arr'] = []
             self._debug['channels']['arr'].append({'start': self._io.pos()})
-            _t_channels = self._root.Channel(self._io, self, self._root)
+            _t_channels = S3m.Channel(self._io, self, self._root)
             _t_channels._read()
             self.channels[i] = _t_channels
             self._debug['channels']['arr'][i]['end'] = self._io.pos()
@@ -124,7 +124,7 @@ class S3m(KaitaiStruct):
             if not 'arr' in self._debug['instruments']:
                 self._debug['instruments']['arr'] = []
             self._debug['instruments']['arr'].append({'start': self._io.pos()})
-            _t_instruments = self._root.InstrumentPtr(self._io, self, self._root)
+            _t_instruments = S3m.InstrumentPtr(self._io, self, self._root)
             _t_instruments._read()
             self.instruments[i] = _t_instruments
             self._debug['instruments']['arr'][i]['end'] = self._io.pos()
@@ -136,7 +136,7 @@ class S3m(KaitaiStruct):
             if not 'arr' in self._debug['patterns']:
                 self._debug['patterns']['arr'] = []
             self._debug['patterns']['arr'].append({'start': self._io.pos()})
-            _t_patterns = self._root.PatternPtr(self._io, self, self._root)
+            _t_patterns = S3m.PatternPtr(self._io, self, self._root)
             _t_patterns._read()
             self.patterns[i] = _t_patterns
             self._debug['patterns']['arr'][i]['end'] = self._io.pos()
@@ -149,7 +149,7 @@ class S3m(KaitaiStruct):
                 if not 'arr' in self._debug['channel_pans']:
                     self._debug['channel_pans']['arr'] = []
                 self._debug['channel_pans']['arr'].append({'start': self._io.pos()})
-                _t_channel_pans = self._root.ChannelPan(self._io, self, self._root)
+                _t_channel_pans = S3m.ChannelPan(self._io, self, self._root)
                 _t_channel_pans._read()
                 self.channel_pans[i] = _t_channel_pans
                 self._debug['channel_pans']['arr'][i]['end'] = self._io.pos()
@@ -167,16 +167,16 @@ class S3m(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(2)
+            self.reserved1 = self._io.read_bits_int_be(2)
             self._debug['reserved1']['end'] = self._io.pos()
             self._debug['has_custom_pan']['start'] = self._io.pos()
-            self.has_custom_pan = self._io.read_bits_int(1) != 0
+            self.has_custom_pan = self._io.read_bits_int_be(1) != 0
             self._debug['has_custom_pan']['end'] = self._io.pos()
             self._debug['reserved2']['start'] = self._io.pos()
-            self.reserved2 = self._io.read_bits_int(1) != 0
+            self.reserved2 = self._io.read_bits_int_be(1) != 0
             self._debug['reserved2']['end'] = self._io.pos()
             self._debug['pan']['start'] = self._io.pos()
-            self.pan = self._io.read_bits_int(4)
+            self.pan = self._io.read_bits_int_be(4)
             self._debug['pan']['end'] = self._io.pos()
 
 
@@ -190,16 +190,16 @@ class S3m(KaitaiStruct):
 
         def _read(self):
             self._debug['has_fx']['start'] = self._io.pos()
-            self.has_fx = self._io.read_bits_int(1) != 0
+            self.has_fx = self._io.read_bits_int_be(1) != 0
             self._debug['has_fx']['end'] = self._io.pos()
             self._debug['has_volume']['start'] = self._io.pos()
-            self.has_volume = self._io.read_bits_int(1) != 0
+            self.has_volume = self._io.read_bits_int_be(1) != 0
             self._debug['has_volume']['end'] = self._io.pos()
             self._debug['has_note_and_instrument']['start'] = self._io.pos()
-            self.has_note_and_instrument = self._io.read_bits_int(1) != 0
+            self.has_note_and_instrument = self._io.read_bits_int_be(1) != 0
             self._debug['has_note_and_instrument']['end'] = self._io.pos()
             self._debug['channel_num']['start'] = self._io.pos()
-            self.channel_num = self._io.read_bits_int(5)
+            self.channel_num = self._io.read_bits_int_be(5)
             self._debug['channel_num']['end'] = self._io.pos()
             self._io.align_to_byte()
             if self.has_note_and_instrument:
@@ -245,7 +245,7 @@ class S3m(KaitaiStruct):
                 if not 'arr' in self._debug['cells']:
                     self._debug['cells']['arr'] = []
                 self._debug['cells']['arr'].append({'start': self._io.pos()})
-                _t_cells = self._root.PatternCell(self._io, self, self._root)
+                _t_cells = S3m.PatternCell(self._io, self, self._root)
                 _t_cells._read()
                 self.cells.append(_t_cells)
                 self._debug['cells']['arr'][len(self.cells) - 1]['end'] = self._io.pos()
@@ -264,10 +264,10 @@ class S3m(KaitaiStruct):
 
         def _read(self):
             self._debug['is_disabled']['start'] = self._io.pos()
-            self.is_disabled = self._io.read_bits_int(1) != 0
+            self.is_disabled = self._io.read_bits_int_be(1) != 0
             self._debug['is_disabled']['end'] = self._io.pos()
             self._debug['ch_type']['start'] = self._io.pos()
-            self.ch_type = self._io.read_bits_int(7)
+            self.ch_type = self._io.read_bits_int_be(7)
             self._debug['ch_type']['end'] = self._io.pos()
 
 
@@ -312,7 +312,7 @@ class S3m(KaitaiStruct):
             self._debug['body']['start'] = self._io.pos()
             self._raw_body = self._io.read_bytes((self.size - 2))
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.PatternCells(_io__raw_body, self, self._root)
+            self.body = S3m.PatternCells(_io__raw_body, self, self._root)
             self.body._read()
             self._debug['body']['end'] = self._io.pos()
 
@@ -338,7 +338,7 @@ class S3m(KaitaiStruct):
             _pos = self._io.pos()
             self._io.seek((self.paraptr * 16))
             self._debug['_m_body']['start'] = self._io.pos()
-            self._m_body = self._root.Pattern(self._io, self, self._root)
+            self._m_body = S3m.Pattern(self._io, self, self._root)
             self._m_body._read()
             self._debug['_m_body']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -366,7 +366,7 @@ class S3m(KaitaiStruct):
             _pos = self._io.pos()
             self._io.seek((self.paraptr * 16))
             self._debug['_m_body']['start'] = self._io.pos()
-            self._m_body = self._root.Instrument(self._io, self, self._root)
+            self._m_body = S3m.Instrument(self._io, self, self._root)
             self._m_body._read()
             self._debug['_m_body']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -392,18 +392,18 @@ class S3m(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.Instrument.InstTypes, self._io.read_u1())
+            self.type = KaitaiStream.resolve_enum(S3m.Instrument.InstTypes, self._io.read_u1())
             self._debug['type']['end'] = self._io.pos()
             self._debug['filename']['start'] = self._io.pos()
             self.filename = KaitaiStream.bytes_terminate(self._io.read_bytes(12), 0, False)
             self._debug['filename']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.type
-            if _on == self._root.Instrument.InstTypes.sample:
-                self.body = self._root.Instrument.Sampled(self._io, self, self._root)
+            if _on == S3m.Instrument.InstTypes.sample:
+                self.body = S3m.Instrument.Sampled(self._io, self, self._root)
                 self.body._read()
             else:
-                self.body = self._root.Instrument.Adlib(self._io, self, self._root)
+                self.body = S3m.Instrument.Adlib(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
             self._debug['tuning_hz']['start'] = self._io.pos()
@@ -431,7 +431,7 @@ class S3m(KaitaiStruct):
 
             def _read(self):
                 self._debug['paraptr_sample']['start'] = self._io.pos()
-                self.paraptr_sample = self._root.SwappedU3(self._io, self, self._root)
+                self.paraptr_sample = S3m.SwappedU3(self._io, self, self._root)
                 self.paraptr_sample._read()
                 self._debug['paraptr_sample']['end'] = self._io.pos()
                 self._debug['len_sample']['start'] = self._io.pos()

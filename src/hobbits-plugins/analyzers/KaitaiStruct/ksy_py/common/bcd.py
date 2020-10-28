@@ -60,7 +60,7 @@ class Bcd(KaitaiStruct):
                 if not 'arr' in self._debug['digits']:
                     self._debug['digits']['arr'] = []
                 self._debug['digits']['arr'].append({'start': self._io.pos()})
-                self.digits[i] = self._io.read_bits_int(4)
+                self.digits[i] = self._io.read_bits_int_be(4)
                 self._debug['digits']['arr'][i]['end'] = self._io.pos()
             elif _on == 8:
                 if not 'arr' in self._debug['digits']:

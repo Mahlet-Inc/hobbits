@@ -20,13 +20,13 @@ class Ipv6Packet(KaitaiStruct):
 
     def _read(self):
         self._debug['version']['start'] = self._io.pos()
-        self.version = self._io.read_bits_int(4)
+        self.version = self._io.read_bits_int_be(4)
         self._debug['version']['end'] = self._io.pos()
         self._debug['traffic_class']['start'] = self._io.pos()
-        self.traffic_class = self._io.read_bits_int(8)
+        self.traffic_class = self._io.read_bits_int_be(8)
         self._debug['traffic_class']['end'] = self._io.pos()
         self._debug['flow_label']['start'] = self._io.pos()
-        self.flow_label = self._io.read_bits_int(20)
+        self.flow_label = self._io.read_bits_int_be(20)
         self._debug['flow_label']['end'] = self._io.pos()
         self._io.align_to_byte()
         self._debug['payload_length']['start'] = self._io.pos()

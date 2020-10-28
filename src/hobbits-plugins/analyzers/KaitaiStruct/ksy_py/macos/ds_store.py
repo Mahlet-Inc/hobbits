@@ -31,7 +31,7 @@ class DsStore(KaitaiStruct):
         if not self.alignment_header == b"\x00\x00\x00\x01":
             raise kaitaistruct.ValidationNotEqualError(b"\x00\x00\x00\x01", self.alignment_header, self._io, u"/seq/0")
         self._debug['buddy_allocator_header']['start'] = self._io.pos()
-        self.buddy_allocator_header = self._root.BuddyAllocatorHeader(self._io, self, self._root)
+        self.buddy_allocator_header = DsStore.BuddyAllocatorHeader(self._io, self, self._root)
         self.buddy_allocator_header._read()
         self._debug['buddy_allocator_header']['end'] = self._io.pos()
 
@@ -84,7 +84,7 @@ class DsStore(KaitaiStruct):
                 if not 'arr' in self._debug['block_addresses']:
                     self._debug['block_addresses']['arr'] = []
                 self._debug['block_addresses']['arr'].append({'start': self._io.pos()})
-                _t_block_addresses = self._root.BuddyAllocatorBody.BlockDescriptor(self._io, self, self._root)
+                _t_block_addresses = DsStore.BuddyAllocatorBody.BlockDescriptor(self._io, self, self._root)
                 _t_block_addresses._read()
                 self.block_addresses[i] = _t_block_addresses
                 self._debug['block_addresses']['arr'][i]['end'] = self._io.pos()
@@ -99,7 +99,7 @@ class DsStore(KaitaiStruct):
                 if not 'arr' in self._debug['directory_entries']:
                     self._debug['directory_entries']['arr'] = []
                 self._debug['directory_entries']['arr'].append({'start': self._io.pos()})
-                _t_directory_entries = self._root.BuddyAllocatorBody.DirectoryEntry(self._io, self, self._root)
+                _t_directory_entries = DsStore.BuddyAllocatorBody.DirectoryEntry(self._io, self, self._root)
                 _t_directory_entries._read()
                 self.directory_entries[i] = _t_directory_entries
                 self._debug['directory_entries']['arr'][i]['end'] = self._io.pos()
@@ -111,7 +111,7 @@ class DsStore(KaitaiStruct):
                 if not 'arr' in self._debug['free_lists']:
                     self._debug['free_lists']['arr'] = []
                 self._debug['free_lists']['arr'].append({'start': self._io.pos()})
-                _t_free_lists = self._root.BuddyAllocatorBody.FreeList(self._io, self, self._root)
+                _t_free_lists = DsStore.BuddyAllocatorBody.FreeList(self._io, self, self._root)
                 _t_free_lists._read()
                 self.free_lists[i] = _t_free_lists
                 self._debug['free_lists']['arr'][i]['end'] = self._io.pos()
@@ -221,7 +221,7 @@ class DsStore(KaitaiStruct):
                 if not 'arr' in self._debug['_m_directories']:
                     self._debug['_m_directories']['arr'] = []
                 self._debug['_m_directories']['arr'].append({'start': io.pos()})
-                _t__m_directories = self._root.MasterBlockRef(i, io, self, self._root)
+                _t__m_directories = DsStore.MasterBlockRef(i, io, self, self._root)
                 _t__m_directories._read()
                 self._m_directories[i] = _t__m_directories
                 self._debug['_m_directories']['arr'][i]['end'] = io.pos()
@@ -276,7 +276,7 @@ class DsStore(KaitaiStruct):
                 _pos = io.pos()
                 io.seek(self._root.buddy_allocator_body.block_addresses[self.block_id].offset)
                 self._debug['_m_root_block']['start'] = io.pos()
-                self._m_root_block = self._root.Block(io, self, self._root)
+                self._m_root_block = DsStore.Block(io, self, self._root)
                 self._m_root_block._read()
                 self._debug['_m_root_block']['end'] = io.pos()
                 io.seek(_pos)
@@ -293,7 +293,7 @@ class DsStore(KaitaiStruct):
             self._debug['_m_master_block']['start'] = self._io.pos()
             self._raw__m_master_block = self._io.read_bytes(self._parent.block_addresses[self._parent.directory_entries[self.idx].block_id].size)
             _io__raw__m_master_block = KaitaiStream(BytesIO(self._raw__m_master_block))
-            self._m_master_block = self._root.MasterBlockRef.MasterBlock(_io__raw__m_master_block, self, self._root)
+            self._m_master_block = DsStore.MasterBlockRef.MasterBlock(_io__raw__m_master_block, self, self._root)
             self._m_master_block._read()
             self._debug['_m_master_block']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -321,7 +321,7 @@ class DsStore(KaitaiStruct):
                 if not 'arr' in self._debug['data']:
                     self._debug['data']['arr'] = []
                 self._debug['data']['arr'].append({'start': self._io.pos()})
-                _t_data = self._root.Block.BlockData(self.mode, self._io, self, self._root)
+                _t_data = DsStore.Block.BlockData(self.mode, self._io, self, self._root)
                 _t_data._read()
                 self.data[i] = _t_data
                 self._debug['data']['arr'][i]['end'] = self._io.pos()
@@ -344,7 +344,7 @@ class DsStore(KaitaiStruct):
                     self._debug['block_id']['end'] = self._io.pos()
 
                 self._debug['record']['start'] = self._io.pos()
-                self.record = self._root.Block.BlockData.Record(self._io, self, self._root)
+                self.record = DsStore.Block.BlockData.Record(self._io, self, self._root)
                 self.record._read()
                 self._debug['record']['end'] = self._io.pos()
 
@@ -358,11 +358,11 @@ class DsStore(KaitaiStruct):
 
                 def _read(self):
                     self._debug['filename']['start'] = self._io.pos()
-                    self.filename = self._root.Block.BlockData.Record.Ustr(self._io, self, self._root)
+                    self.filename = DsStore.Block.BlockData.Record.Ustr(self._io, self, self._root)
                     self.filename._read()
                     self._debug['filename']['end'] = self._io.pos()
                     self._debug['structure_type']['start'] = self._io.pos()
-                    self.structure_type = self._root.Block.BlockData.Record.FourCharCode(self._io, self, self._root)
+                    self.structure_type = DsStore.Block.BlockData.Record.FourCharCode(self._io, self, self._root)
                     self.structure_type._read()
                     self._debug['structure_type']['end'] = self._io.pos()
                     self._debug['data_type']['start'] = self._io.pos()
@@ -379,15 +379,15 @@ class DsStore(KaitaiStruct):
                     elif _on == u"bool":
                         self.value = self._io.read_u1()
                     elif _on == u"ustr":
-                        self.value = self._root.Block.BlockData.Record.Ustr(self._io, self, self._root)
+                        self.value = DsStore.Block.BlockData.Record.Ustr(self._io, self, self._root)
                         self.value._read()
                     elif _on == u"dutc":
                         self.value = self._io.read_u8be()
                     elif _on == u"type":
-                        self.value = self._root.Block.BlockData.Record.FourCharCode(self._io, self, self._root)
+                        self.value = DsStore.Block.BlockData.Record.FourCharCode(self._io, self, self._root)
                         self.value._read()
                     elif _on == u"blob":
-                        self.value = self._root.Block.BlockData.Record.RecordBlob(self._io, self, self._root)
+                        self.value = DsStore.Block.BlockData.Record.RecordBlob(self._io, self, self._root)
                         self.value._read()
                     self._debug['value']['end'] = self._io.pos()
 
@@ -450,7 +450,7 @@ class DsStore(KaitaiStruct):
                     _pos = io.pos()
                     io.seek(self._root.buddy_allocator_body.block_addresses[self.block_id].offset)
                     self._debug['_m_block']['start'] = io.pos()
-                    self._m_block = self._root.Block(io, self, self._root)
+                    self._m_block = DsStore.Block(io, self, self._root)
                     self._m_block._read()
                     self._debug['_m_block']['end'] = io.pos()
                     io.seek(_pos)
@@ -469,7 +469,7 @@ class DsStore(KaitaiStruct):
                 _pos = io.pos()
                 io.seek(self._root.buddy_allocator_body.block_addresses[self.mode].offset)
                 self._debug['_m_rightmost_block']['start'] = io.pos()
-                self._m_rightmost_block = self._root.Block(io, self, self._root)
+                self._m_rightmost_block = DsStore.Block(io, self, self._root)
                 self._m_rightmost_block._read()
                 self._debug['_m_rightmost_block']['end'] = io.pos()
                 io.seek(_pos)
@@ -487,7 +487,7 @@ class DsStore(KaitaiStruct):
         self._debug['_m_buddy_allocator_body']['start'] = self._io.pos()
         self._raw__m_buddy_allocator_body = self._io.read_bytes(self.buddy_allocator_header.len_bookkeeping_info_block)
         _io__raw__m_buddy_allocator_body = KaitaiStream(BytesIO(self._raw__m_buddy_allocator_body))
-        self._m_buddy_allocator_body = self._root.BuddyAllocatorBody(_io__raw__m_buddy_allocator_body, self, self._root)
+        self._m_buddy_allocator_body = DsStore.BuddyAllocatorBody(_io__raw__m_buddy_allocator_body, self, self._root)
         self._m_buddy_allocator_body._read()
         self._debug['_m_buddy_allocator_body']['end'] = self._io.pos()
         self._io.seek(_pos)

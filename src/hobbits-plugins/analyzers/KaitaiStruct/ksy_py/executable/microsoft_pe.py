@@ -29,7 +29,7 @@ class MicrosoftPe(KaitaiStruct):
 
     def _read(self):
         self._debug['mz']['start'] = self._io.pos()
-        self.mz = self._root.MzPlaceholder(self._io, self, self._root)
+        self.mz = MicrosoftPe.MzPlaceholder(self._io, self, self._root)
         self.mz._read()
         self._debug['mz']['end'] = self._io.pos()
 
@@ -60,10 +60,10 @@ class MicrosoftPe(KaitaiStruct):
             self.length = self._io.read_u4le()
             self._debug['length']['end'] = self._io.pos()
             self._debug['revision']['start'] = self._io.pos()
-            self.revision = KaitaiStream.resolve_enum(self._root.CertificateEntry.CertificateRevision, self._io.read_u2le())
+            self.revision = KaitaiStream.resolve_enum(MicrosoftPe.CertificateEntry.CertificateRevision, self._io.read_u2le())
             self._debug['revision']['end'] = self._io.pos()
             self._debug['certificate_type']['start'] = self._io.pos()
-            self.certificate_type = KaitaiStream.resolve_enum(self._root.CertificateEntry.CertificateType, self._io.read_u2le())
+            self.certificate_type = KaitaiStream.resolve_enum(MicrosoftPe.CertificateEntry.CertificateType, self._io.read_u2le())
             self._debug['certificate_type']['end'] = self._io.pos()
             self._debug['certificate_bytes']['start'] = self._io.pos()
             self.certificate_bytes = self._io.read_bytes((self.length - 8))
@@ -93,12 +93,12 @@ class MicrosoftPe(KaitaiStruct):
             self._debug = collections.defaultdict(dict)
 
         def _read(self):
-            if self._parent.std.format == self._root.PeFormat.pe32:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['image_base_32']['start'] = self._io.pos()
                 self.image_base_32 = self._io.read_u4le()
                 self._debug['image_base_32']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32_plus:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32_plus:
                 self._debug['image_base_64']['start'] = self._io.pos()
                 self.image_base_64 = self._io.read_u8le()
                 self._debug['image_base_64']['end'] = self._io.pos()
@@ -140,47 +140,47 @@ class MicrosoftPe(KaitaiStruct):
             self.check_sum = self._io.read_u4le()
             self._debug['check_sum']['end'] = self._io.pos()
             self._debug['subsystem']['start'] = self._io.pos()
-            self.subsystem = KaitaiStream.resolve_enum(self._root.OptionalHeaderWindows.SubsystemEnum, self._io.read_u2le())
+            self.subsystem = KaitaiStream.resolve_enum(MicrosoftPe.OptionalHeaderWindows.SubsystemEnum, self._io.read_u2le())
             self._debug['subsystem']['end'] = self._io.pos()
             self._debug['dll_characteristics']['start'] = self._io.pos()
             self.dll_characteristics = self._io.read_u2le()
             self._debug['dll_characteristics']['end'] = self._io.pos()
-            if self._parent.std.format == self._root.PeFormat.pe32:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['size_of_stack_reserve_32']['start'] = self._io.pos()
                 self.size_of_stack_reserve_32 = self._io.read_u4le()
                 self._debug['size_of_stack_reserve_32']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32_plus:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32_plus:
                 self._debug['size_of_stack_reserve_64']['start'] = self._io.pos()
                 self.size_of_stack_reserve_64 = self._io.read_u8le()
                 self._debug['size_of_stack_reserve_64']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['size_of_stack_commit_32']['start'] = self._io.pos()
                 self.size_of_stack_commit_32 = self._io.read_u4le()
                 self._debug['size_of_stack_commit_32']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32_plus:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32_plus:
                 self._debug['size_of_stack_commit_64']['start'] = self._io.pos()
                 self.size_of_stack_commit_64 = self._io.read_u8le()
                 self._debug['size_of_stack_commit_64']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['size_of_heap_reserve_32']['start'] = self._io.pos()
                 self.size_of_heap_reserve_32 = self._io.read_u4le()
                 self._debug['size_of_heap_reserve_32']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32_plus:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32_plus:
                 self._debug['size_of_heap_reserve_64']['start'] = self._io.pos()
                 self.size_of_heap_reserve_64 = self._io.read_u8le()
                 self._debug['size_of_heap_reserve_64']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['size_of_heap_commit_32']['start'] = self._io.pos()
                 self.size_of_heap_commit_32 = self._io.read_u4le()
                 self._debug['size_of_heap_commit_32']['end'] = self._io.pos()
 
-            if self._parent.std.format == self._root.PeFormat.pe32_plus:
+            if self._parent.std.format == MicrosoftPe.PeFormat.pe32_plus:
                 self._debug['size_of_heap_commit_64']['start'] = self._io.pos()
                 self.size_of_heap_commit_64 = self._io.read_u8le()
                 self._debug['size_of_heap_commit_64']['end'] = self._io.pos()
@@ -203,63 +203,63 @@ class MicrosoftPe(KaitaiStruct):
 
         def _read(self):
             self._debug['export_table']['start'] = self._io.pos()
-            self.export_table = self._root.DataDir(self._io, self, self._root)
+            self.export_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.export_table._read()
             self._debug['export_table']['end'] = self._io.pos()
             self._debug['import_table']['start'] = self._io.pos()
-            self.import_table = self._root.DataDir(self._io, self, self._root)
+            self.import_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.import_table._read()
             self._debug['import_table']['end'] = self._io.pos()
             self._debug['resource_table']['start'] = self._io.pos()
-            self.resource_table = self._root.DataDir(self._io, self, self._root)
+            self.resource_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.resource_table._read()
             self._debug['resource_table']['end'] = self._io.pos()
             self._debug['exception_table']['start'] = self._io.pos()
-            self.exception_table = self._root.DataDir(self._io, self, self._root)
+            self.exception_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.exception_table._read()
             self._debug['exception_table']['end'] = self._io.pos()
             self._debug['certificate_table']['start'] = self._io.pos()
-            self.certificate_table = self._root.DataDir(self._io, self, self._root)
+            self.certificate_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.certificate_table._read()
             self._debug['certificate_table']['end'] = self._io.pos()
             self._debug['base_relocation_table']['start'] = self._io.pos()
-            self.base_relocation_table = self._root.DataDir(self._io, self, self._root)
+            self.base_relocation_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.base_relocation_table._read()
             self._debug['base_relocation_table']['end'] = self._io.pos()
             self._debug['debug']['start'] = self._io.pos()
-            self.debug = self._root.DataDir(self._io, self, self._root)
+            self.debug = MicrosoftPe.DataDir(self._io, self, self._root)
             self.debug._read()
             self._debug['debug']['end'] = self._io.pos()
             self._debug['architecture']['start'] = self._io.pos()
-            self.architecture = self._root.DataDir(self._io, self, self._root)
+            self.architecture = MicrosoftPe.DataDir(self._io, self, self._root)
             self.architecture._read()
             self._debug['architecture']['end'] = self._io.pos()
             self._debug['global_ptr']['start'] = self._io.pos()
-            self.global_ptr = self._root.DataDir(self._io, self, self._root)
+            self.global_ptr = MicrosoftPe.DataDir(self._io, self, self._root)
             self.global_ptr._read()
             self._debug['global_ptr']['end'] = self._io.pos()
             self._debug['tls_table']['start'] = self._io.pos()
-            self.tls_table = self._root.DataDir(self._io, self, self._root)
+            self.tls_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.tls_table._read()
             self._debug['tls_table']['end'] = self._io.pos()
             self._debug['load_config_table']['start'] = self._io.pos()
-            self.load_config_table = self._root.DataDir(self._io, self, self._root)
+            self.load_config_table = MicrosoftPe.DataDir(self._io, self, self._root)
             self.load_config_table._read()
             self._debug['load_config_table']['end'] = self._io.pos()
             self._debug['bound_import']['start'] = self._io.pos()
-            self.bound_import = self._root.DataDir(self._io, self, self._root)
+            self.bound_import = MicrosoftPe.DataDir(self._io, self, self._root)
             self.bound_import._read()
             self._debug['bound_import']['end'] = self._io.pos()
             self._debug['iat']['start'] = self._io.pos()
-            self.iat = self._root.DataDir(self._io, self, self._root)
+            self.iat = MicrosoftPe.DataDir(self._io, self, self._root)
             self.iat._read()
             self._debug['iat']['end'] = self._io.pos()
             self._debug['delay_import_descriptor']['start'] = self._io.pos()
-            self.delay_import_descriptor = self._root.DataDir(self._io, self, self._root)
+            self.delay_import_descriptor = MicrosoftPe.DataDir(self._io, self, self._root)
             self.delay_import_descriptor._read()
             self._debug['delay_import_descriptor']['end'] = self._io.pos()
             self._debug['clr_runtime_header']['start'] = self._io.pos()
-            self.clr_runtime_header = self._root.DataDir(self._io, self, self._root)
+            self.clr_runtime_header = MicrosoftPe.DataDir(self._io, self, self._root)
             self.clr_runtime_header._read()
             self._debug['clr_runtime_header']['end'] = self._io.pos()
 
@@ -293,7 +293,7 @@ class MicrosoftPe(KaitaiStruct):
             self._debug['name_annoying']['start'] = self._io.pos()
             self._raw_name_annoying = self._io.read_bytes(8)
             _io__raw_name_annoying = KaitaiStream(BytesIO(self._raw_name_annoying))
-            self.name_annoying = self._root.Annoyingstring(_io__raw_name_annoying, self, self._root)
+            self.name_annoying = MicrosoftPe.Annoyingstring(_io__raw_name_annoying, self, self._root)
             self.name_annoying._read()
             self._debug['name_annoying']['end'] = self._io.pos()
             self._debug['value']['start'] = self._io.pos()
@@ -349,13 +349,13 @@ class MicrosoftPe(KaitaiStruct):
             if not self.pe_signature == b"\x50\x45\x00\x00":
                 raise kaitaistruct.ValidationNotEqualError(b"\x50\x45\x00\x00", self.pe_signature, self._io, u"/types/pe_header/seq/0")
             self._debug['coff_hdr']['start'] = self._io.pos()
-            self.coff_hdr = self._root.CoffHeader(self._io, self, self._root)
+            self.coff_hdr = MicrosoftPe.CoffHeader(self._io, self, self._root)
             self.coff_hdr._read()
             self._debug['coff_hdr']['end'] = self._io.pos()
             self._debug['optional_hdr']['start'] = self._io.pos()
             self._raw_optional_hdr = self._io.read_bytes(self.coff_hdr.size_of_optional_header)
             _io__raw_optional_hdr = KaitaiStream(BytesIO(self._raw_optional_hdr))
-            self.optional_hdr = self._root.OptionalHeader(_io__raw_optional_hdr, self, self._root)
+            self.optional_hdr = MicrosoftPe.OptionalHeader(_io__raw_optional_hdr, self, self._root)
             self.optional_hdr._read()
             self._debug['optional_hdr']['end'] = self._io.pos()
             self._debug['sections']['start'] = self._io.pos()
@@ -364,7 +364,7 @@ class MicrosoftPe(KaitaiStruct):
                 if not 'arr' in self._debug['sections']:
                     self._debug['sections']['arr'] = []
                 self._debug['sections']['arr'].append({'start': self._io.pos()})
-                _t_sections = self._root.Section(self._io, self, self._root)
+                _t_sections = MicrosoftPe.Section(self._io, self, self._root)
                 _t_sections._read()
                 self.sections[i] = _t_sections
                 self._debug['sections']['arr'][i]['end'] = self._io.pos()
@@ -382,7 +382,7 @@ class MicrosoftPe(KaitaiStruct):
                 self._debug['_m_certificate_table']['start'] = self._io.pos()
                 self._raw__m_certificate_table = self._io.read_bytes(self.optional_hdr.data_dirs.certificate_table.size)
                 _io__raw__m_certificate_table = KaitaiStream(BytesIO(self._raw__m_certificate_table))
-                self._m_certificate_table = self._root.CertificateTable(_io__raw__m_certificate_table, self, self._root)
+                self._m_certificate_table = MicrosoftPe.CertificateTable(_io__raw__m_certificate_table, self, self._root)
                 self._m_certificate_table._read()
                 self._debug['_m_certificate_table']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -400,15 +400,15 @@ class MicrosoftPe(KaitaiStruct):
 
         def _read(self):
             self._debug['std']['start'] = self._io.pos()
-            self.std = self._root.OptionalHeaderStd(self._io, self, self._root)
+            self.std = MicrosoftPe.OptionalHeaderStd(self._io, self, self._root)
             self.std._read()
             self._debug['std']['end'] = self._io.pos()
             self._debug['windows']['start'] = self._io.pos()
-            self.windows = self._root.OptionalHeaderWindows(self._io, self, self._root)
+            self.windows = MicrosoftPe.OptionalHeaderWindows(self._io, self, self._root)
             self.windows._read()
             self._debug['windows']['end'] = self._io.pos()
             self._debug['data_dirs']['start'] = self._io.pos()
-            self.data_dirs = self._root.OptionalHeaderDataDirs(self._io, self, self._root)
+            self.data_dirs = MicrosoftPe.OptionalHeaderDataDirs(self._io, self, self._root)
             self.data_dirs._read()
             self._debug['data_dirs']['end'] = self._io.pos()
 
@@ -483,7 +483,7 @@ class MicrosoftPe(KaitaiStruct):
                 if not 'arr' in self._debug['items']:
                     self._debug['items']['arr'] = []
                 self._debug['items']['arr'].append({'start': self._io.pos()})
-                _t_items = self._root.CertificateEntry(self._io, self, self._root)
+                _t_items = MicrosoftPe.CertificateEntry(self._io, self, self._root)
                 _t_items._read()
                 self.items.append(_t_items)
                 self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
@@ -524,7 +524,7 @@ class MicrosoftPe(KaitaiStruct):
 
         def _read(self):
             self._debug['format']['start'] = self._io.pos()
-            self.format = KaitaiStream.resolve_enum(self._root.PeFormat, self._io.read_u2le())
+            self.format = KaitaiStream.resolve_enum(MicrosoftPe.PeFormat, self._io.read_u2le())
             self._debug['format']['end'] = self._io.pos()
             self._debug['major_linker_version']['start'] = self._io.pos()
             self.major_linker_version = self._io.read_u1()
@@ -547,7 +547,7 @@ class MicrosoftPe(KaitaiStruct):
             self._debug['base_of_code']['start'] = self._io.pos()
             self.base_of_code = self._io.read_u4le()
             self._debug['base_of_code']['end'] = self._io.pos()
-            if self.format == self._root.PeFormat.pe32:
+            if self.format == MicrosoftPe.PeFormat.pe32:
                 self._debug['base_of_data']['start'] = self._io.pos()
                 self.base_of_data = self._io.read_u4le()
                 self._debug['base_of_data']['end'] = self._io.pos()
@@ -596,7 +596,7 @@ class MicrosoftPe(KaitaiStruct):
 
         def _read(self):
             self._debug['machine']['start'] = self._io.pos()
-            self.machine = KaitaiStream.resolve_enum(self._root.CoffHeader.MachineType, self._io.read_u2le())
+            self.machine = KaitaiStream.resolve_enum(MicrosoftPe.CoffHeader.MachineType, self._io.read_u2le())
             self._debug['machine']['end'] = self._io.pos()
             self._debug['number_of_sections']['start'] = self._io.pos()
             self.number_of_sections = self._io.read_u2le()
@@ -659,7 +659,7 @@ class MicrosoftPe(KaitaiStruct):
                 if not 'arr' in self._debug['_m_symbol_table']:
                     self._debug['_m_symbol_table']['arr'] = []
                 self._debug['_m_symbol_table']['arr'].append({'start': self._io.pos()})
-                _t__m_symbol_table = self._root.CoffSymbol(self._io, self, self._root)
+                _t__m_symbol_table = MicrosoftPe.CoffSymbol(self._io, self, self._root)
                 _t__m_symbol_table._read()
                 self._m_symbol_table[i] = _t__m_symbol_table
                 self._debug['_m_symbol_table']['arr'][i]['end'] = self._io.pos()
@@ -754,7 +754,7 @@ class MicrosoftPe(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek(self.mz.ofs_pe)
         self._debug['_m_pe']['start'] = self._io.pos()
-        self._m_pe = self._root.PeHeader(self._io, self, self._root)
+        self._m_pe = MicrosoftPe.PeHeader(self._io, self, self._root)
         self._m_pe._read()
         self._debug['_m_pe']['end'] = self._io.pos()
         self._io.seek(_pos)

@@ -26,7 +26,7 @@ class Luks(KaitaiStruct):
 
     def _read(self):
         self._debug['partition_header']['start'] = self._io.pos()
-        self.partition_header = self._root.PartitionHeader(self._io, self, self._root)
+        self.partition_header = Luks.PartitionHeader(self._io, self, self._root)
         self.partition_header._read()
         self._debug['partition_header']['end'] = self._io.pos()
 
@@ -82,7 +82,7 @@ class Luks(KaitaiStruct):
                 if not 'arr' in self._debug['key_slots']:
                     self._debug['key_slots']['arr'] = []
                 self._debug['key_slots']['arr'].append({'start': self._io.pos()})
-                _t_key_slots = self._root.PartitionHeader.KeySlot(self._io, self, self._root)
+                _t_key_slots = Luks.PartitionHeader.KeySlot(self._io, self, self._root)
                 _t_key_slots._read()
                 self.key_slots[i] = _t_key_slots
                 self._debug['key_slots']['arr'][i]['end'] = self._io.pos()
@@ -103,7 +103,7 @@ class Luks(KaitaiStruct):
 
             def _read(self):
                 self._debug['state_of_key_slot']['start'] = self._io.pos()
-                self.state_of_key_slot = KaitaiStream.resolve_enum(self._root.PartitionHeader.KeySlot.KeySlotStates, self._io.read_u4be())
+                self.state_of_key_slot = KaitaiStream.resolve_enum(Luks.PartitionHeader.KeySlot.KeySlotStates, self._io.read_u4be())
                 self._debug['state_of_key_slot']['end'] = self._io.pos()
                 self._debug['iteration_parameter']['start'] = self._io.pos()
                 self.iteration_parameter = self._io.read_u4be()

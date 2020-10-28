@@ -43,7 +43,7 @@ class JavaClass(KaitaiStruct):
             if not 'arr' in self._debug['constant_pool']:
                 self._debug['constant_pool']['arr'] = []
             self._debug['constant_pool']['arr'].append({'start': self._io.pos()})
-            _t_constant_pool = self._root.ConstantPoolEntry(self._io, self, self._root)
+            _t_constant_pool = JavaClass.ConstantPoolEntry(self._io, self, self._root)
             _t_constant_pool._read()
             self.constant_pool[i] = _t_constant_pool
             self._debug['constant_pool']['arr'][i]['end'] = self._io.pos()
@@ -80,7 +80,7 @@ class JavaClass(KaitaiStruct):
             if not 'arr' in self._debug['fields']:
                 self._debug['fields']['arr'] = []
             self._debug['fields']['arr'].append({'start': self._io.pos()})
-            _t_fields = self._root.FieldInfo(self._io, self, self._root)
+            _t_fields = JavaClass.FieldInfo(self._io, self, self._root)
             _t_fields._read()
             self.fields[i] = _t_fields
             self._debug['fields']['arr'][i]['end'] = self._io.pos()
@@ -95,7 +95,7 @@ class JavaClass(KaitaiStruct):
             if not 'arr' in self._debug['methods']:
                 self._debug['methods']['arr'] = []
             self._debug['methods']['arr'].append({'start': self._io.pos()})
-            _t_methods = self._root.MethodInfo(self._io, self, self._root)
+            _t_methods = JavaClass.MethodInfo(self._io, self, self._root)
             _t_methods._read()
             self.methods[i] = _t_methods
             self._debug['methods']['arr'][i]['end'] = self._io.pos()
@@ -110,7 +110,7 @@ class JavaClass(KaitaiStruct):
             if not 'arr' in self._debug['attributes']:
                 self._debug['attributes']['arr'] = []
             self._debug['attributes']['arr'].append({'start': self._io.pos()})
-            _t_attributes = self._root.AttributeInfo(self._io, self, self._root)
+            _t_attributes = JavaClass.AttributeInfo(self._io, self, self._root)
             _t_attributes._read()
             self.attributes[i] = _t_attributes
             self._debug['attributes']['arr'][i]['end'] = self._io.pos()
@@ -159,22 +159,22 @@ class JavaClass(KaitaiStruct):
             if _on == u"SourceFile":
                 self._raw_info = self._io.read_bytes(self.attribute_length)
                 _io__raw_info = KaitaiStream(BytesIO(self._raw_info))
-                self.info = self._root.AttributeInfo.AttrBodySourceFile(_io__raw_info, self, self._root)
+                self.info = JavaClass.AttributeInfo.AttrBodySourceFile(_io__raw_info, self, self._root)
                 self.info._read()
             elif _on == u"LineNumberTable":
                 self._raw_info = self._io.read_bytes(self.attribute_length)
                 _io__raw_info = KaitaiStream(BytesIO(self._raw_info))
-                self.info = self._root.AttributeInfo.AttrBodyLineNumberTable(_io__raw_info, self, self._root)
+                self.info = JavaClass.AttributeInfo.AttrBodyLineNumberTable(_io__raw_info, self, self._root)
                 self.info._read()
             elif _on == u"Exceptions":
                 self._raw_info = self._io.read_bytes(self.attribute_length)
                 _io__raw_info = KaitaiStream(BytesIO(self._raw_info))
-                self.info = self._root.AttributeInfo.AttrBodyExceptions(_io__raw_info, self, self._root)
+                self.info = JavaClass.AttributeInfo.AttrBodyExceptions(_io__raw_info, self, self._root)
                 self.info._read()
             elif _on == u"Code":
                 self._raw_info = self._io.read_bytes(self.attribute_length)
                 _io__raw_info = KaitaiStream(BytesIO(self._raw_info))
-                self.info = self._root.AttributeInfo.AttrBodyCode(_io__raw_info, self, self._root)
+                self.info = JavaClass.AttributeInfo.AttrBodyCode(_io__raw_info, self, self._root)
                 self.info._read()
             else:
                 self.info = self._io.read_bytes(self.attribute_length)
@@ -214,7 +214,7 @@ class JavaClass(KaitaiStruct):
                     if not 'arr' in self._debug['exception_table']:
                         self._debug['exception_table']['arr'] = []
                     self._debug['exception_table']['arr'].append({'start': self._io.pos()})
-                    _t_exception_table = self._root.AttributeInfo.AttrBodyCode.ExceptionEntry(self._io, self, self._root)
+                    _t_exception_table = JavaClass.AttributeInfo.AttrBodyCode.ExceptionEntry(self._io, self, self._root)
                     _t_exception_table._read()
                     self.exception_table[i] = _t_exception_table
                     self._debug['exception_table']['arr'][i]['end'] = self._io.pos()
@@ -229,7 +229,7 @@ class JavaClass(KaitaiStruct):
                     if not 'arr' in self._debug['attributes']:
                         self._debug['attributes']['arr'] = []
                     self._debug['attributes']['arr'].append({'start': self._io.pos()})
-                    _t_attributes = self._root.AttributeInfo(self._io, self, self._root)
+                    _t_attributes = JavaClass.AttributeInfo(self._io, self, self._root)
                     _t_attributes._read()
                     self.attributes[i] = _t_attributes
                     self._debug['attributes']['arr'][i]['end'] = self._io.pos()
@@ -296,7 +296,7 @@ class JavaClass(KaitaiStruct):
                     if not 'arr' in self._debug['exceptions']:
                         self._debug['exceptions']['arr'] = []
                     self._debug['exceptions']['arr'].append({'start': self._io.pos()})
-                    _t_exceptions = self._root.AttributeInfo.AttrBodyExceptions.ExceptionTableEntry(self._io, self, self._root)
+                    _t_exceptions = JavaClass.AttributeInfo.AttrBodyExceptions.ExceptionTableEntry(self._io, self, self._root)
                     _t_exceptions._read()
                     self.exceptions[i] = _t_exceptions
                     self._debug['exceptions']['arr'][i]['end'] = self._io.pos()
@@ -382,7 +382,7 @@ class JavaClass(KaitaiStruct):
                     if not 'arr' in self._debug['line_number_table']:
                         self._debug['line_number_table']['arr'] = []
                     self._debug['line_number_table']['arr'].append({'start': self._io.pos()})
-                    _t_line_number_table = self._root.AttributeInfo.AttrBodyLineNumberTable.LineNumberTableEntry(self._io, self, self._root)
+                    _t_line_number_table = JavaClass.AttributeInfo.AttrBodyLineNumberTable.LineNumberTableEntry(self._io, self, self._root)
                     _t_line_number_table._read()
                     self.line_number_table[i] = _t_line_number_table
                     self._debug['line_number_table']['arr'][i]['end'] = self._io.pos()
@@ -484,7 +484,7 @@ class JavaClass(KaitaiStruct):
                 if not 'arr' in self._debug['attributes']:
                     self._debug['attributes']['arr'] = []
                 self._debug['attributes']['arr'].append({'start': self._io.pos()})
-                _t_attributes = self._root.AttributeInfo(self._io, self, self._root)
+                _t_attributes = JavaClass.AttributeInfo(self._io, self, self._root)
                 _t_attributes._read()
                 self.attributes[i] = _t_attributes
                 self._debug['attributes']['arr'][i]['end'] = self._io.pos()
@@ -582,7 +582,7 @@ class JavaClass(KaitaiStruct):
 
         def _read(self):
             self._debug['reference_kind']['start'] = self._io.pos()
-            self.reference_kind = KaitaiStream.resolve_enum(self._root.MethodHandleCpInfo.ReferenceKindEnum, self._io.read_u1())
+            self.reference_kind = KaitaiStream.resolve_enum(JavaClass.MethodHandleCpInfo.ReferenceKindEnum, self._io.read_u1())
             self._debug['reference_kind']['end'] = self._io.pos()
             self._debug['reference_index']['start'] = self._io.pos()
             self.reference_index = self._io.read_u2be()
@@ -800,51 +800,51 @@ class JavaClass(KaitaiStruct):
 
         def _read(self):
             self._debug['tag']['start'] = self._io.pos()
-            self.tag = KaitaiStream.resolve_enum(self._root.ConstantPoolEntry.TagEnum, self._io.read_u1())
+            self.tag = KaitaiStream.resolve_enum(JavaClass.ConstantPoolEntry.TagEnum, self._io.read_u1())
             self._debug['tag']['end'] = self._io.pos()
             self._debug['cp_info']['start'] = self._io.pos()
             _on = self.tag
-            if _on == self._root.ConstantPoolEntry.TagEnum.interface_method_ref:
-                self.cp_info = self._root.InterfaceMethodRefCpInfo(self._io, self, self._root)
+            if _on == JavaClass.ConstantPoolEntry.TagEnum.interface_method_ref:
+                self.cp_info = JavaClass.InterfaceMethodRefCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.class_type:
-                self.cp_info = self._root.ClassCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.class_type:
+                self.cp_info = JavaClass.ClassCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.utf8:
-                self.cp_info = self._root.Utf8CpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.utf8:
+                self.cp_info = JavaClass.Utf8CpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.method_type:
-                self.cp_info = self._root.MethodTypeCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.method_type:
+                self.cp_info = JavaClass.MethodTypeCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.integer:
-                self.cp_info = self._root.IntegerCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.integer:
+                self.cp_info = JavaClass.IntegerCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.string:
-                self.cp_info = self._root.StringCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.string:
+                self.cp_info = JavaClass.StringCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.float:
-                self.cp_info = self._root.FloatCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.float:
+                self.cp_info = JavaClass.FloatCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.long:
-                self.cp_info = self._root.LongCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.long:
+                self.cp_info = JavaClass.LongCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.method_ref:
-                self.cp_info = self._root.MethodRefCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.method_ref:
+                self.cp_info = JavaClass.MethodRefCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.double:
-                self.cp_info = self._root.DoubleCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.double:
+                self.cp_info = JavaClass.DoubleCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.invoke_dynamic:
-                self.cp_info = self._root.InvokeDynamicCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.invoke_dynamic:
+                self.cp_info = JavaClass.InvokeDynamicCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.field_ref:
-                self.cp_info = self._root.FieldRefCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.field_ref:
+                self.cp_info = JavaClass.FieldRefCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.method_handle:
-                self.cp_info = self._root.MethodHandleCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.method_handle:
+                self.cp_info = JavaClass.MethodHandleCpInfo(self._io, self, self._root)
                 self.cp_info._read()
-            elif _on == self._root.ConstantPoolEntry.TagEnum.name_and_type:
-                self.cp_info = self._root.NameAndTypeCpInfo(self._io, self, self._root)
+            elif _on == JavaClass.ConstantPoolEntry.TagEnum.name_and_type:
+                self.cp_info = JavaClass.NameAndTypeCpInfo(self._io, self, self._root)
                 self.cp_info._read()
             self._debug['cp_info']['end'] = self._io.pos()
 
@@ -880,7 +880,7 @@ class JavaClass(KaitaiStruct):
                 if not 'arr' in self._debug['attributes']:
                     self._debug['attributes']['arr'] = []
                 self._debug['attributes']['arr'].append({'start': self._io.pos()})
-                _t_attributes = self._root.AttributeInfo(self._io, self, self._root)
+                _t_attributes = JavaClass.AttributeInfo(self._io, self, self._root)
                 _t_attributes._read()
                 self.attributes[i] = _t_attributes
                 self._debug['attributes']['arr'][i]['end'] = self._io.pos()

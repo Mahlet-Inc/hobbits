@@ -68,43 +68,43 @@ class Asn1Der(KaitaiStruct):
 
     def _read(self):
         self._debug['type_tag']['start'] = self._io.pos()
-        self.type_tag = KaitaiStream.resolve_enum(self._root.TypeTag, self._io.read_u1())
+        self.type_tag = KaitaiStream.resolve_enum(Asn1Der.TypeTag, self._io.read_u1())
         self._debug['type_tag']['end'] = self._io.pos()
         self._debug['len']['start'] = self._io.pos()
-        self.len = self._root.LenEncoded(self._io, self, self._root)
+        self.len = Asn1Der.LenEncoded(self._io, self, self._root)
         self.len._read()
         self._debug['len']['end'] = self._io.pos()
         self._debug['body']['start'] = self._io.pos()
         _on = self.type_tag
-        if _on == self._root.TypeTag.printable_string:
+        if _on == Asn1Der.TypeTag.printable_string:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodyPrintableString(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodyPrintableString(_io__raw_body, self, self._root)
             self.body._read()
-        elif _on == self._root.TypeTag.sequence_10:
+        elif _on == Asn1Der.TypeTag.sequence_10:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodySequence(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodySequence(_io__raw_body, self, self._root)
             self.body._read()
-        elif _on == self._root.TypeTag.set:
+        elif _on == Asn1Der.TypeTag.set:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodySequence(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodySequence(_io__raw_body, self, self._root)
             self.body._read()
-        elif _on == self._root.TypeTag.sequence_30:
+        elif _on == Asn1Der.TypeTag.sequence_30:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodySequence(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodySequence(_io__raw_body, self, self._root)
             self.body._read()
-        elif _on == self._root.TypeTag.utf8string:
+        elif _on == Asn1Der.TypeTag.utf8string:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodyUtf8string(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodyUtf8string(_io__raw_body, self, self._root)
             self.body._read()
-        elif _on == self._root.TypeTag.object_id:
+        elif _on == Asn1Der.TypeTag.object_id:
             self._raw_body = self._io.read_bytes(self.len.result)
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-            self.body = self._root.BodyObjectId(_io__raw_body, self, self._root)
+            self.body = Asn1Der.BodyObjectId(_io__raw_body, self, self._root)
             self.body._read()
         else:
             self.body = self._io.read_bytes(self.len.result)

@@ -32,13 +32,13 @@ class FasttrackerXmModule(KaitaiStruct):
 
     def _read(self):
         self._debug['preheader']['start'] = self._io.pos()
-        self.preheader = self._root.Preheader(self._io, self, self._root)
+        self.preheader = FasttrackerXmModule.Preheader(self._io, self, self._root)
         self.preheader._read()
         self._debug['preheader']['end'] = self._io.pos()
         self._debug['header']['start'] = self._io.pos()
         self._raw_header = self._io.read_bytes((self.preheader.header_size - 4))
         _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-        self.header = self._root.Header(_io__raw_header, self, self._root)
+        self.header = FasttrackerXmModule.Header(_io__raw_header, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['patterns']['start'] = self._io.pos()
@@ -47,7 +47,7 @@ class FasttrackerXmModule(KaitaiStruct):
             if not 'arr' in self._debug['patterns']:
                 self._debug['patterns']['arr'] = []
             self._debug['patterns']['arr'].append({'start': self._io.pos()})
-            _t_patterns = self._root.Pattern(self._io, self, self._root)
+            _t_patterns = FasttrackerXmModule.Pattern(self._io, self, self._root)
             _t_patterns._read()
             self.patterns[i] = _t_patterns
             self._debug['patterns']['arr'][i]['end'] = self._io.pos()
@@ -59,7 +59,7 @@ class FasttrackerXmModule(KaitaiStruct):
             if not 'arr' in self._debug['instruments']:
                 self._debug['instruments']['arr'] = []
             self._debug['instruments']['arr'].append({'start': self._io.pos()})
-            _t_instruments = self._root.Instrument(self._io, self, self._root)
+            _t_instruments = FasttrackerXmModule.Instrument(self._io, self, self._root)
             _t_instruments._read()
             self.instruments[i] = _t_instruments
             self._debug['instruments']['arr'][i]['end'] = self._io.pos()
@@ -92,7 +92,7 @@ class FasttrackerXmModule(KaitaiStruct):
             self.tracker_name = (KaitaiStream.bytes_terminate(self._io.read_bytes(20), 0, False)).decode(u"utf-8")
             self._debug['tracker_name']['end'] = self._io.pos()
             self._debug['version_number']['start'] = self._io.pos()
-            self.version_number = self._root.Preheader.Version(self._io, self, self._root)
+            self.version_number = FasttrackerXmModule.Preheader.Version(self._io, self, self._root)
             self.version_number._read()
             self._debug['version_number']['end'] = self._io.pos()
             self._debug['header_size']['start'] = self._io.pos()
@@ -135,7 +135,7 @@ class FasttrackerXmModule(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.Pattern.Header(self._io, self, self._root)
+            self.header = FasttrackerXmModule.Pattern.Header(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['packed_data']['start'] = self._io.pos()
@@ -157,7 +157,7 @@ class FasttrackerXmModule(KaitaiStruct):
                 self._debug['main']['start'] = self._io.pos()
                 self._raw_main = self._io.read_bytes((self.header_length - 4))
                 _io__raw_main = KaitaiStream(BytesIO(self._raw_main))
-                self.main = self._root.Pattern.Header.HeaderMain(_io__raw_main, self, self._root)
+                self.main = FasttrackerXmModule.Pattern.Header.HeaderMain(_io__raw_main, self, self._root)
                 self.main._read()
                 self._debug['main']['end'] = self._io.pos()
 
@@ -205,10 +205,10 @@ class FasttrackerXmModule(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(15)
+            self.reserved = self._io.read_bits_int_be(15)
             self._debug['reserved']['end'] = self._io.pos()
             self._debug['freq_table_type']['start'] = self._io.pos()
-            self.freq_table_type = self._io.read_bits_int(1) != 0
+            self.freq_table_type = self._io.read_bits_int_be(1) != 0
             self._debug['freq_table_type']['end'] = self._io.pos()
 
 
@@ -237,7 +237,7 @@ class FasttrackerXmModule(KaitaiStruct):
             self.num_instruments = self._io.read_u2le()
             self._debug['num_instruments']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.Flags(self._io, self, self._root)
+            self.flags = FasttrackerXmModule.Flags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['default_tempo']['start'] = self._io.pos()
@@ -282,7 +282,7 @@ class FasttrackerXmModule(KaitaiStruct):
             self._debug['header']['start'] = self._io.pos()
             self._raw_header = self._io.read_bytes((self.header_size - 4))
             _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-            self.header = self._root.Instrument.Header(_io__raw_header, self, self._root)
+            self.header = FasttrackerXmModule.Instrument.Header(_io__raw_header, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['samples_headers']['start'] = self._io.pos()
@@ -291,7 +291,7 @@ class FasttrackerXmModule(KaitaiStruct):
                 if not 'arr' in self._debug['samples_headers']:
                     self._debug['samples_headers']['arr'] = []
                 self._debug['samples_headers']['arr'].append({'start': self._io.pos()})
-                _t_samples_headers = self._root.Instrument.SampleHeader(self._io, self, self._root)
+                _t_samples_headers = FasttrackerXmModule.Instrument.SampleHeader(self._io, self, self._root)
                 _t_samples_headers._read()
                 self.samples_headers[i] = _t_samples_headers
                 self._debug['samples_headers']['arr'][i]['end'] = self._io.pos()
@@ -303,7 +303,7 @@ class FasttrackerXmModule(KaitaiStruct):
                 if not 'arr' in self._debug['samples']:
                     self._debug['samples']['arr'] = []
                 self._debug['samples']['arr'].append({'start': self._io.pos()})
-                _t_samples = self._root.Instrument.SamplesData(self.samples_headers[i], self._io, self, self._root)
+                _t_samples = FasttrackerXmModule.Instrument.SamplesData(self.samples_headers[i], self._io, self, self._root)
                 _t_samples._read()
                 self.samples[i] = _t_samples
                 self._debug['samples']['arr'][i]['end'] = self._io.pos()
@@ -330,7 +330,7 @@ class FasttrackerXmModule(KaitaiStruct):
                 self._debug['num_samples']['end'] = self._io.pos()
                 if self.num_samples > 0:
                     self._debug['extra_header']['start'] = self._io.pos()
-                    self.extra_header = self._root.Instrument.ExtraHeader(self._io, self, self._root)
+                    self.extra_header = FasttrackerXmModule.Instrument.ExtraHeader(self._io, self, self._root)
                     self.extra_header._read()
                     self._debug['extra_header']['end'] = self._io.pos()
 
@@ -369,7 +369,7 @@ class FasttrackerXmModule(KaitaiStruct):
                     if not 'arr' in self._debug['volume_points']:
                         self._debug['volume_points']['arr'] = []
                     self._debug['volume_points']['arr'].append({'start': self._io.pos()})
-                    _t_volume_points = self._root.Instrument.ExtraHeader.EnvelopePoint(self._io, self, self._root)
+                    _t_volume_points = FasttrackerXmModule.Instrument.ExtraHeader.EnvelopePoint(self._io, self, self._root)
                     _t_volume_points._read()
                     self.volume_points[i] = _t_volume_points
                     self._debug['volume_points']['arr'][i]['end'] = self._io.pos()
@@ -381,7 +381,7 @@ class FasttrackerXmModule(KaitaiStruct):
                     if not 'arr' in self._debug['panning_points']:
                         self._debug['panning_points']['arr'] = []
                     self._debug['panning_points']['arr'].append({'start': self._io.pos()})
-                    _t_panning_points = self._root.Instrument.ExtraHeader.EnvelopePoint(self._io, self, self._root)
+                    _t_panning_points = FasttrackerXmModule.Instrument.ExtraHeader.EnvelopePoint(self._io, self, self._root)
                     _t_panning_points._read()
                     self.panning_points[i] = _t_panning_points
                     self._debug['panning_points']['arr'][i]['end'] = self._io.pos()
@@ -412,10 +412,10 @@ class FasttrackerXmModule(KaitaiStruct):
                 self.panning_loop_end_point = self._io.read_u1()
                 self._debug['panning_loop_end_point']['end'] = self._io.pos()
                 self._debug['volume_type']['start'] = self._io.pos()
-                self.volume_type = KaitaiStream.resolve_enum(self._root.Instrument.ExtraHeader.Type, self._io.read_u1())
+                self.volume_type = KaitaiStream.resolve_enum(FasttrackerXmModule.Instrument.ExtraHeader.Type, self._io.read_u1())
                 self._debug['volume_type']['end'] = self._io.pos()
                 self._debug['panning_type']['start'] = self._io.pos()
-                self.panning_type = KaitaiStream.resolve_enum(self._root.Instrument.ExtraHeader.Type, self._io.read_u1())
+                self.panning_type = KaitaiStream.resolve_enum(FasttrackerXmModule.Instrument.ExtraHeader.Type, self._io.read_u1())
                 self._debug['panning_type']['end'] = self._io.pos()
                 self._debug['vibrato_type']['start'] = self._io.pos()
                 self.vibrato_type = self._io.read_u1()
@@ -509,7 +509,7 @@ class FasttrackerXmModule(KaitaiStruct):
                 self.fine_tune = self._io.read_s1()
                 self._debug['fine_tune']['end'] = self._io.pos()
                 self._debug['type']['start'] = self._io.pos()
-                self.type = self._root.Instrument.SampleHeader.LoopType(self._io, self, self._root)
+                self.type = FasttrackerXmModule.Instrument.SampleHeader.LoopType(self._io, self, self._root)
                 self.type._read()
                 self._debug['type']['end'] = self._io.pos()
                 self._debug['panning']['start'] = self._io.pos()
@@ -540,16 +540,16 @@ class FasttrackerXmModule(KaitaiStruct):
 
                 def _read(self):
                     self._debug['reserved0']['start'] = self._io.pos()
-                    self.reserved0 = self._io.read_bits_int(3)
+                    self.reserved0 = self._io.read_bits_int_be(3)
                     self._debug['reserved0']['end'] = self._io.pos()
                     self._debug['is_sample_data_16_bit']['start'] = self._io.pos()
-                    self.is_sample_data_16_bit = self._io.read_bits_int(1) != 0
+                    self.is_sample_data_16_bit = self._io.read_bits_int_be(1) != 0
                     self._debug['is_sample_data_16_bit']['end'] = self._io.pos()
                     self._debug['reserved1']['start'] = self._io.pos()
-                    self.reserved1 = self._io.read_bits_int(2)
+                    self.reserved1 = self._io.read_bits_int_be(2)
                     self._debug['reserved1']['end'] = self._io.pos()
                     self._debug['loop_type']['start'] = self._io.pos()
-                    self.loop_type = KaitaiStream.resolve_enum(self._root.Instrument.SampleHeader.LoopType.LoopType, self._io.read_bits_int(2))
+                    self.loop_type = KaitaiStream.resolve_enum(FasttrackerXmModule.Instrument.SampleHeader.LoopType.LoopType, self._io.read_bits_int_be(2))
                     self._debug['loop_type']['end'] = self._io.pos()
 
 

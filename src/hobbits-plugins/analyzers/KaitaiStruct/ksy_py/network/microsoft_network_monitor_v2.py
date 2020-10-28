@@ -10,8 +10,8 @@ import collections
 if parse_version(kaitaistruct.__version__) < parse_version('0.9'):
     raise Exception("Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s" % (kaitaistruct.__version__))
 
-import ethernet_frame
 import windows_systemtime
+import ethernet_frame
 class MicrosoftNetworkMonitorV2(KaitaiStruct):
     """Microsoft Network Monitor (AKA Netmon) is a proprietary Microsoft's
     network packet sniffing and analysis tool. It can save captured
@@ -151,7 +151,7 @@ class MicrosoftNetworkMonitorV2(KaitaiStruct):
         self.version_major = self._io.read_u1()
         self._debug['version_major']['end'] = self._io.pos()
         self._debug['mac_type']['start'] = self._io.pos()
-        self.mac_type = KaitaiStream.resolve_enum(self._root.Linktype, self._io.read_u2le())
+        self.mac_type = KaitaiStream.resolve_enum(MicrosoftNetworkMonitorV2.Linktype, self._io.read_u2le())
         self._debug['mac_type']['end'] = self._io.pos()
         self._debug['time_capture_start']['start'] = self._io.pos()
         self.time_capture_start = windows_systemtime.WindowsSystemtime(self._io)
@@ -210,7 +210,7 @@ class MicrosoftNetworkMonitorV2(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.FrameIndexEntry(self._io, self, self._root)
+                _t_entries = MicrosoftNetworkMonitorV2.FrameIndexEntry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -245,7 +245,7 @@ class MicrosoftNetworkMonitorV2(KaitaiStruct):
             _pos = io.pos()
             io.seek(self.ofs)
             self._debug['_m_body']['start'] = io.pos()
-            self._m_body = self._root.Frame(io, self, self._root)
+            self._m_body = MicrosoftNetworkMonitorV2.Frame(io, self, self._root)
             self._m_body._read()
             self._debug['_m_body']['end'] = io.pos()
             io.seek(_pos)
@@ -279,7 +279,7 @@ class MicrosoftNetworkMonitorV2(KaitaiStruct):
             self._debug['inc_len']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self._root.mac_type
-            if _on == self._root.Linktype.ethernet:
+            if _on == MicrosoftNetworkMonitorV2.Linktype.ethernet:
                 self._raw_body = self._io.read_bytes(self.inc_len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
                 self.body = ethernet_frame.EthernetFrame(_io__raw_body)
@@ -300,7 +300,7 @@ class MicrosoftNetworkMonitorV2(KaitaiStruct):
         self._debug['_m_frame_table']['start'] = self._io.pos()
         self._raw__m_frame_table = self._io.read_bytes(self.frame_table_len)
         _io__raw__m_frame_table = KaitaiStream(BytesIO(self._raw__m_frame_table))
-        self._m_frame_table = self._root.FrameIndex(_io__raw__m_frame_table, self, self._root)
+        self._m_frame_table = MicrosoftNetworkMonitorV2.FrameIndex(_io__raw__m_frame_table, self, self._root)
         self._m_frame_table._read()
         self._debug['_m_frame_table']['end'] = self._io.pos()
         self._io.seek(_pos)

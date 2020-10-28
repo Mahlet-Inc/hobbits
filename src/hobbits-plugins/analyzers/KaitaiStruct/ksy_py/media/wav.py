@@ -313,7 +313,7 @@ class Wav(KaitaiStruct):
 
     def _read(self):
         self._debug['chunk']['start'] = self._io.pos()
-        self.chunk = self._root.Chunk(self._io, self, self._root)
+        self.chunk = Riff.Chunk(self._io, self, self._root)
         self.chunk._read()
         self._debug['chunk']['end'] = self._io.pos()
 
@@ -341,7 +341,7 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['w_format_tag']['start'] = self._io.pos()
-            self.w_format_tag = KaitaiStream.resolve_enum(self._root.WFormatTagType, self._io.read_u2le())
+            self.w_format_tag = KaitaiStream.resolve_enum(Wav.WFormatTagType, self._io.read_u2le())
             self._debug['w_format_tag']['end'] = self._io.pos()
             self._debug['n_channels']['start'] = self._io.pos()
             self.n_channels = self._io.read_u2le()
@@ -370,7 +370,7 @@ class Wav(KaitaiStruct):
 
             if self.is_extensible:
                 self._debug['channel_mask_and_subformat']['start'] = self._io.pos()
-                self.channel_mask_and_subformat = self._root.ChannelMaskAndSubformatType(self._io, self, self._root)
+                self.channel_mask_and_subformat = Wav.ChannelMaskAndSubformatType(self._io, self, self._root)
                 self.channel_mask_and_subformat._read()
                 self._debug['channel_mask_and_subformat']['end'] = self._io.pos()
 
@@ -380,7 +380,7 @@ class Wav(KaitaiStruct):
             if hasattr(self, '_m_is_extensible'):
                 return self._m_is_extensible if hasattr(self, '_m_is_extensible') else None
 
-            self._m_is_extensible = self.w_format_tag == self._root.WFormatTagType.extensible
+            self._m_is_extensible = self.w_format_tag == Wav.WFormatTagType.extensible
             return self._m_is_extensible if hasattr(self, '_m_is_extensible') else None
 
         @property
@@ -388,7 +388,7 @@ class Wav(KaitaiStruct):
             if hasattr(self, '_m_is_basic_pcm'):
                 return self._m_is_basic_pcm if hasattr(self, '_m_is_basic_pcm') else None
 
-            self._m_is_basic_pcm = self.w_format_tag == self._root.WFormatTagType.pcm
+            self._m_is_basic_pcm = self.w_format_tag == Wav.WFormatTagType.pcm
             return self._m_is_basic_pcm if hasattr(self, '_m_is_basic_pcm') else None
 
         @property
@@ -396,7 +396,7 @@ class Wav(KaitaiStruct):
             if hasattr(self, '_m_is_basic_float'):
                 return self._m_is_basic_float if hasattr(self, '_m_is_basic_float') else None
 
-            self._m_is_basic_float = self.w_format_tag == self._root.WFormatTagType.ieee_float
+            self._m_is_basic_float = self.w_format_tag == Wav.WFormatTagType.ieee_float
             return self._m_is_basic_float if hasattr(self, '_m_is_basic_float') else None
 
         @property
@@ -444,7 +444,7 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['chunk']['start'] = self._io.pos()
-            self.chunk = self._root.Chunk(self._io, self, self._root)
+            self.chunk = Riff.Chunk(self._io, self, self._root)
             self.chunk._read()
             self._debug['chunk']['end'] = self._io.pos()
 
@@ -530,11 +530,11 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['dw_channel_mask']['start'] = self._io.pos()
-            self.dw_channel_mask = self._root.ChannelMaskType(self._io, self, self._root)
+            self.dw_channel_mask = Wav.ChannelMaskType(self._io, self, self._root)
             self.dw_channel_mask._read()
             self._debug['dw_channel_mask']['end'] = self._io.pos()
             self._debug['subformat']['start'] = self._io.pos()
-            self.subformat = self._root.GuidType(self._io, self, self._root)
+            self.subformat = Wav.GuidType(self._io, self, self._root)
             self.subformat._read()
             self._debug['subformat']['end'] = self._io.pos()
 
@@ -557,7 +557,7 @@ class Wav(KaitaiStruct):
                 if not 'arr' in self._debug['cue_points']:
                     self._debug['cue_points']['arr'] = []
                 self._debug['cue_points']['arr'].append({'start': self._io.pos()})
-                _t_cue_points = self._root.CuePointType(self._io, self, self._root)
+                _t_cue_points = Wav.CuePointType(self._io, self, self._root)
                 _t_cue_points._read()
                 self.cue_points[i] = _t_cue_points
                 self._debug['cue_points']['arr'][i]['end'] = self._io.pos()
@@ -575,7 +575,7 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['parent_chunk_data']['start'] = self._io.pos()
-            self.parent_chunk_data = self._root.ParentChunkData(self._io, self, self._root)
+            self.parent_chunk_data = Riff.ParentChunkData(self._io, self, self._root)
             self.parent_chunk_data._read()
             self._debug['parent_chunk_data']['end'] = self._io.pos()
 
@@ -584,7 +584,7 @@ class Wav(KaitaiStruct):
             if hasattr(self, '_m_form_type'):
                 return self._m_form_type if hasattr(self, '_m_form_type') else None
 
-            self._m_form_type = KaitaiStream.resolve_enum(self._root.Fourcc, self.parent_chunk_data.form_type)
+            self._m_form_type = KaitaiStream.resolve_enum(Wav.Fourcc, self.parent_chunk_data.form_type)
             return self._m_form_type if hasattr(self, '_m_form_type') else None
 
         @property
@@ -603,11 +603,11 @@ class Wav(KaitaiStruct):
                     self._debug['_m_subchunks']['arr'] = []
                 self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
                 _on = self.form_type
-                if _on == self._root.Fourcc.info:
+                if _on == Wav.Fourcc.info:
                     if not 'arr' in self._debug['_m_subchunks']:
                         self._debug['_m_subchunks']['arr'] = []
                     self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
-                    _t__m_subchunks = self._root.InfoChunkType(io, self, self._root)
+                    _t__m_subchunks = Wav.InfoChunkType(io, self, self._root)
                     _t__m_subchunks._read()
                     self._m_subchunks.append(_t__m_subchunks)
                     self._debug['_m_subchunks']['arr'][len(self._m_subchunks) - 1]['end'] = io.pos()
@@ -629,64 +629,64 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['front_right_of_center']['start'] = self._io.pos()
-            self.front_right_of_center = self._io.read_bits_int(1) != 0
+            self.front_right_of_center = self._io.read_bits_int_be(1) != 0
             self._debug['front_right_of_center']['end'] = self._io.pos()
             self._debug['front_left_of_center']['start'] = self._io.pos()
-            self.front_left_of_center = self._io.read_bits_int(1) != 0
+            self.front_left_of_center = self._io.read_bits_int_be(1) != 0
             self._debug['front_left_of_center']['end'] = self._io.pos()
             self._debug['back_right']['start'] = self._io.pos()
-            self.back_right = self._io.read_bits_int(1) != 0
+            self.back_right = self._io.read_bits_int_be(1) != 0
             self._debug['back_right']['end'] = self._io.pos()
             self._debug['back_left']['start'] = self._io.pos()
-            self.back_left = self._io.read_bits_int(1) != 0
+            self.back_left = self._io.read_bits_int_be(1) != 0
             self._debug['back_left']['end'] = self._io.pos()
             self._debug['low_frequency']['start'] = self._io.pos()
-            self.low_frequency = self._io.read_bits_int(1) != 0
+            self.low_frequency = self._io.read_bits_int_be(1) != 0
             self._debug['low_frequency']['end'] = self._io.pos()
             self._debug['front_center']['start'] = self._io.pos()
-            self.front_center = self._io.read_bits_int(1) != 0
+            self.front_center = self._io.read_bits_int_be(1) != 0
             self._debug['front_center']['end'] = self._io.pos()
             self._debug['front_right']['start'] = self._io.pos()
-            self.front_right = self._io.read_bits_int(1) != 0
+            self.front_right = self._io.read_bits_int_be(1) != 0
             self._debug['front_right']['end'] = self._io.pos()
             self._debug['front_left']['start'] = self._io.pos()
-            self.front_left = self._io.read_bits_int(1) != 0
+            self.front_left = self._io.read_bits_int_be(1) != 0
             self._debug['front_left']['end'] = self._io.pos()
             self._debug['top_center']['start'] = self._io.pos()
-            self.top_center = self._io.read_bits_int(1) != 0
+            self.top_center = self._io.read_bits_int_be(1) != 0
             self._debug['top_center']['end'] = self._io.pos()
             self._debug['side_right']['start'] = self._io.pos()
-            self.side_right = self._io.read_bits_int(1) != 0
+            self.side_right = self._io.read_bits_int_be(1) != 0
             self._debug['side_right']['end'] = self._io.pos()
             self._debug['side_left']['start'] = self._io.pos()
-            self.side_left = self._io.read_bits_int(1) != 0
+            self.side_left = self._io.read_bits_int_be(1) != 0
             self._debug['side_left']['end'] = self._io.pos()
             self._debug['back_center']['start'] = self._io.pos()
-            self.back_center = self._io.read_bits_int(1) != 0
+            self.back_center = self._io.read_bits_int_be(1) != 0
             self._debug['back_center']['end'] = self._io.pos()
             self._debug['top_back_left']['start'] = self._io.pos()
-            self.top_back_left = self._io.read_bits_int(1) != 0
+            self.top_back_left = self._io.read_bits_int_be(1) != 0
             self._debug['top_back_left']['end'] = self._io.pos()
             self._debug['top_front_right']['start'] = self._io.pos()
-            self.top_front_right = self._io.read_bits_int(1) != 0
+            self.top_front_right = self._io.read_bits_int_be(1) != 0
             self._debug['top_front_right']['end'] = self._io.pos()
             self._debug['top_front_center']['start'] = self._io.pos()
-            self.top_front_center = self._io.read_bits_int(1) != 0
+            self.top_front_center = self._io.read_bits_int_be(1) != 0
             self._debug['top_front_center']['end'] = self._io.pos()
             self._debug['top_front_left']['start'] = self._io.pos()
-            self.top_front_left = self._io.read_bits_int(1) != 0
+            self.top_front_left = self._io.read_bits_int_be(1) != 0
             self._debug['top_front_left']['end'] = self._io.pos()
             self._debug['unused1']['start'] = self._io.pos()
-            self.unused1 = self._io.read_bits_int(6)
+            self.unused1 = self._io.read_bits_int_be(6)
             self._debug['unused1']['end'] = self._io.pos()
             self._debug['top_back_right']['start'] = self._io.pos()
-            self.top_back_right = self._io.read_bits_int(1) != 0
+            self.top_back_right = self._io.read_bits_int_be(1) != 0
             self._debug['top_back_right']['end'] = self._io.pos()
             self._debug['top_back_center']['start'] = self._io.pos()
-            self.top_back_center = self._io.read_bits_int(1) != 0
+            self.top_back_center = self._io.read_bits_int_be(1) != 0
             self._debug['top_back_center']['end'] = self._io.pos()
             self._debug['unused2']['start'] = self._io.pos()
-            self.unused2 = self._io.read_bits_int(8)
+            self.unused2 = self._io.read_bits_int_be(8)
             self._debug['unused2']['end'] = self._io.pos()
 
 
@@ -700,7 +700,7 @@ class Wav(KaitaiStruct):
 
         def _read(self):
             self._debug['chunk']['start'] = self._io.pos()
-            self.chunk = self._root.Chunk(self._io, self, self._root)
+            self.chunk = Riff.Chunk(self._io, self, self._root)
             self.chunk._read()
             self._debug['chunk']['end'] = self._io.pos()
 
@@ -709,7 +709,7 @@ class Wav(KaitaiStruct):
             if hasattr(self, '_m_chunk_id'):
                 return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
-            self._m_chunk_id = KaitaiStream.resolve_enum(self._root.Fourcc, self.chunk.id)
+            self._m_chunk_id = KaitaiStream.resolve_enum(Wav.Fourcc, self.chunk.id)
             return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
         @property
@@ -722,20 +722,20 @@ class Wav(KaitaiStruct):
             io.seek(0)
             self._debug['_m_chunk_data']['start'] = io.pos()
             _on = self.chunk_id
-            if _on == self._root.Fourcc.list:
-                self._m_chunk_data = self._root.ListChunkType(io, self, self._root)
+            if _on == Wav.Fourcc.list:
+                self._m_chunk_data = Wav.ListChunkType(io, self, self._root)
                 self._m_chunk_data._read()
-            elif _on == self._root.Fourcc.fmt:
-                self._m_chunk_data = self._root.FormatChunkType(io, self, self._root)
+            elif _on == Wav.Fourcc.fmt:
+                self._m_chunk_data = Wav.FormatChunkType(io, self, self._root)
                 self._m_chunk_data._read()
-            elif _on == self._root.Fourcc.bext:
-                self._m_chunk_data = self._root.BextChunkType(io, self, self._root)
+            elif _on == Wav.Fourcc.bext:
+                self._m_chunk_data = Wav.BextChunkType(io, self, self._root)
                 self._m_chunk_data._read()
-            elif _on == self._root.Fourcc.cue:
-                self._m_chunk_data = self._root.CueChunkType(io, self, self._root)
+            elif _on == Wav.Fourcc.cue:
+                self._m_chunk_data = Wav.CueChunkType(io, self, self._root)
                 self._m_chunk_data._read()
-            elif _on == self._root.Fourcc.data:
-                self._m_chunk_data = self._root.DataChunkType(io, self, self._root)
+            elif _on == Wav.Fourcc.data:
+                self._m_chunk_data = Wav.DataChunkType(io, self, self._root)
                 self._m_chunk_data._read()
             self._debug['_m_chunk_data']['end'] = io.pos()
             io.seek(_pos)
@@ -811,7 +811,7 @@ class Wav(KaitaiStruct):
                 if not 'arr' in self._debug['_m_subchunks']:
                     self._debug['_m_subchunks']['arr'] = []
                 self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
-                _t__m_subchunks = self._root.ChunkType(io, self, self._root)
+                _t__m_subchunks = Wav.ChunkType(io, self, self._root)
                 _t__m_subchunks._read()
                 self._m_subchunks.append(_t__m_subchunks)
                 self._debug['_m_subchunks']['arr'][len(self._m_subchunks) - 1]['end'] = io.pos()
@@ -832,7 +832,7 @@ class Wav(KaitaiStruct):
             _pos = io.pos()
             io.seek(0)
             self._debug['_m_parent_chunk_data']['start'] = io.pos()
-            self._m_parent_chunk_data = self._root.ParentChunkData(io, self, self._root)
+            self._m_parent_chunk_data = Riff.ParentChunkData(io, self, self._root)
             self._m_parent_chunk_data._read()
             self._debug['_m_parent_chunk_data']['end'] = io.pos()
             io.seek(_pos)
@@ -844,7 +844,7 @@ class Wav(KaitaiStruct):
         if hasattr(self, '_m_is_form_type_wave'):
             return self._m_is_form_type_wave if hasattr(self, '_m_is_form_type_wave') else None
 
-        self._m_is_form_type_wave =  ((self.is_riff_chunk) and (self.form_type == self._root.Fourcc.wave)) 
+        self._m_is_form_type_wave =  ((self.is_riff_chunk) and (self.form_type == Wav.Fourcc.wave)) 
         return self._m_is_form_type_wave if hasattr(self, '_m_is_form_type_wave') else None
 
     @property
@@ -852,7 +852,7 @@ class Wav(KaitaiStruct):
         if hasattr(self, '_m_is_riff_chunk'):
             return self._m_is_riff_chunk if hasattr(self, '_m_is_riff_chunk') else None
 
-        self._m_is_riff_chunk = self.chunk_id == self._root.Fourcc.riff
+        self._m_is_riff_chunk = self.chunk_id == Wav.Fourcc.riff
         return self._m_is_riff_chunk if hasattr(self, '_m_is_riff_chunk') else None
 
     @property
@@ -860,7 +860,7 @@ class Wav(KaitaiStruct):
         if hasattr(self, '_m_chunk_id'):
             return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
-        self._m_chunk_id = KaitaiStream.resolve_enum(self._root.Fourcc, self.chunk.id)
+        self._m_chunk_id = KaitaiStream.resolve_enum(Wav.Fourcc, self.chunk.id)
         return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
     @property
@@ -868,7 +868,7 @@ class Wav(KaitaiStruct):
         if hasattr(self, '_m_form_type'):
             return self._m_form_type if hasattr(self, '_m_form_type') else None
 
-        self._m_form_type = KaitaiStream.resolve_enum(self._root.Fourcc, self.parent_chunk_data.form_type)
+        self._m_form_type = KaitaiStream.resolve_enum(Wav.Fourcc, self.parent_chunk_data.form_type)
         return self._m_form_type if hasattr(self, '_m_form_type') else None
 
 

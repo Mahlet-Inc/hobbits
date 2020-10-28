@@ -39,7 +39,7 @@ class Regf(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.FileHeader(self._io, self, self._root)
+        self.header = Regf.FileHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['hive_bins']['start'] = self._io.pos()
@@ -52,7 +52,7 @@ class Regf(KaitaiStruct):
             self._debug['hive_bins']['arr'].append({'start': self._io.pos()})
             self._raw_hive_bins.append(self._io.read_bytes(4096))
             _io__raw_hive_bins = KaitaiStream(BytesIO(self._raw_hive_bins[-1]))
-            _t_hive_bins = self._root.HiveBin(_io__raw_hive_bins, self, self._root)
+            _t_hive_bins = Regf.HiveBin(_io__raw_hive_bins, self, self._root)
             _t_hive_bins._read()
             self.hive_bins.append(_t_hive_bins)
             self._debug['hive_bins']['arr'][len(self.hive_bins) - 1]['end'] = self._io.pos()
@@ -84,7 +84,7 @@ class Regf(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.HiveBinHeader(self._io, self, self._root)
+            self.header = Regf.HiveBinHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['cells']['start'] = self._io.pos()
@@ -94,7 +94,7 @@ class Regf(KaitaiStruct):
                 if not 'arr' in self._debug['cells']:
                     self._debug['cells']['arr'] = []
                 self._debug['cells']['arr'].append({'start': self._io.pos()})
-                _t_cells = self._root.HiveBinCell(self._io, self, self._root)
+                _t_cells = Regf.HiveBinCell(self._io, self, self._root)
                 _t_cells._read()
                 self.cells.append(_t_cells)
                 self._debug['cells']['arr'][len(self.cells) - 1]['end'] = self._io.pos()
@@ -130,7 +130,7 @@ class Regf(KaitaiStruct):
             self.unknown2 = self._io.read_u4le()
             self._debug['unknown2']['end'] = self._io.pos()
             self._debug['timestamp']['start'] = self._io.pos()
-            self.timestamp = self._root.Filetime(self._io, self, self._root)
+            self.timestamp = Regf.Filetime(self._io, self, self._root)
             self.timestamp._read()
             self._debug['timestamp']['end'] = self._io.pos()
             self._debug['unknown4']['start'] = self._io.pos()
@@ -158,37 +158,37 @@ class Regf(KaitaiStruct):
             if _on == u"li":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListLi(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListLi(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"vk":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListVk(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListVk(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"lf":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListLhLf(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListLhLf(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"ri":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListRi(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListRi(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"lh":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListLhLf(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListLhLf(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"nk":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.NamedKey(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.NamedKey(_io__raw_data, self, self._root)
                 self.data._read()
             elif _on == u"sk":
                 self._raw_data = self._io.read_bytes(((self.cell_size - 2) - 4))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.HiveBinCell.SubKeyListSk(_io__raw_data, self, self._root)
+                self.data = Regf.HiveBinCell.SubKeyListSk(_io__raw_data, self, self._root)
                 self.data._read()
             else:
                 self.data = self._io.read_bytes(((self.cell_size - 2) - 4))
@@ -230,15 +230,15 @@ class Regf(KaitaiStruct):
                 self.data_offset = self._io.read_u4le()
                 self._debug['data_offset']['end'] = self._io.pos()
                 self._debug['data_type']['start'] = self._io.pos()
-                self.data_type = KaitaiStream.resolve_enum(self._root.HiveBinCell.SubKeyListVk.DataTypeEnum, self._io.read_u4le())
+                self.data_type = KaitaiStream.resolve_enum(Regf.HiveBinCell.SubKeyListVk.DataTypeEnum, self._io.read_u4le())
                 self._debug['data_type']['end'] = self._io.pos()
                 self._debug['flags']['start'] = self._io.pos()
-                self.flags = KaitaiStream.resolve_enum(self._root.HiveBinCell.SubKeyListVk.VkFlags, self._io.read_u2le())
+                self.flags = KaitaiStream.resolve_enum(Regf.HiveBinCell.SubKeyListVk.VkFlags, self._io.read_u2le())
                 self._debug['flags']['end'] = self._io.pos()
                 self._debug['padding']['start'] = self._io.pos()
                 self.padding = self._io.read_u2le()
                 self._debug['padding']['end'] = self._io.pos()
-                if self.flags == self._root.HiveBinCell.SubKeyListVk.VkFlags.value_comp_name:
+                if self.flags == Regf.HiveBinCell.SubKeyListVk.VkFlags.value_comp_name:
                     self._debug['value_name']['start'] = self._io.pos()
                     self.value_name = (self._io.read_bytes(self.value_name_size)).decode(u"ascii")
                     self._debug['value_name']['end'] = self._io.pos()
@@ -263,7 +263,7 @@ class Regf(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.HiveBinCell.SubKeyListLhLf.Item(self._io, self, self._root)
+                    _t_items = Regf.HiveBinCell.SubKeyListLhLf.Item(self._io, self, self._root)
                     _t_items._read()
                     self.items[i] = _t_items
                     self._debug['items']['arr'][i]['end'] = self._io.pos()
@@ -329,7 +329,7 @@ class Regf(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.HiveBinCell.SubKeyListLi.Item(self._io, self, self._root)
+                    _t_items = Regf.HiveBinCell.SubKeyListLi.Item(self._io, self, self._root)
                     _t_items._read()
                     self.items[i] = _t_items
                     self._debug['items']['arr'][i]['end'] = self._io.pos()
@@ -375,10 +375,10 @@ class Regf(KaitaiStruct):
 
             def _read(self):
                 self._debug['flags']['start'] = self._io.pos()
-                self.flags = KaitaiStream.resolve_enum(self._root.HiveBinCell.NamedKey.NkFlags, self._io.read_u2le())
+                self.flags = KaitaiStream.resolve_enum(Regf.HiveBinCell.NamedKey.NkFlags, self._io.read_u2le())
                 self._debug['flags']['end'] = self._io.pos()
                 self._debug['last_key_written_date_and_time']['start'] = self._io.pos()
-                self.last_key_written_date_and_time = self._root.Filetime(self._io, self, self._root)
+                self.last_key_written_date_and_time = Regf.Filetime(self._io, self, self._root)
                 self.last_key_written_date_and_time._read()
                 self._debug['last_key_written_date_and_time']['end'] = self._io.pos()
                 self._debug['unknown1']['start'] = self._io.pos()
@@ -455,7 +455,7 @@ class Regf(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.HiveBinCell.SubKeyListRi.Item(self._io, self, self._root)
+                    _t_items = Regf.HiveBinCell.SubKeyListRi.Item(self._io, self, self._root)
                     _t_items._read()
                     self.items[i] = _t_items
                     self._debug['items']['arr'][i]['end'] = self._io.pos()
@@ -522,7 +522,7 @@ class Regf(KaitaiStruct):
             self.secondary_sequence_number = self._io.read_u4le()
             self._debug['secondary_sequence_number']['end'] = self._io.pos()
             self._debug['last_modification_date_and_time']['start'] = self._io.pos()
-            self.last_modification_date_and_time = self._root.Filetime(self._io, self, self._root)
+            self.last_modification_date_and_time = Regf.Filetime(self._io, self, self._root)
             self.last_modification_date_and_time._read()
             self._debug['last_modification_date_and_time']['end'] = self._io.pos()
             self._debug['major_version']['start'] = self._io.pos()
@@ -532,10 +532,10 @@ class Regf(KaitaiStruct):
             self.minor_version = self._io.read_u4le()
             self._debug['minor_version']['end'] = self._io.pos()
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.FileHeader.FileType, self._io.read_u4le())
+            self.type = KaitaiStream.resolve_enum(Regf.FileHeader.FileType, self._io.read_u4le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['format']['start'] = self._io.pos()
-            self.format = KaitaiStream.resolve_enum(self._root.FileHeader.FileFormat, self._io.read_u4le())
+            self.format = KaitaiStream.resolve_enum(Regf.FileHeader.FileFormat, self._io.read_u4le())
             self._debug['format']['end'] = self._io.pos()
             self._debug['root_key_offset']['start'] = self._io.pos()
             self.root_key_offset = self._io.read_u4le()
