@@ -9,6 +9,11 @@ const QString KAITAI_PATH_KEY = "kaitai_struct_compiler_path";
 const QString KSY_PATH_KEY = "ksy_directory_path";
 const QString KAITAI_STRUCT_CATEGORY = "kaitai_struct";
 const QString KAITAI_RESULT_LABEL = "kaitai_struct_result_label";
+const QString KSC_OUT_LABEL = "KSC Output";
+const QString PYTHON_OUT_LABEL = "Kaitai Python Output";
+
+const QString PARAM_KSY = "kaitai_struct_yaml";
+const QString PARAM_PY = "precompiled_py_file";
 
 namespace Ui
 {

@@ -10,12 +10,11 @@
 #include <QDirIterator>
 #include "hobbitspython.h"
 
-
 KaitaiStruct::KaitaiStruct()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"katai_struct_yaml", QJsonValue::String, true},
-        {"precompiled_py_file", QJsonValue::String, true}
+        {PARAM_KSY, QJsonValue::String, true},
+        {PARAM_PY, QJsonValue::String, true}
     };
 
     m_delegate = QSharedPointer<ParameterDelegateUi>(
@@ -90,8 +89,10 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progress->setProgressPercent(10);
 
-    if (parameters.contains("kaitai_struct_yaml")
-            && !parameters.value("kaitai_struct_yaml").toString().isEmpty()) {
+    QString kscOutput = "";
+
+    if (parameters.contains(PARAM_KSY)
+            && !parameters.value(PARAM_KSY).toString().isEmpty()) {
         QString kscPath = SettingsManager::getPrivateSetting(KAITAI_PATH_KEY).toString();
         if (kscPath.isEmpty()) {
             return AnalyzerResult::error("A Kaitai Struct Compiler path must be specified");
@@ -104,7 +105,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         if (!ksy.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
             return AnalyzerResult::error("Could not open ksy file for writing");
         }
-        ksy.write(parameters.value("katai_struct_yaml").toString().toLocal8Bit());
+        ksy.write(parameters.value(PARAM_KSY).toString().toLocal8Bit());
         ksy.close();
 
         progress->setProgressPercent(20);
@@ -135,21 +136,23 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         if (errorFile.open(QIODevice::ReadOnly)) {
             errorOutput = errorFile.readAll();
             errorFile.close();
+            kscOutput += QString("stderr:\n%2").arg(errorOutput);
         }
 
         if (stdoutFile.open(QIODevice::ReadOnly)) {
             stdOutput = stdoutFile.readAll();
             stdoutFile.close();
+            kscOutput += QString("stdout:\n%2").arg(stdOutput);
         }
 
         if (!errorOutput.isEmpty()) {
-            return AnalyzerResult::error(QString("kaitai-struct-compiler error:\n%1\n\nstdout: %2").arg(errorOutput).arg(stdOutput));
+            return AnalyzerResult::error(QString("kaitai-struct-compiler error:\n%1").arg(kscOutput));
         }
 
     }
-    else if (parameters.contains("precompiled_py_file")
-             && !parameters.value("precompiled_py_file").toString().isEmpty()) {
-        QString precompiledFilePath = parameters.value("precompiled_py_file").toString();
+    else if (parameters.contains(PARAM_PY)
+             && !parameters.value(PARAM_PY).toString().isEmpty()) {
+        QString precompiledFilePath = parameters.value(PARAM_PY).toString();
         QFileInfo info(precompiledFilePath);
         QFile::copy(precompiledFilePath, dir.filePath(info.fileName()));
     }
@@ -248,6 +251,13 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
     bitInfo->addHighlights(highlights);
+
+    if (!kscOutput.isEmpty()) {
+        bitInfo->setMetadata(KSC_OUT_LABEL, kscOutput);
+    }
+    if (!output.isEmpty()) {
+        bitInfo->setMetadata(PYTHON_OUT_LABEL, output);
+    }
 
     return AnalyzerResult::result(bitInfo, parameters);
 }
