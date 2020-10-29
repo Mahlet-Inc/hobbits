@@ -51,7 +51,7 @@ class WindowsResourceFile(KaitaiStruct):
             if not 'arr' in self._debug['resources']:
                 self._debug['resources']['arr'] = []
             self._debug['resources']['arr'].append({'start': self._io.pos()})
-            _t_resources = self._root.Resource(self._io, self, self._root)
+            _t_resources = WindowsResourceFile.Resource(self._io, self, self._root)
             _t_resources._read()
             self.resources.append(_t_resources)
             self._debug['resources']['arr'][len(self.resources) - 1]['end'] = self._io.pos()
@@ -105,11 +105,11 @@ class WindowsResourceFile(KaitaiStruct):
             self.header_size = self._io.read_u4le()
             self._debug['header_size']['end'] = self._io.pos()
             self._debug['type']['start'] = self._io.pos()
-            self.type = self._root.UnicodeOrId(self._io, self, self._root)
+            self.type = WindowsResourceFile.UnicodeOrId(self._io, self, self._root)
             self.type._read()
             self._debug['type']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.UnicodeOrId(self._io, self, self._root)
+            self.name = WindowsResourceFile.UnicodeOrId(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['padding1']['start'] = self._io.pos()
@@ -148,7 +148,7 @@ class WindowsResourceFile(KaitaiStruct):
                 return self._m_type_as_predef if hasattr(self, '_m_type_as_predef') else None
 
             if  ((not (self.type.is_string)) and (self.type.as_numeric <= 255)) :
-                self._m_type_as_predef = KaitaiStream.resolve_enum(self._root.Resource.PredefTypes, self.type.as_numeric)
+                self._m_type_as_predef = KaitaiStream.resolve_enum(WindowsResourceFile.Resource.PredefTypes, self.type.as_numeric)
 
             return self._m_type_as_predef if hasattr(self, '_m_type_as_predef') else None
 

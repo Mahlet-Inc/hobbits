@@ -31,7 +31,7 @@ class HeroesOfMightAndMagicAgg(KaitaiStruct):
             if not 'arr' in self._debug['entries']:
                 self._debug['entries']['arr'] = []
             self._debug['entries']['arr'].append({'start': self._io.pos()})
-            _t_entries = self._root.Entry(self._io, self, self._root)
+            _t_entries = HeroesOfMightAndMagicAgg.Entry(self._io, self, self._root)
             _t_entries._read()
             self.entries[i] = _t_entries
             self._debug['entries']['arr'][i]['end'] = self._io.pos()
@@ -104,7 +104,7 @@ class HeroesOfMightAndMagicAgg(KaitaiStruct):
             self._debug['_m_filenames']['arr'].append({'start': self._io.pos()})
             self._raw__m_filenames[i] = self._io.read_bytes(15)
             _io__raw__m_filenames = KaitaiStream(BytesIO(self._raw__m_filenames[i]))
-            _t__m_filenames = self._root.Filename(_io__raw__m_filenames, self, self._root)
+            _t__m_filenames = HeroesOfMightAndMagicAgg.Filename(_io__raw__m_filenames, self, self._root)
             _t__m_filenames._read()
             self._m_filenames[i] = _t__m_filenames
             self._debug['_m_filenames']['arr'][i]['end'] = self._io.pos()

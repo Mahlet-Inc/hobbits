@@ -60,7 +60,7 @@ class MagicavoxelVox(KaitaiStruct):
         self.version = self._io.read_u4le()
         self._debug['version']['end'] = self._io.pos()
         self._debug['main']['start'] = self._io.pos()
-        self.main = self._root.Chunk(self._io, self, self._root)
+        self.main = MagicavoxelVox.Chunk(self._io, self, self._root)
         self.main._read()
         self._debug['main']['end'] = self._io.pos()
 
@@ -74,7 +74,7 @@ class MagicavoxelVox(KaitaiStruct):
 
         def _read(self):
             self._debug['chunk_id']['start'] = self._io.pos()
-            self.chunk_id = KaitaiStream.resolve_enum(self._root.ChunkType, self._io.read_u4be())
+            self.chunk_id = KaitaiStream.resolve_enum(MagicavoxelVox.ChunkType, self._io.read_u4be())
             self._debug['chunk_id']['end'] = self._io.pos()
             self._debug['num_bytes_of_chunk_content']['start'] = self._io.pos()
             self.num_bytes_of_chunk_content = self._io.read_u4le()
@@ -85,30 +85,30 @@ class MagicavoxelVox(KaitaiStruct):
             if self.num_bytes_of_chunk_content != 0:
                 self._debug['chunk_content']['start'] = self._io.pos()
                 _on = self.chunk_id
-                if _on == self._root.ChunkType.size:
+                if _on == MagicavoxelVox.ChunkType.size:
                     self._raw_chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
                     _io__raw_chunk_content = KaitaiStream(BytesIO(self._raw_chunk_content))
-                    self.chunk_content = self._root.Size(_io__raw_chunk_content, self, self._root)
+                    self.chunk_content = MagicavoxelVox.Size(_io__raw_chunk_content, self, self._root)
                     self.chunk_content._read()
-                elif _on == self._root.ChunkType.matt:
+                elif _on == MagicavoxelVox.ChunkType.matt:
                     self._raw_chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
                     _io__raw_chunk_content = KaitaiStream(BytesIO(self._raw_chunk_content))
-                    self.chunk_content = self._root.Matt(_io__raw_chunk_content, self, self._root)
+                    self.chunk_content = MagicavoxelVox.Matt(_io__raw_chunk_content, self, self._root)
                     self.chunk_content._read()
-                elif _on == self._root.ChunkType.rgba:
+                elif _on == MagicavoxelVox.ChunkType.rgba:
                     self._raw_chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
                     _io__raw_chunk_content = KaitaiStream(BytesIO(self._raw_chunk_content))
-                    self.chunk_content = self._root.Rgba(_io__raw_chunk_content, self, self._root)
+                    self.chunk_content = MagicavoxelVox.Rgba(_io__raw_chunk_content, self, self._root)
                     self.chunk_content._read()
-                elif _on == self._root.ChunkType.xyzi:
+                elif _on == MagicavoxelVox.ChunkType.xyzi:
                     self._raw_chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
                     _io__raw_chunk_content = KaitaiStream(BytesIO(self._raw_chunk_content))
-                    self.chunk_content = self._root.Xyzi(_io__raw_chunk_content, self, self._root)
+                    self.chunk_content = MagicavoxelVox.Xyzi(_io__raw_chunk_content, self, self._root)
                     self.chunk_content._read()
-                elif _on == self._root.ChunkType.pack:
+                elif _on == MagicavoxelVox.ChunkType.pack:
                     self._raw_chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
                     _io__raw_chunk_content = KaitaiStream(BytesIO(self._raw_chunk_content))
-                    self.chunk_content = self._root.Pack(_io__raw_chunk_content, self, self._root)
+                    self.chunk_content = MagicavoxelVox.Pack(_io__raw_chunk_content, self, self._root)
                     self.chunk_content._read()
                 else:
                     self.chunk_content = self._io.read_bytes(self.num_bytes_of_chunk_content)
@@ -122,7 +122,7 @@ class MagicavoxelVox(KaitaiStruct):
                     if not 'arr' in self._debug['children_chunks']:
                         self._debug['children_chunks']['arr'] = []
                     self._debug['children_chunks']['arr'].append({'start': self._io.pos()})
-                    _t_children_chunks = self._root.Chunk(self._io, self, self._root)
+                    _t_children_chunks = MagicavoxelVox.Chunk(self._io, self, self._root)
                     _t_children_chunks._read()
                     self.children_chunks.append(_t_children_chunks)
                     self._debug['children_chunks']['arr'][len(self.children_chunks) - 1]['end'] = self._io.pos()
@@ -167,7 +167,7 @@ class MagicavoxelVox(KaitaiStruct):
                 if not 'arr' in self._debug['colors']:
                     self._debug['colors']['arr'] = []
                 self._debug['colors']['arr'].append({'start': self._io.pos()})
-                _t_colors = self._root.Color(self._io, self, self._root)
+                _t_colors = MagicavoxelVox.Color(self._io, self, self._root)
                 _t_colors._read()
                 self.colors[i] = _t_colors
                 self._debug['colors']['arr'][i]['end'] = self._io.pos()
@@ -202,7 +202,7 @@ class MagicavoxelVox(KaitaiStruct):
             self.id = self._io.read_u4le()
             self._debug['id']['end'] = self._io.pos()
             self._debug['material_type']['start'] = self._io.pos()
-            self.material_type = KaitaiStream.resolve_enum(self._root.MaterialType, self._io.read_u4le())
+            self.material_type = KaitaiStream.resolve_enum(MagicavoxelVox.MaterialType, self._io.read_u4le())
             self._debug['material_type']['end'] = self._io.pos()
             self._debug['material_weight']['start'] = self._io.pos()
             self.material_weight = self._io.read_f4le()
@@ -334,7 +334,7 @@ class MagicavoxelVox(KaitaiStruct):
                 if not 'arr' in self._debug['voxels']:
                     self._debug['voxels']['arr'] = []
                 self._debug['voxels']['arr'].append({'start': self._io.pos()})
-                _t_voxels = self._root.Voxel(self._io, self, self._root)
+                _t_voxels = MagicavoxelVox.Voxel(self._io, self, self._root)
                 _t_voxels._read()
                 self.voxels[i] = _t_voxels
                 self._debug['voxels']['arr'][i]['end'] = self._io.pos()

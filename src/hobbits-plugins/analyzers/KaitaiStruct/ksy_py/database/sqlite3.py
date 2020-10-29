@@ -55,10 +55,10 @@ class Sqlite3(KaitaiStruct):
         self.len_page_mod = self._io.read_u2be()
         self._debug['len_page_mod']['end'] = self._io.pos()
         self._debug['write_version']['start'] = self._io.pos()
-        self.write_version = KaitaiStream.resolve_enum(self._root.Versions, self._io.read_u1())
+        self.write_version = KaitaiStream.resolve_enum(Sqlite3.Versions, self._io.read_u1())
         self._debug['write_version']['end'] = self._io.pos()
         self._debug['read_version']['start'] = self._io.pos()
-        self.read_version = KaitaiStream.resolve_enum(self._root.Versions, self._io.read_u1())
+        self.read_version = KaitaiStream.resolve_enum(Sqlite3.Versions, self._io.read_u1())
         self._debug['read_version']['end'] = self._io.pos()
         self._debug['reserved_space']['start'] = self._io.pos()
         self.reserved_space = self._io.read_u1()
@@ -97,7 +97,7 @@ class Sqlite3(KaitaiStruct):
         self.largest_root_page = self._io.read_u4be()
         self._debug['largest_root_page']['end'] = self._io.pos()
         self._debug['text_encoding']['start'] = self._io.pos()
-        self.text_encoding = KaitaiStream.resolve_enum(self._root.Encodings, self._io.read_u4be())
+        self.text_encoding = KaitaiStream.resolve_enum(Sqlite3.Encodings, self._io.read_u4be())
         self._debug['text_encoding']['end'] = self._io.pos()
         self._debug['user_version']['start'] = self._io.pos()
         self.user_version = self._io.read_u4be()
@@ -118,7 +118,7 @@ class Sqlite3(KaitaiStruct):
         self.sqlite_version_number = self._io.read_u4be()
         self._debug['sqlite_version_number']['end'] = self._io.pos()
         self._debug['root_page']['start'] = self._io.pos()
-        self.root_page = self._root.BtreePage(self._io, self, self._root)
+        self.root_page = Sqlite3.BtreePage(self._io, self, self._root)
         self.root_page._read()
         self._debug['root_page']['end'] = self._io.pos()
 
@@ -198,7 +198,7 @@ class Sqlite3(KaitaiStruct):
                 if not 'arr' in self._debug['cells']:
                     self._debug['cells']['arr'] = []
                 self._debug['cells']['arr'].append({'start': self._io.pos()})
-                _t_cells = self._root.RefCell(self._io, self, self._root)
+                _t_cells = Sqlite3.RefCell(self._io, self, self._root)
                 _t_cells._read()
                 self.cells[i] = _t_cells
                 self._debug['cells']['arr'][i]['end'] = self._io.pos()
@@ -226,7 +226,7 @@ class Sqlite3(KaitaiStruct):
             self._debug['payload']['start'] = self._io.pos()
             self._raw_payload = self._io.read_bytes(self.len_payload.value)
             _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-            self.payload = self._root.CellPayload(_io__raw_payload, self, self._root)
+            self.payload = Sqlite3.CellPayload(_io__raw_payload, self, self._root)
             self.payload._read()
             self._debug['payload']['end'] = self._io.pos()
 
@@ -280,7 +280,7 @@ class Sqlite3(KaitaiStruct):
             self._debug['payload']['start'] = self._io.pos()
             self._raw_payload = self._io.read_bytes(self.len_payload.value)
             _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-            self.payload = self._root.CellPayload(_io__raw_payload, self, self._root)
+            self.payload = Sqlite3.CellPayload(_io__raw_payload, self, self._root)
             self.payload._read()
             self._debug['payload']['end'] = self._io.pos()
 
@@ -305,7 +305,7 @@ class Sqlite3(KaitaiStruct):
             self._debug['column_serials']['start'] = self._io.pos()
             self._raw_column_serials = self._io.read_bytes((self.len_header_and_len.value - 1))
             _io__raw_column_serials = KaitaiStream(BytesIO(self._raw_column_serials))
-            self.column_serials = self._root.Serials(_io__raw_column_serials, self, self._root)
+            self.column_serials = Sqlite3.Serials(_io__raw_column_serials, self, self._root)
             self.column_serials._read()
             self._debug['column_serials']['end'] = self._io.pos()
             self._debug['column_contents']['start'] = self._io.pos()
@@ -314,7 +314,7 @@ class Sqlite3(KaitaiStruct):
                 if not 'arr' in self._debug['column_contents']:
                     self._debug['column_contents']['arr'] = []
                 self._debug['column_contents']['arr'].append({'start': self._io.pos()})
-                _t_column_contents = self._root.ColumnContent(self.column_serials.entries[i], self._io, self, self._root)
+                _t_column_contents = Sqlite3.ColumnContent(self.column_serials.entries[i], self._io, self, self._root)
                 _t_column_contents._read()
                 self.column_contents[i] = _t_column_contents
                 self._debug['column_contents']['arr'][i]['end'] = self._io.pos()
@@ -367,7 +367,7 @@ class Sqlite3(KaitaiStruct):
             self._debug['payload']['start'] = self._io.pos()
             self._raw_payload = self._io.read_bytes(self.len_payload.value)
             _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-            self.payload = self._root.CellPayload(_io__raw_payload, self, self._root)
+            self.payload = Sqlite3.CellPayload(_io__raw_payload, self, self._root)
             self.payload._read()
             self._debug['payload']['end'] = self._io.pos()
 
@@ -392,9 +392,9 @@ class Sqlite3(KaitaiStruct):
                 elif _on == 1:
                     self.as_int = self._io.read_u1()
                 elif _on == 3:
-                    self.as_int = self._io.read_bits_int(24)
+                    self.as_int = self._io.read_bits_int_be(24)
                 elif _on == 5:
-                    self.as_int = self._io.read_bits_int(48)
+                    self.as_int = self._io.read_bits_int_be(48)
                 elif _on == 2:
                     self.as_int = self._io.read_u2be()
                 self._debug['as_int']['end'] = self._io.pos()
@@ -445,16 +445,16 @@ class Sqlite3(KaitaiStruct):
             self._debug['_m_body']['start'] = self._io.pos()
             _on = self._parent.page_type
             if _on == 13:
-                self._m_body = self._root.CellTableLeaf(self._io, self, self._root)
+                self._m_body = Sqlite3.CellTableLeaf(self._io, self, self._root)
                 self._m_body._read()
             elif _on == 5:
-                self._m_body = self._root.CellTableInterior(self._io, self, self._root)
+                self._m_body = Sqlite3.CellTableInterior(self._io, self, self._root)
                 self._m_body._read()
             elif _on == 10:
-                self._m_body = self._root.CellIndexLeaf(self._io, self, self._root)
+                self._m_body = Sqlite3.CellIndexLeaf(self._io, self, self._root)
                 self._m_body._read()
             elif _on == 2:
-                self._m_body = self._root.CellIndexInterior(self._io, self, self._root)
+                self._m_body = Sqlite3.CellIndexInterior(self._io, self, self._root)
                 self._m_body._read()
             self._debug['_m_body']['end'] = self._io.pos()
             self._io.seek(_pos)

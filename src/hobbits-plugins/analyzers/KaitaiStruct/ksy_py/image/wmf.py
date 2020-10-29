@@ -129,11 +129,11 @@ class Wmf(KaitaiStruct):
 
     def _read(self):
         self._debug['special_header']['start'] = self._io.pos()
-        self.special_header = self._root.SpecialHeader(self._io, self, self._root)
+        self.special_header = Wmf.SpecialHeader(self._io, self, self._root)
         self.special_header._read()
         self._debug['special_header']['end'] = self._io.pos()
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = Wmf.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['records']['start'] = self._io.pos()
@@ -143,12 +143,12 @@ class Wmf(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = Wmf.Record(self._io, self, self._root)
             _t_records._read()
             _ = _t_records
             self.records.append(_)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
-            if _.function == self._root.Func.eof:
+            if _.function == Wmf.Func.eof:
                 break
             i += 1
         self._debug['records']['end'] = self._io.pos()
@@ -188,7 +188,7 @@ class Wmf(KaitaiStruct):
 
         def _read(self):
             self._debug['bk_mode']['start'] = self._io.pos()
-            self.bk_mode = KaitaiStream.resolve_enum(self._root.MixMode, self._io.read_u2le())
+            self.bk_mode = KaitaiStream.resolve_enum(Wmf.MixMode, self._io.read_u2le())
             self._debug['bk_mode']['end'] = self._io.pos()
 
 
@@ -256,7 +256,7 @@ class Wmf(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.PointS(self._io, self, self._root)
+                _t_points = Wmf.PointS(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
@@ -278,7 +278,7 @@ class Wmf(KaitaiStruct):
 
         def _read(self):
             self._debug['metafile_type']['start'] = self._io.pos()
-            self.metafile_type = KaitaiStream.resolve_enum(self._root.Header.MetafileType, self._io.read_u2le())
+            self.metafile_type = KaitaiStream.resolve_enum(Wmf.Header.MetafileType, self._io.read_u2le())
             self._debug['metafile_type']['end'] = self._io.pos()
             self._debug['header_size']['start'] = self._io.pos()
             self.header_size = self._io.read_u2le()
@@ -341,7 +341,7 @@ class Wmf(KaitaiStruct):
 
         def _read(self):
             self._debug['draw_mode']['start'] = self._io.pos()
-            self.draw_mode = KaitaiStream.resolve_enum(self._root.BinRasterOp, self._io.read_u2le())
+            self.draw_mode = KaitaiStream.resolve_enum(Wmf.BinRasterOp, self._io.read_u2le())
             self._debug['draw_mode']['end'] = self._io.pos()
 
 
@@ -359,7 +359,7 @@ class Wmf(KaitaiStruct):
 
         def _read(self):
             self._debug['poly_fill_mode']['start'] = self._io.pos()
-            self.poly_fill_mode = KaitaiStream.resolve_enum(self._root.PolyFillMode, self._io.read_u2le())
+            self.poly_fill_mode = KaitaiStream.resolve_enum(Wmf.PolyFillMode, self._io.read_u2le())
             self._debug['poly_fill_mode']['end'] = self._io.pos()
 
 
@@ -385,7 +385,7 @@ class Wmf(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.PointS(self._io, self, self._root)
+                _t_points = Wmf.PointS(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
@@ -450,49 +450,49 @@ class Wmf(KaitaiStruct):
             self.size = self._io.read_u4le()
             self._debug['size']['end'] = self._io.pos()
             self._debug['function']['start'] = self._io.pos()
-            self.function = KaitaiStream.resolve_enum(self._root.Func, self._io.read_u2le())
+            self.function = KaitaiStream.resolve_enum(Wmf.Func, self._io.read_u2le())
             self._debug['function']['end'] = self._io.pos()
             self._debug['params']['start'] = self._io.pos()
             _on = self.function
-            if _on == self._root.Func.setbkmode:
+            if _on == Wmf.Func.setbkmode:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsSetbkmode(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsSetbkmode(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.polygon:
+            elif _on == Wmf.Func.polygon:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsPolygon(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsPolygon(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.setbkcolor:
+            elif _on == Wmf.Func.setbkcolor:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ColorRef(_io__raw_params, self, self._root)
+                self.params = Wmf.ColorRef(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.setpolyfillmode:
+            elif _on == Wmf.Func.setpolyfillmode:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsSetpolyfillmode(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsSetpolyfillmode(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.setwindoworg:
+            elif _on == Wmf.Func.setwindoworg:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsSetwindoworg(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsSetwindoworg(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.setrop2:
+            elif _on == Wmf.Func.setrop2:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsSetrop2(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsSetrop2(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.setwindowext:
+            elif _on == Wmf.Func.setwindowext:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsSetwindowext(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsSetwindowext(_io__raw_params, self, self._root)
                 self.params._read()
-            elif _on == self._root.Func.polyline:
+            elif _on == Wmf.Func.polyline:
                 self._raw_params = self._io.read_bytes(((self.size - 3) * 2))
                 _io__raw_params = KaitaiStream(BytesIO(self._raw_params))
-                self.params = self._root.ParamsPolyline(_io__raw_params, self, self._root)
+                self.params = Wmf.ParamsPolyline(_io__raw_params, self, self._root)
                 self.params._read()
             else:
                 self.params = self._io.read_bytes(((self.size - 3) * 2))

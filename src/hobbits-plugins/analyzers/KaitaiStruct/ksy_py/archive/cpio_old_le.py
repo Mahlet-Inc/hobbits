@@ -25,7 +25,7 @@ class CpioOldLe(KaitaiStruct):
             if not 'arr' in self._debug['files']:
                 self._debug['files']['arr'] = []
             self._debug['files']['arr'].append({'start': self._io.pos()})
-            _t_files = self._root.File(self._io, self, self._root)
+            _t_files = CpioOldLe.File(self._io, self, self._root)
             _t_files._read()
             self.files.append(_t_files)
             self._debug['files']['arr'][len(self.files) - 1]['end'] = self._io.pos()
@@ -43,7 +43,7 @@ class CpioOldLe(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.FileHeader(self._io, self, self._root)
+            self.header = CpioOldLe.FileHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['path_name']['start'] = self._io.pos()
@@ -114,14 +114,14 @@ class CpioOldLe(KaitaiStruct):
             self.r_device_number = self._io.read_u2le()
             self._debug['r_device_number']['end'] = self._io.pos()
             self._debug['modification_time']['start'] = self._io.pos()
-            self.modification_time = self._root.FourByteUnsignedInteger(self._io, self, self._root)
+            self.modification_time = CpioOldLe.FourByteUnsignedInteger(self._io, self, self._root)
             self.modification_time._read()
             self._debug['modification_time']['end'] = self._io.pos()
             self._debug['path_name_size']['start'] = self._io.pos()
             self.path_name_size = self._io.read_u2le()
             self._debug['path_name_size']['end'] = self._io.pos()
             self._debug['file_size']['start'] = self._io.pos()
-            self.file_size = self._root.FourByteUnsignedInteger(self._io, self, self._root)
+            self.file_size = CpioOldLe.FourByteUnsignedInteger(self._io, self, self._root)
             self.file_size._read()
             self._debug['file_size']['end'] = self._io.pos()
 

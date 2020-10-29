@@ -47,7 +47,7 @@ class Stl(KaitaiStruct):
             if not 'arr' in self._debug['triangles']:
                 self._debug['triangles']['arr'] = []
             self._debug['triangles']['arr'].append({'start': self._io.pos()})
-            _t_triangles = self._root.Triangle(self._io, self, self._root)
+            _t_triangles = Stl.Triangle(self._io, self, self._root)
             _t_triangles._read()
             self.triangles[i] = _t_triangles
             self._debug['triangles']['arr'][i]['end'] = self._io.pos()
@@ -68,7 +68,7 @@ class Stl(KaitaiStruct):
 
         def _read(self):
             self._debug['normal']['start'] = self._io.pos()
-            self.normal = self._root.Vec3d(self._io, self, self._root)
+            self.normal = Stl.Vec3d(self._io, self, self._root)
             self.normal._read()
             self._debug['normal']['end'] = self._io.pos()
             self._debug['vertices']['start'] = self._io.pos()
@@ -77,7 +77,7 @@ class Stl(KaitaiStruct):
                 if not 'arr' in self._debug['vertices']:
                     self._debug['vertices']['arr'] = []
                 self._debug['vertices']['arr'].append({'start': self._io.pos()})
-                _t_vertices = self._root.Vec3d(self._io, self, self._root)
+                _t_vertices = Stl.Vec3d(self._io, self, self._root)
                 _t_vertices._read()
                 self.vertices[i] = _t_vertices
                 self._debug['vertices']['arr'][i]['end'] = self._io.pos()

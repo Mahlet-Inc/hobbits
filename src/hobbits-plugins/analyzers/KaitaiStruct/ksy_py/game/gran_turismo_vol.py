@@ -128,7 +128,7 @@ class GranTurismoVol(KaitaiStruct):
             if not 'arr' in self._debug['_m_files']:
                 self._debug['_m_files']['arr'] = []
             self._debug['_m_files']['arr'].append({'start': self._io.pos()})
-            _t__m_files = self._root.FileInfo(self._io, self, self._root)
+            _t__m_files = GranTurismoVol.FileInfo(self._io, self, self._root)
             _t__m_files._read()
             self._m_files[i] = _t__m_files
             self._debug['_m_files']['arr'][i]['end'] = self._io.pos()

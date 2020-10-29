@@ -33,7 +33,7 @@ class Nitf(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = Nitf.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['image_segments']['start'] = self._io.pos()
@@ -42,7 +42,7 @@ class Nitf(KaitaiStruct):
             if not 'arr' in self._debug['image_segments']:
                 self._debug['image_segments']['arr'] = []
             self._debug['image_segments']['arr'].append({'start': self._io.pos()})
-            _t_image_segments = self._root.ImageSegment(i, self._io, self, self._root)
+            _t_image_segments = Nitf.ImageSegment(i, self._io, self, self._root)
             _t_image_segments._read()
             self.image_segments[i] = _t_image_segments
             self._debug['image_segments']['arr'][i]['end'] = self._io.pos()
@@ -54,7 +54,7 @@ class Nitf(KaitaiStruct):
             if not 'arr' in self._debug['graphics_segments']:
                 self._debug['graphics_segments']['arr'] = []
             self._debug['graphics_segments']['arr'].append({'start': self._io.pos()})
-            _t_graphics_segments = self._root.GraphicsSegment(i, self._io, self, self._root)
+            _t_graphics_segments = Nitf.GraphicsSegment(i, self._io, self, self._root)
             _t_graphics_segments._read()
             self.graphics_segments[i] = _t_graphics_segments
             self._debug['graphics_segments']['arr'][i]['end'] = self._io.pos()
@@ -66,7 +66,7 @@ class Nitf(KaitaiStruct):
             if not 'arr' in self._debug['text_segments']:
                 self._debug['text_segments']['arr'] = []
             self._debug['text_segments']['arr'].append({'start': self._io.pos()})
-            _t_text_segments = self._root.TextSegment(i, self._io, self, self._root)
+            _t_text_segments = Nitf.TextSegment(i, self._io, self, self._root)
             _t_text_segments._read()
             self.text_segments[i] = _t_text_segments
             self._debug['text_segments']['arr'][i]['end'] = self._io.pos()
@@ -78,7 +78,7 @@ class Nitf(KaitaiStruct):
             if not 'arr' in self._debug['data_extension_segments']:
                 self._debug['data_extension_segments']['arr'] = []
             self._debug['data_extension_segments']['arr'].append({'start': self._io.pos()})
-            _t_data_extension_segments = self._root.DataExtensionSegment(i, self._io, self, self._root)
+            _t_data_extension_segments = Nitf.DataExtensionSegment(i, self._io, self, self._root)
             _t_data_extension_segments._read()
             self.data_extension_segments[i] = _t_data_extension_segments
             self._debug['data_extension_segments']['arr'][i]['end'] = self._io.pos()
@@ -90,7 +90,7 @@ class Nitf(KaitaiStruct):
             if not 'arr' in self._debug['reserved_extension_segments']:
                 self._debug['reserved_extension_segments']['arr'] = []
             self._debug['reserved_extension_segments']['arr'].append({'start': self._io.pos()})
-            _t_reserved_extension_segments = self._root.ReservedExtensionSegment(i, self._io, self, self._root)
+            _t_reserved_extension_segments = Nitf.ReservedExtensionSegment(i, self._io, self, self._root)
             _t_reserved_extension_segments._read()
             self.reserved_extension_segments[i] = _t_reserved_extension_segments
             self._debug['reserved_extension_segments']['arr'][i]['end'] = self._io.pos()
@@ -110,7 +110,7 @@ class Nitf(KaitaiStruct):
             self._debug['reserved_sub_header']['start'] = self._io.pos()
             self._raw_reserved_sub_header = self._io.read_bytes(int(self._parent.header.lrnfo[self.idx].length_reserved_extension_subheader))
             _io__raw_reserved_sub_header = KaitaiStream(BytesIO(self._raw_reserved_sub_header))
-            self.reserved_sub_header = self._root.ReservedSubHeader(_io__raw_reserved_sub_header, self, self._root)
+            self.reserved_sub_header = Nitf.ReservedSubHeader(_io__raw_reserved_sub_header, self, self._root)
             self.reserved_sub_header._read()
             self._debug['reserved_sub_header']['end'] = self._io.pos()
             self._debug['reserved_data_field']['start'] = self._io.pos()
@@ -223,12 +223,12 @@ class Nitf(KaitaiStruct):
 
         def _read(self):
             self._debug['image_sub_header']['start'] = self._io.pos()
-            self.image_sub_header = self._root.ImageSubHeader(self._io, self, self._root)
+            self.image_sub_header = Nitf.ImageSubHeader(self._io, self, self._root)
             self.image_sub_header._read()
             self._debug['image_sub_header']['end'] = self._io.pos()
             if self.has_mask:
                 self._debug['image_data_mask']['start'] = self._io.pos()
-                self.image_data_mask = self._root.ImageDataMask(self._io, self, self._root)
+                self.image_data_mask = Nitf.ImageDataMask(self._io, self, self._root)
                 self.image_data_mask._read()
                 self._debug['image_data_mask']['end'] = self._io.pos()
 
@@ -243,7 +243,7 @@ class Nitf(KaitaiStruct):
             if hasattr(self, '_m_has_mask'):
                 return self._m_has_mask if hasattr(self, '_m_has_mask') else None
 
-            self._m_has_mask =  ((self.image_sub_header.img_compression[0:1] == u"M") or (self.image_sub_header.img_compression[1:2] == u"M")) 
+            self._m_has_mask =  (((self.image_sub_header.img_compression)[0:1] == u"M") or ((self.image_sub_header.img_compression)[1:2] == u"M")) 
             return self._m_has_mask if hasattr(self, '_m_has_mask') else None
 
 
@@ -286,11 +286,11 @@ class Nitf(KaitaiStruct):
             self.graphic_name = (self._io.read_bytes(20)).decode(u"UTF-8")
             self._debug['graphic_name']['end'] = self._io.pos()
             self._debug['graphic_classification']['start'] = self._io.pos()
-            self.graphic_classification = self._root.Clasnfo(self._io, self, self._root)
+            self.graphic_classification = Nitf.Clasnfo(self._io, self, self._root)
             self.graphic_classification._read()
             self._debug['graphic_classification']['end'] = self._io.pos()
             self._debug['encryption']['start'] = self._io.pos()
-            self.encryption = self._root.Encrypt(self._io, self, self._root)
+            self.encryption = Nitf.Encrypt(self._io, self, self._root)
             self.encryption._read()
             self._debug['encryption']['end'] = self._io.pos()
             self._debug['graphic_type']['start'] = self._io.pos()
@@ -323,7 +323,7 @@ class Nitf(KaitaiStruct):
             self.reserved2 = (self._io.read_bytes(2)).decode(u"UTF-8")
             self._debug['reserved2']['end'] = self._io.pos()
             self._debug['graphics_extended_sub_header']['start'] = self._io.pos()
-            self.graphics_extended_sub_header = self._root.TreHeader(self._io, self, self._root)
+            self.graphics_extended_sub_header = Nitf.TreHeader(self._io, self, self._root)
             self.graphics_extended_sub_header._read()
             self._debug['graphics_extended_sub_header']['end'] = self._io.pos()
 
@@ -535,7 +535,7 @@ class Nitf(KaitaiStruct):
 
         def _read(self):
             self._debug['graphic_sub_header']['start'] = self._io.pos()
-            self.graphic_sub_header = self._root.GraphicSubHeader(self._io, self, self._root)
+            self.graphic_sub_header = Nitf.GraphicSubHeader(self._io, self, self._root)
             self.graphic_sub_header._read()
             self._debug['graphic_sub_header']['end'] = self._io.pos()
             self._debug['graphic_data_field']['start'] = self._io.pos()
@@ -553,7 +553,7 @@ class Nitf(KaitaiStruct):
 
         def _read(self):
             self._debug['des_base']['start'] = self._io.pos()
-            self.des_base = self._root.DataSubHeaderBase(self._io, self, self._root)
+            self.des_base = Nitf.DataSubHeaderBase(self._io, self, self._root)
             self.des_base._read()
             self._debug['des_base']['end'] = self._io.pos()
             if self.tre_ofl:
@@ -598,7 +598,7 @@ class Nitf(KaitaiStruct):
             self._debug['data_sub_header']['start'] = self._io.pos()
             self._raw_data_sub_header = self._io.read_bytes(int(self._parent.header.ldnfo[self.idx].length_data_extension_subheader))
             _io__raw_data_sub_header = KaitaiStream(BytesIO(self._raw_data_sub_header))
-            self.data_sub_header = self._root.DataSubHeader(_io__raw_data_sub_header, self, self._root)
+            self.data_sub_header = Nitf.DataSubHeader(_io__raw_data_sub_header, self, self._root)
             self.data_sub_header._read()
             self._debug['data_sub_header']['end'] = self._io.pos()
             self._debug['data_data_field']['start'] = self._io.pos()
@@ -616,7 +616,7 @@ class Nitf(KaitaiStruct):
 
         def _read(self):
             self._debug['des_base']['start'] = self._io.pos()
-            self.des_base = self._root.DataSubHeaderBase(self._io, self, self._root)
+            self.des_base = Nitf.DataSubHeaderBase(self._io, self, self._root)
             self.des_base._read()
             self._debug['des_base']['end'] = self._io.pos()
             if self.des_base.desid == u"TRE_OVERFLOW":
@@ -655,7 +655,7 @@ class Nitf(KaitaiStruct):
             self.image_id_1 = (self._io.read_bytes(10)).decode(u"UTF-8")
             self._debug['image_id_1']['end'] = self._io.pos()
             self._debug['image_date_time']['start'] = self._io.pos()
-            self.image_date_time = self._root.DateTime(self._io, self, self._root)
+            self.image_date_time = Nitf.DateTime(self._io, self, self._root)
             self.image_date_time._read()
             self._debug['image_date_time']['end'] = self._io.pos()
             self._debug['target_id']['start'] = self._io.pos()
@@ -665,11 +665,11 @@ class Nitf(KaitaiStruct):
             self.image_id_2 = (self._io.read_bytes(80)).decode(u"UTF-8")
             self._debug['image_id_2']['end'] = self._io.pos()
             self._debug['image_security_classification']['start'] = self._io.pos()
-            self.image_security_classification = self._root.Clasnfo(self._io, self, self._root)
+            self.image_security_classification = Nitf.Clasnfo(self._io, self, self._root)
             self.image_security_classification._read()
             self._debug['image_security_classification']['end'] = self._io.pos()
             self._debug['encryption']['start'] = self._io.pos()
-            self.encryption = self._root.Encrypt(self._io, self, self._root)
+            self.encryption = Nitf.Encrypt(self._io, self, self._root)
             self.encryption._read()
             self._debug['encryption']['end'] = self._io.pos()
             self._debug['image_source']['start'] = self._io.pos()
@@ -711,7 +711,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['img_comments']:
                     self._debug['img_comments']['arr'] = []
                 self._debug['img_comments']['arr'].append({'start': self._io.pos()})
-                _t_img_comments = self._root.ImageComment(self._io, self, self._root)
+                _t_img_comments = Nitf.ImageComment(self._io, self, self._root)
                 _t_img_comments._read()
                 self.img_comments[i] = _t_img_comments
                 self._debug['img_comments']['arr'][i]['end'] = self._io.pos()
@@ -737,7 +737,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['bands']:
                     self._debug['bands']['arr'] = []
                 self._debug['bands']['arr'].append({'start': self._io.pos()})
-                _t_bands = self._root.BandInfo(self._io, self, self._root)
+                _t_bands = Nitf.BandInfo(self._io, self, self._root)
                 _t_bands._read()
                 self.bands[i] = _t_bands
                 self._debug['bands']['arr'][i]['end'] = self._io.pos()
@@ -797,7 +797,7 @@ class Nitf(KaitaiStruct):
                 self._debug['user_def_img_data']['end'] = self._io.pos()
 
             self._debug['image_extended_sub_header']['start'] = self._io.pos()
-            self.image_extended_sub_header = self._root.TreHeader(self._io, self, self._root)
+            self.image_extended_sub_header = Nitf.TreHeader(self._io, self, self._root)
             self.image_extended_sub_header._read()
             self._debug['image_extended_sub_header']['end'] = self._io.pos()
 
@@ -823,7 +823,7 @@ class Nitf(KaitaiStruct):
             self.res_version = (self._io.read_bytes(2)).decode(u"UTF-8")
             self._debug['res_version']['end'] = self._io.pos()
             self._debug['reclasnfo']['start'] = self._io.pos()
-            self.reclasnfo = self._root.Clasnfo(self._io, self, self._root)
+            self.reclasnfo = Nitf.Clasnfo(self._io, self, self._root)
             self.reclasnfo._read()
             self._debug['reclasnfo']['end'] = self._io.pos()
             self._debug['res_user_defined_subheader_length']['start'] = self._io.pos()
@@ -858,7 +858,7 @@ class Nitf(KaitaiStruct):
             self.data_definition_version = (self._io.read_bytes(2)).decode(u"UTF-8")
             self._debug['data_definition_version']['end'] = self._io.pos()
             self._debug['declasnfo']['start'] = self._io.pos()
-            self.declasnfo = self._root.Clasnfo(self._io, self, self._root)
+            self.declasnfo = Nitf.Clasnfo(self._io, self, self._root)
             self.declasnfo._read()
             self._debug['declasnfo']['end'] = self._io.pos()
 
@@ -879,18 +879,18 @@ class Nitf(KaitaiStruct):
             self.text_title = (self._io.read_bytes(80)).decode(u"UTF-8")
             self._debug['text_title']['end'] = self._io.pos()
             self._debug['text_security_class']['start'] = self._io.pos()
-            self.text_security_class = self._root.Clasnfo(self._io, self, self._root)
+            self.text_security_class = Nitf.Clasnfo(self._io, self, self._root)
             self.text_security_class._read()
             self._debug['text_security_class']['end'] = self._io.pos()
             self._debug['encryp']['start'] = self._io.pos()
-            self.encryp = self._root.Encrypt(self._io, self, self._root)
+            self.encryp = Nitf.Encrypt(self._io, self, self._root)
             self.encryp._read()
             self._debug['encryp']['end'] = self._io.pos()
             self._debug['text_format']['start'] = self._io.pos()
             self.text_format = (self._io.read_bytes(3)).decode(u"UTF-8")
             self._debug['text_format']['end'] = self._io.pos()
             self._debug['text_extended_sub_header']['start'] = self._io.pos()
-            self.text_extended_sub_header = self._root.TreHeader(self._io, self, self._root)
+            self.text_extended_sub_header = Nitf.TreHeader(self._io, self, self._root)
             self.text_extended_sub_header._read()
             self._debug['text_extended_sub_header']['end'] = self._io.pos()
 
@@ -940,14 +940,14 @@ class Nitf(KaitaiStruct):
             self.originating_station_id = (self._io.read_bytes(10)).decode(u"UTF-8")
             self._debug['originating_station_id']['end'] = self._io.pos()
             self._debug['file_date_time']['start'] = self._io.pos()
-            self.file_date_time = self._root.DateTime(self._io, self, self._root)
+            self.file_date_time = Nitf.DateTime(self._io, self, self._root)
             self.file_date_time._read()
             self._debug['file_date_time']['end'] = self._io.pos()
             self._debug['file_title']['start'] = self._io.pos()
             self.file_title = (self._io.read_bytes(80)).decode(u"UTF-8")
             self._debug['file_title']['end'] = self._io.pos()
             self._debug['file_security']['start'] = self._io.pos()
-            self.file_security = self._root.Clasnfo(self._io, self, self._root)
+            self.file_security = Nitf.Clasnfo(self._io, self, self._root)
             self.file_security._read()
             self._debug['file_security']['end'] = self._io.pos()
             self._debug['file_copy_number']['start'] = self._io.pos()
@@ -957,7 +957,7 @@ class Nitf(KaitaiStruct):
             self.file_num_of_copys = (self._io.read_bytes(5)).decode(u"UTF-8")
             self._debug['file_num_of_copys']['end'] = self._io.pos()
             self._debug['encryption']['start'] = self._io.pos()
-            self.encryption = self._root.Encrypt(self._io, self, self._root)
+            self.encryption = Nitf.Encrypt(self._io, self, self._root)
             self.encryption._read()
             self._debug['encryption']['end'] = self._io.pos()
             self._debug['file_bg_color']['start'] = self._io.pos()
@@ -984,7 +984,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['linfo']:
                     self._debug['linfo']['arr'] = []
                 self._debug['linfo']['arr'].append({'start': self._io.pos()})
-                _t_linfo = self._root.LengthImageInfo(self._io, self, self._root)
+                _t_linfo = Nitf.LengthImageInfo(self._io, self, self._root)
                 _t_linfo._read()
                 self.linfo[i] = _t_linfo
                 self._debug['linfo']['arr'][i]['end'] = self._io.pos()
@@ -999,7 +999,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['lnnfo']:
                     self._debug['lnnfo']['arr'] = []
                 self._debug['lnnfo']['arr'].append({'start': self._io.pos()})
-                _t_lnnfo = self._root.LengthGraphicInfo(self._io, self, self._root)
+                _t_lnnfo = Nitf.LengthGraphicInfo(self._io, self, self._root)
                 _t_lnnfo._read()
                 self.lnnfo[i] = _t_lnnfo
                 self._debug['lnnfo']['arr'][i]['end'] = self._io.pos()
@@ -1017,7 +1017,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['ltnfo']:
                     self._debug['ltnfo']['arr'] = []
                 self._debug['ltnfo']['arr'].append({'start': self._io.pos()})
-                _t_ltnfo = self._root.LengthTextInfo(self._io, self, self._root)
+                _t_ltnfo = Nitf.LengthTextInfo(self._io, self, self._root)
                 _t_ltnfo._read()
                 self.ltnfo[i] = _t_ltnfo
                 self._debug['ltnfo']['arr'][i]['end'] = self._io.pos()
@@ -1032,7 +1032,7 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['ldnfo']:
                     self._debug['ldnfo']['arr'] = []
                 self._debug['ldnfo']['arr'].append({'start': self._io.pos()})
-                _t_ldnfo = self._root.LengthDataInfo(self._io, self, self._root)
+                _t_ldnfo = Nitf.LengthDataInfo(self._io, self, self._root)
                 _t_ldnfo._read()
                 self.ldnfo[i] = _t_ldnfo
                 self._debug['ldnfo']['arr'][i]['end'] = self._io.pos()
@@ -1047,18 +1047,18 @@ class Nitf(KaitaiStruct):
                 if not 'arr' in self._debug['lrnfo']:
                     self._debug['lrnfo']['arr'] = []
                 self._debug['lrnfo']['arr'].append({'start': self._io.pos()})
-                _t_lrnfo = self._root.LengthReservedInfo(self._io, self, self._root)
+                _t_lrnfo = Nitf.LengthReservedInfo(self._io, self, self._root)
                 _t_lrnfo._read()
                 self.lrnfo[i] = _t_lrnfo
                 self._debug['lrnfo']['arr'][i]['end'] = self._io.pos()
 
             self._debug['lrnfo']['end'] = self._io.pos()
             self._debug['user_defined_header']['start'] = self._io.pos()
-            self.user_defined_header = self._root.TreHeader(self._io, self, self._root)
+            self.user_defined_header = Nitf.TreHeader(self._io, self, self._root)
             self.user_defined_header._read()
             self._debug['user_defined_header']['end'] = self._io.pos()
             self._debug['extended_header']['start'] = self._io.pos()
-            self.extended_header = self._root.TreHeader(self._io, self, self._root)
+            self.extended_header = Nitf.TreHeader(self._io, self, self._root)
             self.extended_header._read()
             self._debug['extended_header']['end'] = self._io.pos()
 
@@ -1074,7 +1074,7 @@ class Nitf(KaitaiStruct):
 
         def _read(self):
             self._debug['des_base']['start'] = self._io.pos()
-            self.des_base = self._root.DataSubHeaderBase(self._io, self, self._root)
+            self.des_base = Nitf.DataSubHeaderBase(self._io, self, self._root)
             self.des_base._read()
             self._debug['des_base']['end'] = self._io.pos()
             self._debug['des_defined_subheader_fields_len']['start'] = self._io.pos()

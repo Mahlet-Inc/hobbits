@@ -44,7 +44,7 @@ class ShapefileMain(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.FileHeader(self._io, self, self._root)
+        self.header = ShapefileMain.FileHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['records']['start'] = self._io.pos()
@@ -54,7 +54,7 @@ class ShapefileMain(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = ShapefileMain.Record(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -72,7 +72,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_points']['start'] = self._io.pos()
@@ -84,14 +84,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -116,19 +116,19 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['x']['start'] = self._io.pos()
-            self.x = self._root.BoundsMinMax(self._io, self, self._root)
+            self.x = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.x._read()
             self._debug['x']['end'] = self._io.pos()
             self._debug['y']['start'] = self._io.pos()
-            self.y = self._root.BoundsMinMax(self._io, self, self._root)
+            self.y = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.y._read()
             self._debug['y']['end'] = self._io.pos()
             self._debug['z']['start'] = self._io.pos()
-            self.z = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.z._read()
             self._debug['z']['end'] = self._io.pos()
             self._debug['m']['start'] = self._io.pos()
-            self.m = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m._read()
             self._debug['m']['end'] = self._io.pos()
 
@@ -160,7 +160,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -185,7 +185,7 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
@@ -220,7 +220,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -245,7 +245,7 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
@@ -263,7 +263,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_points']['start'] = self._io.pos()
@@ -275,14 +275,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['z_range']['start'] = self._io.pos()
-            self.z_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.z_range._read()
             self._debug['z_range']['end'] = self._io.pos()
             self._debug['z_values']['start'] = self._io.pos()
@@ -296,7 +296,7 @@ class ShapefileMain(KaitaiStruct):
 
             self._debug['z_values']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -321,7 +321,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -346,14 +346,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['z_range']['start'] = self._io.pos()
-            self.z_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.z_range._read()
             self._debug['z_range']['end'] = self._io.pos()
             self._debug['z_values']['start'] = self._io.pos()
@@ -367,7 +367,7 @@ class ShapefileMain(KaitaiStruct):
 
             self._debug['z_values']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -392,7 +392,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -417,14 +417,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['z_range']['start'] = self._io.pos()
-            self.z_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.z_range._read()
             self._debug['z_range']['end'] = self._io.pos()
             self._debug['z_values']['start'] = self._io.pos()
@@ -438,7 +438,7 @@ class ShapefileMain(KaitaiStruct):
 
             self._debug['z_values']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -463,11 +463,11 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['x']['start'] = self._io.pos()
-            self.x = self._root.BoundsMinMax(self._io, self, self._root)
+            self.x = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.x._read()
             self._debug['x']['end'] = self._io.pos()
             self._debug['y']['start'] = self._io.pos()
-            self.y = self._root.BoundsMinMax(self._io, self, self._root)
+            self.y = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.y._read()
             self._debug['y']['end'] = self._io.pos()
 
@@ -502,7 +502,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -527,14 +527,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -576,7 +576,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_points']['start'] = self._io.pos()
@@ -588,7 +588,7 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
@@ -644,10 +644,10 @@ class ShapefileMain(KaitaiStruct):
             if not self.version == b"\xE8\x03\x00\x00":
                 raise kaitaistruct.ValidationNotEqualError(b"\xE8\x03\x00\x00", self.version, self._io, u"/types/file_header/seq/7")
             self._debug['shape_type']['start'] = self._io.pos()
-            self.shape_type = KaitaiStream.resolve_enum(self._root.ShapeType, self._io.read_s4le())
+            self.shape_type = KaitaiStream.resolve_enum(ShapefileMain.ShapeType, self._io.read_s4le())
             self._debug['shape_type']['end'] = self._io.pos()
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXYZM(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXYZM(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
 
@@ -685,11 +685,11 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.RecordHeader(self._io, self, self._root)
+            self.header = ShapefileMain.RecordHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             self._debug['contents']['start'] = self._io.pos()
-            self.contents = self._root.RecordContents(self._io, self, self._root)
+            self.contents = ShapefileMain.RecordContents(self._io, self, self._root)
             self.contents._read()
             self._debug['contents']['end'] = self._io.pos()
 
@@ -704,49 +704,49 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['shape_type']['start'] = self._io.pos()
-            self.shape_type = KaitaiStream.resolve_enum(self._root.ShapeType, self._io.read_s4le())
+            self.shape_type = KaitaiStream.resolve_enum(ShapefileMain.ShapeType, self._io.read_s4le())
             self._debug['shape_type']['end'] = self._io.pos()
-            if self.shape_type != self._root.ShapeType.null_shape:
+            if self.shape_type != ShapefileMain.ShapeType.null_shape:
                 self._debug['shape_parameters']['start'] = self._io.pos()
                 _on = self.shape_type
-                if _on == self._root.ShapeType.poly_line_z:
-                    self.shape_parameters = self._root.PolyLineZ(self._io, self, self._root)
+                if _on == ShapefileMain.ShapeType.poly_line_z:
+                    self.shape_parameters = ShapefileMain.PolyLineZ(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.multi_patch:
-                    self.shape_parameters = self._root.MultiPatch(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.multi_patch:
+                    self.shape_parameters = ShapefileMain.MultiPatch(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.poly_line_m:
-                    self.shape_parameters = self._root.PolyLineM(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.poly_line_m:
+                    self.shape_parameters = ShapefileMain.PolyLineM(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.polygon:
-                    self.shape_parameters = self._root.Polygon(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.polygon:
+                    self.shape_parameters = ShapefileMain.Polygon(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.polygon_z:
-                    self.shape_parameters = self._root.PolygonZ(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.polygon_z:
+                    self.shape_parameters = ShapefileMain.PolygonZ(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.point_z:
-                    self.shape_parameters = self._root.PointZ(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.point_z:
+                    self.shape_parameters = ShapefileMain.PointZ(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.poly_line:
-                    self.shape_parameters = self._root.PolyLine(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.poly_line:
+                    self.shape_parameters = ShapefileMain.PolyLine(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.point_m:
-                    self.shape_parameters = self._root.PointM(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.point_m:
+                    self.shape_parameters = ShapefileMain.PointM(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.polygon_m:
-                    self.shape_parameters = self._root.PolygonM(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.polygon_m:
+                    self.shape_parameters = ShapefileMain.PolygonM(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.multi_point:
-                    self.shape_parameters = self._root.MultiPoint(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.multi_point:
+                    self.shape_parameters = ShapefileMain.MultiPoint(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.point:
-                    self.shape_parameters = self._root.Point(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.point:
+                    self.shape_parameters = ShapefileMain.Point(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.multi_point_m:
-                    self.shape_parameters = self._root.MultiPointM(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.multi_point_m:
+                    self.shape_parameters = ShapefileMain.MultiPointM(self._io, self, self._root)
                     self.shape_parameters._read()
-                elif _on == self._root.ShapeType.multi_point_z:
-                    self.shape_parameters = self._root.MultiPointZ(self._io, self, self._root)
+                elif _on == ShapefileMain.ShapeType.multi_point_z:
+                    self.shape_parameters = ShapefileMain.MultiPointZ(self._io, self, self._root)
                     self.shape_parameters._read()
                 self._debug['shape_parameters']['end'] = self._io.pos()
 
@@ -762,7 +762,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -787,7 +787,7 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['part_types']:
                     self._debug['part_types']['arr'] = []
                 self._debug['part_types']['arr'].append({'start': self._io.pos()})
-                self.part_types[i] = KaitaiStream.resolve_enum(self._root.PartType, self._io.read_s4le())
+                self.part_types[i] = KaitaiStream.resolve_enum(ShapefileMain.PartType, self._io.read_s4le())
                 self._debug['part_types']['arr'][i]['end'] = self._io.pos()
 
             self._debug['part_types']['end'] = self._io.pos()
@@ -797,14 +797,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['z_range']['start'] = self._io.pos()
-            self.z_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.z_range._read()
             self._debug['z_range']['end'] = self._io.pos()
             self._debug['z_values']['start'] = self._io.pos()
@@ -818,7 +818,7 @@ class ShapefileMain(KaitaiStruct):
 
             self._debug['z_values']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()
@@ -843,7 +843,7 @@ class ShapefileMain(KaitaiStruct):
 
         def _read(self):
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXY(self._io, self, self._root)
+            self.bounding_box = ShapefileMain.BoundingBoxXY(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
             self._debug['number_of_parts']['start'] = self._io.pos()
@@ -868,14 +868,14 @@ class ShapefileMain(KaitaiStruct):
                 if not 'arr' in self._debug['points']:
                     self._debug['points']['arr'] = []
                 self._debug['points']['arr'].append({'start': self._io.pos()})
-                _t_points = self._root.Point(self._io, self, self._root)
+                _t_points = ShapefileMain.Point(self._io, self, self._root)
                 _t_points._read()
                 self.points[i] = _t_points
                 self._debug['points']['arr'][i]['end'] = self._io.pos()
 
             self._debug['points']['end'] = self._io.pos()
             self._debug['m_range']['start'] = self._io.pos()
-            self.m_range = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m_range = ShapefileMain.BoundsMinMax(self._io, self, self._root)
             self.m_range._read()
             self._debug['m_range']['end'] = self._io.pos()
             self._debug['m_values']['start'] = self._io.pos()

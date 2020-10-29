@@ -205,7 +205,7 @@ class NtMdt(KaitaiStruct):
         self._debug['frames']['start'] = self._io.pos()
         self._raw_frames = self._io.read_bytes(self.size)
         _io__raw_frames = KaitaiStream(BytesIO(self._raw_frames))
-        self.frames = self._root.Framez(_io__raw_frames, self, self._root)
+        self.frames = NtMdt.Framez(_io__raw_frames, self, self._root)
         self.frames._read()
         self._debug['frames']['end'] = self._io.pos()
 
@@ -245,7 +245,7 @@ class NtMdt(KaitaiStruct):
                 if not 'arr' in self._debug['frames']:
                     self._debug['frames']['arr'] = []
                 self._debug['frames']['arr'].append({'start': self._io.pos()})
-                _t_frames = self._root.Frame(self._io, self, self._root)
+                _t_frames = NtMdt.Frame(self._io, self, self._root)
                 _t_frames._read()
                 self.frames[i] = _t_frames
                 self._debug['frames']['arr'][i]['end'] = self._io.pos()
@@ -278,7 +278,7 @@ class NtMdt(KaitaiStruct):
             self._debug['main']['start'] = self._io.pos()
             self._raw_main = self._io.read_bytes((self.size - 4))
             _io__raw_main = KaitaiStream(BytesIO(self._raw_main))
-            self.main = self._root.Frame.FrameMain(_io__raw_main, self, self._root)
+            self.main = NtMdt.Frame.FrameMain(_io__raw_main, self, self._root)
             self.main._read()
             self._debug['main']['end'] = self._io.pos()
 
@@ -296,7 +296,7 @@ class NtMdt(KaitaiStruct):
                 self._debug['fm_ndots']['end'] = self._io.pos()
                 if self.fm_ndots > 0:
                     self._debug['coord_header']['start'] = self._io.pos()
-                    self.coord_header = self._root.Frame.Dots.DotsHeader(self._io, self, self._root)
+                    self.coord_header = NtMdt.Frame.Dots.DotsHeader(self._io, self, self._root)
                     self.coord_header._read()
                     self._debug['coord_header']['end'] = self._io.pos()
 
@@ -306,7 +306,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['coordinates']:
                         self._debug['coordinates']['arr'] = []
                     self._debug['coordinates']['arr'].append({'start': self._io.pos()})
-                    _t_coordinates = self._root.Frame.Dots.DotsData(self._io, self, self._root)
+                    _t_coordinates = NtMdt.Frame.Dots.DotsData(self._io, self, self._root)
                     _t_coordinates._read()
                     self.coordinates[i] = _t_coordinates
                     self._debug['coordinates']['arr'][i]['end'] = self._io.pos()
@@ -318,7 +318,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['data']:
                         self._debug['data']['arr'] = []
                     self._debug['data']['arr'].append({'start': self._io.pos()})
-                    _t_data = self._root.Frame.Dots.DataLinez(i, self._io, self, self._root)
+                    _t_data = NtMdt.Frame.Dots.DataLinez(i, self._io, self, self._root)
                     _t_data._read()
                     self.data[i] = _t_data
                     self._debug['data']['arr'][i]['end'] = self._io.pos()
@@ -340,7 +340,7 @@ class NtMdt(KaitaiStruct):
                     self._debug['header']['start'] = self._io.pos()
                     self._raw_header = self._io.read_bytes(self.header_size)
                     _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-                    self.header = self._root.Frame.Dots.DotsHeader.Header(_io__raw_header, self, self._root)
+                    self.header = NtMdt.Frame.Dots.DotsHeader.Header(_io__raw_header, self, self._root)
                     self.header._read()
                     self._debug['header']['end'] = self._io.pos()
 
@@ -360,7 +360,7 @@ class NtMdt(KaitaiStruct):
                         self.version = self._io.read_s4le()
                         self._debug['version']['end'] = self._io.pos()
                         self._debug['xyunits']['start'] = self._io.pos()
-                        self.xyunits = KaitaiStream.resolve_enum(self._root.Unit, self._io.read_s2le())
+                        self.xyunits = KaitaiStream.resolve_enum(NtMdt.Unit, self._io.read_s2le())
                         self._debug['xyunits']['end'] = self._io.pos()
 
 
@@ -431,14 +431,14 @@ class NtMdt(KaitaiStruct):
 
             def _read(self):
                 self._debug['type']['start'] = self._io.pos()
-                self.type = KaitaiStream.resolve_enum(self._root.Frame.FrameType, self._io.read_u2le())
+                self.type = KaitaiStream.resolve_enum(NtMdt.Frame.FrameType, self._io.read_u2le())
                 self._debug['type']['end'] = self._io.pos()
                 self._debug['version']['start'] = self._io.pos()
-                self.version = self._root.Version(self._io, self, self._root)
+                self.version = NtMdt.Version(self._io, self, self._root)
                 self.version._read()
                 self._debug['version']['end'] = self._io.pos()
                 self._debug['date_time']['start'] = self._io.pos()
-                self.date_time = self._root.Frame.DateTime(self._io, self, self._root)
+                self.date_time = NtMdt.Frame.DateTime(self._io, self, self._root)
                 self.date_time._read()
                 self._debug['date_time']['end'] = self._io.pos()
                 self._debug['var_size']['start'] = self._io.pos()
@@ -446,30 +446,30 @@ class NtMdt(KaitaiStruct):
                 self._debug['var_size']['end'] = self._io.pos()
                 self._debug['frame_data']['start'] = self._io.pos()
                 _on = self.type
-                if _on == self._root.Frame.FrameType.mda:
+                if _on == NtMdt.Frame.FrameType.mda:
                     self._raw_frame_data = self._io.read_bytes_full()
                     _io__raw_frame_data = KaitaiStream(BytesIO(self._raw_frame_data))
-                    self.frame_data = self._root.Frame.FdMetaData(_io__raw_frame_data, self, self._root)
+                    self.frame_data = NtMdt.Frame.FdMetaData(_io__raw_frame_data, self, self._root)
                     self.frame_data._read()
-                elif _on == self._root.Frame.FrameType.curves_new:
+                elif _on == NtMdt.Frame.FrameType.curves_new:
                     self._raw_frame_data = self._io.read_bytes_full()
                     _io__raw_frame_data = KaitaiStream(BytesIO(self._raw_frame_data))
-                    self.frame_data = self._root.Frame.FdCurvesNew(_io__raw_frame_data, self, self._root)
+                    self.frame_data = NtMdt.Frame.FdCurvesNew(_io__raw_frame_data, self, self._root)
                     self.frame_data._read()
-                elif _on == self._root.Frame.FrameType.curves:
+                elif _on == NtMdt.Frame.FrameType.curves:
                     self._raw_frame_data = self._io.read_bytes_full()
                     _io__raw_frame_data = KaitaiStream(BytesIO(self._raw_frame_data))
-                    self.frame_data = self._root.Frame.FdSpectroscopy(_io__raw_frame_data, self, self._root)
+                    self.frame_data = NtMdt.Frame.FdSpectroscopy(_io__raw_frame_data, self, self._root)
                     self.frame_data._read()
-                elif _on == self._root.Frame.FrameType.spectroscopy:
+                elif _on == NtMdt.Frame.FrameType.spectroscopy:
                     self._raw_frame_data = self._io.read_bytes_full()
                     _io__raw_frame_data = KaitaiStream(BytesIO(self._raw_frame_data))
-                    self.frame_data = self._root.Frame.FdSpectroscopy(_io__raw_frame_data, self, self._root)
+                    self.frame_data = NtMdt.Frame.FdSpectroscopy(_io__raw_frame_data, self, self._root)
                     self.frame_data._read()
-                elif _on == self._root.Frame.FrameType.scanned:
+                elif _on == NtMdt.Frame.FrameType.scanned:
                     self._raw_frame_data = self._io.read_bytes_full()
                     _io__raw_frame_data = KaitaiStream(BytesIO(self._raw_frame_data))
-                    self.frame_data = self._root.Frame.FdScanned(_io__raw_frame_data, self, self._root)
+                    self.frame_data = NtMdt.Frame.FdScanned(_io__raw_frame_data, self, self._root)
                     self.frame_data._read()
                 else:
                     self.frame_data = self._io.read_bytes_full()
@@ -494,7 +494,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['blocks_headers']:
                         self._debug['blocks_headers']['arr'] = []
                     self._debug['blocks_headers']['arr'].append({'start': self._io.pos()})
-                    _t_blocks_headers = self._root.Frame.FdCurvesNew.BlockDescr(self._io, self, self._root)
+                    _t_blocks_headers = NtMdt.Frame.FdCurvesNew.BlockDescr(self._io, self, self._root)
                     _t_blocks_headers._read()
                     self.blocks_headers[i] = _t_blocks_headers
                     self._debug['blocks_headers']['arr'][i]['end'] = self._io.pos()
@@ -560,7 +560,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['guids']:
                         self._debug['guids']['arr'] = []
                     self._debug['guids']['arr'].append({'start': self._io.pos()})
-                    _t_guids = self._root.Uuid(self._io, self, self._root)
+                    _t_guids = NtMdt.Uuid(self._io, self, self._root)
                     _t_guids._read()
                     self.guids[i] = _t_guids
                     self._debug['guids']['arr'][i]['end'] = self._io.pos()
@@ -620,7 +620,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['dimensions']:
                         self._debug['dimensions']['arr'] = []
                     self._debug['dimensions']['arr'].append({'start': self._io.pos()})
-                    _t_dimensions = self._root.Frame.FdMetaData.Calibration(self._io, self, self._root)
+                    _t_dimensions = NtMdt.Frame.FdMetaData.Calibration(self._io, self, self._root)
                     _t_dimensions._read()
                     self.dimensions[i] = _t_dimensions
                     self._debug['dimensions']['arr'][i]['end'] = self._io.pos()
@@ -632,7 +632,7 @@ class NtMdt(KaitaiStruct):
                     if not 'arr' in self._debug['mesurands']:
                         self._debug['mesurands']['arr'] = []
                     self._debug['mesurands']['arr'].append({'start': self._io.pos()})
-                    _t_mesurands = self._root.Frame.FdMetaData.Calibration(self._io, self, self._root)
+                    _t_mesurands = NtMdt.Frame.FdMetaData.Calibration(self._io, self, self._root)
                     _t_mesurands._read()
                     self.mesurands[i] = _t_mesurands
                     self._debug['mesurands']['arr'][i]['end'] = self._io.pos()
@@ -655,7 +655,7 @@ class NtMdt(KaitaiStruct):
                         if not 'arr' in self._debug['image']:
                             self._debug['image']['arr'] = []
                         self._debug['image']['arr'].append({'start': self._io.pos()})
-                        _t_image = self._root.Frame.FdMetaData.Image.Vec(self._io, self, self._root)
+                        _t_image = NtMdt.Frame.FdMetaData.Image.Vec(self._io, self, self._root)
                         _t_image._read()
                         self.image.append(_t_image)
                         self._debug['image']['arr'][len(self.image) - 1]['end'] = self._io.pos()
@@ -679,61 +679,61 @@ class NtMdt(KaitaiStruct):
                                 self._debug['items']['arr'] = []
                             self._debug['items']['arr'].append({'start': self._io.pos()})
                             _on = self._parent._parent.mesurands[i].data_type
-                            if _on == self._root.DataType.uint64:
+                            if _on == NtMdt.DataType.uint64:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_u8le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.uint8:
+                            elif _on == NtMdt.DataType.uint8:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_u1()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.float32:
+                            elif _on == NtMdt.DataType.float32:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_f4le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.int8:
+                            elif _on == NtMdt.DataType.int8:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_s1()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.uint16:
+                            elif _on == NtMdt.DataType.uint16:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_u2le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.int64:
+                            elif _on == NtMdt.DataType.int64:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_s8le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.uint32:
+                            elif _on == NtMdt.DataType.uint32:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_u4le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.float64:
+                            elif _on == NtMdt.DataType.float64:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_f8le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.int16:
+                            elif _on == NtMdt.DataType.int16:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
                                 self.items[i] = self._io.read_s2le()
                                 self._debug['items']['arr'][i]['end'] = self._io.pos()
-                            elif _on == self._root.DataType.int32:
+                            elif _on == NtMdt.DataType.int32:
                                 if not 'arr' in self._debug['items']:
                                     self._debug['items']['arr'] = []
                                 self._debug['items']['arr'].append({'start': self._io.pos()})
@@ -791,7 +791,7 @@ class NtMdt(KaitaiStruct):
                     self.max_index = self._io.read_u8le()
                     self._debug['max_index']['end'] = self._io.pos()
                     self._debug['data_type']['start'] = self._io.pos()
-                    self.data_type = KaitaiStream.resolve_enum(self._root.DataType, self._io.read_s4le())
+                    self.data_type = KaitaiStream.resolve_enum(NtMdt.DataType, self._io.read_s4le())
                     self._debug['data_type']['end'] = self._io.pos()
                     self._debug['len_author']['start'] = self._io.pos()
                     self.len_author = self._io.read_u4le()
@@ -828,7 +828,7 @@ class NtMdt(KaitaiStruct):
                 self._debug['_m_image']['start'] = self._io.pos()
                 self._raw__m_image = self._io.read_bytes(self.data_size)
                 _io__raw__m_image = KaitaiStream(BytesIO(self._raw__m_image))
-                self._m_image = self._root.Frame.FdMetaData.Image(_io__raw__m_image, self, self._root)
+                self._m_image = NtMdt.Frame.FdMetaData.Image(_io__raw__m_image, self, self._root)
                 self._m_image._read()
                 self._debug['_m_image']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -847,7 +847,7 @@ class NtMdt(KaitaiStruct):
                 self._debug['vars']['start'] = self._io.pos()
                 self._raw_vars = self._io.read_bytes(self._parent.var_size)
                 _io__raw_vars = KaitaiStream(BytesIO(self._raw_vars))
-                self.vars = self._root.Frame.FdSpectroscopy.Vars(_io__raw_vars, self, self._root)
+                self.vars = NtMdt.Frame.FdSpectroscopy.Vars(_io__raw_vars, self, self._root)
                 self.vars._read()
                 self._debug['vars']['end'] = self._io.pos()
                 self._debug['fm_mode']['start'] = self._io.pos()
@@ -860,7 +860,7 @@ class NtMdt(KaitaiStruct):
                 self.fm_yres = self._io.read_u2le()
                 self._debug['fm_yres']['end'] = self._io.pos()
                 self._debug['dots']['start'] = self._io.pos()
-                self.dots = self._root.Frame.Dots(self._io, self, self._root)
+                self.dots = NtMdt.Frame.Dots(self._io, self, self._root)
                 self.dots._read()
                 self._debug['dots']['end'] = self._io.pos()
                 self._debug['data']['start'] = self._io.pos()
@@ -874,11 +874,11 @@ class NtMdt(KaitaiStruct):
 
                 self._debug['data']['end'] = self._io.pos()
                 self._debug['title']['start'] = self._io.pos()
-                self.title = self._root.Title(self._io, self, self._root)
+                self.title = NtMdt.Title(self._io, self, self._root)
                 self.title._read()
                 self._debug['title']['end'] = self._io.pos()
                 self._debug['xml']['start'] = self._io.pos()
-                self.xml = self._root.Xml(self._io, self, self._root)
+                self.xml = NtMdt.Xml(self._io, self, self._root)
                 self.xml._read()
                 self._debug['xml']['end'] = self._io.pos()
 
@@ -892,15 +892,15 @@ class NtMdt(KaitaiStruct):
 
                 def _read(self):
                     self._debug['x_scale']['start'] = self._io.pos()
-                    self.x_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.x_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.x_scale._read()
                     self._debug['x_scale']['end'] = self._io.pos()
                     self._debug['y_scale']['start'] = self._io.pos()
-                    self.y_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.y_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.y_scale._read()
                     self._debug['y_scale']['end'] = self._io.pos()
                     self._debug['z_scale']['start'] = self._io.pos()
-                    self.z_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.z_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.z_scale._read()
                     self._debug['z_scale']['end'] = self._io.pos()
                     self._debug['sp_mode']['start'] = self._io.pos()
@@ -967,11 +967,11 @@ class NtMdt(KaitaiStruct):
 
             def _read(self):
                 self._debug['date']['start'] = self._io.pos()
-                self.date = self._root.Frame.DateTime.Date(self._io, self, self._root)
+                self.date = NtMdt.Frame.DateTime.Date(self._io, self, self._root)
                 self.date._read()
                 self._debug['date']['end'] = self._io.pos()
                 self._debug['time']['start'] = self._io.pos()
-                self.time = self._root.Frame.DateTime.Time(self._io, self, self._root)
+                self.time = NtMdt.Frame.DateTime.Time(self._io, self, self._root)
                 self.time._read()
                 self._debug['time']['end'] = self._io.pos()
 
@@ -1032,7 +1032,7 @@ class NtMdt(KaitaiStruct):
                 self.step = self._io.read_f4le()
                 self._debug['step']['end'] = self._io.pos()
                 self._debug['unit']['start'] = self._io.pos()
-                self.unit = KaitaiStream.resolve_enum(self._root.Unit, self._io.read_s2le())
+                self.unit = KaitaiStream.resolve_enum(NtMdt.Unit, self._io.read_s2le())
                 self._debug['unit']['end'] = self._io.pos()
 
 
@@ -1065,7 +1065,7 @@ class NtMdt(KaitaiStruct):
                 self._debug['vars']['start'] = self._io.pos()
                 self._raw_vars = self._io.read_bytes(self._parent.var_size)
                 _io__raw_vars = KaitaiStream(BytesIO(self._raw_vars))
-                self.vars = self._root.Frame.FdScanned.Vars(_io__raw_vars, self, self._root)
+                self.vars = NtMdt.Frame.FdScanned.Vars(_io__raw_vars, self, self._root)
                 self.vars._read()
                 self._debug['vars']['end'] = self._io.pos()
                 if False:
@@ -1075,7 +1075,7 @@ class NtMdt(KaitaiStruct):
 
                 if False:
                     self._debug['tune']['start'] = self._io.pos()
-                    self.tune = KaitaiStream.resolve_enum(self._root.Frame.FdScanned.LiftMode, self._io.read_u4le())
+                    self.tune = KaitaiStream.resolve_enum(NtMdt.Frame.FdScanned.LiftMode, self._io.read_u4le())
                     self._debug['tune']['end'] = self._io.pos()
 
                 if False:
@@ -1103,7 +1103,7 @@ class NtMdt(KaitaiStruct):
                 self.fm_yres = self._io.read_u2le()
                 self._debug['fm_yres']['end'] = self._io.pos()
                 self._debug['dots']['start'] = self._io.pos()
-                self.dots = self._root.Frame.Dots(self._io, self, self._root)
+                self.dots = NtMdt.Frame.Dots(self._io, self, self._root)
                 self.dots._read()
                 self._debug['dots']['end'] = self._io.pos()
                 self._debug['image']['start'] = self._io.pos()
@@ -1117,11 +1117,11 @@ class NtMdt(KaitaiStruct):
 
                 self._debug['image']['end'] = self._io.pos()
                 self._debug['title']['start'] = self._io.pos()
-                self.title = self._root.Title(self._io, self, self._root)
+                self.title = NtMdt.Title(self._io, self, self._root)
                 self.title._read()
                 self._debug['title']['end'] = self._io.pos()
                 self._debug['xml']['start'] = self._io.pos()
-                self.xml = self._root.Xml(self._io, self, self._root)
+                self.xml = NtMdt.Xml(self._io, self, self._root)
                 self.xml._read()
                 self._debug['xml']['end'] = self._io.pos()
 
@@ -1135,22 +1135,22 @@ class NtMdt(KaitaiStruct):
 
                 def _read(self):
                     self._debug['x_scale']['start'] = self._io.pos()
-                    self.x_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.x_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.x_scale._read()
                     self._debug['x_scale']['end'] = self._io.pos()
                     self._debug['y_scale']['start'] = self._io.pos()
-                    self.y_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.y_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.y_scale._read()
                     self._debug['y_scale']['end'] = self._io.pos()
                     self._debug['z_scale']['start'] = self._io.pos()
-                    self.z_scale = self._root.Frame.AxisScale(self._io, self, self._root)
+                    self.z_scale = NtMdt.Frame.AxisScale(self._io, self, self._root)
                     self.z_scale._read()
                     self._debug['z_scale']['end'] = self._io.pos()
                     self._debug['channel_index']['start'] = self._io.pos()
-                    self.channel_index = KaitaiStream.resolve_enum(self._root.AdcMode, self._io.read_u1())
+                    self.channel_index = KaitaiStream.resolve_enum(NtMdt.AdcMode, self._io.read_u1())
                     self._debug['channel_index']['end'] = self._io.pos()
                     self._debug['mode']['start'] = self._io.pos()
-                    self.mode = KaitaiStream.resolve_enum(self._root.Frame.FdScanned.Mode, self._io.read_u1())
+                    self.mode = KaitaiStream.resolve_enum(NtMdt.Frame.FdScanned.Mode, self._io.read_u1())
                     self._debug['mode']['end'] = self._io.pos()
                     self._debug['xres']['start'] = self._io.pos()
                     self.xres = self._io.read_u2le()
@@ -1180,7 +1180,7 @@ class NtMdt(KaitaiStruct):
                     self.substr_plane_order_or_pass_num = self._io.read_u1()
                     self._debug['substr_plane_order_or_pass_num']['end'] = self._io.pos()
                     self._debug['scan_dir']['start'] = self._io.pos()
-                    self.scan_dir = self._root.Frame.FdScanned.ScanDir(self._io, self, self._root)
+                    self.scan_dir = NtMdt.Frame.FdScanned.ScanDir(self._io, self, self._root)
                     self.scan_dir._read()
                     self._debug['scan_dir']['end'] = self._io.pos()
                     self._debug['power_of_2']['start'] = self._io.pos()
@@ -1239,19 +1239,19 @@ class NtMdt(KaitaiStruct):
 
                 def _read(self):
                     self._debug['unkn']['start'] = self._io.pos()
-                    self.unkn = self._io.read_bits_int(4)
+                    self.unkn = self._io.read_bits_int_be(4)
                     self._debug['unkn']['end'] = self._io.pos()
                     self._debug['double_pass']['start'] = self._io.pos()
-                    self.double_pass = self._io.read_bits_int(1) != 0
+                    self.double_pass = self._io.read_bits_int_be(1) != 0
                     self._debug['double_pass']['end'] = self._io.pos()
                     self._debug['bottom']['start'] = self._io.pos()
-                    self.bottom = self._io.read_bits_int(1) != 0
+                    self.bottom = self._io.read_bits_int_be(1) != 0
                     self._debug['bottom']['end'] = self._io.pos()
                     self._debug['left']['start'] = self._io.pos()
-                    self.left = self._io.read_bits_int(1) != 0
+                    self.left = self._io.read_bits_int_be(1) != 0
                     self._debug['left']['end'] = self._io.pos()
                     self._debug['horizontal']['start'] = self._io.pos()
-                    self.horizontal = self._io.read_bits_int(1) != 0
+                    self.horizontal = self._io.read_bits_int_be(1) != 0
                     self._debug['horizontal']['end'] = self._io.pos()
 
 

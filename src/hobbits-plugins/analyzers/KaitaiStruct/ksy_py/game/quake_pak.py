@@ -50,7 +50,7 @@ class QuakePak(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.IndexEntry(self._io, self, self._root)
+                _t_entries = QuakePak.IndexEntry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -103,7 +103,7 @@ class QuakePak(KaitaiStruct):
         self._debug['_m_index']['start'] = self._io.pos()
         self._raw__m_index = self._io.read_bytes(self.len_index)
         _io__raw__m_index = KaitaiStream(BytesIO(self._raw__m_index))
-        self._m_index = self._root.IndexStruct(_io__raw__m_index, self, self._root)
+        self._m_index = QuakePak.IndexStruct(_io__raw__m_index, self, self._root)
         self._m_index._read()
         self._debug['_m_index']['end'] = self._io.pos()
         self._io.seek(_pos)

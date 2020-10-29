@@ -26,7 +26,7 @@ class Ines(KaitaiStruct):
         self._debug['header']['start'] = self._io.pos()
         self._raw_header = self._io.read_bytes(16)
         _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-        self.header = self._root.Header(_io__raw_header, self, self._root)
+        self.header = Ines.Header(_io__raw_header, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         if self.header.f6.trainer:
@@ -42,7 +42,7 @@ class Ines(KaitaiStruct):
         self._debug['chr_rom']['end'] = self._io.pos()
         if self.header.f7.playchoice10:
             self._debug['playchoice10']['start'] = self._io.pos()
-            self.playchoice10 = self._root.Playchoice10(self._io, self, self._root)
+            self.playchoice10 = Ines.Playchoice10(self._io, self, self._root)
             self.playchoice10._read()
             self._debug['playchoice10']['end'] = self._io.pos()
 
@@ -75,13 +75,13 @@ class Ines(KaitaiStruct):
             self._debug['f6']['start'] = self._io.pos()
             self._raw_f6 = self._io.read_bytes(1)
             _io__raw_f6 = KaitaiStream(BytesIO(self._raw_f6))
-            self.f6 = self._root.Header.F6(_io__raw_f6, self, self._root)
+            self.f6 = Ines.Header.F6(_io__raw_f6, self, self._root)
             self.f6._read()
             self._debug['f6']['end'] = self._io.pos()
             self._debug['f7']['start'] = self._io.pos()
             self._raw_f7 = self._io.read_bytes(1)
             _io__raw_f7 = KaitaiStream(BytesIO(self._raw_f7))
-            self.f7 = self._root.Header.F7(_io__raw_f7, self, self._root)
+            self.f7 = Ines.Header.F7(_io__raw_f7, self, self._root)
             self.f7._read()
             self._debug['f7']['end'] = self._io.pos()
             self._debug['len_prg_ram']['start'] = self._io.pos()
@@ -90,13 +90,13 @@ class Ines(KaitaiStruct):
             self._debug['f9']['start'] = self._io.pos()
             self._raw_f9 = self._io.read_bytes(1)
             _io__raw_f9 = KaitaiStream(BytesIO(self._raw_f9))
-            self.f9 = self._root.Header.F9(_io__raw_f9, self, self._root)
+            self.f9 = Ines.Header.F9(_io__raw_f9, self, self._root)
             self.f9._read()
             self._debug['f9']['end'] = self._io.pos()
             self._debug['f10']['start'] = self._io.pos()
             self._raw_f10 = self._io.read_bytes(1)
             _io__raw_f10 = KaitaiStream(BytesIO(self._raw_f10))
-            self.f10 = self._root.Header.F10(_io__raw_f10, self, self._root)
+            self.f10 = Ines.Header.F10(_io__raw_f10, self, self._root)
             self.f10._read()
             self._debug['f10']['end'] = self._io.pos()
             self._debug['reserved']['start'] = self._io.pos()
@@ -123,19 +123,19 @@ class Ines(KaitaiStruct):
 
             def _read(self):
                 self._debug['lower_mapper']['start'] = self._io.pos()
-                self.lower_mapper = self._io.read_bits_int(4)
+                self.lower_mapper = self._io.read_bits_int_be(4)
                 self._debug['lower_mapper']['end'] = self._io.pos()
                 self._debug['four_screen']['start'] = self._io.pos()
-                self.four_screen = self._io.read_bits_int(1) != 0
+                self.four_screen = self._io.read_bits_int_be(1) != 0
                 self._debug['four_screen']['end'] = self._io.pos()
                 self._debug['trainer']['start'] = self._io.pos()
-                self.trainer = self._io.read_bits_int(1) != 0
+                self.trainer = self._io.read_bits_int_be(1) != 0
                 self._debug['trainer']['end'] = self._io.pos()
                 self._debug['has_battery_ram']['start'] = self._io.pos()
-                self.has_battery_ram = self._io.read_bits_int(1) != 0
+                self.has_battery_ram = self._io.read_bits_int_be(1) != 0
                 self._debug['has_battery_ram']['end'] = self._io.pos()
                 self._debug['mirroring']['start'] = self._io.pos()
-                self.mirroring = KaitaiStream.resolve_enum(self._root.Header.F6.Mirroring, self._io.read_bits_int(1))
+                self.mirroring = KaitaiStream.resolve_enum(Ines.Header.F6.Mirroring, self._io.read_bits_int_be(1))
                 self._debug['mirroring']['end'] = self._io.pos()
 
 
@@ -153,16 +153,16 @@ class Ines(KaitaiStruct):
 
             def _read(self):
                 self._debug['upper_mapper']['start'] = self._io.pos()
-                self.upper_mapper = self._io.read_bits_int(4)
+                self.upper_mapper = self._io.read_bits_int_be(4)
                 self._debug['upper_mapper']['end'] = self._io.pos()
                 self._debug['format']['start'] = self._io.pos()
-                self.format = self._io.read_bits_int(2)
+                self.format = self._io.read_bits_int_be(2)
                 self._debug['format']['end'] = self._io.pos()
                 self._debug['playchoice10']['start'] = self._io.pos()
-                self.playchoice10 = self._io.read_bits_int(1) != 0
+                self.playchoice10 = self._io.read_bits_int_be(1) != 0
                 self._debug['playchoice10']['end'] = self._io.pos()
                 self._debug['vs_unisystem']['start'] = self._io.pos()
-                self.vs_unisystem = self._io.read_bits_int(1) != 0
+                self.vs_unisystem = self._io.read_bits_int_be(1) != 0
                 self._debug['vs_unisystem']['end'] = self._io.pos()
 
 
@@ -184,10 +184,10 @@ class Ines(KaitaiStruct):
 
             def _read(self):
                 self._debug['reserved']['start'] = self._io.pos()
-                self.reserved = self._io.read_bits_int(7)
+                self.reserved = self._io.read_bits_int_be(7)
                 self._debug['reserved']['end'] = self._io.pos()
                 self._debug['tv_system']['start'] = self._io.pos()
-                self.tv_system = KaitaiStream.resolve_enum(self._root.Header.F9.TvSystem, self._io.read_bits_int(1))
+                self.tv_system = KaitaiStream.resolve_enum(Ines.Header.F9.TvSystem, self._io.read_bits_int_be(1))
                 self._debug['tv_system']['end'] = self._io.pos()
 
 
@@ -211,19 +211,19 @@ class Ines(KaitaiStruct):
 
             def _read(self):
                 self._debug['reserved1']['start'] = self._io.pos()
-                self.reserved1 = self._io.read_bits_int(2)
+                self.reserved1 = self._io.read_bits_int_be(2)
                 self._debug['reserved1']['end'] = self._io.pos()
                 self._debug['bus_conflict']['start'] = self._io.pos()
-                self.bus_conflict = self._io.read_bits_int(1) != 0
+                self.bus_conflict = self._io.read_bits_int_be(1) != 0
                 self._debug['bus_conflict']['end'] = self._io.pos()
                 self._debug['prg_ram']['start'] = self._io.pos()
-                self.prg_ram = self._io.read_bits_int(1) != 0
+                self.prg_ram = self._io.read_bits_int_be(1) != 0
                 self._debug['prg_ram']['end'] = self._io.pos()
                 self._debug['reserved2']['start'] = self._io.pos()
-                self.reserved2 = self._io.read_bits_int(2)
+                self.reserved2 = self._io.read_bits_int_be(2)
                 self._debug['reserved2']['end'] = self._io.pos()
                 self._debug['tv_system']['start'] = self._io.pos()
-                self.tv_system = KaitaiStream.resolve_enum(self._root.Header.F10.TvSystem, self._io.read_bits_int(2))
+                self.tv_system = KaitaiStream.resolve_enum(Ines.Header.F10.TvSystem, self._io.read_bits_int_be(2))
                 self._debug['tv_system']['end'] = self._io.pos()
 
 
@@ -257,7 +257,7 @@ class Ines(KaitaiStruct):
             self.inst_rom = self._io.read_bytes(8192)
             self._debug['inst_rom']['end'] = self._io.pos()
             self._debug['prom']['start'] = self._io.pos()
-            self.prom = self._root.Playchoice10.Prom(self._io, self, self._root)
+            self.prom = Ines.Playchoice10.Prom(self._io, self, self._root)
             self.prom._read()
             self._debug['prom']['end'] = self._io.pos()
 

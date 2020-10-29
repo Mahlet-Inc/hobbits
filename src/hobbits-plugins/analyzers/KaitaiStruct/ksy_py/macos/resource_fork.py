@@ -70,7 +70,7 @@ class ResourceFork(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.FileHeader(self._io, self, self._root)
+        self.header = ResourceFork.FileHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['system_data']['start'] = self._io.pos()
@@ -142,7 +142,7 @@ class ResourceFork(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved_file_header_copy']['start'] = self._io.pos()
-            self.reserved_file_header_copy = self._root.FileHeader(self._io, self, self._root)
+            self.reserved_file_header_copy = ResourceFork.FileHeader(self._io, self, self._root)
             self.reserved_file_header_copy._read()
             self._debug['reserved_file_header_copy']['end'] = self._io.pos()
             self._debug['reserved_next_resource_map_handle']['start'] = self._io.pos()
@@ -154,7 +154,7 @@ class ResourceFork(KaitaiStruct):
             self._debug['file_attributes']['start'] = self._io.pos()
             self._raw_file_attributes = self._io.read_bytes(2)
             _io__raw_file_attributes = KaitaiStream(BytesIO(self._raw_file_attributes))
-            self.file_attributes = self._root.ResourceMap.FileAttributes(_io__raw_file_attributes, self, self._root)
+            self.file_attributes = ResourceFork.ResourceMap.FileAttributes(_io__raw_file_attributes, self, self._root)
             self.file_attributes._read()
             self._debug['file_attributes']['end'] = self._io.pos()
             self._debug['ofs_type_list']['start'] = self._io.pos()
@@ -180,25 +180,25 @@ class ResourceFork(KaitaiStruct):
 
             def _read(self):
                 self._debug['resources_locked']['start'] = self._io.pos()
-                self.resources_locked = self._io.read_bits_int(1) != 0
+                self.resources_locked = self._io.read_bits_int_be(1) != 0
                 self._debug['resources_locked']['end'] = self._io.pos()
                 self._debug['reserved0']['start'] = self._io.pos()
-                self.reserved0 = self._io.read_bits_int(6)
+                self.reserved0 = self._io.read_bits_int_be(6)
                 self._debug['reserved0']['end'] = self._io.pos()
                 self._debug['printer_driver_multifinder_compatible']['start'] = self._io.pos()
-                self.printer_driver_multifinder_compatible = self._io.read_bits_int(1) != 0
+                self.printer_driver_multifinder_compatible = self._io.read_bits_int_be(1) != 0
                 self._debug['printer_driver_multifinder_compatible']['end'] = self._io.pos()
                 self._debug['no_write_changes']['start'] = self._io.pos()
-                self.no_write_changes = self._io.read_bits_int(1) != 0
+                self.no_write_changes = self._io.read_bits_int_be(1) != 0
                 self._debug['no_write_changes']['end'] = self._io.pos()
                 self._debug['needs_compact']['start'] = self._io.pos()
-                self.needs_compact = self._io.read_bits_int(1) != 0
+                self.needs_compact = self._io.read_bits_int_be(1) != 0
                 self._debug['needs_compact']['end'] = self._io.pos()
                 self._debug['map_needs_write']['start'] = self._io.pos()
-                self.map_needs_write = self._io.read_bits_int(1) != 0
+                self.map_needs_write = self._io.read_bits_int_be(1) != 0
                 self._debug['map_needs_write']['end'] = self._io.pos()
                 self._debug['reserved1']['start'] = self._io.pos()
-                self.reserved1 = self._io.read_bits_int(5)
+                self.reserved1 = self._io.read_bits_int_be(5)
                 self._debug['reserved1']['end'] = self._io.pos()
 
             @property
@@ -235,7 +235,7 @@ class ResourceFork(KaitaiStruct):
 
             def _read(self):
                 self._debug['type_list']['start'] = self._io.pos()
-                self.type_list = self._root.ResourceMap.TypeListAndReferenceLists.TypeList(self._io, self, self._root)
+                self.type_list = ResourceFork.ResourceMap.TypeListAndReferenceLists.TypeList(self._io, self, self._root)
                 self.type_list._read()
                 self._debug['type_list']['end'] = self._io.pos()
                 self._debug['reference_lists']['start'] = self._io.pos()
@@ -261,7 +261,7 @@ class ResourceFork(KaitaiStruct):
                         if not 'arr' in self._debug['entries']:
                             self._debug['entries']['arr'] = []
                         self._debug['entries']['arr'].append({'start': self._io.pos()})
-                        _t_entries = self._root.ResourceMap.TypeListAndReferenceLists.TypeList.TypeListEntry(self._io, self, self._root)
+                        _t_entries = ResourceFork.ResourceMap.TypeListAndReferenceLists.TypeList.TypeListEntry(self._io, self, self._root)
                         _t_entries._read()
                         self.entries[i] = _t_entries
                         self._debug['entries']['arr'][i]['end'] = self._io.pos()
@@ -311,7 +311,7 @@ class ResourceFork(KaitaiStruct):
                         _pos = io.pos()
                         io.seek(self.ofs_reference_list)
                         self._debug['_m_reference_list']['start'] = io.pos()
-                        self._m_reference_list = self._root.ResourceMap.TypeListAndReferenceLists.ReferenceList(self.num_references, io, self, self._root)
+                        self._m_reference_list = ResourceFork.ResourceMap.TypeListAndReferenceLists.ReferenceList(self.num_references, io, self, self._root)
                         self._m_reference_list._read()
                         self._debug['_m_reference_list']['end'] = io.pos()
                         io.seek(_pos)
@@ -350,7 +350,7 @@ class ResourceFork(KaitaiStruct):
                         if not 'arr' in self._debug['references']:
                             self._debug['references']['arr'] = []
                         self._debug['references']['arr'].append({'start': self._io.pos()})
-                        _t_references = self._root.ResourceMap.TypeListAndReferenceLists.ReferenceList.Reference(self._io, self, self._root)
+                        _t_references = ResourceFork.ResourceMap.TypeListAndReferenceLists.ReferenceList.Reference(self._io, self, self._root)
                         _t_references._read()
                         self.references[i] = _t_references
                         self._debug['references']['arr'][i]['end'] = self._io.pos()
@@ -376,11 +376,11 @@ class ResourceFork(KaitaiStruct):
                         self._debug['attributes']['start'] = self._io.pos()
                         self._raw_attributes = self._io.read_bytes(1)
                         _io__raw_attributes = KaitaiStream(BytesIO(self._raw_attributes))
-                        self.attributes = self._root.ResourceMap.TypeListAndReferenceLists.ReferenceList.Reference.Attributes(_io__raw_attributes, self, self._root)
+                        self.attributes = ResourceFork.ResourceMap.TypeListAndReferenceLists.ReferenceList.Reference.Attributes(_io__raw_attributes, self, self._root)
                         self.attributes._read()
                         self._debug['attributes']['end'] = self._io.pos()
                         self._debug['ofs_data_block']['start'] = self._io.pos()
-                        self.ofs_data_block = self._io.read_bits_int(24)
+                        self.ofs_data_block = self._io.read_bits_int_be(24)
                         self._debug['ofs_data_block']['end'] = self._io.pos()
                         self._io.align_to_byte()
                         self._debug['reserved_handle']['start'] = self._io.pos()
@@ -400,28 +400,28 @@ class ResourceFork(KaitaiStruct):
 
                         def _read(self):
                             self._debug['system_reference']['start'] = self._io.pos()
-                            self.system_reference = self._io.read_bits_int(1) != 0
+                            self.system_reference = self._io.read_bits_int_be(1) != 0
                             self._debug['system_reference']['end'] = self._io.pos()
                             self._debug['load_into_system_heap']['start'] = self._io.pos()
-                            self.load_into_system_heap = self._io.read_bits_int(1) != 0
+                            self.load_into_system_heap = self._io.read_bits_int_be(1) != 0
                             self._debug['load_into_system_heap']['end'] = self._io.pos()
                             self._debug['purgeable']['start'] = self._io.pos()
-                            self.purgeable = self._io.read_bits_int(1) != 0
+                            self.purgeable = self._io.read_bits_int_be(1) != 0
                             self._debug['purgeable']['end'] = self._io.pos()
                             self._debug['locked']['start'] = self._io.pos()
-                            self.locked = self._io.read_bits_int(1) != 0
+                            self.locked = self._io.read_bits_int_be(1) != 0
                             self._debug['locked']['end'] = self._io.pos()
                             self._debug['protected']['start'] = self._io.pos()
-                            self.protected = self._io.read_bits_int(1) != 0
+                            self.protected = self._io.read_bits_int_be(1) != 0
                             self._debug['protected']['end'] = self._io.pos()
                             self._debug['preload']['start'] = self._io.pos()
-                            self.preload = self._io.read_bits_int(1) != 0
+                            self.preload = self._io.read_bits_int_be(1) != 0
                             self._debug['preload']['end'] = self._io.pos()
                             self._debug['needs_write']['start'] = self._io.pos()
-                            self.needs_write = self._io.read_bits_int(1) != 0
+                            self.needs_write = self._io.read_bits_int_be(1) != 0
                             self._debug['needs_write']['end'] = self._io.pos()
                             self._debug['compressed']['start'] = self._io.pos()
-                            self.compressed = self._io.read_bits_int(1) != 0
+                            self.compressed = self._io.read_bits_int_be(1) != 0
                             self._debug['compressed']['end'] = self._io.pos()
 
                         @property
@@ -453,7 +453,7 @@ class ResourceFork(KaitaiStruct):
                             _pos = io.pos()
                             io.seek(self.ofs_name)
                             self._debug['_m_name']['start'] = io.pos()
-                            self._m_name = self._root.ResourceMap.Name(io, self, self._root)
+                            self._m_name = ResourceFork.ResourceMap.Name(io, self, self._root)
                             self._m_name._read()
                             self._debug['_m_name']['end'] = io.pos()
                             io.seek(_pos)
@@ -471,7 +471,7 @@ class ResourceFork(KaitaiStruct):
                         _pos = io.pos()
                         io.seek(self.ofs_data_block)
                         self._debug['_m_data_block']['start'] = io.pos()
-                        self._m_data_block = self._root.DataBlock(io, self, self._root)
+                        self._m_data_block = ResourceFork.DataBlock(io, self, self._root)
                         self._m_data_block._read()
                         self._debug['_m_data_block']['end'] = io.pos()
                         io.seek(_pos)
@@ -515,7 +515,7 @@ class ResourceFork(KaitaiStruct):
             self._debug['_m_type_list_and_reference_lists']['start'] = self._io.pos()
             self._raw__m_type_list_and_reference_lists = self._io.read_bytes((self.ofs_names - self.ofs_type_list))
             _io__raw__m_type_list_and_reference_lists = KaitaiStream(BytesIO(self._raw__m_type_list_and_reference_lists))
-            self._m_type_list_and_reference_lists = self._root.ResourceMap.TypeListAndReferenceLists(_io__raw__m_type_list_and_reference_lists, self, self._root)
+            self._m_type_list_and_reference_lists = ResourceFork.ResourceMap.TypeListAndReferenceLists(_io__raw__m_type_list_and_reference_lists, self, self._root)
             self._m_type_list_and_reference_lists._read()
             self._debug['_m_type_list_and_reference_lists']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -602,7 +602,7 @@ class ResourceFork(KaitaiStruct):
         self._debug['_m_resource_map']['start'] = self._io.pos()
         self._raw__m_resource_map = self._io.read_bytes(self.header.len_resource_map)
         _io__raw__m_resource_map = KaitaiStream(BytesIO(self._raw__m_resource_map))
-        self._m_resource_map = self._root.ResourceMap(_io__raw__m_resource_map, self, self._root)
+        self._m_resource_map = ResourceFork.ResourceMap(_io__raw__m_resource_map, self, self._root)
         self._m_resource_map._read()
         self._debug['_m_resource_map']['end'] = self._io.pos()
         self._io.seek(_pos)

@@ -34,7 +34,7 @@ class MifareClassic(KaitaiStruct):
             self._debug['sectors']['arr'].append({'start': self._io.pos()})
             self._raw_sectors.append(self._io.read_bytes((((4 if i >= 32 else 1) * 4) * 16)))
             _io__raw_sectors = KaitaiStream(BytesIO(self._raw_sectors[-1]))
-            _t_sectors = self._root.Sector(i == 0, _io__raw_sectors, self, self._root)
+            _t_sectors = MifareClassic.Sector(i == 0, _io__raw_sectors, self, self._root)
             _t_sectors._read()
             self.sectors.append(_t_sectors)
             self._debug['sectors']['arr'][len(self.sectors) - 1]['end'] = self._io.pos()
@@ -68,18 +68,18 @@ class MifareClassic(KaitaiStruct):
         def _read(self):
             if self.has_manufacturer:
                 self._debug['manufacturer']['start'] = self._io.pos()
-                self.manufacturer = self._root.Manufacturer(self._io, self, self._root)
+                self.manufacturer = MifareClassic.Manufacturer(self._io, self, self._root)
                 self.manufacturer._read()
                 self._debug['manufacturer']['end'] = self._io.pos()
 
             self._debug['data_filler']['start'] = self._io.pos()
             self._raw_data_filler = self._io.read_bytes(((self._io.size() - self._io.pos()) - 16))
             _io__raw_data_filler = KaitaiStream(BytesIO(self._raw_data_filler))
-            self.data_filler = self._root.Sector.Filler(_io__raw_data_filler, self, self._root)
+            self.data_filler = MifareClassic.Sector.Filler(_io__raw_data_filler, self, self._root)
             self.data_filler._read()
             self._debug['data_filler']['end'] = self._io.pos()
             self._debug['trailer']['start'] = self._io.pos()
-            self.trailer = self._root.Trailer(self._io, self, self._root)
+            self.trailer = MifareClassic.Trailer(self._io, self, self._root)
             self.trailer._read()
             self._debug['trailer']['end'] = self._io.pos()
 
@@ -99,7 +99,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['values']:
                         self._debug['values']['arr'] = []
                     self._debug['values']['arr'].append({'start': self._io.pos()})
-                    _t_values = self._root.Sector.Values.ValueBlock(self._io, self, self._root)
+                    _t_values = MifareClassic.Sector.Values.ValueBlock(self._io, self, self._root)
                     _t_values._read()
                     self.values.append(_t_values)
                     self._debug['values']['arr'][len(self.values) - 1]['end'] = self._io.pos()
@@ -246,7 +246,7 @@ class MifareClassic(KaitaiStruct):
             _pos = io.pos()
             io.seek(0)
             self._debug['_m_values']['start'] = io.pos()
-            self._m_values = self._root.Sector.Values(io, self, self._root)
+            self._m_values = MifareClassic.Sector.Values(io, self, self._root)
             self._m_values._read()
             self._debug['_m_values']['end'] = io.pos()
             io.seek(_pos)
@@ -289,20 +289,20 @@ class MifareClassic(KaitaiStruct):
 
         def _read(self):
             self._debug['key_a']['start'] = self._io.pos()
-            self.key_a = self._root.Key(self._io, self, self._root)
+            self.key_a = MifareClassic.Key(self._io, self, self._root)
             self.key_a._read()
             self._debug['key_a']['end'] = self._io.pos()
             self._debug['access_bits']['start'] = self._io.pos()
             self._raw_access_bits = self._io.read_bytes(3)
             _io__raw_access_bits = KaitaiStream(BytesIO(self._raw_access_bits))
-            self.access_bits = self._root.Trailer.AccessConditions(_io__raw_access_bits, self, self._root)
+            self.access_bits = MifareClassic.Trailer.AccessConditions(_io__raw_access_bits, self, self._root)
             self.access_bits._read()
             self._debug['access_bits']['end'] = self._io.pos()
             self._debug['user_byte']['start'] = self._io.pos()
             self.user_byte = self._io.read_u1()
             self._debug['user_byte']['end'] = self._io.pos()
             self._debug['key_b']['start'] = self._io.pos()
-            self.key_b = self._root.Key(self._io, self, self._root)
+            self.key_b = MifareClassic.Key(self._io, self, self._root)
             self.key_b._read()
             self._debug['key_b']['end'] = self._io.pos()
 
@@ -321,7 +321,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['raw_chunks']:
                         self._debug['raw_chunks']['arr'] = []
                     self._debug['raw_chunks']['arr'].append({'start': self._io.pos()})
-                    self.raw_chunks[i] = self._io.read_bits_int(4)
+                    self.raw_chunks[i] = self._io.read_bits_int_be(4)
                     self._debug['raw_chunks']['arr'][i]['end'] = self._io.pos()
 
                 self._debug['raw_chunks']['end'] = self._io.pos()
@@ -525,7 +525,7 @@ class MifareClassic(KaitaiStruct):
                         if not 'arr' in self._debug['_m_bits']:
                             self._debug['_m_bits']['arr'] = []
                         self._debug['_m_bits']['arr'].append({'start': self._io.pos()})
-                        _t__m_bits = self._root.Trailer.AccessConditions.Ac.AcBit(self.index, self._parent.chunks[i].chunk, self._io, self, self._root)
+                        _t__m_bits = MifareClassic.Trailer.AccessConditions.Ac.AcBit(self.index, self._parent.chunks[i].chunk, self._io, self, self._root)
                         _t__m_bits._read()
                         self._m_bits[i] = _t__m_bits
                         self._debug['_m_bits']['arr'][i]['end'] = self._io.pos()
@@ -587,7 +587,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['_m_data_acs']:
                         self._debug['_m_data_acs']['arr'] = []
                     self._debug['_m_data_acs']['arr'].append({'start': self._io.pos()})
-                    _t__m_data_acs = self._root.Trailer.AccessConditions.DataAc(self.acs_raw[i], self._io, self, self._root)
+                    _t__m_data_acs = MifareClassic.Trailer.AccessConditions.DataAc(self.acs_raw[i], self._io, self, self._root)
                     _t__m_data_acs._read()
                     self._m_data_acs[i] = _t__m_data_acs
                     self._debug['_m_data_acs']['arr'][i]['end'] = self._io.pos()
@@ -609,7 +609,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['_m_remaps']:
                         self._debug['_m_remaps']['arr'] = []
                     self._debug['_m_remaps']['arr'].append({'start': self._io.pos()})
-                    _t__m_remaps = self._root.Trailer.AccessConditions.ChunkBitRemap(i, self._io, self, self._root)
+                    _t__m_remaps = MifareClassic.Trailer.AccessConditions.ChunkBitRemap(i, self._io, self, self._root)
                     _t__m_remaps._read()
                     self._m_remaps[i] = _t__m_remaps
                     self._debug['_m_remaps']['arr'][i]['end'] = self._io.pos()
@@ -631,7 +631,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['_m_acs_raw']:
                         self._debug['_m_acs_raw']['arr'] = []
                     self._debug['_m_acs_raw']['arr'].append({'start': self._io.pos()})
-                    _t__m_acs_raw = self._root.Trailer.AccessConditions.Ac(i, self._io, self, self._root)
+                    _t__m_acs_raw = MifareClassic.Trailer.AccessConditions.Ac(i, self._io, self, self._root)
                     _t__m_acs_raw._read()
                     self._m_acs_raw[i] = _t__m_acs_raw
                     self._debug['_m_acs_raw']['arr'][i]['end'] = self._io.pos()
@@ -648,7 +648,7 @@ class MifareClassic(KaitaiStruct):
                 _pos = self._io.pos()
                 self._io.seek(0)
                 self._debug['_m_trailer_ac']['start'] = self._io.pos()
-                self._m_trailer_ac = self._root.Trailer.AccessConditions.TrailerAc(self.acs_raw[(self._parent.acs_in_sector - 1)], self._io, self, self._root)
+                self._m_trailer_ac = MifareClassic.Trailer.AccessConditions.TrailerAc(self.acs_raw[(self._parent.acs_in_sector - 1)], self._io, self, self._root)
                 self._m_trailer_ac._read()
                 self._debug['_m_trailer_ac']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -667,7 +667,7 @@ class MifareClassic(KaitaiStruct):
                     if not 'arr' in self._debug['_m_chunks']:
                         self._debug['_m_chunks']['arr'] = []
                     self._debug['_m_chunks']['arr'].append({'start': self._io.pos()})
-                    _t__m_chunks = self._root.Trailer.AccessConditions.ValidChunk(self.raw_chunks[self.remaps[i].inv_chunk_no], self.raw_chunks[self.remaps[i].chunk_no], self._io, self, self._root)
+                    _t__m_chunks = MifareClassic.Trailer.AccessConditions.ValidChunk(self.raw_chunks[self.remaps[i].inv_chunk_no], self.raw_chunks[self.remaps[i].chunk_no], self._io, self, self._root)
                     _t__m_chunks._read()
                     self._m_chunks[i] = _t__m_chunks
                     self._debug['_m_chunks']['arr'][i]['end'] = self._io.pos()

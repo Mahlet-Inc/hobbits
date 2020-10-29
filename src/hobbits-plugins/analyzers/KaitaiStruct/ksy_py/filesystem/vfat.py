@@ -19,7 +19,7 @@ class Vfat(KaitaiStruct):
 
     def _read(self):
         self._debug['boot_sector']['start'] = self._io.pos()
-        self.boot_sector = self._root.BootSector(self._io, self, self._root)
+        self.boot_sector = Vfat.BootSector(self._io, self, self._root)
         self.boot_sector._read()
         self._debug['boot_sector']['end'] = self._io.pos()
 
@@ -37,13 +37,13 @@ class Vfat(KaitaiStruct):
             self.ls_per_fat = self._io.read_u4le()
             self._debug['ls_per_fat']['end'] = self._io.pos()
             self._debug['has_active_fat']['start'] = self._io.pos()
-            self.has_active_fat = self._io.read_bits_int(1) != 0
+            self.has_active_fat = self._io.read_bits_int_be(1) != 0
             self._debug['has_active_fat']['end'] = self._io.pos()
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(3)
+            self.reserved1 = self._io.read_bits_int_be(3)
             self._debug['reserved1']['end'] = self._io.pos()
             self._debug['active_fat_id']['start'] = self._io.pos()
-            self.active_fat_id = self._io.read_bits_int(4)
+            self.active_fat_id = self._io.read_bits_int_be(4)
             self._debug['active_fat_id']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['reserved2']['start'] = self._io.pos()
@@ -102,18 +102,18 @@ class Vfat(KaitaiStruct):
             self.oem_name = (KaitaiStream.bytes_strip_right(self._io.read_bytes(8), 32)).decode(u"ASCII")
             self._debug['oem_name']['end'] = self._io.pos()
             self._debug['bpb']['start'] = self._io.pos()
-            self.bpb = self._root.BiosParamBlock(self._io, self, self._root)
+            self.bpb = Vfat.BiosParamBlock(self._io, self, self._root)
             self.bpb._read()
             self._debug['bpb']['end'] = self._io.pos()
             if not (self.is_fat32):
                 self._debug['ebpb_fat16']['start'] = self._io.pos()
-                self.ebpb_fat16 = self._root.ExtBiosParamBlockFat16(self._io, self, self._root)
+                self.ebpb_fat16 = Vfat.ExtBiosParamBlockFat16(self._io, self, self._root)
                 self.ebpb_fat16._read()
                 self._debug['ebpb_fat16']['end'] = self._io.pos()
 
             if self.is_fat32:
                 self._debug['ebpb_fat32']['start'] = self._io.pos()
-                self.ebpb_fat32 = self._root.ExtBiosParamBlockFat32(self._io, self, self._root)
+                self.ebpb_fat32 = Vfat.ExtBiosParamBlockFat32(self._io, self, self._root)
                 self.ebpb_fat32._read()
                 self._debug['ebpb_fat32']['end'] = self._io.pos()
 
@@ -283,7 +283,7 @@ class Vfat(KaitaiStruct):
                 if not 'arr' in self._debug['records']:
                     self._debug['records']['arr'] = []
                 self._debug['records']['arr'].append({'start': self._io.pos()})
-                _t_records = self._root.RootDirectoryRec(self._io, self, self._root)
+                _t_records = Vfat.RootDirectoryRec(self._io, self, self._root)
                 _t_records._read()
                 self.records[i] = _t_records
                 self._debug['records']['arr'][i]['end'] = self._io.pos()
@@ -353,7 +353,7 @@ class Vfat(KaitaiStruct):
         self._debug['_m_root_dir']['start'] = self._io.pos()
         self._raw__m_root_dir = self._io.read_bytes(self.boot_sector.size_root_dir)
         _io__raw__m_root_dir = KaitaiStream(BytesIO(self._raw__m_root_dir))
-        self._m_root_dir = self._root.RootDirectory(_io__raw__m_root_dir, self, self._root)
+        self._m_root_dir = Vfat.RootDirectory(_io__raw__m_root_dir, self, self._root)
         self._m_root_dir._read()
         self._debug['_m_root_dir']['end'] = self._io.pos()
         self._io.seek(_pos)

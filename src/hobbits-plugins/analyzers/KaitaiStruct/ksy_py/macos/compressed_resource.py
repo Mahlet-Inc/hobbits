@@ -50,7 +50,7 @@ class CompressedResource(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = CompressedResource.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['compressed_data']['start'] = self._io.pos()
@@ -70,7 +70,7 @@ class CompressedResource(KaitaiStruct):
 
         def _read(self):
             self._debug['common_part']['start'] = self._io.pos()
-            self.common_part = self._root.Header.CommonPart(self._io, self, self._root)
+            self.common_part = CompressedResource.Header.CommonPart(self._io, self, self._root)
             self.common_part._read()
             self._debug['common_part']['end'] = self._io.pos()
             self._debug['type_specific_part_raw_with_io']['start'] = self._io.pos()
@@ -204,10 +204,10 @@ class CompressedResource(KaitaiStruct):
             self._debug['_m_type_specific_part']['start'] = io.pos()
             _on = self.common_part.header_type
             if _on == 8:
-                self._m_type_specific_part = self._root.Header.TypeSpecificPartType8(io, self, self._root)
+                self._m_type_specific_part = CompressedResource.Header.TypeSpecificPartType8(io, self, self._root)
                 self._m_type_specific_part._read()
             elif _on == 9:
-                self._m_type_specific_part = self._root.Header.TypeSpecificPartType9(io, self, self._root)
+                self._m_type_specific_part = CompressedResource.Header.TypeSpecificPartType9(io, self, self._root)
                 self._m_type_specific_part._read()
             self._debug['_m_type_specific_part']['end'] = io.pos()
             io.seek(_pos)

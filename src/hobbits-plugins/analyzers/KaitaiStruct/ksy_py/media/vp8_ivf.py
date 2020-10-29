@@ -67,7 +67,7 @@ class Vp8Ivf(KaitaiStruct):
             if not 'arr' in self._debug['image_data']:
                 self._debug['image_data']['arr'] = []
             self._debug['image_data']['arr'].append({'start': self._io.pos()})
-            _t_image_data = self._root.Blocks(self._io, self, self._root)
+            _t_image_data = Vp8Ivf.Blocks(self._io, self, self._root)
             _t_image_data._read()
             self.image_data[i] = _t_image_data
             self._debug['image_data']['arr'][i]['end'] = self._io.pos()
@@ -84,7 +84,7 @@ class Vp8Ivf(KaitaiStruct):
 
         def _read(self):
             self._debug['entries']['start'] = self._io.pos()
-            self.entries = self._root.Block(self._io, self, self._root)
+            self.entries = Vp8Ivf.Block(self._io, self, self._root)
             self.entries._read()
             self._debug['entries']['end'] = self._io.pos()
 

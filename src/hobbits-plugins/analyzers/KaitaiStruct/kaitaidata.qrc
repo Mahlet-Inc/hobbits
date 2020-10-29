@@ -126,6 +126,7 @@
   <file>ksy/macos/compressed_resource.ksy</file>
   <file>ksy/macos/resource_fork.ksy</file>
   <file>ksy/macos/ds_store.ksy</file>
+  <file>ksy/macos/mac_os_resource_snd.ksy</file>
   <file>ksy/macos/resource_compression/dcmp_0.ksy</file>
   <file>ksy/macos/resource_compression/dcmp_1.ksy</file>
   <file>ksy/macos/resource_compression/dcmp_variable_length_integer.ksy</file>
@@ -147,6 +148,7 @@
   <file>ksy/image/bmp.ksy</file>
   <file>ksy/machine_code/code_6502.ksy</file>
   <file>ksy/font/ttf.ksy</file>
+  <file>ksy/font/pcf_font.ksy</file>
   <file>ksy/common/bytes_with_io.ksy</file>
   <file>ksy/common/vlq_base128_be.ksy</file>
   <file>ksy/common/riff.ksy</file>
@@ -257,6 +259,7 @@
   <file>ksy_py/game/warcraft_2_pud.py</file>
   <file>ksy_py/game/fallout_dat.py</file>
   <file>ksy_py/game/doom_wad.py</file>
+  <file>ksy_py/game/fallout2_dat.py</file>
   <file>ksy_py/game/allegro_dat.py</file>
   <file>ksy_py/game/dune_2_pak.py</file>
   <file>ksy_py/game/heaps_pak.py</file>
@@ -287,7 +290,10 @@
   <file>ksy_py/macos/bytes_with_io.py</file>
   <file>ksy_py/macos/ds_store.py</file>
   <file>ksy_py/macos/resource_fork.py</file>
+  <file>ksy_py/macos/mac_os_resource_snd.py</file>
+  <file>ksy_py/macos/resource_compression/dcmp_2.py</file>
   <file>ksy_py/macos/resource_compression/dcmp_variable_length_integer.py</file>
+  <file>ksy_py/macos/resource_compression/bytes_with_io.py</file>
   <file>ksy_py/macos/resource_compression/dcmp_0.py</file>
   <file>ksy_py/macos/resource_compression/dcmp_1.py</file>
   <file>ksy_py/image/wmf.py</file>
@@ -306,6 +312,8 @@
   <file>ksy_py/image/xwd.py</file>
   <file>ksy_py/machine_code/code_6502.py</file>
   <file>ksy_py/font/ttf.py</file>
+  <file>ksy_py/font/bytes_with_io.py</file>
+  <file>ksy_py/font/pcf_font.py</file>
   <file>ksy_py/common/bcd.py</file>
   <file>ksy_py/common/vlq_base128_be.py</file>
   <file>ksy_py/common/riff.py</file>

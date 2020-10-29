@@ -38,7 +38,7 @@ class SudoersTs(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = SudoersTs.Record(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -56,10 +56,10 @@ class SudoersTs(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.TsType, self._io.read_u2le())
+            self.type = KaitaiStream.resolve_enum(SudoersTs.TsType, self._io.read_u2le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.TsFlag(self._io, self, self._root)
+            self.flags = SudoersTs.TsFlag(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['auth_uid']['start'] = self._io.pos()
@@ -69,19 +69,19 @@ class SudoersTs(KaitaiStruct):
             self.sid = self._io.read_u4le()
             self._debug['sid']['end'] = self._io.pos()
             self._debug['start_time']['start'] = self._io.pos()
-            self.start_time = self._root.Timespec(self._io, self, self._root)
+            self.start_time = SudoersTs.Timespec(self._io, self, self._root)
             self.start_time._read()
             self._debug['start_time']['end'] = self._io.pos()
             self._debug['ts']['start'] = self._io.pos()
-            self.ts = self._root.Timespec(self._io, self, self._root)
+            self.ts = SudoersTs.Timespec(self._io, self, self._root)
             self.ts._read()
             self._debug['ts']['end'] = self._io.pos()
-            if self.type == self._root.TsType.tty:
+            if self.type == SudoersTs.TsType.tty:
                 self._debug['ttydev']['start'] = self._io.pos()
                 self.ttydev = self._io.read_u4le()
                 self._debug['ttydev']['end'] = self._io.pos()
 
-            if self.type == self._root.TsType.ppid:
+            if self.type == SudoersTs.TsType.ppid:
                 self._debug['ppid']['start'] = self._io.pos()
                 self.ppid = self._io.read_u4le()
                 self._debug['ppid']['end'] = self._io.pos()
@@ -98,16 +98,16 @@ class SudoersTs(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved0']['start'] = self._io.pos()
-            self.reserved0 = self._io.read_bits_int(6)
+            self.reserved0 = self._io.read_bits_int_be(6)
             self._debug['reserved0']['end'] = self._io.pos()
             self._debug['anyuid']['start'] = self._io.pos()
-            self.anyuid = self._io.read_bits_int(1) != 0
+            self.anyuid = self._io.read_bits_int_be(1) != 0
             self._debug['anyuid']['end'] = self._io.pos()
             self._debug['disabled']['start'] = self._io.pos()
-            self.disabled = self._io.read_bits_int(1) != 0
+            self.disabled = self._io.read_bits_int_be(1) != 0
             self._debug['disabled']['end'] = self._io.pos()
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(8)
+            self.reserved1 = self._io.read_bits_int_be(8)
             self._debug['reserved1']['end'] = self._io.pos()
 
 
@@ -121,10 +121,10 @@ class SudoersTs(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.TsType, self._io.read_u2le())
+            self.type = KaitaiStream.resolve_enum(SudoersTs.TsType, self._io.read_u2le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.TsFlag(self._io, self, self._root)
+            self.flags = SudoersTs.TsFlag(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['auth_uid']['start'] = self._io.pos()
@@ -134,15 +134,15 @@ class SudoersTs(KaitaiStruct):
             self.sid = self._io.read_u4le()
             self._debug['sid']['end'] = self._io.pos()
             self._debug['ts']['start'] = self._io.pos()
-            self.ts = self._root.Timespec(self._io, self, self._root)
+            self.ts = SudoersTs.Timespec(self._io, self, self._root)
             self.ts._read()
             self._debug['ts']['end'] = self._io.pos()
-            if self.type == self._root.TsType.tty:
+            if self.type == SudoersTs.TsType.tty:
                 self._debug['ttydev']['start'] = self._io.pos()
                 self.ttydev = self._io.read_u4le()
                 self._debug['ttydev']['end'] = self._io.pos()
 
-            if self.type == self._root.TsType.ppid:
+            if self.type == SudoersTs.TsType.ppid:
                 self._debug['ppid']['start'] = self._io.pos()
                 self.ppid = self._io.read_u4le()
                 self._debug['ppid']['end'] = self._io.pos()
@@ -186,12 +186,12 @@ class SudoersTs(KaitaiStruct):
             if _on == 1:
                 self._raw_payload = self._io.read_bytes((self.len_record - 4))
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.RecordV1(_io__raw_payload, self, self._root)
+                self.payload = SudoersTs.RecordV1(_io__raw_payload, self, self._root)
                 self.payload._read()
             elif _on == 2:
                 self._raw_payload = self._io.read_bytes((self.len_record - 4))
                 _io__raw_payload = KaitaiStream(BytesIO(self._raw_payload))
-                self.payload = self._root.RecordV2(_io__raw_payload, self, self._root)
+                self.payload = SudoersTs.RecordV2(_io__raw_payload, self, self._root)
                 self.payload._read()
             else:
                 self.payload = self._io.read_bytes((self.len_record - 4))

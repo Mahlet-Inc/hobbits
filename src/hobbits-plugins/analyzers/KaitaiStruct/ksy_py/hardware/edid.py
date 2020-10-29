@@ -61,11 +61,11 @@ class Edid(KaitaiStruct):
         self.features_flags = self._io.read_u1()
         self._debug['features_flags']['end'] = self._io.pos()
         self._debug['chromacity']['start'] = self._io.pos()
-        self.chromacity = self._root.ChromacityInfo(self._io, self, self._root)
+        self.chromacity = Edid.ChromacityInfo(self._io, self, self._root)
         self.chromacity._read()
         self._debug['chromacity']['end'] = self._io.pos()
         self._debug['est_timings']['start'] = self._io.pos()
-        self.est_timings = self._root.EstTimingsInfo(self._io, self, self._root)
+        self.est_timings = Edid.EstTimingsInfo(self._io, self, self._root)
         self.est_timings._read()
         self._debug['est_timings']['end'] = self._io.pos()
         self._debug['std_timings']['start'] = self._io.pos()
@@ -74,7 +74,7 @@ class Edid(KaitaiStruct):
             if not 'arr' in self._debug['std_timings']:
                 self._debug['std_timings']['arr'] = []
             self._debug['std_timings']['arr'].append({'start': self._io.pos()})
-            _t_std_timings = self._root.StdTiming(self._io, self, self._root)
+            _t_std_timings = Edid.StdTiming(self._io, self, self._root)
             _t_std_timings._read()
             self.std_timings[i] = _t_std_timings
             self._debug['std_timings']['arr'][i]['end'] = self._io.pos()
@@ -95,28 +95,28 @@ class Edid(KaitaiStruct):
 
         def _read(self):
             self._debug['red_x_1_0']['start'] = self._io.pos()
-            self.red_x_1_0 = self._io.read_bits_int(2)
+            self.red_x_1_0 = self._io.read_bits_int_be(2)
             self._debug['red_x_1_0']['end'] = self._io.pos()
             self._debug['red_y_1_0']['start'] = self._io.pos()
-            self.red_y_1_0 = self._io.read_bits_int(2)
+            self.red_y_1_0 = self._io.read_bits_int_be(2)
             self._debug['red_y_1_0']['end'] = self._io.pos()
             self._debug['green_x_1_0']['start'] = self._io.pos()
-            self.green_x_1_0 = self._io.read_bits_int(2)
+            self.green_x_1_0 = self._io.read_bits_int_be(2)
             self._debug['green_x_1_0']['end'] = self._io.pos()
             self._debug['green_y_1_0']['start'] = self._io.pos()
-            self.green_y_1_0 = self._io.read_bits_int(2)
+            self.green_y_1_0 = self._io.read_bits_int_be(2)
             self._debug['green_y_1_0']['end'] = self._io.pos()
             self._debug['blue_x_1_0']['start'] = self._io.pos()
-            self.blue_x_1_0 = self._io.read_bits_int(2)
+            self.blue_x_1_0 = self._io.read_bits_int_be(2)
             self._debug['blue_x_1_0']['end'] = self._io.pos()
             self._debug['blue_y_1_0']['start'] = self._io.pos()
-            self.blue_y_1_0 = self._io.read_bits_int(2)
+            self.blue_y_1_0 = self._io.read_bits_int_be(2)
             self._debug['blue_y_1_0']['end'] = self._io.pos()
             self._debug['white_x_1_0']['start'] = self._io.pos()
-            self.white_x_1_0 = self._io.read_bits_int(2)
+            self.white_x_1_0 = self._io.read_bits_int_be(2)
             self._debug['white_x_1_0']['end'] = self._io.pos()
             self._debug['white_y_1_0']['start'] = self._io.pos()
-            self.white_y_1_0 = self._io.read_bits_int(2)
+            self.white_y_1_0 = self._io.read_bits_int_be(2)
             self._debug['white_y_1_0']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['red_x_9_2']['start'] = self._io.pos()
@@ -291,58 +291,58 @@ class Edid(KaitaiStruct):
 
         def _read(self):
             self._debug['can_720_400_70']['start'] = self._io.pos()
-            self.can_720_400_70 = self._io.read_bits_int(1) != 0
+            self.can_720_400_70 = self._io.read_bits_int_be(1) != 0
             self._debug['can_720_400_70']['end'] = self._io.pos()
             self._debug['can_720_400_88']['start'] = self._io.pos()
-            self.can_720_400_88 = self._io.read_bits_int(1) != 0
+            self.can_720_400_88 = self._io.read_bits_int_be(1) != 0
             self._debug['can_720_400_88']['end'] = self._io.pos()
             self._debug['can_640_480_60']['start'] = self._io.pos()
-            self.can_640_480_60 = self._io.read_bits_int(1) != 0
+            self.can_640_480_60 = self._io.read_bits_int_be(1) != 0
             self._debug['can_640_480_60']['end'] = self._io.pos()
             self._debug['can_640_480_67']['start'] = self._io.pos()
-            self.can_640_480_67 = self._io.read_bits_int(1) != 0
+            self.can_640_480_67 = self._io.read_bits_int_be(1) != 0
             self._debug['can_640_480_67']['end'] = self._io.pos()
             self._debug['can_640_480_72']['start'] = self._io.pos()
-            self.can_640_480_72 = self._io.read_bits_int(1) != 0
+            self.can_640_480_72 = self._io.read_bits_int_be(1) != 0
             self._debug['can_640_480_72']['end'] = self._io.pos()
             self._debug['can_640_480_75']['start'] = self._io.pos()
-            self.can_640_480_75 = self._io.read_bits_int(1) != 0
+            self.can_640_480_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_640_480_75']['end'] = self._io.pos()
             self._debug['can_800_600_56']['start'] = self._io.pos()
-            self.can_800_600_56 = self._io.read_bits_int(1) != 0
+            self.can_800_600_56 = self._io.read_bits_int_be(1) != 0
             self._debug['can_800_600_56']['end'] = self._io.pos()
             self._debug['can_800_600_60']['start'] = self._io.pos()
-            self.can_800_600_60 = self._io.read_bits_int(1) != 0
+            self.can_800_600_60 = self._io.read_bits_int_be(1) != 0
             self._debug['can_800_600_60']['end'] = self._io.pos()
             self._debug['can_800_600_72']['start'] = self._io.pos()
-            self.can_800_600_72 = self._io.read_bits_int(1) != 0
+            self.can_800_600_72 = self._io.read_bits_int_be(1) != 0
             self._debug['can_800_600_72']['end'] = self._io.pos()
             self._debug['can_800_600_75']['start'] = self._io.pos()
-            self.can_800_600_75 = self._io.read_bits_int(1) != 0
+            self.can_800_600_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_800_600_75']['end'] = self._io.pos()
             self._debug['can_832_624_75']['start'] = self._io.pos()
-            self.can_832_624_75 = self._io.read_bits_int(1) != 0
+            self.can_832_624_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_832_624_75']['end'] = self._io.pos()
             self._debug['can_1024_768_87_i']['start'] = self._io.pos()
-            self.can_1024_768_87_i = self._io.read_bits_int(1) != 0
+            self.can_1024_768_87_i = self._io.read_bits_int_be(1) != 0
             self._debug['can_1024_768_87_i']['end'] = self._io.pos()
             self._debug['can_1024_768_60']['start'] = self._io.pos()
-            self.can_1024_768_60 = self._io.read_bits_int(1) != 0
+            self.can_1024_768_60 = self._io.read_bits_int_be(1) != 0
             self._debug['can_1024_768_60']['end'] = self._io.pos()
             self._debug['can_1024_768_70']['start'] = self._io.pos()
-            self.can_1024_768_70 = self._io.read_bits_int(1) != 0
+            self.can_1024_768_70 = self._io.read_bits_int_be(1) != 0
             self._debug['can_1024_768_70']['end'] = self._io.pos()
             self._debug['can_1024_768_75']['start'] = self._io.pos()
-            self.can_1024_768_75 = self._io.read_bits_int(1) != 0
+            self.can_1024_768_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_1024_768_75']['end'] = self._io.pos()
             self._debug['can_1280_1024_75']['start'] = self._io.pos()
-            self.can_1280_1024_75 = self._io.read_bits_int(1) != 0
+            self.can_1280_1024_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_1280_1024_75']['end'] = self._io.pos()
             self._debug['can_1152_870_75']['start'] = self._io.pos()
-            self.can_1152_870_75 = self._io.read_bits_int(1) != 0
+            self.can_1152_870_75 = self._io.read_bits_int_be(1) != 0
             self._debug['can_1152_870_75']['end'] = self._io.pos()
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(7)
+            self.reserved = self._io.read_bits_int_be(7)
             self._debug['reserved']['end'] = self._io.pos()
 
 
@@ -365,10 +365,10 @@ class Edid(KaitaiStruct):
             self.horiz_active_pixels_mod = self._io.read_u1()
             self._debug['horiz_active_pixels_mod']['end'] = self._io.pos()
             self._debug['aspect_ratio']['start'] = self._io.pos()
-            self.aspect_ratio = KaitaiStream.resolve_enum(self._root.StdTiming.AspectRatios, self._io.read_bits_int(2))
+            self.aspect_ratio = KaitaiStream.resolve_enum(Edid.StdTiming.AspectRatios, self._io.read_bits_int_be(2))
             self._debug['aspect_ratio']['end'] = self._io.pos()
             self._debug['refresh_rate_mod']['start'] = self._io.pos()
-            self.refresh_rate_mod = self._io.read_bits_int(5)
+            self.refresh_rate_mod = self._io.read_bits_int_be(5)
             self._debug['refresh_rate_mod']['end'] = self._io.pos()
 
         @property

@@ -23,7 +23,7 @@ class HeapsPak(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = HeapsPak.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
 
@@ -53,7 +53,7 @@ class HeapsPak(KaitaiStruct):
             self._debug['root_entry']['start'] = self._io.pos()
             self._raw_root_entry = self._io.read_bytes((self.len_header - 16))
             _io__raw_root_entry = KaitaiStream(BytesIO(self._raw_root_entry))
-            self.root_entry = self._root.Header.Entry(_io__raw_root_entry, self, self._root)
+            self.root_entry = HeapsPak.Header.Entry(_io__raw_root_entry, self, self._root)
             self.root_entry._read()
             self._debug['root_entry']['end'] = self._io.pos()
             self._debug['magic2']['start'] = self._io.pos()
@@ -82,16 +82,16 @@ class HeapsPak(KaitaiStruct):
                 self.name = (self._io.read_bytes(self.len_name)).decode(u"UTF-8")
                 self._debug['name']['end'] = self._io.pos()
                 self._debug['flags']['start'] = self._io.pos()
-                self.flags = self._root.Header.Entry.Flags(self._io, self, self._root)
+                self.flags = HeapsPak.Header.Entry.Flags(self._io, self, self._root)
                 self.flags._read()
                 self._debug['flags']['end'] = self._io.pos()
                 self._debug['body']['start'] = self._io.pos()
                 _on = self.flags.is_dir
                 if _on == True:
-                    self.body = self._root.Header.Dir(self._io, self, self._root)
+                    self.body = HeapsPak.Header.Dir(self._io, self, self._root)
                     self.body._read()
                 elif _on == False:
-                    self.body = self._root.Header.File(self._io, self, self._root)
+                    self.body = HeapsPak.Header.File(self._io, self, self._root)
                     self.body._read()
                 self._debug['body']['end'] = self._io.pos()
 
@@ -105,10 +105,10 @@ class HeapsPak(KaitaiStruct):
 
                 def _read(self):
                     self._debug['unused']['start'] = self._io.pos()
-                    self.unused = self._io.read_bits_int(7)
+                    self.unused = self._io.read_bits_int_be(7)
                     self._debug['unused']['end'] = self._io.pos()
                     self._debug['is_dir']['start'] = self._io.pos()
-                    self.is_dir = self._io.read_bits_int(1) != 0
+                    self.is_dir = self._io.read_bits_int_be(1) != 0
                     self._debug['is_dir']['end'] = self._io.pos()
 
 
@@ -165,7 +165,7 @@ class HeapsPak(KaitaiStruct):
                     if not 'arr' in self._debug['entries']:
                         self._debug['entries']['arr'] = []
                     self._debug['entries']['arr'].append({'start': self._io.pos()})
-                    _t_entries = self._root.Header.Entry(self._io, self, self._root)
+                    _t_entries = HeapsPak.Header.Entry(self._io, self, self._root)
                     _t_entries._read()
                     self.entries[i] = _t_entries
                     self._debug['entries']['arr'][i]['end'] = self._io.pos()

@@ -42,7 +42,7 @@ class GenmidiOp2(KaitaiStruct):
             if not 'arr' in self._debug['instruments']:
                 self._debug['instruments']['arr'] = []
             self._debug['instruments']['arr'].append({'start': self._io.pos()})
-            _t_instruments = self._root.InstrumentEntry(self._io, self, self._root)
+            _t_instruments = GenmidiOp2.InstrumentEntry(self._io, self, self._root)
             _t_instruments._read()
             self.instruments[i] = _t_instruments
             self._debug['instruments']['arr'][i]['end'] = self._io.pos()
@@ -83,7 +83,7 @@ class GenmidiOp2(KaitaiStruct):
                 if not 'arr' in self._debug['instruments']:
                     self._debug['instruments']['arr'] = []
                 self._debug['instruments']['arr'].append({'start': self._io.pos()})
-                _t_instruments = self._root.Instrument(self._io, self, self._root)
+                _t_instruments = GenmidiOp2.Instrument(self._io, self, self._root)
                 _t_instruments._read()
                 self.instruments[i] = _t_instruments
                 self._debug['instruments']['arr'][i]['end'] = self._io.pos()
@@ -101,14 +101,14 @@ class GenmidiOp2(KaitaiStruct):
 
         def _read(self):
             self._debug['op1']['start'] = self._io.pos()
-            self.op1 = self._root.OpSettings(self._io, self, self._root)
+            self.op1 = GenmidiOp2.OpSettings(self._io, self, self._root)
             self.op1._read()
             self._debug['op1']['end'] = self._io.pos()
             self._debug['feedback']['start'] = self._io.pos()
             self.feedback = self._io.read_u1()
             self._debug['feedback']['end'] = self._io.pos()
             self._debug['op2']['start'] = self._io.pos()
-            self.op2 = self._root.OpSettings(self._io, self, self._root)
+            self.op2 = GenmidiOp2.OpSettings(self._io, self, self._root)
             self.op2._read()
             self._debug['op2']['end'] = self._io.pos()
             self._debug['unused']['start'] = self._io.pos()

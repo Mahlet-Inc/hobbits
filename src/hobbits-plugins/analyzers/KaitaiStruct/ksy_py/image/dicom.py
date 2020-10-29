@@ -4059,7 +4059,7 @@ class Dicom(KaitaiStruct):
 
     def _read(self):
         self._debug['file_header']['start'] = self._io.pos()
-        self.file_header = self._root.TFileHeader(self._io, self, self._root)
+        self.file_header = Dicom.TFileHeader(self._io, self, self._root)
         self.file_header._read()
         self._debug['file_header']['end'] = self._io.pos()
         self._debug['elements']['start'] = self._io.pos()
@@ -4069,7 +4069,7 @@ class Dicom(KaitaiStruct):
             if not 'arr' in self._debug['elements']:
                 self._debug['elements']['arr'] = []
             self._debug['elements']['arr'].append({'start': self._io.pos()})
-            _t_elements = self._root.TDataElementImplicit(self._io, self, self._root)
+            _t_elements = Dicom.TDataElementImplicit(self._io, self, self._root)
             _t_elements._read()
             self.elements.append(_t_elements)
             self._debug['elements']['arr'][len(self.elements) - 1]['end'] = self._io.pos()
@@ -4145,7 +4145,7 @@ class Dicom(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.SeqItem(self._io, self, self._root)
+                    _t_items = Dicom.SeqItem(self._io, self, self._root)
                     _t_items._read()
                     _ = _t_items
                     self.items.append(_)
@@ -4163,7 +4163,7 @@ class Dicom(KaitaiStruct):
                     if not 'arr' in self._debug['elements_implicit']:
                         self._debug['elements_implicit']['arr'] = []
                     self._debug['elements_implicit']['arr'].append({'start': self._io.pos()})
-                    _t_elements_implicit = self._root.TDataElementImplicit(self._io, self, self._root)
+                    _t_elements_implicit = Dicom.TDataElementImplicit(self._io, self, self._root)
                     _t_elements_implicit._read()
                     self.elements_implicit.append(_t_elements_implicit)
                     self._debug['elements_implicit']['arr'][len(self.elements_implicit) - 1]['end'] = self._io.pos()
@@ -4201,7 +4201,7 @@ class Dicom(KaitaiStruct):
             if hasattr(self, '_m_tag'):
                 return self._m_tag if hasattr(self, '_m_tag') else None
 
-            self._m_tag = KaitaiStream.resolve_enum(self._root.Tags, ((self.tag_group << 16) | self.tag_elem))
+            self._m_tag = KaitaiStream.resolve_enum(Dicom.Tags, ((self.tag_group << 16) | self.tag_elem))
             return self._m_tag if hasattr(self, '_m_tag') else None
 
 
@@ -4254,7 +4254,7 @@ class Dicom(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.SeqItem(self._io, self, self._root)
+                    _t_items = Dicom.SeqItem(self._io, self, self._root)
                     _t_items._read()
                     _ = _t_items
                     self.items.append(_)
@@ -4272,7 +4272,7 @@ class Dicom(KaitaiStruct):
                     if not 'arr' in self._debug['elements']:
                         self._debug['elements']['arr'] = []
                     self._debug['elements']['arr'].append({'start': self._io.pos()})
-                    _t_elements = self._root.TDataElementExplicit(self._io, self, self._root)
+                    _t_elements = Dicom.TDataElementExplicit(self._io, self, self._root)
                     _t_elements._read()
                     self.elements.append(_t_elements)
                     self._debug['elements']['arr'][len(self.elements) - 1]['end'] = self._io.pos()
@@ -4286,7 +4286,7 @@ class Dicom(KaitaiStruct):
             if hasattr(self, '_m_tag'):
                 return self._m_tag if hasattr(self, '_m_tag') else None
 
-            self._m_tag = KaitaiStream.resolve_enum(self._root.Tags, ((self.tag_group << 16) | self.tag_elem))
+            self._m_tag = KaitaiStream.resolve_enum(Dicom.Tags, ((self.tag_group << 16) | self.tag_elem))
             return self._m_tag if hasattr(self, '_m_tag') else None
 
         @property
@@ -4355,7 +4355,7 @@ class Dicom(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.TDataElementExplicit(self._io, self, self._root)
+                    _t_items = Dicom.TDataElementExplicit(self._io, self, self._root)
                     _t_items._read()
                     _ = _t_items
                     self.items.append(_)

@@ -45,7 +45,7 @@ class VlqBase128Le(KaitaiStruct):
             if not 'arr' in self._debug['groups']:
                 self._debug['groups']['arr'] = []
             self._debug['groups']['arr'].append({'start': self._io.pos()})
-            _t_groups = self._root.Group(self._io, self, self._root)
+            _t_groups = VlqBase128Le.Group(self._io, self, self._root)
             _t_groups._read()
             _ = _t_groups
             self.groups.append(_)

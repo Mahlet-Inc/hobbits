@@ -41,7 +41,7 @@ class GlibcUtmp(KaitaiStruct):
             self._debug['records']['arr'].append({'start': self._io.pos()})
             self._raw_records.append(self._io.read_bytes(384))
             _io__raw_records = KaitaiStream(BytesIO(self._raw_records[-1]))
-            _t_records = self._root.Record(_io__raw_records, self, self._root)
+            _t_records = GlibcUtmp.Record(_io__raw_records, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -59,7 +59,7 @@ class GlibcUtmp(KaitaiStruct):
 
         def _read(self):
             self._debug['ut_type']['start'] = self._io.pos()
-            self.ut_type = KaitaiStream.resolve_enum(self._root.EntryType, self._io.read_s4le())
+            self.ut_type = KaitaiStream.resolve_enum(GlibcUtmp.EntryType, self._io.read_s4le())
             self._debug['ut_type']['end'] = self._io.pos()
             self._debug['pid']['start'] = self._io.pos()
             self.pid = self._io.read_u4le()
@@ -83,7 +83,7 @@ class GlibcUtmp(KaitaiStruct):
             self.session = self._io.read_s4le()
             self._debug['session']['end'] = self._io.pos()
             self._debug['tv']['start'] = self._io.pos()
-            self.tv = self._root.Timeval(self._io, self, self._root)
+            self.tv = GlibcUtmp.Timeval(self._io, self, self._root)
             self.tv._read()
             self._debug['tv']['end'] = self._io.pos()
             self._debug['addr_v6']['start'] = self._io.pos()

@@ -28,7 +28,7 @@ class DosMz(KaitaiStruct):
 
     def _read(self):
         self._debug['hdr']['start'] = self._io.pos()
-        self.hdr = self._root.MzHeader(self._io, self, self._root)
+        self.hdr = DosMz.MzHeader(self._io, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
         self._debug['mz_header2']['start'] = self._io.pos()
@@ -40,7 +40,7 @@ class DosMz(KaitaiStruct):
             if not 'arr' in self._debug['relocations']:
                 self._debug['relocations']['arr'] = []
             self._debug['relocations']['arr'].append({'start': self._io.pos()})
-            _t_relocations = self._root.Relocation(self._io, self, self._root)
+            _t_relocations = DosMz.Relocation(self._io, self, self._root)
             _t_relocations._read()
             self.relocations[i] = _t_relocations
             self._debug['relocations']['arr'][i]['end'] = self._io.pos()

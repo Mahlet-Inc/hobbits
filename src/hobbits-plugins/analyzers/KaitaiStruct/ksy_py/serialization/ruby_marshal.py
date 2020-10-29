@@ -63,7 +63,7 @@ class RubyMarshal(KaitaiStruct):
         if not self.version == b"\x04\x08":
             raise kaitaistruct.ValidationNotEqualError(b"\x04\x08", self.version, self._io, u"/seq/0")
         self._debug['records']['start'] = self._io.pos()
-        self.records = self._root.Record(self._io, self, self._root)
+        self.records = RubyMarshal.Record(self._io, self, self._root)
         self.records._read()
         self._debug['records']['end'] = self._io.pos()
 
@@ -77,7 +77,7 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['num_elements']['start'] = self._io.pos()
-            self.num_elements = self._root.PackedInt(self._io, self, self._root)
+            self.num_elements = RubyMarshal.PackedInt(self._io, self, self._root)
             self.num_elements._read()
             self._debug['num_elements']['end'] = self._io.pos()
             self._debug['elements']['start'] = self._io.pos()
@@ -86,7 +86,7 @@ class RubyMarshal(KaitaiStruct):
                 if not 'arr' in self._debug['elements']:
                     self._debug['elements']['arr'] = []
                 self._debug['elements']['arr'].append({'start': self._io.pos()})
-                _t_elements = self._root.Record(self._io, self, self._root)
+                _t_elements = RubyMarshal.Record(self._io, self, self._root)
                 _t_elements._read()
                 self.elements[i] = _t_elements
                 self._debug['elements']['arr'][i]['end'] = self._io.pos()
@@ -111,7 +111,7 @@ class RubyMarshal(KaitaiStruct):
             self.sign = self._io.read_u1()
             self._debug['sign']['end'] = self._io.pos()
             self._debug['len_div_2']['start'] = self._io.pos()
-            self.len_div_2 = self._root.PackedInt(self._io, self, self._root)
+            self.len_div_2 = RubyMarshal.PackedInt(self._io, self, self._root)
             self.len_div_2._read()
             self._debug['len_div_2']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
@@ -133,11 +133,11 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.Record(self._io, self, self._root)
+            self.name = RubyMarshal.Record(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['num_members']['start'] = self._io.pos()
-            self.num_members = self._root.PackedInt(self._io, self, self._root)
+            self.num_members = RubyMarshal.PackedInt(self._io, self, self._root)
             self.num_members._read()
             self._debug['num_members']['end'] = self._io.pos()
             self._debug['members']['start'] = self._io.pos()
@@ -146,7 +146,7 @@ class RubyMarshal(KaitaiStruct):
                 if not 'arr' in self._debug['members']:
                     self._debug['members']['arr'] = []
                 self._debug['members']['arr'].append({'start': self._io.pos()})
-                _t_members = self._root.Pair(self._io, self, self._root)
+                _t_members = RubyMarshal.Pair(self._io, self, self._root)
                 _t_members._read()
                 self.members[i] = _t_members
                 self._debug['members']['arr'][i]['end'] = self._io.pos()
@@ -168,7 +168,7 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['len']['start'] = self._io.pos()
-            self.len = self._root.PackedInt(self._io, self, self._root)
+            self.len = RubyMarshal.PackedInt(self._io, self, self._root)
             self.len._read()
             self._debug['len']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
@@ -271,11 +271,11 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['key']['start'] = self._io.pos()
-            self.key = self._root.Record(self._io, self, self._root)
+            self.key = RubyMarshal.Record(self._io, self, self._root)
             self.key._read()
             self._debug['key']['end'] = self._io.pos()
             self._debug['value']['start'] = self._io.pos()
-            self.value = self._root.Record(self._io, self, self._root)
+            self.value = RubyMarshal.Record(self._io, self, self._root)
             self.value._read()
             self._debug['value']['end'] = self._io.pos()
 
@@ -294,11 +294,11 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['obj']['start'] = self._io.pos()
-            self.obj = self._root.Record(self._io, self, self._root)
+            self.obj = RubyMarshal.Record(self._io, self, self._root)
             self.obj._read()
             self._debug['obj']['end'] = self._io.pos()
             self._debug['num_vars']['start'] = self._io.pos()
-            self.num_vars = self._root.PackedInt(self._io, self, self._root)
+            self.num_vars = RubyMarshal.PackedInt(self._io, self, self._root)
             self.num_vars._read()
             self._debug['num_vars']['end'] = self._io.pos()
             self._debug['vars']['start'] = self._io.pos()
@@ -307,7 +307,7 @@ class RubyMarshal(KaitaiStruct):
                 if not 'arr' in self._debug['vars']:
                     self._debug['vars']['arr'] = []
                 self._debug['vars']['arr'].append({'start': self._io.pos()})
-                _t_vars = self._root.Pair(self._io, self, self._root)
+                _t_vars = RubyMarshal.Pair(self._io, self, self._root)
                 _t_vars._read()
                 self.vars[i] = _t_vars
                 self._debug['vars']['arr'][i]['end'] = self._io.pos()
@@ -329,36 +329,36 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['code']['start'] = self._io.pos()
-            self.code = KaitaiStream.resolve_enum(self._root.Codes, self._io.read_u1())
+            self.code = KaitaiStream.resolve_enum(RubyMarshal.Codes, self._io.read_u1())
             self._debug['code']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.code
-            if _on == self._root.Codes.packed_int:
-                self.body = self._root.PackedInt(self._io, self, self._root)
+            if _on == RubyMarshal.Codes.packed_int:
+                self.body = RubyMarshal.PackedInt(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.bignum:
-                self.body = self._root.Bignum(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.bignum:
+                self.body = RubyMarshal.Bignum(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_array:
-                self.body = self._root.RubyArray(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_array:
+                self.body = RubyMarshal.RubyArray(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_symbol_link:
-                self.body = self._root.PackedInt(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_symbol_link:
+                self.body = RubyMarshal.PackedInt(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_struct:
-                self.body = self._root.RubyStruct(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_struct:
+                self.body = RubyMarshal.RubyStruct(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_string:
-                self.body = self._root.RubyString(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_string:
+                self.body = RubyMarshal.RubyString(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.instance_var:
-                self.body = self._root.InstanceVar(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.instance_var:
+                self.body = RubyMarshal.InstanceVar(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_hash:
-                self.body = self._root.RubyHash(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_hash:
+                self.body = RubyMarshal.RubyHash(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.Codes.ruby_symbol:
-                self.body = self._root.RubySymbol(self._io, self, self._root)
+            elif _on == RubyMarshal.Codes.ruby_symbol:
+                self.body = RubyMarshal.RubySymbol(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 
@@ -377,7 +377,7 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['num_pairs']['start'] = self._io.pos()
-            self.num_pairs = self._root.PackedInt(self._io, self, self._root)
+            self.num_pairs = RubyMarshal.PackedInt(self._io, self, self._root)
             self.num_pairs._read()
             self._debug['num_pairs']['end'] = self._io.pos()
             self._debug['pairs']['start'] = self._io.pos()
@@ -386,7 +386,7 @@ class RubyMarshal(KaitaiStruct):
                 if not 'arr' in self._debug['pairs']:
                     self._debug['pairs']['arr'] = []
                 self._debug['pairs']['arr'].append({'start': self._io.pos()})
-                _t_pairs = self._root.Pair(self._io, self, self._root)
+                _t_pairs = RubyMarshal.Pair(self._io, self, self._root)
                 _t_pairs._read()
                 self.pairs[i] = _t_pairs
                 self._debug['pairs']['arr'][i]['end'] = self._io.pos()
@@ -408,7 +408,7 @@ class RubyMarshal(KaitaiStruct):
 
         def _read(self):
             self._debug['len']['start'] = self._io.pos()
-            self.len = self._root.PackedInt(self._io, self, self._root)
+            self.len = RubyMarshal.PackedInt(self._io, self, self._root)
             self.len._read()
             self._debug['len']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()

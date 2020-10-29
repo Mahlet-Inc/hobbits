@@ -35,7 +35,7 @@ class Ogg(KaitaiStruct):
             if not 'arr' in self._debug['pages']:
                 self._debug['pages']['arr'] = []
             self._debug['pages']['arr'].append({'start': self._io.pos()})
-            _t_pages = self._root.Page(self._io, self, self._root)
+            _t_pages = Ogg.Page(self._io, self, self._root)
             _t_pages._read()
             self.pages.append(_t_pages)
             self._debug['pages']['arr'][len(self.pages) - 1]['end'] = self._io.pos()
@@ -66,16 +66,16 @@ class Ogg(KaitaiStruct):
             if not self.version == b"\x00":
                 raise kaitaistruct.ValidationNotEqualError(b"\x00", self.version, self._io, u"/types/page/seq/1")
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(5)
+            self.reserved1 = self._io.read_bits_int_be(5)
             self._debug['reserved1']['end'] = self._io.pos()
             self._debug['is_end_of_stream']['start'] = self._io.pos()
-            self.is_end_of_stream = self._io.read_bits_int(1) != 0
+            self.is_end_of_stream = self._io.read_bits_int_be(1) != 0
             self._debug['is_end_of_stream']['end'] = self._io.pos()
             self._debug['is_beginning_of_stream']['start'] = self._io.pos()
-            self.is_beginning_of_stream = self._io.read_bits_int(1) != 0
+            self.is_beginning_of_stream = self._io.read_bits_int_be(1) != 0
             self._debug['is_beginning_of_stream']['end'] = self._io.pos()
             self._debug['is_continuation']['start'] = self._io.pos()
-            self.is_continuation = self._io.read_bits_int(1) != 0
+            self.is_continuation = self._io.read_bits_int_be(1) != 0
             self._debug['is_continuation']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['granule_pos']['start'] = self._io.pos()

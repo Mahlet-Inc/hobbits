@@ -35,7 +35,7 @@ class Riff(KaitaiStruct):
 
     def _read(self):
         self._debug['chunk']['start'] = self._io.pos()
-        self.chunk = self._root.Chunk(self._io, self, self._root)
+        self.chunk = Riff.Chunk(self._io, self, self._root)
         self.chunk._read()
         self._debug['chunk']['end'] = self._io.pos()
 
@@ -54,7 +54,7 @@ class Riff(KaitaiStruct):
                 self._debug['save_parent_chunk_data_ofs']['end'] = self._io.pos()
 
             self._debug['parent_chunk_data']['start'] = self._io.pos()
-            self.parent_chunk_data = self._root.ParentChunkData(self._io, self, self._root)
+            self.parent_chunk_data = Riff.ParentChunkData(self._io, self, self._root)
             self.parent_chunk_data._read()
             self._debug['parent_chunk_data']['end'] = self._io.pos()
 
@@ -71,7 +71,7 @@ class Riff(KaitaiStruct):
             if hasattr(self, '_m_form_type'):
                 return self._m_form_type if hasattr(self, '_m_form_type') else None
 
-            self._m_form_type = KaitaiStream.resolve_enum(self._root.Fourcc, self.parent_chunk_data.form_type)
+            self._m_form_type = KaitaiStream.resolve_enum(Riff.Fourcc, self.parent_chunk_data.form_type)
             return self._m_form_type if hasattr(self, '_m_form_type') else None
 
         @property
@@ -103,11 +103,11 @@ class Riff(KaitaiStruct):
                     self._debug['_m_subchunks']['arr'] = []
                 self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
                 _on = self.form_type
-                if _on == self._root.Fourcc.info:
+                if _on == Riff.Fourcc.info:
                     if not 'arr' in self._debug['_m_subchunks']:
                         self._debug['_m_subchunks']['arr'] = []
                     self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
-                    _t__m_subchunks = self._root.InfoSubchunk(io, self, self._root)
+                    _t__m_subchunks = Riff.InfoSubchunk(io, self, self._root)
                     _t__m_subchunks._read()
                     self._m_subchunks.append(_t__m_subchunks)
                     self._debug['_m_subchunks']['arr'][len(self._m_subchunks) - 1]['end'] = io.pos()
@@ -115,7 +115,7 @@ class Riff(KaitaiStruct):
                     if not 'arr' in self._debug['_m_subchunks']:
                         self._debug['_m_subchunks']['arr'] = []
                     self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
-                    _t__m_subchunks = self._root.ChunkType(io, self, self._root)
+                    _t__m_subchunks = Riff.ChunkType(io, self, self._root)
                     _t__m_subchunks._read()
                     self._m_subchunks.append(_t__m_subchunks)
                     self._debug['_m_subchunks']['arr'][len(self._m_subchunks) - 1]['end'] = io.pos()
@@ -145,7 +145,7 @@ class Riff(KaitaiStruct):
             self._debug['data_slot']['start'] = self._io.pos()
             self._raw_data_slot = self._io.read_bytes(self.len)
             _io__raw_data_slot = KaitaiStream(BytesIO(self._raw_data_slot))
-            self.data_slot = self._root.Chunk.Slot(_io__raw_data_slot, self, self._root)
+            self.data_slot = Riff.Chunk.Slot(_io__raw_data_slot, self, self._root)
             self.data_slot._read()
             self._debug['data_slot']['end'] = self._io.pos()
             self._debug['pad_byte']['start'] = self._io.pos()
@@ -180,7 +180,7 @@ class Riff(KaitaiStruct):
             self._debug['subchunks_slot']['start'] = self._io.pos()
             self._raw_subchunks_slot = self._io.read_bytes_full()
             _io__raw_subchunks_slot = KaitaiStream(BytesIO(self._raw_subchunks_slot))
-            self.subchunks_slot = self._root.ParentChunkData.Slot(_io__raw_subchunks_slot, self, self._root)
+            self.subchunks_slot = Riff.ParentChunkData.Slot(_io__raw_subchunks_slot, self, self._root)
             self.subchunks_slot._read()
             self._debug['subchunks_slot']['end'] = self._io.pos()
 
@@ -220,7 +220,7 @@ class Riff(KaitaiStruct):
                 self._debug['save_chunk_ofs']['end'] = self._io.pos()
 
             self._debug['chunk']['start'] = self._io.pos()
-            self.chunk = self._root.Chunk(self._io, self, self._root)
+            self.chunk = Riff.Chunk(self._io, self, self._root)
             self.chunk._read()
             self._debug['chunk']['end'] = self._io.pos()
 
@@ -295,7 +295,7 @@ class Riff(KaitaiStruct):
                 self._debug['save_chunk_ofs']['end'] = self._io.pos()
 
             self._debug['chunk']['start'] = self._io.pos()
-            self.chunk = self._root.Chunk(self._io, self, self._root)
+            self.chunk = Riff.Chunk(self._io, self, self._root)
             self.chunk._read()
             self._debug['chunk']['end'] = self._io.pos()
 
@@ -312,7 +312,7 @@ class Riff(KaitaiStruct):
             if hasattr(self, '_m_chunk_id'):
                 return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
-            self._m_chunk_id = KaitaiStream.resolve_enum(self._root.Fourcc, self.chunk.id)
+            self._m_chunk_id = KaitaiStream.resolve_enum(Riff.Fourcc, self.chunk.id)
             return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
         @property
@@ -338,8 +338,8 @@ class Riff(KaitaiStruct):
             io.seek(0)
             self._debug['_m_chunk_data']['start'] = io.pos()
             _on = self.chunk_id
-            if _on == self._root.Fourcc.list:
-                self._m_chunk_data = self._root.ListChunkData(io, self, self._root)
+            if _on == Riff.Fourcc.list:
+                self._m_chunk_data = Riff.ListChunkData(io, self, self._root)
                 self._m_chunk_data._read()
             self._debug['_m_chunk_data']['end'] = io.pos()
             io.seek(_pos)
@@ -351,7 +351,7 @@ class Riff(KaitaiStruct):
         if hasattr(self, '_m_chunk_id'):
             return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
-        self._m_chunk_id = KaitaiStream.resolve_enum(self._root.Fourcc, self.chunk.id)
+        self._m_chunk_id = KaitaiStream.resolve_enum(Riff.Fourcc, self.chunk.id)
         return self._m_chunk_id if hasattr(self, '_m_chunk_id') else None
 
     @property
@@ -359,7 +359,7 @@ class Riff(KaitaiStruct):
         if hasattr(self, '_m_is_riff_chunk'):
             return self._m_is_riff_chunk if hasattr(self, '_m_is_riff_chunk') else None
 
-        self._m_is_riff_chunk = self.chunk_id == self._root.Fourcc.riff
+        self._m_is_riff_chunk = self.chunk_id == Riff.Fourcc.riff
         return self._m_is_riff_chunk if hasattr(self, '_m_is_riff_chunk') else None
 
     @property
@@ -372,7 +372,7 @@ class Riff(KaitaiStruct):
             _pos = io.pos()
             io.seek(0)
             self._debug['_m_parent_chunk_data']['start'] = io.pos()
-            self._m_parent_chunk_data = self._root.ParentChunkData(io, self, self._root)
+            self._m_parent_chunk_data = Riff.ParentChunkData(io, self, self._root)
             self._m_parent_chunk_data._read()
             self._debug['_m_parent_chunk_data']['end'] = io.pos()
             io.seek(_pos)
@@ -395,7 +395,7 @@ class Riff(KaitaiStruct):
                 if not 'arr' in self._debug['_m_subchunks']:
                     self._debug['_m_subchunks']['arr'] = []
                 self._debug['_m_subchunks']['arr'].append({'start': io.pos()})
-                _t__m_subchunks = self._root.ChunkType(io, self, self._root)
+                _t__m_subchunks = Riff.ChunkType(io, self, self._root)
                 _t__m_subchunks._read()
                 self._m_subchunks.append(_t__m_subchunks)
                 self._debug['_m_subchunks']['arr'][len(self._m_subchunks) - 1]['end'] = io.pos()

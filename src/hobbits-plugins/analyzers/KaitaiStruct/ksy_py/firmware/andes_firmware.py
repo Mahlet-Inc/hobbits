@@ -22,7 +22,7 @@ class AndesFirmware(KaitaiStruct):
         self._debug['image_header']['start'] = self._io.pos()
         self._raw_image_header = self._io.read_bytes(32)
         _io__raw_image_header = KaitaiStream(BytesIO(self._raw_image_header))
-        self.image_header = self._root.ImageHeader(_io__raw_image_header, self, self._root)
+        self.image_header = AndesFirmware.ImageHeader(_io__raw_image_header, self, self._root)
         self.image_header._read()
         self._debug['image_header']['end'] = self._io.pos()
         self._debug['ilm']['start'] = self._io.pos()

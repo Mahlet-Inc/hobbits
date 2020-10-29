@@ -40,7 +40,7 @@ class WindowsShellItems(KaitaiStruct):
             if not 'arr' in self._debug['items']:
                 self._debug['items']['arr'] = []
             self._debug['items']['arr'].append({'start': self._io.pos()})
-            _t_items = self._root.ShellItem(self._io, self, self._root)
+            _t_items = WindowsShellItems.ShellItem(self._io, self, self._root)
             _t_items._read()
             _ = _t_items
             self.items.append(_)
@@ -65,16 +65,16 @@ class WindowsShellItems(KaitaiStruct):
             self._debug['body1']['start'] = self._io.pos()
             _on = self.code
             if _on == 31:
-                self.body1 = self._root.RootFolderBody(self._io, self, self._root)
+                self.body1 = WindowsShellItems.RootFolderBody(self._io, self, self._root)
                 self.body1._read()
             self._debug['body1']['end'] = self._io.pos()
             self._debug['body2']['start'] = self._io.pos()
             _on = (self.code & 112)
             if _on == 32:
-                self.body2 = self._root.VolumeBody(self._io, self, self._root)
+                self.body2 = WindowsShellItems.VolumeBody(self._io, self, self._root)
                 self.body2._read()
             elif _on == 48:
-                self.body2 = self._root.FileEntryBody(self._io, self, self._root)
+                self.body2 = WindowsShellItems.FileEntryBody(self._io, self, self._root)
                 self.body2._read()
             self._debug['body2']['end'] = self._io.pos()
 
@@ -99,7 +99,7 @@ class WindowsShellItems(KaitaiStruct):
                 self._debug['data']['start'] = self._io.pos()
                 self._raw_data = self._io.read_bytes((self.len_data - 2))
                 _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
-                self.data = self._root.ShellItemData(_io__raw_data, self, self._root)
+                self.data = WindowsShellItems.ShellItemData(_io__raw_data, self, self._root)
                 self.data._read()
                 self._debug['data']['end'] = self._io.pos()
 

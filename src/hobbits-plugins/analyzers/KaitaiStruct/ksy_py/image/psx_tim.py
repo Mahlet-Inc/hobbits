@@ -35,12 +35,12 @@ class PsxTim(KaitaiStruct):
         self._debug['flags']['end'] = self._io.pos()
         if self.has_clut:
             self._debug['clut']['start'] = self._io.pos()
-            self.clut = self._root.Bitmap(self._io, self, self._root)
+            self.clut = PsxTim.Bitmap(self._io, self, self._root)
             self.clut._read()
             self._debug['clut']['end'] = self._io.pos()
 
         self._debug['img']['start'] = self._io.pos()
-        self.img = self._root.Bitmap(self._io, self, self._root)
+        self.img = PsxTim.Bitmap(self._io, self, self._root)
         self.img._read()
         self._debug['img']['end'] = self._io.pos()
 

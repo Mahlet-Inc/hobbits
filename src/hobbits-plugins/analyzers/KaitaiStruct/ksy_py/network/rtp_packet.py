@@ -63,22 +63,22 @@ class RtpPacket(KaitaiStruct):
 
     def _read(self):
         self._debug['version']['start'] = self._io.pos()
-        self.version = self._io.read_bits_int(2)
+        self.version = self._io.read_bits_int_be(2)
         self._debug['version']['end'] = self._io.pos()
         self._debug['has_padding']['start'] = self._io.pos()
-        self.has_padding = self._io.read_bits_int(1) != 0
+        self.has_padding = self._io.read_bits_int_be(1) != 0
         self._debug['has_padding']['end'] = self._io.pos()
         self._debug['has_extension']['start'] = self._io.pos()
-        self.has_extension = self._io.read_bits_int(1) != 0
+        self.has_extension = self._io.read_bits_int_be(1) != 0
         self._debug['has_extension']['end'] = self._io.pos()
         self._debug['csrc_count']['start'] = self._io.pos()
-        self.csrc_count = self._io.read_bits_int(4)
+        self.csrc_count = self._io.read_bits_int_be(4)
         self._debug['csrc_count']['end'] = self._io.pos()
         self._debug['marker']['start'] = self._io.pos()
-        self.marker = self._io.read_bits_int(1) != 0
+        self.marker = self._io.read_bits_int_be(1) != 0
         self._debug['marker']['end'] = self._io.pos()
         self._debug['payload_type']['start'] = self._io.pos()
-        self.payload_type = KaitaiStream.resolve_enum(self._root.PayloadTypeEnum, self._io.read_bits_int(7))
+        self.payload_type = KaitaiStream.resolve_enum(RtpPacket.PayloadTypeEnum, self._io.read_bits_int_be(7))
         self._debug['payload_type']['end'] = self._io.pos()
         self._io.align_to_byte()
         self._debug['sequence_number']['start'] = self._io.pos()
@@ -92,7 +92,7 @@ class RtpPacket(KaitaiStruct):
         self._debug['ssrc']['end'] = self._io.pos()
         if self.has_extension:
             self._debug['header_extension']['start'] = self._io.pos()
-            self.header_extension = self._root.HeaderExtention(self._io, self, self._root)
+            self.header_extension = RtpPacket.HeaderExtention(self._io, self, self._root)
             self.header_extension._read()
             self._debug['header_extension']['end'] = self._io.pos()
 

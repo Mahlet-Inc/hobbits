@@ -44,7 +44,7 @@ class Dex(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.HeaderItem(self._io, self, self._root)
+        self.header = Dex.HeaderItem(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
 
@@ -82,7 +82,7 @@ class Dex(KaitaiStruct):
             self.header_size = self._io.read_u4le()
             self._debug['header_size']['end'] = self._io.pos()
             self._debug['endian_tag']['start'] = self._io.pos()
-            self.endian_tag = KaitaiStream.resolve_enum(self._root.HeaderItem.EndianConstant, self._io.read_u4le())
+            self.endian_tag = KaitaiStream.resolve_enum(Dex.HeaderItem.EndianConstant, self._io.read_u4le())
             self._debug['endian_tag']['end'] = self._io.pos()
             self._debug['link_size']['start'] = self._io.pos()
             self.link_size = self._io.read_u4le()
@@ -155,7 +155,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['list']:
                     self._debug['list']['arr'] = []
                 self._debug['list']['arr'].append({'start': self._io.pos()})
-                _t_list = self._root.MapItem(self._io, self, self._root)
+                _t_list = Dex.MapItem(self._io, self, self._root)
                 _t_list._read()
                 self.list[i] = _t_list
                 self._debug['list']['arr'][i]['end'] = self._io.pos()
@@ -193,47 +193,47 @@ class Dex(KaitaiStruct):
 
         def _read(self):
             self._debug['value_arg']['start'] = self._io.pos()
-            self.value_arg = self._io.read_bits_int(3)
+            self.value_arg = self._io.read_bits_int_be(3)
             self._debug['value_arg']['end'] = self._io.pos()
             self._debug['value_type']['start'] = self._io.pos()
-            self.value_type = KaitaiStream.resolve_enum(self._root.EncodedValue.ValueTypeEnum, self._io.read_bits_int(5))
+            self.value_type = KaitaiStream.resolve_enum(Dex.EncodedValue.ValueTypeEnum, self._io.read_bits_int_be(5))
             self._debug['value_type']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['value']['start'] = self._io.pos()
             _on = self.value_type
-            if _on == self._root.EncodedValue.ValueTypeEnum.int:
+            if _on == Dex.EncodedValue.ValueTypeEnum.int:
                 self.value = self._io.read_s4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.annotation:
-                self.value = self._root.EncodedAnnotation(self._io, self, self._root)
+            elif _on == Dex.EncodedValue.ValueTypeEnum.annotation:
+                self.value = Dex.EncodedAnnotation(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.long:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.long:
                 self.value = self._io.read_s8le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.method_handle:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.method_handle:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.byte:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.byte:
                 self.value = self._io.read_s1()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.array:
-                self.value = self._root.EncodedArray(self._io, self, self._root)
+            elif _on == Dex.EncodedValue.ValueTypeEnum.array:
+                self.value = Dex.EncodedArray(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.method_type:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.method_type:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.short:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.short:
                 self.value = self._io.read_s2le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.method:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.method:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.double:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.double:
                 self.value = self._io.read_f8le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.float:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.float:
                 self.value = self._io.read_f4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.type:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.type:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.enum:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.enum:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.field:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.field:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.string:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.string:
                 self.value = self._io.read_u4le()
-            elif _on == self._root.EncodedValue.ValueTypeEnum.char:
+            elif _on == Dex.EncodedValue.ValueTypeEnum.char:
                 self.value = self._io.read_u2le()
             self._debug['value']['end'] = self._io.pos()
 
@@ -357,7 +357,7 @@ class Dex(KaitaiStruct):
             self.name_idx._read()
             self._debug['name_idx']['end'] = self._io.pos()
             self._debug['value']['start'] = self._io.pos()
-            self.value = self._root.EncodedValue(self._io, self, self._root)
+            self.value = Dex.EncodedValue(self._io, self, self._root)
             self.value._read()
             self._debug['value']['end'] = self._io.pos()
 
@@ -391,7 +391,7 @@ class Dex(KaitaiStruct):
 
         def _read(self):
             self._debug['value']['start'] = self._io.pos()
-            self.value = self._root.EncodedArray(self._io, self, self._root)
+            self.value = Dex.EncodedArray(self._io, self, self._root)
             self.value._read()
             self._debug['value']['end'] = self._io.pos()
 
@@ -427,7 +427,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['static_fields']:
                     self._debug['static_fields']['arr'] = []
                 self._debug['static_fields']['arr'].append({'start': self._io.pos()})
-                _t_static_fields = self._root.EncodedField(self._io, self, self._root)
+                _t_static_fields = Dex.EncodedField(self._io, self, self._root)
                 _t_static_fields._read()
                 self.static_fields[i] = _t_static_fields
                 self._debug['static_fields']['arr'][i]['end'] = self._io.pos()
@@ -439,7 +439,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['instance_fields']:
                     self._debug['instance_fields']['arr'] = []
                 self._debug['instance_fields']['arr'].append({'start': self._io.pos()})
-                _t_instance_fields = self._root.EncodedField(self._io, self, self._root)
+                _t_instance_fields = Dex.EncodedField(self._io, self, self._root)
                 _t_instance_fields._read()
                 self.instance_fields[i] = _t_instance_fields
                 self._debug['instance_fields']['arr'][i]['end'] = self._io.pos()
@@ -451,7 +451,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['direct_methods']:
                     self._debug['direct_methods']['arr'] = []
                 self._debug['direct_methods']['arr'].append({'start': self._io.pos()})
-                _t_direct_methods = self._root.EncodedMethod(self._io, self, self._root)
+                _t_direct_methods = Dex.EncodedMethod(self._io, self, self._root)
                 _t_direct_methods._read()
                 self.direct_methods[i] = _t_direct_methods
                 self._debug['direct_methods']['arr'][i]['end'] = self._io.pos()
@@ -463,7 +463,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['virtual_methods']:
                     self._debug['virtual_methods']['arr'] = []
                 self._debug['virtual_methods']['arr'].append({'start': self._io.pos()})
-                _t_virtual_methods = self._root.EncodedMethod(self._io, self, self._root)
+                _t_virtual_methods = Dex.EncodedMethod(self._io, self, self._root)
                 _t_virtual_methods._read()
                 self.virtual_methods[i] = _t_virtual_methods
                 self._debug['virtual_methods']['arr'][i]['end'] = self._io.pos()
@@ -541,7 +541,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['elements']:
                     self._debug['elements']['arr'] = []
                 self._debug['elements']['arr'].append({'start': self._io.pos()})
-                _t_elements = self._root.AnnotationElement(self._io, self, self._root)
+                _t_elements = Dex.AnnotationElement(self._io, self, self._root)
                 _t_elements._read()
                 self.elements[i] = _t_elements
                 self._debug['elements']['arr'][i]['end'] = self._io.pos()
@@ -562,7 +562,7 @@ class Dex(KaitaiStruct):
             self.class_idx = self._io.read_u4le()
             self._debug['class_idx']['end'] = self._io.pos()
             self._debug['access_flags']['start'] = self._io.pos()
-            self.access_flags = KaitaiStream.resolve_enum(self._root.ClassAccessFlags, self._io.read_u4le())
+            self.access_flags = KaitaiStream.resolve_enum(Dex.ClassAccessFlags, self._io.read_u4le())
             self._debug['access_flags']['end'] = self._io.pos()
             self._debug['superclass_idx']['start'] = self._io.pos()
             self.superclass_idx = self._io.read_u4le()
@@ -600,7 +600,7 @@ class Dex(KaitaiStruct):
                 _pos = self._io.pos()
                 self._io.seek(self.class_data_off)
                 self._debug['_m_class_data']['start'] = self._io.pos()
-                self._m_class_data = self._root.ClassDataItem(self._io, self, self._root)
+                self._m_class_data = Dex.ClassDataItem(self._io, self, self._root)
                 self._m_class_data._read()
                 self._debug['_m_class_data']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -616,7 +616,7 @@ class Dex(KaitaiStruct):
                 _pos = self._io.pos()
                 self._io.seek(self.static_values_off)
                 self._debug['_m_static_values']['start'] = self._io.pos()
-                self._m_static_values = self._root.EncodedArrayItem(self._io, self, self._root)
+                self._m_static_values = Dex.EncodedArrayItem(self._io, self, self._root)
                 self._m_static_values._read()
                 self._debug['_m_static_values']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -642,7 +642,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['list']:
                     self._debug['list']['arr'] = []
                 self._debug['list']['arr'].append({'start': self._io.pos()})
-                _t_list = self._root.TypeItem(self._io, self, self._root)
+                _t_list = Dex.TypeItem(self._io, self, self._root)
                 _t_list._read()
                 self.list[i] = _t_list
                 self._debug['list']['arr'][i]['end'] = self._io.pos()
@@ -689,7 +689,7 @@ class Dex(KaitaiStruct):
             _pos = self._io.pos()
             self._io.seek(self.string_data_off)
             self._debug['_m_value']['start'] = self._io.pos()
-            self._m_value = self._root.StringIdItem.StringDataItem(self._io, self, self._root)
+            self._m_value = Dex.StringIdItem.StringDataItem(self._io, self, self._root)
             self._m_value._read()
             self._debug['_m_value']['end'] = self._io.pos()
             self._io.seek(_pos)
@@ -735,7 +735,7 @@ class Dex(KaitaiStruct):
                 _pos = io.pos()
                 io.seek(self.parameters_off)
                 self._debug['_m_params_types']['start'] = io.pos()
-                self._m_params_types = self._root.TypeList(io, self, self._root)
+                self._m_params_types = Dex.TypeList(io, self, self._root)
                 self._m_params_types._read()
                 self._debug['_m_params_types']['end'] = io.pos()
                 io.seek(_pos)
@@ -807,7 +807,7 @@ class Dex(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.MapItem.MapItemType, self._io.read_u2le())
+            self.type = KaitaiStream.resolve_enum(Dex.MapItem.MapItemType, self._io.read_u2le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['unused']['start'] = self._io.pos()
             self.unused = self._io.read_u2le()
@@ -839,7 +839,7 @@ class Dex(KaitaiStruct):
                 if not 'arr' in self._debug['values']:
                     self._debug['values']['arr'] = []
                 self._debug['values']['arr'].append({'start': self._io.pos()})
-                _t_values = self._root.EncodedValue(self._io, self, self._root)
+                _t_values = Dex.EncodedValue(self._io, self, self._root)
                 _t_values._read()
                 self.values[i] = _t_values
                 self._debug['values']['arr'][i]['end'] = self._io.pos()
@@ -868,7 +868,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_string_ids']:
                 self._debug['_m_string_ids']['arr'] = []
             self._debug['_m_string_ids']['arr'].append({'start': self._io.pos()})
-            _t__m_string_ids = self._root.StringIdItem(self._io, self, self._root)
+            _t__m_string_ids = Dex.StringIdItem(self._io, self, self._root)
             _t__m_string_ids._read()
             self._m_string_ids[i] = _t__m_string_ids
             self._debug['_m_string_ids']['arr'][i]['end'] = self._io.pos()
@@ -901,7 +901,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_method_ids']:
                 self._debug['_m_method_ids']['arr'] = []
             self._debug['_m_method_ids']['arr'].append({'start': self._io.pos()})
-            _t__m_method_ids = self._root.MethodIdItem(self._io, self, self._root)
+            _t__m_method_ids = Dex.MethodIdItem(self._io, self, self._root)
             _t__m_method_ids._read()
             self._m_method_ids[i] = _t__m_method_ids
             self._debug['_m_method_ids']['arr'][i]['end'] = self._io.pos()
@@ -938,7 +938,7 @@ class Dex(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek(self.header.map_off)
         self._debug['_m_map']['start'] = self._io.pos()
-        self._m_map = self._root.MapList(self._io, self, self._root)
+        self._m_map = Dex.MapList(self._io, self, self._root)
         self._m_map._read()
         self._debug['_m_map']['end'] = self._io.pos()
         self._io.seek(_pos)
@@ -965,7 +965,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_class_defs']:
                 self._debug['_m_class_defs']['arr'] = []
             self._debug['_m_class_defs']['arr'].append({'start': self._io.pos()})
-            _t__m_class_defs = self._root.ClassDefItem(self._io, self, self._root)
+            _t__m_class_defs = Dex.ClassDefItem(self._io, self, self._root)
             _t__m_class_defs._read()
             self._m_class_defs[i] = _t__m_class_defs
             self._debug['_m_class_defs']['arr'][i]['end'] = self._io.pos()
@@ -1012,7 +1012,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_type_ids']:
                 self._debug['_m_type_ids']['arr'] = []
             self._debug['_m_type_ids']['arr'].append({'start': self._io.pos()})
-            _t__m_type_ids = self._root.TypeIdItem(self._io, self, self._root)
+            _t__m_type_ids = Dex.TypeIdItem(self._io, self, self._root)
             _t__m_type_ids._read()
             self._m_type_ids[i] = _t__m_type_ids
             self._debug['_m_type_ids']['arr'][i]['end'] = self._io.pos()
@@ -1042,7 +1042,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_proto_ids']:
                 self._debug['_m_proto_ids']['arr'] = []
             self._debug['_m_proto_ids']['arr'].append({'start': self._io.pos()})
-            _t__m_proto_ids = self._root.ProtoIdItem(self._io, self, self._root)
+            _t__m_proto_ids = Dex.ProtoIdItem(self._io, self, self._root)
             _t__m_proto_ids._read()
             self._m_proto_ids[i] = _t__m_proto_ids
             self._debug['_m_proto_ids']['arr'][i]['end'] = self._io.pos()
@@ -1074,7 +1074,7 @@ class Dex(KaitaiStruct):
             if not 'arr' in self._debug['_m_field_ids']:
                 self._debug['_m_field_ids']['arr'] = []
             self._debug['_m_field_ids']['arr'].append({'start': self._io.pos()})
-            _t__m_field_ids = self._root.FieldIdItem(self._io, self, self._root)
+            _t__m_field_ids = Dex.FieldIdItem(self._io, self, self._root)
             _t__m_field_ids._read()
             self._m_field_ids[i] = _t__m_field_ids
             self._debug['_m_field_ids']['arr'][i]['end'] = self._io.pos()

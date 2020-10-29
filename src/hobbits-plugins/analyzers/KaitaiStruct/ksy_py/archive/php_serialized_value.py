@@ -73,45 +73,45 @@ class PhpSerializedValue(KaitaiStruct):
 
     def _read(self):
         self._debug['type']['start'] = self._io.pos()
-        self.type = KaitaiStream.resolve_enum(self._root.ValueType, self._io.read_u1())
+        self.type = KaitaiStream.resolve_enum(PhpSerializedValue.ValueType, self._io.read_u1())
         self._debug['type']['end'] = self._io.pos()
         self._debug['contents']['start'] = self._io.pos()
         _on = self.type
-        if _on == self._root.ValueType.custom_serialized_object:
-            self.contents = self._root.CustomSerializedObjectContents(self._io, self, self._root)
+        if _on == PhpSerializedValue.ValueType.custom_serialized_object:
+            self.contents = PhpSerializedValue.CustomSerializedObjectContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.php_3_object:
-            self.contents = self._root.Php3ObjectContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.php_3_object:
+            self.contents = PhpSerializedValue.Php3ObjectContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.object:
-            self.contents = self._root.ObjectContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.object:
+            self.contents = PhpSerializedValue.ObjectContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.variable_reference:
-            self.contents = self._root.IntContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.variable_reference:
+            self.contents = PhpSerializedValue.IntContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.php_6_string:
-            self.contents = self._root.StringContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.php_6_string:
+            self.contents = PhpSerializedValue.StringContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.float:
-            self.contents = self._root.FloatContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.float:
+            self.contents = PhpSerializedValue.FloatContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.object_reference:
-            self.contents = self._root.IntContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.object_reference:
+            self.contents = PhpSerializedValue.IntContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.null:
-            self.contents = self._root.NullContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.null:
+            self.contents = PhpSerializedValue.NullContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.bool:
-            self.contents = self._root.BoolContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.bool:
+            self.contents = PhpSerializedValue.BoolContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.int:
-            self.contents = self._root.IntContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.int:
+            self.contents = PhpSerializedValue.IntContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.array:
-            self.contents = self._root.ArrayContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.array:
+            self.contents = PhpSerializedValue.ArrayContents(self._io, self, self._root)
             self.contents._read()
-        elif _on == self._root.ValueType.string:
-            self.contents = self._root.StringContents(self._io, self, self._root)
+        elif _on == PhpSerializedValue.ValueType.string:
+            self.contents = PhpSerializedValue.StringContents(self._io, self, self._root)
             self.contents._read()
         self._debug['contents']['end'] = self._io.pos()
 
@@ -139,7 +139,7 @@ class PhpSerializedValue(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.MappingEntry(self._io, self, self._root)
+                _t_entries = PhpSerializedValue.MappingEntry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries[i] = _t_entries
                 self._debug['entries']['arr'][i]['end'] = self._io.pos()
@@ -245,7 +245,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon1 == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon1, self._io, u"/types/object_contents/seq/0")
             self._debug['class_name']['start'] = self._io.pos()
-            self.class_name = self._root.LengthPrefixedQuotedString(self._io, self, self._root)
+            self.class_name = PhpSerializedValue.LengthPrefixedQuotedString(self._io, self, self._root)
             self.class_name._read()
             self._debug['class_name']['end'] = self._io.pos()
             self._debug['colon2']['start'] = self._io.pos()
@@ -254,7 +254,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon2 == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon2, self._io, u"/types/object_contents/seq/2")
             self._debug['properties']['start'] = self._io.pos()
-            self.properties = self._root.CountPrefixedMapping(self._io, self, self._root)
+            self.properties = PhpSerializedValue.CountPrefixedMapping(self._io, self, self._root)
             self.properties._read()
             self._debug['properties']['end'] = self._io.pos()
 
@@ -275,7 +275,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon, self._io, u"/types/array_contents/seq/0")
             self._debug['elements']['start'] = self._io.pos()
-            self.elements = self._root.CountPrefixedMapping(self._io, self, self._root)
+            self.elements = PhpSerializedValue.CountPrefixedMapping(self._io, self, self._root)
             self.elements._read()
             self._debug['elements']['end'] = self._io.pos()
 
@@ -298,7 +298,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon1 == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon1, self._io, u"/types/custom_serialized_object_contents/seq/0")
             self._debug['class_name']['start'] = self._io.pos()
-            self.class_name = self._root.LengthPrefixedQuotedString(self._io, self, self._root)
+            self.class_name = PhpSerializedValue.LengthPrefixedQuotedString(self._io, self, self._root)
             self.class_name._read()
             self._debug['class_name']['end'] = self._io.pos()
             self._debug['colon2']['start'] = self._io.pos()
@@ -372,7 +372,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon, self._io, u"/types/php_3_object_contents/seq/0")
             self._debug['properties']['start'] = self._io.pos()
-            self.properties = self._root.CountPrefixedMapping(self._io, self, self._root)
+            self.properties = PhpSerializedValue.CountPrefixedMapping(self._io, self, self._root)
             self.properties._read()
             self._debug['properties']['end'] = self._io.pos()
 
@@ -393,7 +393,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon, self._io, u"/types/bool_contents/seq/0")
             self._debug['value_dec']['start'] = self._io.pos()
-            self.value_dec = KaitaiStream.resolve_enum(self._root.BoolValue, self._io.read_u1())
+            self.value_dec = KaitaiStream.resolve_enum(PhpSerializedValue.BoolValue, self._io.read_u1())
             self._debug['value_dec']['end'] = self._io.pos()
             self._debug['semicolon']['start'] = self._io.pos()
             self.semicolon = self._io.read_bytes(1)
@@ -407,7 +407,7 @@ class PhpSerializedValue(KaitaiStruct):
             if hasattr(self, '_m_value'):
                 return self._m_value if hasattr(self, '_m_value') else None
 
-            self._m_value = self.value_dec == self._root.BoolValue.true
+            self._m_value = self.value_dec == PhpSerializedValue.BoolValue.true
             return self._m_value if hasattr(self, '_m_value') else None
 
 
@@ -431,7 +431,7 @@ class PhpSerializedValue(KaitaiStruct):
             if not self.colon == b"\x3A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x3A", self.colon, self._io, u"/types/string_contents/seq/0")
             self._debug['string']['start'] = self._io.pos()
-            self.string = self._root.LengthPrefixedQuotedString(self._io, self, self._root)
+            self.string = PhpSerializedValue.LengthPrefixedQuotedString(self._io, self, self._root)
             self.string._read()
             self._debug['string']['end'] = self._io.pos()
             self._debug['semicolon']['start'] = self._io.pos()

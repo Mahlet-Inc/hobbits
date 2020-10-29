@@ -36,7 +36,7 @@ class ShapefileIndex(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.FileHeader(self._io, self, self._root)
+        self.header = ShapefileIndex.FileHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['records']['start'] = self._io.pos()
@@ -46,7 +46,7 @@ class ShapefileIndex(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.Record(self._io, self, self._root)
+            _t_records = ShapefileIndex.Record(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -102,10 +102,10 @@ class ShapefileIndex(KaitaiStruct):
             if not self.version == b"\xE8\x03\x00\x00":
                 raise kaitaistruct.ValidationNotEqualError(b"\xE8\x03\x00\x00", self.version, self._io, u"/types/file_header/seq/7")
             self._debug['shape_type']['start'] = self._io.pos()
-            self.shape_type = KaitaiStream.resolve_enum(self._root.ShapeType, self._io.read_s4le())
+            self.shape_type = KaitaiStream.resolve_enum(ShapefileIndex.ShapeType, self._io.read_s4le())
             self._debug['shape_type']['end'] = self._io.pos()
             self._debug['bounding_box']['start'] = self._io.pos()
-            self.bounding_box = self._root.BoundingBoxXYZM(self._io, self, self._root)
+            self.bounding_box = ShapefileIndex.BoundingBoxXYZM(self._io, self, self._root)
             self.bounding_box._read()
             self._debug['bounding_box']['end'] = self._io.pos()
 
@@ -137,19 +137,19 @@ class ShapefileIndex(KaitaiStruct):
 
         def _read(self):
             self._debug['x']['start'] = self._io.pos()
-            self.x = self._root.BoundsMinMax(self._io, self, self._root)
+            self.x = ShapefileIndex.BoundsMinMax(self._io, self, self._root)
             self.x._read()
             self._debug['x']['end'] = self._io.pos()
             self._debug['y']['start'] = self._io.pos()
-            self.y = self._root.BoundsMinMax(self._io, self, self._root)
+            self.y = ShapefileIndex.BoundsMinMax(self._io, self, self._root)
             self.y._read()
             self._debug['y']['end'] = self._io.pos()
             self._debug['z']['start'] = self._io.pos()
-            self.z = self._root.BoundsMinMax(self._io, self, self._root)
+            self.z = ShapefileIndex.BoundsMinMax(self._io, self, self._root)
             self.z._read()
             self._debug['z']['end'] = self._io.pos()
             self._debug['m']['start'] = self._io.pos()
-            self.m = self._root.BoundsMinMax(self._io, self, self._root)
+            self.m = ShapefileIndex.BoundsMinMax(self._io, self, self._root)
             self.m._read()
             self._debug['m']['end'] = self._io.pos()
 

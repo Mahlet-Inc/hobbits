@@ -51,7 +51,7 @@ class TrDosImage(KaitaiStruct):
             if not 'arr' in self._debug['files']:
                 self._debug['files']['arr'] = []
             self._debug['files']['arr'].append({'start': self._io.pos()})
-            _t_files = self._root.File(self._io, self, self._root)
+            _t_files = TrDosImage.File(self._io, self, self._root)
             _t_files._read()
             _ = _t_files
             self.files.append(_)
@@ -85,7 +85,7 @@ class TrDosImage(KaitaiStruct):
             self.first_free_sector_track = self._io.read_u1()
             self._debug['first_free_sector_track']['end'] = self._io.pos()
             self._debug['disk_type']['start'] = self._io.pos()
-            self.disk_type = KaitaiStream.resolve_enum(self._root.DiskType, self._io.read_u1())
+            self.disk_type = KaitaiStream.resolve_enum(TrDosImage.DiskType, self._io.read_u1())
             self._debug['disk_type']['end'] = self._io.pos()
             self._debug['num_files']['start'] = self._io.pos()
             self.num_files = self._io.read_u1()
@@ -244,7 +244,7 @@ class TrDosImage(KaitaiStruct):
             self._debug['name']['start'] = self._io.pos()
             self._raw_name = self._io.read_bytes(8)
             _io__raw_name = KaitaiStream(BytesIO(self._raw_name))
-            self.name = self._root.Filename(_io__raw_name, self, self._root)
+            self.name = TrDosImage.Filename(_io__raw_name, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['extension']['start'] = self._io.pos()
@@ -253,16 +253,16 @@ class TrDosImage(KaitaiStruct):
             self._debug['position_and_length']['start'] = self._io.pos()
             _on = self.extension
             if _on == 66:
-                self.position_and_length = self._root.PositionAndLengthBasic(self._io, self, self._root)
+                self.position_and_length = TrDosImage.PositionAndLengthBasic(self._io, self, self._root)
                 self.position_and_length._read()
             elif _on == 67:
-                self.position_and_length = self._root.PositionAndLengthCode(self._io, self, self._root)
+                self.position_and_length = TrDosImage.PositionAndLengthCode(self._io, self, self._root)
                 self.position_and_length._read()
             elif _on == 35:
-                self.position_and_length = self._root.PositionAndLengthPrint(self._io, self, self._root)
+                self.position_and_length = TrDosImage.PositionAndLengthPrint(self._io, self, self._root)
                 self.position_and_length._read()
             else:
-                self.position_and_length = self._root.PositionAndLengthGeneric(self._io, self, self._root)
+                self.position_and_length = TrDosImage.PositionAndLengthGeneric(self._io, self, self._root)
                 self.position_and_length._read()
             self._debug['position_and_length']['end'] = self._io.pos()
             self._debug['length_sectors']['start'] = self._io.pos()
@@ -313,7 +313,7 @@ class TrDosImage(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek(2048)
         self._debug['_m_volume_info']['start'] = self._io.pos()
-        self._m_volume_info = self._root.VolumeInfo(self._io, self, self._root)
+        self._m_volume_info = TrDosImage.VolumeInfo(self._io, self, self._root)
         self._m_volume_info._read()
         self._debug['_m_volume_info']['end'] = self._io.pos()
         self._io.seek(_pos)

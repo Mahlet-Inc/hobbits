@@ -19,28 +19,28 @@ class TlsClientHello(KaitaiStruct):
 
     def _read(self):
         self._debug['version']['start'] = self._io.pos()
-        self.version = self._root.Version(self._io, self, self._root)
+        self.version = TlsClientHello.Version(self._io, self, self._root)
         self.version._read()
         self._debug['version']['end'] = self._io.pos()
         self._debug['random']['start'] = self._io.pos()
-        self.random = self._root.Random(self._io, self, self._root)
+        self.random = TlsClientHello.Random(self._io, self, self._root)
         self.random._read()
         self._debug['random']['end'] = self._io.pos()
         self._debug['session_id']['start'] = self._io.pos()
-        self.session_id = self._root.SessionId(self._io, self, self._root)
+        self.session_id = TlsClientHello.SessionId(self._io, self, self._root)
         self.session_id._read()
         self._debug['session_id']['end'] = self._io.pos()
         self._debug['cipher_suites']['start'] = self._io.pos()
-        self.cipher_suites = self._root.CipherSuites(self._io, self, self._root)
+        self.cipher_suites = TlsClientHello.CipherSuites(self._io, self, self._root)
         self.cipher_suites._read()
         self._debug['cipher_suites']['end'] = self._io.pos()
         self._debug['compression_methods']['start'] = self._io.pos()
-        self.compression_methods = self._root.CompressionMethods(self._io, self, self._root)
+        self.compression_methods = TlsClientHello.CompressionMethods(self._io, self, self._root)
         self.compression_methods._read()
         self._debug['compression_methods']['end'] = self._io.pos()
         if self._io.is_eof() == False:
             self._debug['extensions']['start'] = self._io.pos()
-            self.extensions = self._root.Extensions(self._io, self, self._root)
+            self.extensions = TlsClientHello.Extensions(self._io, self, self._root)
             self.extensions._read()
             self._debug['extensions']['end'] = self._io.pos()
 
@@ -118,7 +118,7 @@ class TlsClientHello(KaitaiStruct):
                 if not 'arr' in self._debug['server_names']:
                     self._debug['server_names']['arr'] = []
                 self._debug['server_names']['arr'].append({'start': self._io.pos()})
-                _t_server_names = self._root.ServerName(self._io, self, self._root)
+                _t_server_names = TlsClientHello.ServerName(self._io, self, self._root)
                 _t_server_names._read()
                 self.server_names.append(_t_server_names)
                 self._debug['server_names']['arr'][len(self.server_names) - 1]['end'] = self._io.pos()
@@ -187,7 +187,7 @@ class TlsClientHello(KaitaiStruct):
                 if not 'arr' in self._debug['alpn_protocols']:
                     self._debug['alpn_protocols']['arr'] = []
                 self._debug['alpn_protocols']['arr'].append({'start': self._io.pos()})
-                _t_alpn_protocols = self._root.Protocol(self._io, self, self._root)
+                _t_alpn_protocols = TlsClientHello.Protocol(self._io, self, self._root)
                 _t_alpn_protocols._read()
                 self.alpn_protocols.append(_t_alpn_protocols)
                 self._debug['alpn_protocols']['arr'][len(self.alpn_protocols) - 1]['end'] = self._io.pos()
@@ -215,7 +215,7 @@ class TlsClientHello(KaitaiStruct):
                 if not 'arr' in self._debug['extensions']:
                     self._debug['extensions']['arr'] = []
                 self._debug['extensions']['arr'].append({'start': self._io.pos()})
-                _t_extensions = self._root.Extension(self._io, self, self._root)
+                _t_extensions = TlsClientHello.Extension(self._io, self, self._root)
                 _t_extensions._read()
                 self.extensions.append(_t_extensions)
                 self._debug['extensions']['arr'][len(self.extensions) - 1]['end'] = self._io.pos()
@@ -278,12 +278,12 @@ class TlsClientHello(KaitaiStruct):
             if _on == 0:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Sni(_io__raw_body, self, self._root)
+                self.body = TlsClientHello.Sni(_io__raw_body, self, self._root)
                 self.body._read()
             elif _on == 16:
                 self._raw_body = self._io.read_bytes(self.len)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Alpn(_io__raw_body, self, self._root)
+                self.body = TlsClientHello.Alpn(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len)

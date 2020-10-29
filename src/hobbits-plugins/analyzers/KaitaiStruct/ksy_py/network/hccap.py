@@ -32,7 +32,7 @@ class Hccap(KaitaiStruct):
             if not 'arr' in self._debug['records']:
                 self._debug['records']['arr'] = []
             self._debug['records']['arr'].append({'start': self._io.pos()})
-            _t_records = self._root.HccapRecord(self._io, self, self._root)
+            _t_records = Hccap.HccapRecord(self._io, self, self._root)
             _t_records._read()
             self.records.append(_t_records)
             self._debug['records']['arr'][len(self.records) - 1]['end'] = self._io.pos()
@@ -67,7 +67,7 @@ class Hccap(KaitaiStruct):
             self._debug['eapol_buffer']['start'] = self._io.pos()
             self._raw_eapol_buffer = self._io.read_bytes(256)
             _io__raw_eapol_buffer = KaitaiStream(BytesIO(self._raw_eapol_buffer))
-            self.eapol_buffer = self._root.EapolDummy(_io__raw_eapol_buffer, self, self._root)
+            self.eapol_buffer = Hccap.EapolDummy(_io__raw_eapol_buffer, self, self._root)
             self.eapol_buffer._read()
             self._debug['eapol_buffer']['end'] = self._io.pos()
             self._debug['len_eapol']['start'] = self._io.pos()

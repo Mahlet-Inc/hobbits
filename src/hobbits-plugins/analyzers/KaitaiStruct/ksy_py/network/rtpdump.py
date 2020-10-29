@@ -26,7 +26,7 @@ class Rtpdump(KaitaiStruct):
 
     def _read(self):
         self._debug['file_header']['start'] = self._io.pos()
-        self.file_header = self._root.HeaderT(self._io, self, self._root)
+        self.file_header = Rtpdump.HeaderT(self._io, self, self._root)
         self.file_header._read()
         self._debug['file_header']['end'] = self._io.pos()
         self._debug['packets']['start'] = self._io.pos()
@@ -36,7 +36,7 @@ class Rtpdump(KaitaiStruct):
             if not 'arr' in self._debug['packets']:
                 self._debug['packets']['arr'] = []
             self._debug['packets']['arr'].append({'start': self._io.pos()})
-            _t_packets = self._root.PacketT(self._io, self, self._root)
+            _t_packets = Rtpdump.PacketT(self._io, self, self._root)
             _t_packets._read()
             self.packets.append(_t_packets)
             self._debug['packets']['arr'][len(self.packets) - 1]['end'] = self._io.pos()

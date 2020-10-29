@@ -28,7 +28,7 @@ class SomeIp(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.Header(self._io, self, self._root)
+        self.header = SomeIp.Header(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['payload']['start'] = self._io.pos()
@@ -79,7 +79,7 @@ class SomeIp(KaitaiStruct):
             self._debug['message_id']['start'] = self._io.pos()
             self._raw_message_id = self._io.read_bytes(4)
             _io__raw_message_id = KaitaiStream(BytesIO(self._raw_message_id))
-            self.message_id = self._root.Header.MessageId(_io__raw_message_id, self, self._root)
+            self.message_id = SomeIp.Header.MessageId(_io__raw_message_id, self, self._root)
             self.message_id._read()
             self._debug['message_id']['end'] = self._io.pos()
             self._debug['length']['start'] = self._io.pos()
@@ -88,7 +88,7 @@ class SomeIp(KaitaiStruct):
             self._debug['request_id']['start'] = self._io.pos()
             self._raw_request_id = self._io.read_bytes(4)
             _io__raw_request_id = KaitaiStream(BytesIO(self._raw_request_id))
-            self.request_id = self._root.Header.RequestId(_io__raw_request_id, self, self._root)
+            self.request_id = SomeIp.Header.RequestId(_io__raw_request_id, self, self._root)
             self.request_id._read()
             self._debug['request_id']['end'] = self._io.pos()
             self._debug['protocol_version']['start'] = self._io.pos()
@@ -98,10 +98,10 @@ class SomeIp(KaitaiStruct):
             self.interface_version = self._io.read_u1()
             self._debug['interface_version']['end'] = self._io.pos()
             self._debug['message_type']['start'] = self._io.pos()
-            self.message_type = KaitaiStream.resolve_enum(self._root.Header.MessageTypeEnum, self._io.read_u1())
+            self.message_type = KaitaiStream.resolve_enum(SomeIp.Header.MessageTypeEnum, self._io.read_u1())
             self._debug['message_type']['end'] = self._io.pos()
             self._debug['return_code']['start'] = self._io.pos()
-            self.return_code = KaitaiStream.resolve_enum(self._root.Header.ReturnCodeEnum, self._io.read_u1())
+            self.return_code = KaitaiStream.resolve_enum(SomeIp.Header.ReturnCodeEnum, self._io.read_u1())
             self._debug['return_code']['end'] = self._io.pos()
 
         class MessageId(KaitaiStruct):
@@ -127,16 +127,16 @@ class SomeIp(KaitaiStruct):
                 self.service_id = self._io.read_u2be()
                 self._debug['service_id']['end'] = self._io.pos()
                 self._debug['sub_id']['start'] = self._io.pos()
-                self.sub_id = self._io.read_bits_int(1) != 0
+                self.sub_id = self._io.read_bits_int_be(1) != 0
                 self._debug['sub_id']['end'] = self._io.pos()
                 if self.sub_id == False:
                     self._debug['method_id']['start'] = self._io.pos()
-                    self.method_id = self._io.read_bits_int(15)
+                    self.method_id = self._io.read_bits_int_be(15)
                     self._debug['method_id']['end'] = self._io.pos()
 
                 if self.sub_id == True:
                     self._debug['event_id']['start'] = self._io.pos()
-                    self.event_id = self._io.read_bits_int(15)
+                    self.event_id = self._io.read_bits_int_be(15)
                     self._debug['event_id']['end'] = self._io.pos()
 
 
@@ -202,7 +202,7 @@ class SomeIp(KaitaiStruct):
             if hasattr(self, '_m_is_valid_service_discovery'):
                 return self._m_is_valid_service_discovery if hasattr(self, '_m_is_valid_service_discovery') else None
 
-            self._m_is_valid_service_discovery =  ((self.message_id.value == 4294934784) and (self.protocol_version == 1) and (self.interface_version == 1) and (self.message_type == self._root.Header.MessageTypeEnum.notification) and (self.return_code == self._root.Header.ReturnCodeEnum.ok)) 
+            self._m_is_valid_service_discovery =  ((self.message_id.value == 4294934784) and (self.protocol_version == 1) and (self.interface_version == 1) and (self.message_type == SomeIp.Header.MessageTypeEnum.notification) and (self.return_code == SomeIp.Header.ReturnCodeEnum.ok)) 
             return self._m_is_valid_service_discovery if hasattr(self, '_m_is_valid_service_discovery') else None
 
 

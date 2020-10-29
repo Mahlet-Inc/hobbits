@@ -35,7 +35,7 @@ class AndroidOpenglShadersCache(KaitaiStruct):
         self._debug['contents']['start'] = self._io.pos()
         self._raw_contents = self._io.read_bytes_full()
         _io__raw_contents = KaitaiStream(BytesIO(self._raw_contents))
-        self.contents = self._root.Cache(_io__raw_contents, self, self._root)
+        self.contents = AndroidOpenglShadersCache.Cache(_io__raw_contents, self, self._root)
         self.contents._read()
         self._debug['contents']['end'] = self._io.pos()
 
@@ -69,7 +69,7 @@ class AndroidOpenglShadersCache(KaitaiStruct):
             self.str = (KaitaiStream.bytes_terminate(self._io.read_bytes(self.len_str), 0, False)).decode(u"ascii")
             self._debug['str']['end'] = self._io.pos()
             self._debug['alignment']['start'] = self._io.pos()
-            self.alignment = self._root.Alignment(self._io, self, self._root)
+            self.alignment = AndroidOpenglShadersCache.Alignment(self._io, self, self._root)
             self.alignment._read()
             self._debug['alignment']['end'] = self._io.pos()
 
@@ -103,7 +103,7 @@ class AndroidOpenglShadersCache(KaitaiStruct):
             self._debug['num_entries']['end'] = self._io.pos()
             if self.version >= 3:
                 self._debug['build_id']['start'] = self._io.pos()
-                self.build_id = self._root.PrefixedString(self._io, self, self._root)
+                self.build_id = AndroidOpenglShadersCache.PrefixedString(self._io, self, self._root)
                 self.build_id._read()
                 self._debug['build_id']['end'] = self._io.pos()
 
@@ -113,7 +113,7 @@ class AndroidOpenglShadersCache(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Cache.Entry(self._io, self, self._root)
+                _t_entries = AndroidOpenglShadersCache.Cache.Entry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries[i] = _t_entries
                 self._debug['entries']['arr'][i]['end'] = self._io.pos()
@@ -142,7 +142,7 @@ class AndroidOpenglShadersCache(KaitaiStruct):
                 self.value = self._io.read_bytes(self.len_value)
                 self._debug['value']['end'] = self._io.pos()
                 self._debug['alignment']['start'] = self._io.pos()
-                self.alignment = self._root.Alignment(self._io, self, self._root)
+                self.alignment = AndroidOpenglShadersCache.Alignment(self._io, self, self._root)
                 self.alignment._read()
                 self._debug['alignment']['end'] = self._io.pos()
 

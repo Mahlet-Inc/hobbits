@@ -34,7 +34,7 @@ class EfivarSignatureList(KaitaiStruct):
 
     def _read(self):
         self._debug['var_attributes']['start'] = self._io.pos()
-        self.var_attributes = self._root.EfiVarAttr(self._io, self, self._root)
+        self.var_attributes = EfivarSignatureList.EfiVarAttr(self._io, self, self._root)
         self.var_attributes._read()
         self._debug['var_attributes']['end'] = self._io.pos()
         self._debug['signatures']['start'] = self._io.pos()
@@ -44,7 +44,7 @@ class EfivarSignatureList(KaitaiStruct):
             if not 'arr' in self._debug['signatures']:
                 self._debug['signatures']['arr'] = []
             self._debug['signatures']['arr'].append({'start': self._io.pos()})
-            _t_signatures = self._root.SignatureList(self._io, self, self._root)
+            _t_signatures = EfivarSignatureList.SignatureList(self._io, self, self._root)
             _t_signatures._read()
             self.signatures.append(_t_signatures)
             self._debug['signatures']['arr'][len(self.signatures) - 1]['end'] = self._io.pos()
@@ -90,7 +90,7 @@ class EfivarSignatureList(KaitaiStruct):
                     self._debug['signatures']['arr'].append({'start': self._io.pos()})
                     self._raw_signatures[i] = self._io.read_bytes(self.len_signature)
                     _io__raw_signatures = KaitaiStream(BytesIO(self._raw_signatures[i]))
-                    _t_signatures = self._root.SignatureData(_io__raw_signatures, self, self._root)
+                    _t_signatures = EfivarSignatureList.SignatureData(_io__raw_signatures, self, self._root)
                     _t_signatures._read()
                     self.signatures[i] = _t_signatures
                     self._debug['signatures']['arr'][i]['end'] = self._io.pos()
@@ -300,31 +300,31 @@ class EfivarSignatureList(KaitaiStruct):
 
         def _read(self):
             self._debug['enhanced_authenticated_access']['start'] = self._io.pos()
-            self.enhanced_authenticated_access = self._io.read_bits_int(1) != 0
+            self.enhanced_authenticated_access = self._io.read_bits_int_be(1) != 0
             self._debug['enhanced_authenticated_access']['end'] = self._io.pos()
             self._debug['append_write']['start'] = self._io.pos()
-            self.append_write = self._io.read_bits_int(1) != 0
+            self.append_write = self._io.read_bits_int_be(1) != 0
             self._debug['append_write']['end'] = self._io.pos()
             self._debug['time_based_authenticated_write_access']['start'] = self._io.pos()
-            self.time_based_authenticated_write_access = self._io.read_bits_int(1) != 0
+            self.time_based_authenticated_write_access = self._io.read_bits_int_be(1) != 0
             self._debug['time_based_authenticated_write_access']['end'] = self._io.pos()
             self._debug['authenticated_write_access']['start'] = self._io.pos()
-            self.authenticated_write_access = self._io.read_bits_int(1) != 0
+            self.authenticated_write_access = self._io.read_bits_int_be(1) != 0
             self._debug['authenticated_write_access']['end'] = self._io.pos()
             self._debug['hardware_error_record']['start'] = self._io.pos()
-            self.hardware_error_record = self._io.read_bits_int(1) != 0
+            self.hardware_error_record = self._io.read_bits_int_be(1) != 0
             self._debug['hardware_error_record']['end'] = self._io.pos()
             self._debug['runtime_access']['start'] = self._io.pos()
-            self.runtime_access = self._io.read_bits_int(1) != 0
+            self.runtime_access = self._io.read_bits_int_be(1) != 0
             self._debug['runtime_access']['end'] = self._io.pos()
             self._debug['bootservice_access']['start'] = self._io.pos()
-            self.bootservice_access = self._io.read_bits_int(1) != 0
+            self.bootservice_access = self._io.read_bits_int_be(1) != 0
             self._debug['bootservice_access']['end'] = self._io.pos()
             self._debug['non_volatile']['start'] = self._io.pos()
-            self.non_volatile = self._io.read_bits_int(1) != 0
+            self.non_volatile = self._io.read_bits_int_be(1) != 0
             self._debug['non_volatile']['end'] = self._io.pos()
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(24)
+            self.reserved1 = self._io.read_bits_int_be(24)
             self._debug['reserved1']['end'] = self._io.pos()
 
 

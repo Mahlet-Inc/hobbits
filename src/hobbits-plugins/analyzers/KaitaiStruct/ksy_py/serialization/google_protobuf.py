@@ -58,7 +58,7 @@ class GoogleProtobuf(KaitaiStruct):
             if not 'arr' in self._debug['pairs']:
                 self._debug['pairs']['arr'] = []
             self._debug['pairs']['arr'].append({'start': self._io.pos()})
-            _t_pairs = self._root.Pair(self._io, self, self._root)
+            _t_pairs = GoogleProtobuf.Pair(self._io, self, self._root)
             _t_pairs._read()
             self.pairs.append(_t_pairs)
             self._debug['pairs']['arr'][len(self.pairs) - 1]['end'] = self._io.pos()
@@ -90,15 +90,15 @@ class GoogleProtobuf(KaitaiStruct):
             self._debug['key']['end'] = self._io.pos()
             self._debug['value']['start'] = self._io.pos()
             _on = self.wire_type
-            if _on == self._root.Pair.WireTypes.varint:
+            if _on == GoogleProtobuf.Pair.WireTypes.varint:
                 self.value = vlq_base128_le.VlqBase128Le(self._io)
                 self.value._read()
-            elif _on == self._root.Pair.WireTypes.len_delimited:
-                self.value = self._root.DelimitedBytes(self._io, self, self._root)
+            elif _on == GoogleProtobuf.Pair.WireTypes.len_delimited:
+                self.value = GoogleProtobuf.DelimitedBytes(self._io, self, self._root)
                 self.value._read()
-            elif _on == self._root.Pair.WireTypes.bit_64:
+            elif _on == GoogleProtobuf.Pair.WireTypes.bit_64:
                 self.value = self._io.read_u8le()
-            elif _on == self._root.Pair.WireTypes.bit_32:
+            elif _on == GoogleProtobuf.Pair.WireTypes.bit_32:
                 self.value = self._io.read_u4le()
             self._debug['value']['end'] = self._io.pos()
 
@@ -115,7 +115,7 @@ class GoogleProtobuf(KaitaiStruct):
             if hasattr(self, '_m_wire_type'):
                 return self._m_wire_type if hasattr(self, '_m_wire_type') else None
 
-            self._m_wire_type = KaitaiStream.resolve_enum(self._root.Pair.WireTypes, (self.key.value & 7))
+            self._m_wire_type = KaitaiStream.resolve_enum(GoogleProtobuf.Pair.WireTypes, (self.key.value & 7))
             return self._m_wire_type if hasattr(self, '_m_wire_type') else None
 
         @property

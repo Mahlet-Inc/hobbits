@@ -11,11 +11,12 @@
 #include "hobbitspluginmanager.h"
 #include "settingsmanager.h"
 #include <QJsonArray>
-#include "pythonpluginconfig.h"
+
 #include <QTimer>
 
 #ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
+#include "pythonpluginconfig.h"
 #endif
 
 int main(int argc, char *argv[])

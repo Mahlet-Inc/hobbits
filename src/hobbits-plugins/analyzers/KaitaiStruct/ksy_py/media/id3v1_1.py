@@ -199,7 +199,7 @@ class Id3v11(KaitaiStruct):
             self.comment = self._io.read_bytes(30)
             self._debug['comment']['end'] = self._io.pos()
             self._debug['genre']['start'] = self._io.pos()
-            self.genre = KaitaiStream.resolve_enum(self._root.Id3V11Tag.GenreEnum, self._io.read_u1())
+            self.genre = KaitaiStream.resolve_enum(Id3v11.Id3V11Tag.GenreEnum, self._io.read_u1())
             self._debug['genre']['end'] = self._io.pos()
 
 
@@ -211,7 +211,7 @@ class Id3v11(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek((self._io.size() - 128))
         self._debug['_m_id3v1_tag']['start'] = self._io.pos()
-        self._m_id3v1_tag = self._root.Id3V11Tag(self._io, self, self._root)
+        self._m_id3v1_tag = Id3v11.Id3V11Tag(self._io, self, self._root)
         self._m_id3v1_tag._read()
         self._debug['_m_id3v1_tag']['end'] = self._io.pos()
         self._io.seek(_pos)

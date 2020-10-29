@@ -36,7 +36,7 @@ class PcxDcx(KaitaiStruct):
             if not 'arr' in self._debug['files']:
                 self._debug['files']['arr'] = []
             self._debug['files']['arr'].append({'start': self._io.pos()})
-            _t_files = self._root.PcxOffset(self._io, self, self._root)
+            _t_files = PcxDcx.PcxOffset(self._io, self, self._root)
             _t_files._read()
             _ = _t_files
             self.files.append(_)

@@ -43,48 +43,48 @@ class WindowsLnkFile(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.FileHeader(self._io, self, self._root)
+        self.header = WindowsLnkFile.FileHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         if self.header.flags.has_link_target_id_list:
             self._debug['target_id_list']['start'] = self._io.pos()
-            self.target_id_list = self._root.LinkTargetIdList(self._io, self, self._root)
+            self.target_id_list = WindowsLnkFile.LinkTargetIdList(self._io, self, self._root)
             self.target_id_list._read()
             self._debug['target_id_list']['end'] = self._io.pos()
 
         if self.header.flags.has_link_info:
             self._debug['info']['start'] = self._io.pos()
-            self.info = self._root.LinkInfo(self._io, self, self._root)
+            self.info = WindowsLnkFile.LinkInfo(self._io, self, self._root)
             self.info._read()
             self._debug['info']['end'] = self._io.pos()
 
         if self.header.flags.has_name:
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.StringData(self._io, self, self._root)
+            self.name = WindowsLnkFile.StringData(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
 
         if self.header.flags.has_rel_path:
             self._debug['rel_path']['start'] = self._io.pos()
-            self.rel_path = self._root.StringData(self._io, self, self._root)
+            self.rel_path = WindowsLnkFile.StringData(self._io, self, self._root)
             self.rel_path._read()
             self._debug['rel_path']['end'] = self._io.pos()
 
         if self.header.flags.has_work_dir:
             self._debug['work_dir']['start'] = self._io.pos()
-            self.work_dir = self._root.StringData(self._io, self, self._root)
+            self.work_dir = WindowsLnkFile.StringData(self._io, self, self._root)
             self.work_dir._read()
             self._debug['work_dir']['end'] = self._io.pos()
 
         if self.header.flags.has_arguments:
             self._debug['arguments']['start'] = self._io.pos()
-            self.arguments = self._root.StringData(self._io, self, self._root)
+            self.arguments = WindowsLnkFile.StringData(self._io, self, self._root)
             self.arguments._read()
             self._debug['arguments']['end'] = self._io.pos()
 
         if self.header.flags.has_icon_location:
             self._debug['icon_location']['start'] = self._io.pos()
-            self.icon_location = self._root.StringData(self._io, self, self._root)
+            self.icon_location = WindowsLnkFile.StringData(self._io, self, self._root)
             self.icon_location._read()
             self._debug['icon_location']['end'] = self._io.pos()
 
@@ -149,7 +149,7 @@ class WindowsLnkFile(KaitaiStruct):
             self._debug['all']['start'] = self._io.pos()
             self._raw_all = self._io.read_bytes((self.len_all - 4))
             _io__raw_all = KaitaiStream(BytesIO(self._raw_all))
-            self.all = self._root.LinkInfo.All(_io__raw_all, self, self._root)
+            self.all = WindowsLnkFile.LinkInfo.All(_io__raw_all, self, self._root)
             self.all._read()
             self._debug['all']['end'] = self._io.pos()
 
@@ -167,7 +167,7 @@ class WindowsLnkFile(KaitaiStruct):
 
             def _read(self):
                 self._debug['drive_type']['start'] = self._io.pos()
-                self.drive_type = KaitaiStream.resolve_enum(self._root.DriveTypes, self._io.read_u4le())
+                self.drive_type = KaitaiStream.resolve_enum(WindowsLnkFile.DriveTypes, self._io.read_u4le())
                 self._debug['drive_type']['end'] = self._io.pos()
                 self._debug['drive_serial_number']['start'] = self._io.pos()
                 self.drive_serial_number = self._io.read_u4le()
@@ -224,7 +224,7 @@ class WindowsLnkFile(KaitaiStruct):
                 self._debug['header']['start'] = self._io.pos()
                 self._raw_header = self._io.read_bytes((self.len_header - 8))
                 _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-                self.header = self._root.LinkInfo.Header(_io__raw_header, self, self._root)
+                self.header = WindowsLnkFile.LinkInfo.Header(_io__raw_header, self, self._root)
                 self.header._read()
                 self._debug['header']['end'] = self._io.pos()
 
@@ -237,7 +237,7 @@ class WindowsLnkFile(KaitaiStruct):
                     _pos = self._io.pos()
                     self._io.seek((self.header.ofs_volume_id - 4))
                     self._debug['_m_volume_id']['start'] = self._io.pos()
-                    self._m_volume_id = self._root.LinkInfo.VolumeIdSpec(self._io, self, self._root)
+                    self._m_volume_id = WindowsLnkFile.LinkInfo.VolumeIdSpec(self._io, self, self._root)
                     self._m_volume_id._read()
                     self._debug['_m_volume_id']['end'] = self._io.pos()
                     self._io.seek(_pos)
@@ -279,7 +279,7 @@ class WindowsLnkFile(KaitaiStruct):
                 self._debug['body']['start'] = self._io.pos()
                 self._raw_body = self._io.read_bytes((self.len_all - 4))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkInfo.VolumeIdBody(_io__raw_body, self, self._root)
+                self.body = WindowsLnkFile.LinkInfo.VolumeIdBody(_io__raw_body, self, self._root)
                 self.body._read()
                 self._debug['body']['end'] = self._io.pos()
 
@@ -298,16 +298,16 @@ class WindowsLnkFile(KaitaiStruct):
 
             def _read(self):
                 self._debug['reserved1']['start'] = self._io.pos()
-                self.reserved1 = self._io.read_bits_int(6)
+                self.reserved1 = self._io.read_bits_int_be(6)
                 self._debug['reserved1']['end'] = self._io.pos()
                 self._debug['has_common_net_rel_link']['start'] = self._io.pos()
-                self.has_common_net_rel_link = self._io.read_bits_int(1) != 0
+                self.has_common_net_rel_link = self._io.read_bits_int_be(1) != 0
                 self._debug['has_common_net_rel_link']['end'] = self._io.pos()
                 self._debug['has_volume_id_and_local_base_path']['start'] = self._io.pos()
-                self.has_volume_id_and_local_base_path = self._io.read_bits_int(1) != 0
+                self.has_volume_id_and_local_base_path = self._io.read_bits_int_be(1) != 0
                 self._debug['has_volume_id_and_local_base_path']['end'] = self._io.pos()
                 self._debug['reserved2']['start'] = self._io.pos()
-                self.reserved2 = self._io.read_bits_int(24)
+                self.reserved2 = self._io.read_bits_int_be(24)
                 self._debug['reserved2']['end'] = self._io.pos()
 
 
@@ -325,7 +325,7 @@ class WindowsLnkFile(KaitaiStruct):
 
             def _read(self):
                 self._debug['flags']['start'] = self._io.pos()
-                self.flags = self._root.LinkInfo.LinkInfoFlags(self._io, self, self._root)
+                self.flags = WindowsLnkFile.LinkInfo.LinkInfoFlags(self._io, self, self._root)
                 self.flags._read()
                 self._debug['flags']['end'] = self._io.pos()
                 self._debug['ofs_volume_id']['start'] = self._io.pos()
@@ -367,40 +367,40 @@ class WindowsLnkFile(KaitaiStruct):
 
         def _read(self):
             self._debug['is_unicode']['start'] = self._io.pos()
-            self.is_unicode = self._io.read_bits_int(1) != 0
+            self.is_unicode = self._io.read_bits_int_be(1) != 0
             self._debug['is_unicode']['end'] = self._io.pos()
             self._debug['has_icon_location']['start'] = self._io.pos()
-            self.has_icon_location = self._io.read_bits_int(1) != 0
+            self.has_icon_location = self._io.read_bits_int_be(1) != 0
             self._debug['has_icon_location']['end'] = self._io.pos()
             self._debug['has_arguments']['start'] = self._io.pos()
-            self.has_arguments = self._io.read_bits_int(1) != 0
+            self.has_arguments = self._io.read_bits_int_be(1) != 0
             self._debug['has_arguments']['end'] = self._io.pos()
             self._debug['has_work_dir']['start'] = self._io.pos()
-            self.has_work_dir = self._io.read_bits_int(1) != 0
+            self.has_work_dir = self._io.read_bits_int_be(1) != 0
             self._debug['has_work_dir']['end'] = self._io.pos()
             self._debug['has_rel_path']['start'] = self._io.pos()
-            self.has_rel_path = self._io.read_bits_int(1) != 0
+            self.has_rel_path = self._io.read_bits_int_be(1) != 0
             self._debug['has_rel_path']['end'] = self._io.pos()
             self._debug['has_name']['start'] = self._io.pos()
-            self.has_name = self._io.read_bits_int(1) != 0
+            self.has_name = self._io.read_bits_int_be(1) != 0
             self._debug['has_name']['end'] = self._io.pos()
             self._debug['has_link_info']['start'] = self._io.pos()
-            self.has_link_info = self._io.read_bits_int(1) != 0
+            self.has_link_info = self._io.read_bits_int_be(1) != 0
             self._debug['has_link_info']['end'] = self._io.pos()
             self._debug['has_link_target_id_list']['start'] = self._io.pos()
-            self.has_link_target_id_list = self._io.read_bits_int(1) != 0
+            self.has_link_target_id_list = self._io.read_bits_int_be(1) != 0
             self._debug['has_link_target_id_list']['end'] = self._io.pos()
             self._debug['_unnamed8']['start'] = self._io.pos()
-            self._unnamed8 = self._io.read_bits_int(16)
+            self._unnamed8 = self._io.read_bits_int_be(16)
             self._debug['_unnamed8']['end'] = self._io.pos()
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(5)
+            self.reserved = self._io.read_bits_int_be(5)
             self._debug['reserved']['end'] = self._io.pos()
             self._debug['keep_local_id_list_for_unc_target']['start'] = self._io.pos()
-            self.keep_local_id_list_for_unc_target = self._io.read_bits_int(1) != 0
+            self.keep_local_id_list_for_unc_target = self._io.read_bits_int_be(1) != 0
             self._debug['keep_local_id_list_for_unc_target']['end'] = self._io.pos()
             self._debug['_unnamed11']['start'] = self._io.pos()
-            self._unnamed11 = self._io.read_bits_int(2)
+            self._unnamed11 = self._io.read_bits_int_be(2)
             self._debug['_unnamed11']['end'] = self._io.pos()
 
 
@@ -430,7 +430,7 @@ class WindowsLnkFile(KaitaiStruct):
             self._debug['flags']['start'] = self._io.pos()
             self._raw_flags = self._io.read_bytes(4)
             _io__raw_flags = KaitaiStream(BytesIO(self._raw_flags))
-            self.flags = self._root.LinkFlags(_io__raw_flags, self, self._root)
+            self.flags = WindowsLnkFile.LinkFlags(_io__raw_flags, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['file_attrs']['start'] = self._io.pos()
@@ -452,7 +452,7 @@ class WindowsLnkFile(KaitaiStruct):
             self.icon_index = self._io.read_s4le()
             self._debug['icon_index']['end'] = self._io.pos()
             self._debug['show_command']['start'] = self._io.pos()
-            self.show_command = KaitaiStream.resolve_enum(self._root.WindowState, self._io.read_u4le())
+            self.show_command = KaitaiStream.resolve_enum(WindowsLnkFile.WindowState, self._io.read_u4le())
             self._debug['show_command']['end'] = self._io.pos()
             self._debug['hotkey']['start'] = self._io.pos()
             self.hotkey = self._io.read_u2le()

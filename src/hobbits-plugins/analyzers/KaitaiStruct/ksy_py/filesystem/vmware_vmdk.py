@@ -36,7 +36,7 @@ class VmwareVmdk(KaitaiStruct):
         self.version = self._io.read_s4le()
         self._debug['version']['end'] = self._io.pos()
         self._debug['flags']['start'] = self._io.pos()
-        self.flags = self._root.HeaderFlags(self._io, self, self._root)
+        self.flags = VmwareVmdk.HeaderFlags(self._io, self, self._root)
         self.flags._read()
         self._debug['flags']['end'] = self._io.pos()
         self._debug['size_max']['start'] = self._io.pos()
@@ -70,7 +70,7 @@ class VmwareVmdk(KaitaiStruct):
         self.stuff = self._io.read_bytes(4)
         self._debug['stuff']['end'] = self._io.pos()
         self._debug['compression_method']['start'] = self._io.pos()
-        self.compression_method = KaitaiStream.resolve_enum(self._root.CompressionMethods, self._io.read_u2le())
+        self.compression_method = KaitaiStream.resolve_enum(VmwareVmdk.CompressionMethods, self._io.read_u2le())
         self._debug['compression_method']['end'] = self._io.pos()
 
     class HeaderFlags(KaitaiStruct):
@@ -87,29 +87,29 @@ class VmwareVmdk(KaitaiStruct):
 
         def _read(self):
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(5)
+            self.reserved1 = self._io.read_bits_int_be(5)
             self._debug['reserved1']['end'] = self._io.pos()
             self._debug['zeroed_grain_table_entry']['start'] = self._io.pos()
-            self.zeroed_grain_table_entry = self._io.read_bits_int(1) != 0
+            self.zeroed_grain_table_entry = self._io.read_bits_int_be(1) != 0
             self._debug['zeroed_grain_table_entry']['end'] = self._io.pos()
             self._debug['use_secondary_grain_dir']['start'] = self._io.pos()
-            self.use_secondary_grain_dir = self._io.read_bits_int(1) != 0
+            self.use_secondary_grain_dir = self._io.read_bits_int_be(1) != 0
             self._debug['use_secondary_grain_dir']['end'] = self._io.pos()
             self._debug['valid_new_line_detection_test']['start'] = self._io.pos()
-            self.valid_new_line_detection_test = self._io.read_bits_int(1) != 0
+            self.valid_new_line_detection_test = self._io.read_bits_int_be(1) != 0
             self._debug['valid_new_line_detection_test']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['reserved2']['start'] = self._io.pos()
             self.reserved2 = self._io.read_u1()
             self._debug['reserved2']['end'] = self._io.pos()
             self._debug['reserved3']['start'] = self._io.pos()
-            self.reserved3 = self._io.read_bits_int(6)
+            self.reserved3 = self._io.read_bits_int_be(6)
             self._debug['reserved3']['end'] = self._io.pos()
             self._debug['has_metadata']['start'] = self._io.pos()
-            self.has_metadata = self._io.read_bits_int(1) != 0
+            self.has_metadata = self._io.read_bits_int_be(1) != 0
             self._debug['has_metadata']['end'] = self._io.pos()
             self._debug['has_compressed_grain']['start'] = self._io.pos()
-            self.has_compressed_grain = self._io.read_bits_int(1) != 0
+            self.has_compressed_grain = self._io.read_bits_int_be(1) != 0
             self._debug['has_compressed_grain']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['reserved4']['start'] = self._io.pos()

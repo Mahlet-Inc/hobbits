@@ -136,19 +136,19 @@ class Bmp(KaitaiStruct):
 
     def _read(self):
         self._debug['file_hdr']['start'] = self._io.pos()
-        self.file_hdr = self._root.FileHeader(self._io, self, self._root)
+        self.file_hdr = Bmp.FileHeader(self._io, self, self._root)
         self.file_hdr._read()
         self._debug['file_hdr']['end'] = self._io.pos()
         self._debug['dib_info']['start'] = self._io.pos()
         self._raw_dib_info = self._io.read_bytes((self.file_hdr.ofs_bitmap - 14))
         _io__raw_dib_info = KaitaiStream(BytesIO(self._raw_dib_info))
-        self.dib_info = self._root.BitmapInfo(_io__raw_dib_info, self, self._root)
+        self.dib_info = Bmp.BitmapInfo(_io__raw_dib_info, self, self._root)
         self.dib_info._read()
         self._debug['dib_info']['end'] = self._io.pos()
         self._debug['bitmap']['start'] = self._io.pos()
         self._raw_bitmap = self._io.read_bytes_full()
         _io__raw_bitmap = KaitaiStream(BytesIO(self._raw_bitmap))
-        self.bitmap = self._root.Bitmap(_io__raw_bitmap, self, self._root)
+        self.bitmap = Bmp.Bitmap(_io__raw_bitmap, self, self._root)
         self.bitmap._read()
         self._debug['bitmap']['end'] = self._io.pos()
 
@@ -166,15 +166,15 @@ class Bmp(KaitaiStruct):
 
         def _read(self):
             self._debug['x']['start'] = self._io.pos()
-            self.x = self._root.FixedPoint2Dot30(self._io, self, self._root)
+            self.x = Bmp.FixedPoint2Dot30(self._io, self, self._root)
             self.x._read()
             self._debug['x']['end'] = self._io.pos()
             self._debug['y']['start'] = self._io.pos()
-            self.y = self._root.FixedPoint2Dot30(self._io, self, self._root)
+            self.y = Bmp.FixedPoint2Dot30(self._io, self, self._root)
             self.y._read()
             self._debug['y']['end'] = self._io.pos()
             self._debug['z']['start'] = self._io.pos()
-            self.z = self._root.FixedPoint2Dot30(self._io, self, self._root)
+            self.z = Bmp.FixedPoint2Dot30(self._io, self, self._root)
             self.z._read()
             self._debug['z']['end'] = self._io.pos()
 
@@ -219,7 +219,7 @@ class Bmp(KaitaiStruct):
 
         def _read(self):
             self._debug['intent']['start'] = self._io.pos()
-            self.intent = KaitaiStream.resolve_enum(self._root.Intent, self._io.read_u4le())
+            self.intent = KaitaiStream.resolve_enum(Bmp.Intent, self._io.read_u4le())
             self._debug['intent']['end'] = self._io.pos()
             self._debug['ofs_profile']['start'] = self._io.pos()
             self.ofs_profile = self._io.read_u4le()
@@ -236,7 +236,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_has_profile'):
                 return self._m_has_profile if hasattr(self, '_m_has_profile') else None
 
-            self._m_has_profile =  ((self._parent.bitmap_v4_ext.color_space_type == self._root.ColorSpace.profile_linked) or (self._parent.bitmap_v4_ext.color_space_type == self._root.ColorSpace.profile_embedded)) 
+            self._m_has_profile =  ((self._parent.bitmap_v4_ext.color_space_type == Bmp.ColorSpace.profile_linked) or (self._parent.bitmap_v4_ext.color_space_type == Bmp.ColorSpace.profile_embedded)) 
             return self._m_has_profile if hasattr(self, '_m_has_profile') else None
 
         @property
@@ -253,7 +253,7 @@ class Bmp(KaitaiStruct):
                 _pos = io.pos()
                 io.seek((14 + self.ofs_profile))
                 self._debug['_m_profile_data']['start'] = io.pos()
-                _on = self._parent.bitmap_v4_ext.color_space_type == self._root.ColorSpace.profile_linked
+                _on = self._parent.bitmap_v4_ext.color_space_type == Bmp.ColorSpace.profile_linked
                 if _on == True:
                     self._m_profile_data = (KaitaiStream.bytes_terminate(io.read_bytes(self.len_profile), 0, False)).decode(u"windows-1252")
                 else:
@@ -304,30 +304,30 @@ class Bmp(KaitaiStruct):
 
         def _read(self):
             self._debug['color_space_type']['start'] = self._io.pos()
-            self.color_space_type = KaitaiStream.resolve_enum(self._root.ColorSpace, self._io.read_u4le())
+            self.color_space_type = KaitaiStream.resolve_enum(Bmp.ColorSpace, self._io.read_u4le())
             self._debug['color_space_type']['end'] = self._io.pos()
             self._debug['endpoint_red']['start'] = self._io.pos()
-            self.endpoint_red = self._root.CieXyz(self._io, self, self._root)
+            self.endpoint_red = Bmp.CieXyz(self._io, self, self._root)
             self.endpoint_red._read()
             self._debug['endpoint_red']['end'] = self._io.pos()
             self._debug['endpoint_green']['start'] = self._io.pos()
-            self.endpoint_green = self._root.CieXyz(self._io, self, self._root)
+            self.endpoint_green = Bmp.CieXyz(self._io, self, self._root)
             self.endpoint_green._read()
             self._debug['endpoint_green']['end'] = self._io.pos()
             self._debug['endpoint_blue']['start'] = self._io.pos()
-            self.endpoint_blue = self._root.CieXyz(self._io, self, self._root)
+            self.endpoint_blue = Bmp.CieXyz(self._io, self, self._root)
             self.endpoint_blue._read()
             self._debug['endpoint_blue']['end'] = self._io.pos()
             self._debug['gamma_red']['start'] = self._io.pos()
-            self.gamma_red = self._root.FixedPoint16Dot16(self._io, self, self._root)
+            self.gamma_red = Bmp.FixedPoint16Dot16(self._io, self, self._root)
             self.gamma_red._read()
             self._debug['gamma_red']['end'] = self._io.pos()
             self._debug['gamma_blue']['start'] = self._io.pos()
-            self.gamma_blue = self._root.FixedPoint16Dot16(self._io, self, self._root)
+            self.gamma_blue = Bmp.FixedPoint16Dot16(self._io, self, self._root)
             self.gamma_blue._read()
             self._debug['gamma_blue']['end'] = self._io.pos()
             self._debug['gamma_green']['start'] = self._io.pos()
-            self.gamma_green = self._root.FixedPoint16Dot16(self._io, self, self._root)
+            self.gamma_green = Bmp.FixedPoint16Dot16(self._io, self, self._root)
             self.gamma_green._read()
             self._debug['gamma_green']['end'] = self._io.pos()
 
@@ -347,12 +347,12 @@ class Bmp(KaitaiStruct):
         def _read(self):
             if not (self._parent.extends_os2_2x_bitmap):
                 self._debug['compression']['start'] = self._io.pos()
-                self.compression = KaitaiStream.resolve_enum(self._root.Compressions, self._io.read_u4le())
+                self.compression = KaitaiStream.resolve_enum(Bmp.Compressions, self._io.read_u4le())
                 self._debug['compression']['end'] = self._io.pos()
 
             if self._parent.extends_os2_2x_bitmap:
                 self._debug['os2_compression']['start'] = self._io.pos()
-                self.os2_compression = KaitaiStream.resolve_enum(self._root.Os2Compressions, self._io.read_u4le())
+                self.os2_compression = KaitaiStream.resolve_enum(Bmp.Os2Compressions, self._io.read_u4le())
                 self._debug['os2_compression']['end'] = self._io.pos()
 
             self._debug['len_image']['start'] = self._io.pos()
@@ -451,31 +451,31 @@ class Bmp(KaitaiStruct):
             self._debug['bits_per_pixel']['end'] = self._io.pos()
             if self.extends_bitmap_info:
                 self._debug['bitmap_info_ext']['start'] = self._io.pos()
-                self.bitmap_info_ext = self._root.BitmapInfoExtension(self._io, self, self._root)
+                self.bitmap_info_ext = Bmp.BitmapInfoExtension(self._io, self, self._root)
                 self.bitmap_info_ext._read()
                 self._debug['bitmap_info_ext']['end'] = self._io.pos()
 
             if self.is_color_mask_here:
                 self._debug['color_mask']['start'] = self._io.pos()
-                self.color_mask = self._root.ColorMask(self.len_header != self._root.HeaderType.bitmap_v2_info_header.value, self._io, self, self._root)
+                self.color_mask = Bmp.ColorMask(self.len_header != Bmp.HeaderType.bitmap_v2_info_header.value, self._io, self, self._root)
                 self.color_mask._read()
                 self._debug['color_mask']['end'] = self._io.pos()
 
             if self.extends_os2_2x_bitmap:
                 self._debug['os2_2x_bitmap_ext']['start'] = self._io.pos()
-                self.os2_2x_bitmap_ext = self._root.Os22xBitmapExtension(self._io, self, self._root)
+                self.os2_2x_bitmap_ext = Bmp.Os22xBitmapExtension(self._io, self, self._root)
                 self.os2_2x_bitmap_ext._read()
                 self._debug['os2_2x_bitmap_ext']['end'] = self._io.pos()
 
             if self.extends_bitmap_v4:
                 self._debug['bitmap_v4_ext']['start'] = self._io.pos()
-                self.bitmap_v4_ext = self._root.BitmapV4Extension(self._io, self, self._root)
+                self.bitmap_v4_ext = Bmp.BitmapV4Extension(self._io, self, self._root)
                 self.bitmap_v4_ext._read()
                 self._debug['bitmap_v4_ext']['end'] = self._io.pos()
 
             if self.extends_bitmap_v5:
                 self._debug['bitmap_v5_ext']['start'] = self._io.pos()
-                self.bitmap_v5_ext = self._root.BitmapV5Extension(self._io, self, self._root)
+                self.bitmap_v5_ext = Bmp.BitmapV5Extension(self._io, self, self._root)
                 self.bitmap_v5_ext._read()
                 self._debug['bitmap_v5_ext']['end'] = self._io.pos()
 
@@ -485,7 +485,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_extends_bitmap_v4'):
                 return self._m_extends_bitmap_v4 if hasattr(self, '_m_extends_bitmap_v4') else None
 
-            self._m_extends_bitmap_v4 = self.len_header >= self._root.HeaderType.bitmap_v4_header.value
+            self._m_extends_bitmap_v4 = self.len_header >= Bmp.HeaderType.bitmap_v4_header.value
             return self._m_extends_bitmap_v4 if hasattr(self, '_m_extends_bitmap_v4') else None
 
         @property
@@ -493,7 +493,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_extends_os2_2x_bitmap'):
                 return self._m_extends_os2_2x_bitmap if hasattr(self, '_m_extends_os2_2x_bitmap') else None
 
-            self._m_extends_os2_2x_bitmap = self.len_header == self._root.HeaderType.os2_2x_bitmap_header.value
+            self._m_extends_os2_2x_bitmap = self.len_header == Bmp.HeaderType.os2_2x_bitmap_header.value
             return self._m_extends_os2_2x_bitmap if hasattr(self, '_m_extends_os2_2x_bitmap') else None
 
         @property
@@ -501,7 +501,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_uses_fixed_palette'):
                 return self._m_uses_fixed_palette if hasattr(self, '_m_uses_fixed_palette') else None
 
-            self._m_uses_fixed_palette =  ((not ( ((self.bits_per_pixel == 16) or (self.bits_per_pixel == 24) or (self.bits_per_pixel == 32)) )) and (not ( ((self.extends_bitmap_info) and (not (self.extends_os2_2x_bitmap)) and ( ((self.bitmap_info_ext.compression == self._root.Compressions.jpeg) or (self.bitmap_info_ext.compression == self._root.Compressions.png)) )) ))) 
+            self._m_uses_fixed_palette =  ((not ( ((self.bits_per_pixel == 16) or (self.bits_per_pixel == 24) or (self.bits_per_pixel == 32)) )) and (not ( ((self.extends_bitmap_info) and (not (self.extends_os2_2x_bitmap)) and ( ((self.bitmap_info_ext.compression == Bmp.Compressions.jpeg) or (self.bitmap_info_ext.compression == Bmp.Compressions.png)) )) ))) 
             return self._m_uses_fixed_palette if hasattr(self, '_m_uses_fixed_palette') else None
 
         @property
@@ -509,7 +509,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_extends_bitmap_info'):
                 return self._m_extends_bitmap_info if hasattr(self, '_m_extends_bitmap_info') else None
 
-            self._m_extends_bitmap_info = self.len_header >= self._root.HeaderType.bitmap_info_header.value
+            self._m_extends_bitmap_info = self.len_header >= Bmp.HeaderType.bitmap_info_header.value
             return self._m_extends_bitmap_info if hasattr(self, '_m_extends_bitmap_info') else None
 
         @property
@@ -525,7 +525,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_is_core_header'):
                 return self._m_is_core_header if hasattr(self, '_m_is_core_header') else None
 
-            self._m_is_core_header = self.len_header == self._root.HeaderType.bitmap_core_header.value
+            self._m_is_core_header = self.len_header == Bmp.HeaderType.bitmap_core_header.value
             return self._m_is_core_header if hasattr(self, '_m_is_core_header') else None
 
         @property
@@ -533,7 +533,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_extends_bitmap_v5'):
                 return self._m_extends_bitmap_v5 if hasattr(self, '_m_extends_bitmap_v5') else None
 
-            self._m_extends_bitmap_v5 = self.len_header >= self._root.HeaderType.bitmap_v5_header.value
+            self._m_extends_bitmap_v5 = self.len_header >= Bmp.HeaderType.bitmap_v5_header.value
             return self._m_extends_bitmap_v5 if hasattr(self, '_m_extends_bitmap_v5') else None
 
         @property
@@ -541,7 +541,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_is_color_mask_here'):
                 return self._m_is_color_mask_here if hasattr(self, '_m_is_color_mask_here') else None
 
-            self._m_is_color_mask_here =  ((self.len_header == self._root.HeaderType.bitmap_v2_info_header.value) or (self.len_header == self._root.HeaderType.bitmap_v3_info_header.value) or (self.extends_bitmap_v4)) 
+            self._m_is_color_mask_here =  ((self.len_header == Bmp.HeaderType.bitmap_v2_info_header.value) or (self.len_header == Bmp.HeaderType.bitmap_v3_info_header.value) or (self.extends_bitmap_v4)) 
             return self._m_is_color_mask_here if hasattr(self, '_m_is_color_mask_here') else None
 
         @property
@@ -576,7 +576,7 @@ class Bmp(KaitaiStruct):
             self.recording = self._io.read_u2le()
             self._debug['recording']['end'] = self._io.pos()
             self._debug['rendering']['start'] = self._io.pos()
-            self.rendering = KaitaiStream.resolve_enum(self._root.Os2Rendering, self._io.read_u2le())
+            self.rendering = KaitaiStream.resolve_enum(Bmp.Os2Rendering, self._io.read_u2le())
             self._debug['rendering']['end'] = self._io.pos()
             self._debug['size1']['start'] = self._io.pos()
             self.size1 = self._io.read_u4le()
@@ -631,7 +631,7 @@ class Bmp(KaitaiStruct):
                 if not 'arr' in self._debug['colors']:
                     self._debug['colors']['arr'] = []
                 self._debug['colors']['arr'].append({'start': self._io.pos()})
-                _t_colors = self._root.RgbRecord(self.has_reserved_field, self._io, self, self._root)
+                _t_colors = Bmp.RgbRecord(self.has_reserved_field, self._io, self, self._root)
                 _t_colors._read()
                 self.colors[i] = _t_colors
                 self._debug['colors']['arr'][i]['end'] = self._io.pos()
@@ -698,12 +698,12 @@ class Bmp(KaitaiStruct):
             self._debug['header']['start'] = self._io.pos()
             self._raw_header = self._io.read_bytes((self.len_header - 4))
             _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
-            self.header = self._root.BitmapHeader(self.len_header, _io__raw_header, self, self._root)
+            self.header = Bmp.BitmapHeader(self.len_header, _io__raw_header, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
             if  ((not (self._io.is_eof())) and (self.is_color_mask_here)) :
                 self._debug['color_mask']['start'] = self._io.pos()
-                self.color_mask = self._root.ColorMask(self.header.bitmap_info_ext.compression == self._root.Compressions.alpha_bitfields, self._io, self, self._root)
+                self.color_mask = Bmp.ColorMask(self.header.bitmap_info_ext.compression == Bmp.Compressions.alpha_bitfields, self._io, self, self._root)
                 self.color_mask._read()
                 self._debug['color_mask']['end'] = self._io.pos()
 
@@ -711,7 +711,7 @@ class Bmp(KaitaiStruct):
                 self._debug['color_table']['start'] = self._io.pos()
                 self._raw_color_table = self._io.read_bytes_full()
                 _io__raw_color_table = KaitaiStream(BytesIO(self._raw_color_table))
-                self.color_table = self._root.ColorTable(not (self.header.is_core_header), (self.header.bitmap_info_ext.num_colors_used if self.header.extends_bitmap_info else 0), _io__raw_color_table, self, self._root)
+                self.color_table = Bmp.ColorTable(not (self.header.is_core_header), (self.header.bitmap_info_ext.num_colors_used if self.header.extends_bitmap_info else 0), _io__raw_color_table, self, self._root)
                 self.color_table._read()
                 self._debug['color_table']['end'] = self._io.pos()
 
@@ -721,7 +721,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_is_color_mask_given'):
                 return self._m_is_color_mask_given if hasattr(self, '_m_is_color_mask_given') else None
 
-            self._m_is_color_mask_given =  ((self.header.extends_bitmap_info) and ( ((self.header.bitmap_info_ext.compression == self._root.Compressions.bitfields) or (self.header.bitmap_info_ext.compression == self._root.Compressions.alpha_bitfields)) ) and ( ((self.is_color_mask_here) or (self.header.is_color_mask_here)) )) 
+            self._m_is_color_mask_given =  ((self.header.extends_bitmap_info) and ( ((self.header.bitmap_info_ext.compression == Bmp.Compressions.bitfields) or (self.header.bitmap_info_ext.compression == Bmp.Compressions.alpha_bitfields)) ) and ( ((self.is_color_mask_here) or (self.header.is_color_mask_here)) )) 
             return self._m_is_color_mask_given if hasattr(self, '_m_is_color_mask_given') else None
 
         @property
@@ -763,7 +763,7 @@ class Bmp(KaitaiStruct):
             if hasattr(self, '_m_is_color_mask_here'):
                 return self._m_is_color_mask_here if hasattr(self, '_m_is_color_mask_here') else None
 
-            self._m_is_color_mask_here =  ((self.header.len_header == self._root.HeaderType.bitmap_info_header.value) and ( ((self.header.bitmap_info_ext.compression == self._root.Compressions.bitfields) or (self.header.bitmap_info_ext.compression == self._root.Compressions.alpha_bitfields)) )) 
+            self._m_is_color_mask_here =  ((self.header.len_header == Bmp.HeaderType.bitmap_info_header.value) and ( ((self.header.bitmap_info_ext.compression == Bmp.Compressions.bitfields) or (self.header.bitmap_info_ext.compression == Bmp.Compressions.alpha_bitfields)) )) 
             return self._m_is_color_mask_here if hasattr(self, '_m_is_color_mask_here') else None
 
         @property

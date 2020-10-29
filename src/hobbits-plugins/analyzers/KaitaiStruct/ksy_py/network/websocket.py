@@ -42,7 +42,7 @@ class Websocket(KaitaiStruct):
 
     def _read(self):
         self._debug['initial_frame']['start'] = self._io.pos()
-        self.initial_frame = self._root.InitialFrame(self._io, self, self._root)
+        self.initial_frame = Websocket.InitialFrame(self._io, self, self._root)
         self.initial_frame._read()
         self._debug['initial_frame']['end'] = self._io.pos()
         if self.initial_frame.header.finished != True:
@@ -53,7 +53,7 @@ class Websocket(KaitaiStruct):
                 if not 'arr' in self._debug['trailing_frames']:
                     self._debug['trailing_frames']['arr'] = []
                 self._debug['trailing_frames']['arr'].append({'start': self._io.pos()})
-                _t_trailing_frames = self._root.Dataframe(self._io, self, self._root)
+                _t_trailing_frames = Websocket.Dataframe(self._io, self, self._root)
                 _t_trailing_frames._read()
                 _ = _t_trailing_frames
                 self.trailing_frames.append(_)
@@ -74,19 +74,19 @@ class Websocket(KaitaiStruct):
 
         def _read(self):
             self._debug['finished']['start'] = self._io.pos()
-            self.finished = self._io.read_bits_int(1) != 0
+            self.finished = self._io.read_bits_int_be(1) != 0
             self._debug['finished']['end'] = self._io.pos()
             self._debug['reserved']['start'] = self._io.pos()
-            self.reserved = self._io.read_bits_int(3)
+            self.reserved = self._io.read_bits_int_be(3)
             self._debug['reserved']['end'] = self._io.pos()
             self._debug['opcode']['start'] = self._io.pos()
-            self.opcode = KaitaiStream.resolve_enum(self._root.Opcode, self._io.read_bits_int(4))
+            self.opcode = KaitaiStream.resolve_enum(Websocket.Opcode, self._io.read_bits_int_be(4))
             self._debug['opcode']['end'] = self._io.pos()
             self._debug['is_masked']['start'] = self._io.pos()
-            self.is_masked = self._io.read_bits_int(1) != 0
+            self.is_masked = self._io.read_bits_int_be(1) != 0
             self._debug['is_masked']['end'] = self._io.pos()
             self._debug['len_payload_primary']['start'] = self._io.pos()
-            self.len_payload_primary = self._io.read_bits_int(7)
+            self.len_payload_primary = self._io.read_bits_int_be(7)
             self._debug['len_payload_primary']['end'] = self._io.pos()
             self._io.align_to_byte()
             if self.len_payload_primary == 126:
@@ -124,15 +124,15 @@ class Websocket(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.FrameHeader(self._io, self, self._root)
+            self.header = Websocket.FrameHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
-            if self.header.opcode != self._root.Opcode.text:
+            if self.header.opcode != Websocket.Opcode.text:
                 self._debug['payload_bytes']['start'] = self._io.pos()
                 self.payload_bytes = self._io.read_bytes(self.header.len_payload)
                 self._debug['payload_bytes']['end'] = self._io.pos()
 
-            if self.header.opcode == self._root.Opcode.text:
+            if self.header.opcode == Websocket.Opcode.text:
                 self._debug['payload_text']['start'] = self._io.pos()
                 self.payload_text = (self._io.read_bytes(self.header.len_payload)).decode(u"UTF-8")
                 self._debug['payload_text']['end'] = self._io.pos()
@@ -149,15 +149,15 @@ class Websocket(KaitaiStruct):
 
         def _read(self):
             self._debug['header']['start'] = self._io.pos()
-            self.header = self._root.FrameHeader(self._io, self, self._root)
+            self.header = Websocket.FrameHeader(self._io, self, self._root)
             self.header._read()
             self._debug['header']['end'] = self._io.pos()
-            if self._root.initial_frame.header.opcode != self._root.Opcode.text:
+            if self._root.initial_frame.header.opcode != Websocket.Opcode.text:
                 self._debug['payload_bytes']['start'] = self._io.pos()
                 self.payload_bytes = self._io.read_bytes(self.header.len_payload)
                 self._debug['payload_bytes']['end'] = self._io.pos()
 
-            if self._root.initial_frame.header.opcode == self._root.Opcode.text:
+            if self._root.initial_frame.header.opcode == Websocket.Opcode.text:
                 self._debug['payload_text']['start'] = self._io.pos()
                 self.payload_text = (self._io.read_bytes(self.header.len_payload)).decode(u"UTF-8")
                 self._debug['payload_text']['end'] = self._io.pos()

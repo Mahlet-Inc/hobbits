@@ -44,7 +44,7 @@ class UefiTe(KaitaiStruct):
         self._debug['te_hdr']['start'] = self._io.pos()
         self._raw_te_hdr = self._io.read_bytes(40)
         _io__raw_te_hdr = KaitaiStream(BytesIO(self._raw_te_hdr))
-        self.te_hdr = self._root.TeHeader(_io__raw_te_hdr, self, self._root)
+        self.te_hdr = UefiTe.TeHeader(_io__raw_te_hdr, self, self._root)
         self.te_hdr._read()
         self._debug['te_hdr']['end'] = self._io.pos()
         self._debug['sections']['start'] = self._io.pos()
@@ -53,7 +53,7 @@ class UefiTe(KaitaiStruct):
             if not 'arr' in self._debug['sections']:
                 self._debug['sections']['arr'] = []
             self._debug['sections']['arr'].append({'start': self._io.pos()})
-            _t_sections = self._root.Section(self._io, self, self._root)
+            _t_sections = UefiTe.Section(self._io, self, self._root)
             _t_sections._read()
             self.sections[i] = _t_sections
             self._debug['sections']['arr'][i]['end'] = self._io.pos()
@@ -117,13 +117,13 @@ class UefiTe(KaitaiStruct):
             if not self.magic == b"\x56\x5A":
                 raise kaitaistruct.ValidationNotEqualError(b"\x56\x5A", self.magic, self._io, u"/types/te_header/seq/0")
             self._debug['machine']['start'] = self._io.pos()
-            self.machine = KaitaiStream.resolve_enum(self._root.TeHeader.MachineType, self._io.read_u2le())
+            self.machine = KaitaiStream.resolve_enum(UefiTe.TeHeader.MachineType, self._io.read_u2le())
             self._debug['machine']['end'] = self._io.pos()
             self._debug['num_sections']['start'] = self._io.pos()
             self.num_sections = self._io.read_u1()
             self._debug['num_sections']['end'] = self._io.pos()
             self._debug['subsystem']['start'] = self._io.pos()
-            self.subsystem = KaitaiStream.resolve_enum(self._root.TeHeader.SubsystemEnum, self._io.read_u1())
+            self.subsystem = KaitaiStream.resolve_enum(UefiTe.TeHeader.SubsystemEnum, self._io.read_u1())
             self._debug['subsystem']['end'] = self._io.pos()
             self._debug['stripped_size']['start'] = self._io.pos()
             self.stripped_size = self._io.read_u2le()
@@ -138,7 +138,7 @@ class UefiTe(KaitaiStruct):
             self.image_base = self._io.read_u8le()
             self._debug['image_base']['end'] = self._io.pos()
             self._debug['data_dirs']['start'] = self._io.pos()
-            self.data_dirs = self._root.HeaderDataDirs(self._io, self, self._root)
+            self.data_dirs = UefiTe.HeaderDataDirs(self._io, self, self._root)
             self.data_dirs._read()
             self._debug['data_dirs']['end'] = self._io.pos()
 
@@ -153,11 +153,11 @@ class UefiTe(KaitaiStruct):
 
         def _read(self):
             self._debug['base_relocation_table']['start'] = self._io.pos()
-            self.base_relocation_table = self._root.DataDir(self._io, self, self._root)
+            self.base_relocation_table = UefiTe.DataDir(self._io, self, self._root)
             self.base_relocation_table._read()
             self._debug['base_relocation_table']['end'] = self._io.pos()
             self._debug['debug']['start'] = self._io.pos()
-            self.debug = self._root.DataDir(self._io, self, self._root)
+            self.debug = UefiTe.DataDir(self._io, self, self._root)
             self.debug._read()
             self._debug['debug']['end'] = self._io.pos()
 

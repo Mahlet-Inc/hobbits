@@ -48,18 +48,18 @@ class Gif(KaitaiStruct):
 
     def _read(self):
         self._debug['hdr']['start'] = self._io.pos()
-        self.hdr = self._root.Header(self._io, self, self._root)
+        self.hdr = Gif.Header(self._io, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
         self._debug['logical_screen_descriptor']['start'] = self._io.pos()
-        self.logical_screen_descriptor = self._root.LogicalScreenDescriptorStruct(self._io, self, self._root)
+        self.logical_screen_descriptor = Gif.LogicalScreenDescriptorStruct(self._io, self, self._root)
         self.logical_screen_descriptor._read()
         self._debug['logical_screen_descriptor']['end'] = self._io.pos()
         if self.logical_screen_descriptor.has_color_table:
             self._debug['global_color_table']['start'] = self._io.pos()
             self._raw_global_color_table = self._io.read_bytes((self.logical_screen_descriptor.color_table_size * 3))
             _io__raw_global_color_table = KaitaiStream(BytesIO(self._raw_global_color_table))
-            self.global_color_table = self._root.ColorTable(_io__raw_global_color_table, self, self._root)
+            self.global_color_table = Gif.ColorTable(_io__raw_global_color_table, self, self._root)
             self.global_color_table._read()
             self._debug['global_color_table']['end'] = self._io.pos()
 
@@ -70,12 +70,12 @@ class Gif(KaitaiStruct):
             if not 'arr' in self._debug['blocks']:
                 self._debug['blocks']['arr'] = []
             self._debug['blocks']['arr'].append({'start': self._io.pos()})
-            _t_blocks = self._root.Block(self._io, self, self._root)
+            _t_blocks = Gif.Block(self._io, self, self._root)
             _t_blocks._read()
             _ = _t_blocks
             self.blocks.append(_)
             self._debug['blocks']['arr'][len(self.blocks) - 1]['end'] = self._io.pos()
-            if  ((self._io.is_eof()) or (_.block_type == self._root.BlockType.end_of_file)) :
+            if  ((self._io.is_eof()) or (_.block_type == Gif.BlockType.end_of_file)) :
                 break
             i += 1
         self._debug['blocks']['end'] = self._io.pos()
@@ -97,7 +97,7 @@ class Gif(KaitaiStruct):
             self.lzw_min_code_size = self._io.read_u1()
             self._debug['lzw_min_code_size']['end'] = self._io.pos()
             self._debug['subblocks']['start'] = self._io.pos()
-            self.subblocks = self._root.Subblocks(self._io, self, self._root)
+            self.subblocks = Gif.Subblocks(self._io, self, self._root)
             self.subblocks._read()
             self._debug['subblocks']['end'] = self._io.pos()
 
@@ -196,12 +196,12 @@ class Gif(KaitaiStruct):
                 self._debug['local_color_table']['start'] = self._io.pos()
                 self._raw_local_color_table = self._io.read_bytes((self.color_table_size * 3))
                 _io__raw_local_color_table = KaitaiStream(BytesIO(self._raw_local_color_table))
-                self.local_color_table = self._root.ColorTable(_io__raw_local_color_table, self, self._root)
+                self.local_color_table = Gif.ColorTable(_io__raw_local_color_table, self, self._root)
                 self.local_color_table._read()
                 self._debug['local_color_table']['end'] = self._io.pos()
 
             self._debug['image_data']['start'] = self._io.pos()
-            self.image_data = self._root.ImageData(self._io, self, self._root)
+            self.image_data = Gif.ImageData(self._io, self, self._root)
             self.image_data._read()
             self._debug['image_data']['end'] = self._io.pos()
 
@@ -248,15 +248,15 @@ class Gif(KaitaiStruct):
 
         def _read(self):
             self._debug['block_type']['start'] = self._io.pos()
-            self.block_type = KaitaiStream.resolve_enum(self._root.BlockType, self._io.read_u1())
+            self.block_type = KaitaiStream.resolve_enum(Gif.BlockType, self._io.read_u1())
             self._debug['block_type']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.block_type
-            if _on == self._root.BlockType.extension:
-                self.body = self._root.Extension(self._io, self, self._root)
+            if _on == Gif.BlockType.extension:
+                self.body = Gif.Extension(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.BlockType.local_image_descriptor:
-                self.body = self._root.LocalImageDescriptor(self._io, self, self._root)
+            elif _on == Gif.BlockType.local_image_descriptor:
+                self.body = Gif.LocalImageDescriptor(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 
@@ -281,7 +281,7 @@ class Gif(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.ColorTableEntry(self._io, self, self._root)
+                _t_entries = Gif.ColorTableEntry(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -390,7 +390,7 @@ class Gif(KaitaiStruct):
 
         def _read(self):
             self._debug['application_id']['start'] = self._io.pos()
-            self.application_id = self._root.Subblock(self._io, self, self._root)
+            self.application_id = Gif.Subblock(self._io, self, self._root)
             self.application_id._read()
             self._debug['application_id']['end'] = self._io.pos()
             self._debug['subblocks']['start'] = self._io.pos()
@@ -400,7 +400,7 @@ class Gif(KaitaiStruct):
                 if not 'arr' in self._debug['subblocks']:
                     self._debug['subblocks']['arr'] = []
                 self._debug['subblocks']['arr'].append({'start': self._io.pos()})
-                _t_subblocks = self._root.Subblock(self._io, self, self._root)
+                _t_subblocks = Gif.Subblock(self._io, self, self._root)
                 _t_subblocks._read()
                 _ = _t_subblocks
                 self.subblocks.append(_)
@@ -427,7 +427,7 @@ class Gif(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.Subblock(self._io, self, self._root)
+                _t_entries = Gif.Subblock(self._io, self, self._root)
                 _t_entries._read()
                 _ = _t_entries
                 self.entries.append(_)
@@ -448,21 +448,21 @@ class Gif(KaitaiStruct):
 
         def _read(self):
             self._debug['label']['start'] = self._io.pos()
-            self.label = KaitaiStream.resolve_enum(self._root.ExtensionLabel, self._io.read_u1())
+            self.label = KaitaiStream.resolve_enum(Gif.ExtensionLabel, self._io.read_u1())
             self._debug['label']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.label
-            if _on == self._root.ExtensionLabel.application:
-                self.body = self._root.ExtApplication(self._io, self, self._root)
+            if _on == Gif.ExtensionLabel.application:
+                self.body = Gif.ExtApplication(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.ExtensionLabel.comment:
-                self.body = self._root.Subblocks(self._io, self, self._root)
+            elif _on == Gif.ExtensionLabel.comment:
+                self.body = Gif.Subblocks(self._io, self, self._root)
                 self.body._read()
-            elif _on == self._root.ExtensionLabel.graphic_control:
-                self.body = self._root.ExtGraphicControl(self._io, self, self._root)
+            elif _on == Gif.ExtensionLabel.graphic_control:
+                self.body = Gif.ExtGraphicControl(self._io, self, self._root)
                 self.body._read()
             else:
-                self.body = self._root.Subblocks(self._io, self, self._root)
+                self.body = Gif.Subblocks(self._io, self, self._root)
                 self.body._read()
             self._debug['body']['end'] = self._io.pos()
 

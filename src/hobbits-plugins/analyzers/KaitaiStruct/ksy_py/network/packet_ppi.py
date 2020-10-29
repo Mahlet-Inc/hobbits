@@ -145,23 +145,23 @@ class PacketPpi(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.PacketPpiHeader(self._io, self, self._root)
+        self.header = PacketPpi.PacketPpiHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['fields']['start'] = self._io.pos()
         self._raw_fields = self._io.read_bytes((self.header.pph_len - 8))
         _io__raw_fields = KaitaiStream(BytesIO(self._raw_fields))
-        self.fields = self._root.PacketPpiFields(_io__raw_fields, self, self._root)
+        self.fields = PacketPpi.PacketPpiFields(_io__raw_fields, self, self._root)
         self.fields._read()
         self._debug['fields']['end'] = self._io.pos()
         self._debug['body']['start'] = self._io.pos()
         _on = self.header.pph_dlt
-        if _on == self._root.Linktype.ppi:
+        if _on == PacketPpi.Linktype.ppi:
             self._raw_body = self._io.read_bytes_full()
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
             self.body = PacketPpi(_io__raw_body)
             self.body._read()
-        elif _on == self._root.Linktype.ethernet:
+        elif _on == PacketPpi.Linktype.ethernet:
             self._raw_body = self._io.read_bytes_full()
             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
             self.body = ethernet_frame.EthernetFrame(_io__raw_body)
@@ -186,7 +186,7 @@ class PacketPpi(KaitaiStruct):
                 if not 'arr' in self._debug['entries']:
                     self._debug['entries']['arr'] = []
                 self._debug['entries']['arr'].append({'start': self._io.pos()})
-                _t_entries = self._root.PacketPpiField(self._io, self, self._root)
+                _t_entries = PacketPpi.PacketPpiField(self._io, self, self._root)
                 _t_entries._read()
                 self.entries.append(_t_entries)
                 self._debug['entries']['arr'][len(self.entries) - 1]['end'] = self._io.pos()
@@ -209,7 +209,7 @@ class PacketPpi(KaitaiStruct):
 
         def _read(self):
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.MacFlags(self._io, self, self._root)
+            self.flags = PacketPpi.MacFlags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['a_mpdu_id']['start'] = self._io.pos()
@@ -233,28 +233,28 @@ class PacketPpi(KaitaiStruct):
 
         def _read(self):
             self._debug['unused1']['start'] = self._io.pos()
-            self.unused1 = self._io.read_bits_int(1) != 0
+            self.unused1 = self._io.read_bits_int_be(1) != 0
             self._debug['unused1']['end'] = self._io.pos()
             self._debug['aggregate_delimiter']['start'] = self._io.pos()
-            self.aggregate_delimiter = self._io.read_bits_int(1) != 0
+            self.aggregate_delimiter = self._io.read_bits_int_be(1) != 0
             self._debug['aggregate_delimiter']['end'] = self._io.pos()
             self._debug['more_aggregates']['start'] = self._io.pos()
-            self.more_aggregates = self._io.read_bits_int(1) != 0
+            self.more_aggregates = self._io.read_bits_int_be(1) != 0
             self._debug['more_aggregates']['end'] = self._io.pos()
             self._debug['aggregate']['start'] = self._io.pos()
-            self.aggregate = self._io.read_bits_int(1) != 0
+            self.aggregate = self._io.read_bits_int_be(1) != 0
             self._debug['aggregate']['end'] = self._io.pos()
             self._debug['dup_rx']['start'] = self._io.pos()
-            self.dup_rx = self._io.read_bits_int(1) != 0
+            self.dup_rx = self._io.read_bits_int_be(1) != 0
             self._debug['dup_rx']['end'] = self._io.pos()
             self._debug['rx_short_guard']['start'] = self._io.pos()
-            self.rx_short_guard = self._io.read_bits_int(1) != 0
+            self.rx_short_guard = self._io.read_bits_int_be(1) != 0
             self._debug['rx_short_guard']['end'] = self._io.pos()
             self._debug['is_ht_40']['start'] = self._io.pos()
-            self.is_ht_40 = self._io.read_bits_int(1) != 0
+            self.is_ht_40 = self._io.read_bits_int_be(1) != 0
             self._debug['is_ht_40']['end'] = self._io.pos()
             self._debug['greenfield']['start'] = self._io.pos()
-            self.greenfield = self._io.read_bits_int(1) != 0
+            self.greenfield = self._io.read_bits_int_be(1) != 0
             self._debug['greenfield']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['unused2']['start'] = self._io.pos()
@@ -285,7 +285,7 @@ class PacketPpi(KaitaiStruct):
             self.pph_len = self._io.read_u2le()
             self._debug['pph_len']['end'] = self._io.pos()
             self._debug['pph_dlt']['start'] = self._io.pos()
-            self.pph_dlt = KaitaiStream.resolve_enum(self._root.Linktype, self._io.read_u4le())
+            self.pph_dlt = KaitaiStream.resolve_enum(PacketPpi.Linktype, self._io.read_u4le())
             self._debug['pph_dlt']['end'] = self._io.pos()
 
 
@@ -345,27 +345,27 @@ class PacketPpi(KaitaiStruct):
 
         def _read(self):
             self._debug['pfh_type']['start'] = self._io.pos()
-            self.pfh_type = KaitaiStream.resolve_enum(self._root.PfhType, self._io.read_u2le())
+            self.pfh_type = KaitaiStream.resolve_enum(PacketPpi.PfhType, self._io.read_u2le())
             self._debug['pfh_type']['end'] = self._io.pos()
             self._debug['pfh_datalen']['start'] = self._io.pos()
             self.pfh_datalen = self._io.read_u2le()
             self._debug['pfh_datalen']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.pfh_type
-            if _on == self._root.PfhType.radio_802_11_common:
+            if _on == PacketPpi.PfhType.radio_802_11_common:
                 self._raw_body = self._io.read_bytes(self.pfh_datalen)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Radio80211CommonBody(_io__raw_body, self, self._root)
+                self.body = PacketPpi.Radio80211CommonBody(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PfhType.radio_802_11n_mac_ext:
+            elif _on == PacketPpi.PfhType.radio_802_11n_mac_ext:
                 self._raw_body = self._io.read_bytes(self.pfh_datalen)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Radio80211nMacExtBody(_io__raw_body, self, self._root)
+                self.body = PacketPpi.Radio80211nMacExtBody(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.PfhType.radio_802_11n_mac_phy_ext:
+            elif _on == PacketPpi.PfhType.radio_802_11n_mac_phy_ext:
                 self._raw_body = self._io.read_bytes(self.pfh_datalen)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Radio80211nMacPhyExtBody(_io__raw_body, self, self._root)
+                self.body = PacketPpi.Radio80211nMacPhyExtBody(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.pfh_datalen)
@@ -386,7 +386,7 @@ class PacketPpi(KaitaiStruct):
 
         def _read(self):
             self._debug['flags']['start'] = self._io.pos()
-            self.flags = self._root.MacFlags(self._io, self, self._root)
+            self.flags = PacketPpi.MacFlags(self._io, self, self._root)
             self.flags._read()
             self._debug['flags']['end'] = self._io.pos()
             self._debug['a_mpdu_id']['start'] = self._io.pos()
@@ -428,7 +428,7 @@ class PacketPpi(KaitaiStruct):
             self.ext_channel_freq = self._io.read_u2le()
             self._debug['ext_channel_freq']['end'] = self._io.pos()
             self._debug['ext_channel_flags']['start'] = self._io.pos()
-            self.ext_channel_flags = self._root.Radio80211nMacPhyExtBody.ChannelFlags(self._io, self, self._root)
+            self.ext_channel_flags = PacketPpi.Radio80211nMacPhyExtBody.ChannelFlags(self._io, self, self._root)
             self.ext_channel_flags._read()
             self._debug['ext_channel_flags']['end'] = self._io.pos()
             self._debug['rf_signal_noise']['start'] = self._io.pos()
@@ -437,7 +437,7 @@ class PacketPpi(KaitaiStruct):
                 if not 'arr' in self._debug['rf_signal_noise']:
                     self._debug['rf_signal_noise']['arr'] = []
                 self._debug['rf_signal_noise']['arr'].append({'start': self._io.pos()})
-                _t_rf_signal_noise = self._root.Radio80211nMacPhyExtBody.SignalNoise(self._io, self, self._root)
+                _t_rf_signal_noise = PacketPpi.Radio80211nMacPhyExtBody.SignalNoise(self._io, self, self._root)
                 _t_rf_signal_noise._read()
                 self.rf_signal_noise[i] = _t_rf_signal_noise
                 self._debug['rf_signal_noise']['arr'][i]['end'] = self._io.pos()
@@ -464,31 +464,31 @@ class PacketPpi(KaitaiStruct):
 
             def _read(self):
                 self._debug['spectrum_2ghz']['start'] = self._io.pos()
-                self.spectrum_2ghz = self._io.read_bits_int(1) != 0
+                self.spectrum_2ghz = self._io.read_bits_int_be(1) != 0
                 self._debug['spectrum_2ghz']['end'] = self._io.pos()
                 self._debug['ofdm']['start'] = self._io.pos()
-                self.ofdm = self._io.read_bits_int(1) != 0
+                self.ofdm = self._io.read_bits_int_be(1) != 0
                 self._debug['ofdm']['end'] = self._io.pos()
                 self._debug['cck']['start'] = self._io.pos()
-                self.cck = self._io.read_bits_int(1) != 0
+                self.cck = self._io.read_bits_int_be(1) != 0
                 self._debug['cck']['end'] = self._io.pos()
                 self._debug['turbo']['start'] = self._io.pos()
-                self.turbo = self._io.read_bits_int(1) != 0
+                self.turbo = self._io.read_bits_int_be(1) != 0
                 self._debug['turbo']['end'] = self._io.pos()
                 self._debug['unused']['start'] = self._io.pos()
-                self.unused = self._io.read_bits_int(8)
+                self.unused = self._io.read_bits_int_be(8)
                 self._debug['unused']['end'] = self._io.pos()
                 self._debug['gfsk']['start'] = self._io.pos()
-                self.gfsk = self._io.read_bits_int(1) != 0
+                self.gfsk = self._io.read_bits_int_be(1) != 0
                 self._debug['gfsk']['end'] = self._io.pos()
                 self._debug['dyn_cck_ofdm']['start'] = self._io.pos()
-                self.dyn_cck_ofdm = self._io.read_bits_int(1) != 0
+                self.dyn_cck_ofdm = self._io.read_bits_int_be(1) != 0
                 self._debug['dyn_cck_ofdm']['end'] = self._io.pos()
                 self._debug['only_passive_scan']['start'] = self._io.pos()
-                self.only_passive_scan = self._io.read_bits_int(1) != 0
+                self.only_passive_scan = self._io.read_bits_int_be(1) != 0
                 self._debug['only_passive_scan']['end'] = self._io.pos()
                 self._debug['spectrum_5ghz']['start'] = self._io.pos()
-                self.spectrum_5ghz = self._io.read_bits_int(1) != 0
+                self.spectrum_5ghz = self._io.read_bits_int_be(1) != 0
                 self._debug['spectrum_5ghz']['end'] = self._io.pos()
 
 

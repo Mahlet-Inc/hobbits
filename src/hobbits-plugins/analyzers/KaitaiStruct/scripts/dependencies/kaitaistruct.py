@@ -221,7 +221,7 @@ class KaitaiStream(object):
         self.bits = 0
         self.bits_left = 0
 
-    def read_bits_int(self, n):
+    def read_bits_int_be(self, n):
         bits_needed = n - self.bits_left
         if bits_needed > 0:
             # 1 bit  => 1 byte
@@ -230,26 +230,48 @@ class KaitaiStream(object):
             bytes_needed = ((bits_needed - 1) // 8) + 1
             buf = self.read_bytes(bytes_needed)
             for byte in buf:
-                # Python 2 will get "byte" as one-character str, thus
-                # we need to convert it to integer manually; Python 3
-                # is fine as is.
-                if isinstance(byte, str):
-                    byte = ord(byte)
+                byte = KaitaiStream.int_from_byte(byte)
                 self.bits <<= 8
                 self.bits |= byte
                 self.bits_left += 8
 
         # raw mask with required number of 1s, starting from lowest bit
         mask = (1 << n) - 1
-        # shift mask to align with highest bits available in self.bits
+        # shift self.bits to align the highest bits with the mask & derive reading result
         shift_bits = self.bits_left - n
-        mask <<= shift_bits
-        # derive reading result
-        res = (self.bits & mask) >> shift_bits
+        res = (self.bits >> shift_bits) & mask
         # clear top bits that we've just read => AND with 1s
         self.bits_left -= n
         mask = (1 << self.bits_left) - 1
         self.bits &= mask
+
+        return res
+
+    # Unused since Kaitai Struct Compiler v0.9+ - compatibility with
+    # older versions.
+    def read_bits_int(self, n):
+        return self.read_bits_int_be(n)
+
+    def read_bits_int_le(self, n):
+        bits_needed = n - self.bits_left
+        if bits_needed > 0:
+            # 1 bit  => 1 byte
+            # 8 bits => 1 byte
+            # 9 bits => 2 bytes
+            bytes_needed = ((bits_needed - 1) // 8) + 1
+            buf = self.read_bytes(bytes_needed)
+            for byte in buf:
+                byte = KaitaiStream.int_from_byte(byte)
+                self.bits |= (byte << self.bits_left)
+                self.bits_left += 8
+
+        # raw mask with required number of 1s, starting from lowest bit
+        mask = (1 << n) - 1
+        # derive reading result
+        res = self.bits & mask
+        # remove bottom bits that we've just read by shifting
+        self.bits >>= n
+        self.bits_left -= n
 
         return res
 
@@ -457,10 +479,20 @@ class ValidationGreaterThanError(ValidationFailedError):
         self.max = max
         self.actual = actual
 
+
 class ValidationNotAnyOfError(ValidationFailedError):
     """Signals validation failure: we required "actual" value to be
     from the list, but it turned out that it's not.
     """
     def __init__(self, actual, io, src_path):
         super(ValidationNotAnyOfError, self).__init__("not any of the list, got %s" % (repr(actual)), io, src_path)
+        self.actual = actual
+
+
+class ValidationExprError(ValidationFailedError):
+    """Signals validation failure: we required "actual" value to match
+    the expression, but it turned out that it doesn't.
+    """
+    def __init__(self, actual, io, src_path):
+        super(ValidationExprError, self).__init__("not matching the expression, got %s" % (repr(actual)), io, src_path)
         self.actual = actual

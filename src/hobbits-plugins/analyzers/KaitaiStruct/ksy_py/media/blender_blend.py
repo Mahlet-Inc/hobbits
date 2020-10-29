@@ -41,7 +41,7 @@ class BlenderBlend(KaitaiStruct):
 
     def _read(self):
         self._debug['hdr']['start'] = self._io.pos()
-        self.hdr = self._root.Header(self._io, self, self._root)
+        self.hdr = BlenderBlend.Header(self._io, self, self._root)
         self.hdr._read()
         self._debug['hdr']['end'] = self._io.pos()
         self._debug['blocks']['start'] = self._io.pos()
@@ -51,7 +51,7 @@ class BlenderBlend(KaitaiStruct):
             if not 'arr' in self._debug['blocks']:
                 self._debug['blocks']['arr'] = []
             self._debug['blocks']['arr'].append({'start': self._io.pos()})
-            _t_blocks = self._root.FileBlock(self._io, self, self._root)
+            _t_blocks = BlenderBlend.FileBlock(self._io, self, self._root)
             _t_blocks._read()
             self.blocks.append(_t_blocks)
             self._debug['blocks']['arr'][len(self.blocks) - 1]['end'] = self._io.pos()
@@ -83,7 +83,7 @@ class BlenderBlend(KaitaiStruct):
                 if not 'arr' in self._debug['fields']:
                     self._debug['fields']['arr'] = []
                 self._debug['fields']['arr'].append({'start': self._io.pos()})
-                _t_fields = self._root.DnaField(self._io, self, self._root)
+                _t_fields = BlenderBlend.DnaField(self._io, self, self._root)
                 _t_fields._read()
                 self.fields[i] = _t_fields
                 self._debug['fields']['arr'][i]['end'] = self._io.pos()
@@ -128,7 +128,7 @@ class BlenderBlend(KaitaiStruct):
             if _on == u"DNA1":
                 self._raw_body = self._io.read_bytes(self.len_body)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.Dna1Body(_io__raw_body, self, self._root)
+                self.body = BlenderBlend.Dna1Body(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.len_body)
@@ -248,7 +248,7 @@ class BlenderBlend(KaitaiStruct):
                 if not 'arr' in self._debug['structs']:
                     self._debug['structs']['arr'] = []
                 self._debug['structs']['arr'].append({'start': self._io.pos()})
-                _t_structs = self._root.DnaStruct(self._io, self, self._root)
+                _t_structs = BlenderBlend.DnaStruct(self._io, self, self._root)
                 _t_structs._read()
                 self.structs[i] = _t_structs
                 self._debug['structs']['arr'][i]['end'] = self._io.pos()
@@ -271,10 +271,10 @@ class BlenderBlend(KaitaiStruct):
             if not self.magic == b"\x42\x4C\x45\x4E\x44\x45\x52":
                 raise kaitaistruct.ValidationNotEqualError(b"\x42\x4C\x45\x4E\x44\x45\x52", self.magic, self._io, u"/types/header/seq/0")
             self._debug['ptr_size_id']['start'] = self._io.pos()
-            self.ptr_size_id = KaitaiStream.resolve_enum(self._root.PtrSize, self._io.read_u1())
+            self.ptr_size_id = KaitaiStream.resolve_enum(BlenderBlend.PtrSize, self._io.read_u1())
             self._debug['ptr_size_id']['end'] = self._io.pos()
             self._debug['endian']['start'] = self._io.pos()
-            self.endian = KaitaiStream.resolve_enum(self._root.Endian, self._io.read_u1())
+            self.endian = KaitaiStream.resolve_enum(BlenderBlend.Endian, self._io.read_u1())
             self._debug['endian']['end'] = self._io.pos()
             self._debug['version']['start'] = self._io.pos()
             self.version = (self._io.read_bytes(3)).decode(u"ASCII")
@@ -286,7 +286,7 @@ class BlenderBlend(KaitaiStruct):
             if hasattr(self, '_m_psize'):
                 return self._m_psize if hasattr(self, '_m_psize') else None
 
-            self._m_psize = (8 if self.ptr_size_id == self._root.PtrSize.bits_64 else 4)
+            self._m_psize = (8 if self.ptr_size_id == BlenderBlend.PtrSize.bits_64 else 4)
             return self._m_psize if hasattr(self, '_m_psize') else None
 
 

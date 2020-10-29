@@ -20,7 +20,7 @@ class MicrosoftCfb(KaitaiStruct):
 
     def _read(self):
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.CfbHeader(self._io, self, self._root)
+        self.header = MicrosoftCfb.CfbHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
 
@@ -151,10 +151,10 @@ class MicrosoftCfb(KaitaiStruct):
             self.name_len = self._io.read_u2le()
             self._debug['name_len']['end'] = self._io.pos()
             self._debug['object_type']['start'] = self._io.pos()
-            self.object_type = KaitaiStream.resolve_enum(self._root.DirEntry.ObjType, self._io.read_u1())
+            self.object_type = KaitaiStream.resolve_enum(MicrosoftCfb.DirEntry.ObjType, self._io.read_u1())
             self._debug['object_type']['end'] = self._io.pos()
             self._debug['color_flag']['start'] = self._io.pos()
-            self.color_flag = KaitaiStream.resolve_enum(self._root.DirEntry.RbColor, self._io.read_u1())
+            self.color_flag = KaitaiStream.resolve_enum(MicrosoftCfb.DirEntry.RbColor, self._io.read_u1())
             self._debug['color_flag']['end'] = self._io.pos()
             self._debug['left_sibling_id']['start'] = self._io.pos()
             self.left_sibling_id = self._io.read_s4le()
@@ -189,7 +189,7 @@ class MicrosoftCfb(KaitaiStruct):
             if hasattr(self, '_m_mini_stream'):
                 return self._m_mini_stream if hasattr(self, '_m_mini_stream') else None
 
-            if self.object_type == self._root.DirEntry.ObjType.root_storage:
+            if self.object_type == MicrosoftCfb.DirEntry.ObjType.root_storage:
                 io = self._root._io
                 _pos = io.pos()
                 io.seek(((self.ofs + 1) * self._root.sector_size))
@@ -210,7 +210,7 @@ class MicrosoftCfb(KaitaiStruct):
                 _pos = io.pos()
                 io.seek((((self._root.header.ofs_dir + 1) * self._root.sector_size) + (self.child_id * 128)))
                 self._debug['_m_child']['start'] = io.pos()
-                self._m_child = self._root.DirEntry(io, self, self._root)
+                self._m_child = MicrosoftCfb.DirEntry(io, self, self._root)
                 self._m_child._read()
                 self._debug['_m_child']['end'] = io.pos()
                 io.seek(_pos)
@@ -227,7 +227,7 @@ class MicrosoftCfb(KaitaiStruct):
                 _pos = io.pos()
                 io.seek((((self._root.header.ofs_dir + 1) * self._root.sector_size) + (self.left_sibling_id * 128)))
                 self._debug['_m_left_sibling']['start'] = io.pos()
-                self._m_left_sibling = self._root.DirEntry(io, self, self._root)
+                self._m_left_sibling = MicrosoftCfb.DirEntry(io, self, self._root)
                 self._m_left_sibling._read()
                 self._debug['_m_left_sibling']['end'] = io.pos()
                 io.seek(_pos)
@@ -244,7 +244,7 @@ class MicrosoftCfb(KaitaiStruct):
                 _pos = io.pos()
                 io.seek((((self._root.header.ofs_dir + 1) * self._root.sector_size) + (self.right_sibling_id * 128)))
                 self._debug['_m_right_sibling']['start'] = io.pos()
-                self._m_right_sibling = self._root.DirEntry(io, self, self._root)
+                self._m_right_sibling = MicrosoftCfb.DirEntry(io, self, self._root)
                 self._m_right_sibling._read()
                 self._debug['_m_right_sibling']['end'] = io.pos()
                 io.seek(_pos)
@@ -270,7 +270,7 @@ class MicrosoftCfb(KaitaiStruct):
         self._debug['_m_fat']['start'] = self._io.pos()
         self._raw__m_fat = self._io.read_bytes((self.header.size_fat * self.sector_size))
         _io__raw__m_fat = KaitaiStream(BytesIO(self._raw__m_fat))
-        self._m_fat = self._root.FatEntries(_io__raw__m_fat, self, self._root)
+        self._m_fat = MicrosoftCfb.FatEntries(_io__raw__m_fat, self, self._root)
         self._m_fat._read()
         self._debug['_m_fat']['end'] = self._io.pos()
         self._io.seek(_pos)
@@ -284,7 +284,7 @@ class MicrosoftCfb(KaitaiStruct):
         _pos = self._io.pos()
         self._io.seek(((self.header.ofs_dir + 1) * self.sector_size))
         self._debug['_m_dir']['start'] = self._io.pos()
-        self._m_dir = self._root.DirEntry(self._io, self, self._root)
+        self._m_dir = MicrosoftCfb.DirEntry(self._io, self, self._root)
         self._m_dir._read()
         self._debug['_m_dir']['end'] = self._io.pos()
         self._io.seek(_pos)

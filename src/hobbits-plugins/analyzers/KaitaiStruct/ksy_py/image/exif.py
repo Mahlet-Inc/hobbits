@@ -23,7 +23,7 @@ class Exif(KaitaiStruct):
         self.endianness = self._io.read_u2le()
         self._debug['endianness']['end'] = self._io.pos()
         self._debug['body']['start'] = self._io.pos()
-        self.body = self._root.ExifBody(self._io, self, self._root)
+        self.body = Exif.ExifBody(self._io, self, self._root)
         self.body._read()
         self._debug['body']['end'] = self._io.pos()
 
@@ -91,7 +91,7 @@ class Exif(KaitaiStruct):
                     if not 'arr' in self._debug['fields']:
                         self._debug['fields']['arr'] = []
                     self._debug['fields']['arr'].append({'start': self._io.pos()})
-                    _t_fields = self._root.ExifBody.IfdField(self._io, self, self._root, self._is_le)
+                    _t_fields = Exif.ExifBody.IfdField(self._io, self, self._root, self._is_le)
                     _t_fields._read()
                     self.fields[i] = _t_fields
                     self._debug['fields']['arr'][i]['end'] = self._io.pos()
@@ -111,7 +111,7 @@ class Exif(KaitaiStruct):
                     if not 'arr' in self._debug['fields']:
                         self._debug['fields']['arr'] = []
                     self._debug['fields']['arr'].append({'start': self._io.pos()})
-                    _t_fields = self._root.ExifBody.IfdField(self._io, self, self._root, self._is_le)
+                    _t_fields = Exif.ExifBody.IfdField(self._io, self, self._root, self._is_le)
                     _t_fields._read()
                     self.fields[i] = _t_fields
                     self._debug['fields']['arr'][i]['end'] = self._io.pos()
@@ -131,10 +131,10 @@ class Exif(KaitaiStruct):
                     self._io.seek(self.next_ifd_ofs)
                     self._debug['_m_next_ifd']['start'] = self._io.pos()
                     if self._is_le:
-                        self._m_next_ifd = self._root.ExifBody.Ifd(self._io, self, self._root, self._is_le)
+                        self._m_next_ifd = Exif.ExifBody.Ifd(self._io, self, self._root, self._is_le)
                         self._m_next_ifd._read()
                     else:
-                        self._m_next_ifd = self._root.ExifBody.Ifd(self._io, self, self._root, self._is_le)
+                        self._m_next_ifd = Exif.ExifBody.Ifd(self._io, self, self._root, self._is_le)
                         self._m_next_ifd._read()
                     self._debug['_m_next_ifd']['end'] = self._io.pos()
                     self._io.seek(_pos)
@@ -631,10 +631,10 @@ class Exif(KaitaiStruct):
 
             def _read_le(self):
                 self._debug['tag']['start'] = self._io.pos()
-                self.tag = KaitaiStream.resolve_enum(self._root.ExifBody.IfdField.TagEnum, self._io.read_u2le())
+                self.tag = KaitaiStream.resolve_enum(Exif.ExifBody.IfdField.TagEnum, self._io.read_u2le())
                 self._debug['tag']['end'] = self._io.pos()
                 self._debug['field_type']['start'] = self._io.pos()
-                self.field_type = KaitaiStream.resolve_enum(self._root.ExifBody.IfdField.FieldTypeEnum, self._io.read_u2le())
+                self.field_type = KaitaiStream.resolve_enum(Exif.ExifBody.IfdField.FieldTypeEnum, self._io.read_u2le())
                 self._debug['field_type']['end'] = self._io.pos()
                 self._debug['length']['start'] = self._io.pos()
                 self.length = self._io.read_u4le()
@@ -645,10 +645,10 @@ class Exif(KaitaiStruct):
 
             def _read_be(self):
                 self._debug['tag']['start'] = self._io.pos()
-                self.tag = KaitaiStream.resolve_enum(self._root.ExifBody.IfdField.TagEnum, self._io.read_u2be())
+                self.tag = KaitaiStream.resolve_enum(Exif.ExifBody.IfdField.TagEnum, self._io.read_u2be())
                 self._debug['tag']['end'] = self._io.pos()
                 self._debug['field_type']['start'] = self._io.pos()
-                self.field_type = KaitaiStream.resolve_enum(self._root.ExifBody.IfdField.FieldTypeEnum, self._io.read_u2be())
+                self.field_type = KaitaiStream.resolve_enum(Exif.ExifBody.IfdField.FieldTypeEnum, self._io.read_u2be())
                 self._debug['field_type']['end'] = self._io.pos()
                 self._debug['length']['start'] = self._io.pos()
                 self.length = self._io.read_u4be()
@@ -662,7 +662,7 @@ class Exif(KaitaiStruct):
                 if hasattr(self, '_m_type_byte_length'):
                     return self._m_type_byte_length if hasattr(self, '_m_type_byte_length') else None
 
-                self._m_type_byte_length = (2 if self.field_type == self._root.ExifBody.IfdField.FieldTypeEnum.word else (4 if self.field_type == self._root.ExifBody.IfdField.FieldTypeEnum.dword else 1))
+                self._m_type_byte_length = (2 if self.field_type == Exif.ExifBody.IfdField.FieldTypeEnum.word else (4 if self.field_type == Exif.ExifBody.IfdField.FieldTypeEnum.dword else 1))
                 return self._m_type_byte_length if hasattr(self, '_m_type_byte_length') else None
 
             @property
@@ -710,10 +710,10 @@ class Exif(KaitaiStruct):
             self._io.seek(self.ifd0_ofs)
             self._debug['_m_ifd0']['start'] = self._io.pos()
             if self._is_le:
-                self._m_ifd0 = self._root.ExifBody.Ifd(self._io, self, self._root, self._is_le)
+                self._m_ifd0 = Exif.ExifBody.Ifd(self._io, self, self._root, self._is_le)
                 self._m_ifd0._read()
             else:
-                self._m_ifd0 = self._root.ExifBody.Ifd(self._io, self, self._root, self._is_le)
+                self._m_ifd0 = Exif.ExifBody.Ifd(self._io, self, self._root, self._is_le)
                 self._m_ifd0._read()
             self._debug['_m_ifd0']['end'] = self._io.pos()
             self._io.seek(_pos)

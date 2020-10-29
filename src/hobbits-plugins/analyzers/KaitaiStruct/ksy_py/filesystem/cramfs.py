@@ -20,7 +20,7 @@ class Cramfs(KaitaiStruct):
 
     def _read(self):
         self._debug['super_block']['start'] = self._io.pos()
-        self.super_block = self._root.SuperBlockStruct(self._io, self, self._root)
+        self.super_block = Cramfs.SuperBlockStruct(self._io, self, self._root)
         self.super_block._read()
         self._debug['super_block']['end'] = self._io.pos()
 
@@ -53,14 +53,14 @@ class Cramfs(KaitaiStruct):
             if not self.signature == b"\x43\x6F\x6D\x70\x72\x65\x73\x73\x65\x64\x20\x52\x4F\x4D\x46\x53":
                 raise kaitaistruct.ValidationNotEqualError(b"\x43\x6F\x6D\x70\x72\x65\x73\x73\x65\x64\x20\x52\x4F\x4D\x46\x53", self.signature, self._io, u"/types/super_block_struct/seq/4")
             self._debug['fsid']['start'] = self._io.pos()
-            self.fsid = self._root.Info(self._io, self, self._root)
+            self.fsid = Cramfs.Info(self._io, self, self._root)
             self.fsid._read()
             self._debug['fsid']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
             self.name = (self._io.read_bytes(16)).decode(u"ASCII")
             self._debug['name']['end'] = self._io.pos()
             self._debug['root']['start'] = self._io.pos()
-            self.root = self._root.Inode(self._io, self, self._root)
+            self.root = Cramfs.Inode(self._io, self, self._root)
             self.root._read()
             self._debug['root']['end'] = self._io.pos()
 
@@ -180,7 +180,7 @@ class Cramfs(KaitaiStruct):
             _pos = io.pos()
             io.seek(self.offset)
             self._debug['_m_as_reg_file']['start'] = io.pos()
-            self._m_as_reg_file = self._root.ChunkedDataInode(io, self, self._root)
+            self._m_as_reg_file = Cramfs.ChunkedDataInode(io, self, self._root)
             self._m_as_reg_file._read()
             self._debug['_m_as_reg_file']['end'] = io.pos()
             io.seek(_pos)
@@ -203,7 +203,7 @@ class Cramfs(KaitaiStruct):
             _pos = io.pos()
             io.seek(self.offset)
             self._debug['_m_as_symlink']['start'] = io.pos()
-            self._m_as_symlink = self._root.ChunkedDataInode(io, self, self._root)
+            self._m_as_symlink = Cramfs.ChunkedDataInode(io, self, self._root)
             self._m_as_symlink._read()
             self._debug['_m_as_symlink']['end'] = io.pos()
             io.seek(_pos)
@@ -260,7 +260,7 @@ class Cramfs(KaitaiStruct):
             self._debug['_m_as_dir']['start'] = io.pos()
             self._raw__m_as_dir = io.read_bytes(self.size)
             _io__raw__m_as_dir = KaitaiStream(BytesIO(self._raw__m_as_dir))
-            self._m_as_dir = self._root.DirInode(_io__raw__m_as_dir, self, self._root)
+            self._m_as_dir = Cramfs.DirInode(_io__raw__m_as_dir, self, self._root)
             self._m_as_dir._read()
             self._debug['_m_as_dir']['end'] = io.pos()
             io.seek(_pos)
@@ -271,7 +271,7 @@ class Cramfs(KaitaiStruct):
             if hasattr(self, '_m_type'):
                 return self._m_type if hasattr(self, '_m_type') else None
 
-            self._m_type = KaitaiStream.resolve_enum(self._root.Inode.FileType, ((self.mode >> 12) & 15))
+            self._m_type = KaitaiStream.resolve_enum(Cramfs.Inode.FileType, ((self.mode >> 12) & 15))
             return self._m_type if hasattr(self, '_m_type') else None
 
         @property
@@ -300,7 +300,7 @@ class Cramfs(KaitaiStruct):
                     if not 'arr' in self._debug['children']:
                         self._debug['children']['arr'] = []
                     self._debug['children']['arr'].append({'start': self._io.pos()})
-                    _t_children = self._root.Inode(self._io, self, self._root)
+                    _t_children = Cramfs.Inode(self._io, self, self._root)
                     _t_children._read()
                     self.children.append(_t_children)
                     self._debug['children']['arr'][len(self.children) - 1]['end'] = self._io.pos()

@@ -60,7 +60,7 @@ class Rar(KaitaiStruct):
 
     def _read(self):
         self._debug['magic']['start'] = self._io.pos()
-        self.magic = self._root.MagicSignature(self._io, self, self._root)
+        self.magic = Rar.MagicSignature(self._io, self, self._root)
         self.magic._read()
         self._debug['magic']['end'] = self._io.pos()
         self._debug['blocks']['start'] = self._io.pos()
@@ -75,7 +75,7 @@ class Rar(KaitaiStruct):
                 if not 'arr' in self._debug['blocks']:
                     self._debug['blocks']['arr'] = []
                 self._debug['blocks']['arr'].append({'start': self._io.pos()})
-                _t_blocks = self._root.Block(self._io, self, self._root)
+                _t_blocks = Rar.Block(self._io, self, self._root)
                 _t_blocks._read()
                 self.blocks.append(_t_blocks)
                 self._debug['blocks']['arr'][len(self.blocks) - 1]['end'] = self._io.pos()
@@ -83,7 +83,7 @@ class Rar(KaitaiStruct):
                 if not 'arr' in self._debug['blocks']:
                     self._debug['blocks']['arr'] = []
                 self._debug['blocks']['arr'].append({'start': self._io.pos()})
-                _t_blocks = self._root.BlockV5(self._io, self, self._root)
+                _t_blocks = Rar.BlockV5(self._io, self, self._root)
                 _t_blocks._read()
                 self.blocks.append(_t_blocks)
                 self._debug['blocks']['arr'][len(self.blocks) - 1]['end'] = self._io.pos()
@@ -121,7 +121,7 @@ class Rar(KaitaiStruct):
             self.crc16 = self._io.read_u2le()
             self._debug['crc16']['end'] = self._io.pos()
             self._debug['block_type']['start'] = self._io.pos()
-            self.block_type = KaitaiStream.resolve_enum(self._root.BlockTypes, self._io.read_u1())
+            self.block_type = KaitaiStream.resolve_enum(Rar.BlockTypes, self._io.read_u1())
             self._debug['block_type']['end'] = self._io.pos()
             self._debug['flags']['start'] = self._io.pos()
             self.flags = self._io.read_u2le()
@@ -136,10 +136,10 @@ class Rar(KaitaiStruct):
 
             self._debug['body']['start'] = self._io.pos()
             _on = self.block_type
-            if _on == self._root.BlockTypes.file_header:
+            if _on == Rar.BlockTypes.file_header:
                 self._raw_body = self._io.read_bytes(self.body_size)
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.BlockFileHeader(_io__raw_body, self, self._root)
+                self.body = Rar.BlockFileHeader(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes(self.body_size)
@@ -189,20 +189,20 @@ class Rar(KaitaiStruct):
             self.low_unp_size = self._io.read_u4le()
             self._debug['low_unp_size']['end'] = self._io.pos()
             self._debug['host_os']['start'] = self._io.pos()
-            self.host_os = KaitaiStream.resolve_enum(self._root.Oses, self._io.read_u1())
+            self.host_os = KaitaiStream.resolve_enum(Rar.Oses, self._io.read_u1())
             self._debug['host_os']['end'] = self._io.pos()
             self._debug['file_crc32']['start'] = self._io.pos()
             self.file_crc32 = self._io.read_u4le()
             self._debug['file_crc32']['end'] = self._io.pos()
             self._debug['file_time']['start'] = self._io.pos()
-            self.file_time = self._root.DosTime(self._io, self, self._root)
+            self.file_time = Rar.DosTime(self._io, self, self._root)
             self.file_time._read()
             self._debug['file_time']['end'] = self._io.pos()
             self._debug['rar_version']['start'] = self._io.pos()
             self.rar_version = self._io.read_u1()
             self._debug['rar_version']['end'] = self._io.pos()
             self._debug['method']['start'] = self._io.pos()
-            self.method = KaitaiStream.resolve_enum(self._root.Methods, self._io.read_u1())
+            self.method = KaitaiStream.resolve_enum(Rar.Methods, self._io.read_u1())
             self._debug['method']['end'] = self._io.pos()
             self._debug['name_size']['start'] = self._io.pos()
             self.name_size = self._io.read_u2le()

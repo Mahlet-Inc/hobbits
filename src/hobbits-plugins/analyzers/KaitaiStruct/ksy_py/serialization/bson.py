@@ -30,7 +30,7 @@ class Bson(KaitaiStruct):
         self._debug['fields']['start'] = self._io.pos()
         self._raw_fields = self._io.read_bytes((self.len - 5))
         _io__raw_fields = KaitaiStream(BytesIO(self._raw_fields))
-        self.fields = self._root.ElementsList(_io__raw_fields, self, self._root)
+        self.fields = Bson.ElementsList(_io__raw_fields, self, self._root)
         self.fields._read()
         self._debug['fields']['end'] = self._io.pos()
         self._debug['terminator']['start'] = self._io.pos()
@@ -80,14 +80,14 @@ class Bson(KaitaiStruct):
             self.len = self._io.read_s4le()
             self._debug['len']['end'] = self._io.pos()
             self._debug['subtype']['start'] = self._io.pos()
-            self.subtype = KaitaiStream.resolve_enum(self._root.BinData.Subtype, self._io.read_u1())
+            self.subtype = KaitaiStream.resolve_enum(Bson.BinData.Subtype, self._io.read_u1())
             self._debug['subtype']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.subtype
-            if _on == self._root.BinData.Subtype.byte_array_deprecated:
+            if _on == Bson.BinData.Subtype.byte_array_deprecated:
                 self._raw_content = self._io.read_bytes(self.len)
                 _io__raw_content = KaitaiStream(BytesIO(self._raw_content))
-                self.content = self._root.BinData.ByteArrayDeprecated(_io__raw_content, self, self._root)
+                self.content = Bson.BinData.ByteArrayDeprecated(_io__raw_content, self, self._root)
                 self.content._read()
             else:
                 self.content = self._io.read_bytes(self.len)
@@ -128,7 +128,7 @@ class Bson(KaitaiStruct):
                 if not 'arr' in self._debug['elements']:
                     self._debug['elements']['arr'] = []
                 self._debug['elements']['arr'].append({'start': self._io.pos()})
-                _t_elements = self._root.Element(self._io, self, self._root)
+                _t_elements = Bson.Element(self._io, self, self._root)
                 _t_elements._read()
                 self.elements.append(_t_elements)
                 self._debug['elements']['arr'][len(self.elements) - 1]['end'] = self._io.pos()
@@ -207,59 +207,59 @@ class Bson(KaitaiStruct):
 
         def _read(self):
             self._debug['type_byte']['start'] = self._io.pos()
-            self.type_byte = KaitaiStream.resolve_enum(self._root.Element.BsonType, self._io.read_u1())
+            self.type_byte = KaitaiStream.resolve_enum(Bson.Element.BsonType, self._io.read_u1())
             self._debug['type_byte']['end'] = self._io.pos()
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.Cstring(self._io, self, self._root)
+            self.name = Bson.Cstring(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
             self._debug['content']['start'] = self._io.pos()
             _on = self.type_byte
-            if _on == self._root.Element.BsonType.code_with_scope:
-                self.content = self._root.CodeWithScope(self._io, self, self._root)
+            if _on == Bson.Element.BsonType.code_with_scope:
+                self.content = Bson.CodeWithScope(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.reg_ex:
-                self.content = self._root.RegEx(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.reg_ex:
+                self.content = Bson.RegEx(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.number_double:
+            elif _on == Bson.Element.BsonType.number_double:
                 self.content = self._io.read_f8le()
-            elif _on == self._root.Element.BsonType.symbol:
-                self.content = self._root.String(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.symbol:
+                self.content = Bson.String(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.timestamp:
-                self.content = self._root.Timestamp(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.timestamp:
+                self.content = Bson.Timestamp(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.number_int:
+            elif _on == Bson.Element.BsonType.number_int:
                 self.content = self._io.read_s4le()
-            elif _on == self._root.Element.BsonType.document:
+            elif _on == Bson.Element.BsonType.document:
                 self.content = Bson(self._io)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.object_id:
-                self.content = self._root.ObjectId(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.object_id:
+                self.content = Bson.ObjectId(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.javascript:
-                self.content = self._root.String(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.javascript:
+                self.content = Bson.String(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.utc_datetime:
+            elif _on == Bson.Element.BsonType.utc_datetime:
                 self.content = self._io.read_s8le()
-            elif _on == self._root.Element.BsonType.boolean:
+            elif _on == Bson.Element.BsonType.boolean:
                 self.content = self._io.read_u1()
-            elif _on == self._root.Element.BsonType.number_long:
+            elif _on == Bson.Element.BsonType.number_long:
                 self.content = self._io.read_s8le()
-            elif _on == self._root.Element.BsonType.bin_data:
-                self.content = self._root.BinData(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.bin_data:
+                self.content = Bson.BinData(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.string:
-                self.content = self._root.String(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.string:
+                self.content = Bson.String(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.db_pointer:
-                self.content = self._root.DbPointer(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.db_pointer:
+                self.content = Bson.DbPointer(self._io, self, self._root)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.array:
+            elif _on == Bson.Element.BsonType.array:
                 self.content = Bson(self._io)
                 self.content._read()
-            elif _on == self._root.Element.BsonType.number_decimal:
-                self.content = self._root.F16(self._io, self, self._root)
+            elif _on == Bson.Element.BsonType.number_decimal:
+                self.content = Bson.F16(self._io, self, self._root)
                 self.content._read()
             self._debug['content']['end'] = self._io.pos()
 
@@ -274,11 +274,11 @@ class Bson(KaitaiStruct):
 
         def _read(self):
             self._debug['namespace']['start'] = self._io.pos()
-            self.namespace = self._root.String(self._io, self, self._root)
+            self.namespace = Bson.String(self._io, self, self._root)
             self.namespace._read()
             self._debug['namespace']['end'] = self._io.pos()
             self._debug['id']['start'] = self._io.pos()
-            self.id = self._root.ObjectId(self._io, self, self._root)
+            self.id = Bson.ObjectId(self._io, self, self._root)
             self.id._read()
             self._debug['id']['end'] = self._io.pos()
 
@@ -326,7 +326,7 @@ class Bson(KaitaiStruct):
             self.id = self._io.read_s4le()
             self._debug['id']['end'] = self._io.pos()
             self._debug['source']['start'] = self._io.pos()
-            self.source = self._root.String(self._io, self, self._root)
+            self.source = Bson.String(self._io, self, self._root)
             self.source._read()
             self._debug['source']['end'] = self._io.pos()
             self._debug['scope']['start'] = self._io.pos()
@@ -346,13 +346,13 @@ class Bson(KaitaiStruct):
 
         def _read(self):
             self._debug['str']['start'] = self._io.pos()
-            self.str = self._io.read_bits_int(1) != 0
+            self.str = self._io.read_bits_int_be(1) != 0
             self._debug['str']['end'] = self._io.pos()
             self._debug['exponent']['start'] = self._io.pos()
-            self.exponent = self._io.read_bits_int(15)
+            self.exponent = self._io.read_bits_int_be(15)
             self._debug['exponent']['end'] = self._io.pos()
             self._debug['significand_hi']['start'] = self._io.pos()
-            self.significand_hi = self._io.read_bits_int(49)
+            self.significand_hi = self._io.read_bits_int_be(49)
             self._debug['significand_hi']['end'] = self._io.pos()
             self._io.align_to_byte()
             self._debug['significand_lo']['start'] = self._io.pos()
@@ -374,14 +374,14 @@ class Bson(KaitaiStruct):
             self.epoch_time = self._io.read_u4le()
             self._debug['epoch_time']['end'] = self._io.pos()
             self._debug['machine_id']['start'] = self._io.pos()
-            self.machine_id = self._root.U3(self._io, self, self._root)
+            self.machine_id = Bson.U3(self._io, self, self._root)
             self.machine_id._read()
             self._debug['machine_id']['end'] = self._io.pos()
             self._debug['process_id']['start'] = self._io.pos()
             self.process_id = self._io.read_u2le()
             self._debug['process_id']['end'] = self._io.pos()
             self._debug['counter']['start'] = self._io.pos()
-            self.counter = self._root.U3(self._io, self, self._root)
+            self.counter = Bson.U3(self._io, self, self._root)
             self.counter._read()
             self._debug['counter']['end'] = self._io.pos()
 
@@ -396,11 +396,11 @@ class Bson(KaitaiStruct):
 
         def _read(self):
             self._debug['pattern']['start'] = self._io.pos()
-            self.pattern = self._root.Cstring(self._io, self, self._root)
+            self.pattern = Bson.Cstring(self._io, self, self._root)
             self.pattern._read()
             self._debug['pattern']['end'] = self._io.pos()
             self._debug['options']['start'] = self._io.pos()
-            self.options = self._root.Cstring(self._io, self, self._root)
+            self.options = Bson.Cstring(self._io, self, self._root)
             self.options._read()
             self._debug['options']['end'] = self._io.pos()
 

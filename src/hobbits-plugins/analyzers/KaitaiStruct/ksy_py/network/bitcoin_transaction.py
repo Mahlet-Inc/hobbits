@@ -36,7 +36,7 @@ class BitcoinTransaction(KaitaiStruct):
             if not 'arr' in self._debug['vins']:
                 self._debug['vins']['arr'] = []
             self._debug['vins']['arr'].append({'start': self._io.pos()})
-            _t_vins = self._root.Vin(self._io, self, self._root)
+            _t_vins = BitcoinTransaction.Vin(self._io, self, self._root)
             _t_vins._read()
             self.vins[i] = _t_vins
             self._debug['vins']['arr'][i]['end'] = self._io.pos()
@@ -51,7 +51,7 @@ class BitcoinTransaction(KaitaiStruct):
             if not 'arr' in self._debug['vouts']:
                 self._debug['vouts']['arr'] = []
             self._debug['vouts']['arr'].append({'start': self._io.pos()})
-            _t_vouts = self._root.Vout(self._io, self, self._root)
+            _t_vouts = BitcoinTransaction.Vout(self._io, self, self._root)
             _t_vouts._read()
             self.vouts[i] = _t_vouts
             self._debug['vouts']['arr'][i]['end'] = self._io.pos()
@@ -82,7 +82,7 @@ class BitcoinTransaction(KaitaiStruct):
             self._debug['script_sig']['start'] = self._io.pos()
             self._raw_script_sig = self._io.read_bytes(self.len_script)
             _io__raw_script_sig = KaitaiStream(BytesIO(self._raw_script_sig))
-            self.script_sig = self._root.Vin.ScriptSignature(_io__raw_script_sig, self, self._root)
+            self.script_sig = BitcoinTransaction.Vin.ScriptSignature(_io__raw_script_sig, self, self._root)
             self.script_sig._read()
             self._debug['script_sig']['end'] = self._io.pos()
             self._debug['end_of_vin']['start'] = self._io.pos()
@@ -110,17 +110,17 @@ class BitcoinTransaction(KaitaiStruct):
                 self.len_sig_stack = self._io.read_u1()
                 self._debug['len_sig_stack']['end'] = self._io.pos()
                 self._debug['der_sig']['start'] = self._io.pos()
-                self.der_sig = self._root.Vin.ScriptSignature.DerSignature(self._io, self, self._root)
+                self.der_sig = BitcoinTransaction.Vin.ScriptSignature.DerSignature(self._io, self, self._root)
                 self.der_sig._read()
                 self._debug['der_sig']['end'] = self._io.pos()
                 self._debug['sig_type']['start'] = self._io.pos()
-                self.sig_type = KaitaiStream.resolve_enum(self._root.Vin.ScriptSignature.SighashType, self._io.read_u1())
+                self.sig_type = KaitaiStream.resolve_enum(BitcoinTransaction.Vin.ScriptSignature.SighashType, self._io.read_u1())
                 self._debug['sig_type']['end'] = self._io.pos()
                 self._debug['len_pubkey_stack']['start'] = self._io.pos()
                 self.len_pubkey_stack = self._io.read_u1()
                 self._debug['len_pubkey_stack']['end'] = self._io.pos()
                 self._debug['pubkey']['start'] = self._io.pos()
-                self.pubkey = self._root.Vin.ScriptSignature.PublicKey(self._io, self, self._root)
+                self.pubkey = BitcoinTransaction.Vin.ScriptSignature.PublicKey(self._io, self, self._root)
                 self.pubkey._read()
                 self._debug['pubkey']['end'] = self._io.pos()
 

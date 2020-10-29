@@ -184,7 +184,7 @@ class Code6502(KaitaiStruct):
             if not 'arr' in self._debug['operations']:
                 self._debug['operations']['arr'] = []
             self._debug['operations']['arr'].append({'start': self._io.pos()})
-            _t_operations = self._root.Operation(self._io, self, self._root)
+            _t_operations = Code6502.Operation(self._io, self, self._root)
             _t_operations._read()
             self.operations.append(_t_operations)
             self._debug['operations']['arr'][len(self.operations) - 1]['end'] = self._io.pos()
@@ -202,253 +202,253 @@ class Code6502(KaitaiStruct):
 
         def _read(self):
             self._debug['code']['start'] = self._io.pos()
-            self.code = KaitaiStream.resolve_enum(self._root.Opcode, self._io.read_u1())
+            self.code = KaitaiStream.resolve_enum(Code6502.Opcode, self._io.read_u1())
             self._debug['code']['end'] = self._io.pos()
             self._debug['args']['start'] = self._io.pos()
             _on = self.code
-            if _on == self._root.Opcode.bcc_rel:
+            if _on == Code6502.Opcode.bcc_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.ora_ind_y:
+            elif _on == Code6502.Opcode.ora_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.lda_ind_y:
+            elif _on == Code6502.Opcode.lda_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cpx_zpg:
+            elif _on == Code6502.Opcode.cpx_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sta_zpg_x:
+            elif _on == Code6502.Opcode.sta_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sta_zpg:
+            elif _on == Code6502.Opcode.sta_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.bcs_rel:
+            elif _on == Code6502.Opcode.bcs_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.ldy_zpg_x:
+            elif _on == Code6502.Opcode.ldy_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.lsr_abs_x:
+            elif _on == Code6502.Opcode.lsr_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.and_abs_x:
+            elif _on == Code6502.Opcode.and_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.adc_abs:
+            elif _on == Code6502.Opcode.adc_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sta_abs:
+            elif _on == Code6502.Opcode.sta_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.bne_rel:
+            elif _on == Code6502.Opcode.bne_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.lda_imm:
+            elif _on == Code6502.Opcode.lda_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.adc_imm:
+            elif _on == Code6502.Opcode.adc_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.lsr_abs:
+            elif _on == Code6502.Opcode.lsr_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.adc_abs_x:
+            elif _on == Code6502.Opcode.adc_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sta_abs_x:
+            elif _on == Code6502.Opcode.sta_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.cpx_imm:
+            elif _on == Code6502.Opcode.cpx_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.jmp_ind:
+            elif _on == Code6502.Opcode.jmp_ind:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.adc_zpg:
+            elif _on == Code6502.Opcode.adc_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.eor_imm:
+            elif _on == Code6502.Opcode.eor_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.eor_abs_x:
+            elif _on == Code6502.Opcode.eor_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sta_x_ind:
+            elif _on == Code6502.Opcode.sta_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_imm:
+            elif _on == Code6502.Opcode.sbc_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cpy_abs:
+            elif _on == Code6502.Opcode.cpy_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldx_abs_y:
+            elif _on == Code6502.Opcode.ldx_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.adc_zpg_x:
+            elif _on == Code6502.Opcode.adc_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.bpl_rel:
+            elif _on == Code6502.Opcode.bpl_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.ora_imm:
+            elif _on == Code6502.Opcode.ora_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ror_abs_x:
+            elif _on == Code6502.Opcode.ror_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.adc_ind_y:
+            elif _on == Code6502.Opcode.adc_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.eor_ind_y:
+            elif _on == Code6502.Opcode.eor_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.lda_abs:
+            elif _on == Code6502.Opcode.lda_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.bit_zpg:
+            elif _on == Code6502.Opcode.bit_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.rol_zpg:
+            elif _on == Code6502.Opcode.rol_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sty_zpg:
+            elif _on == Code6502.Opcode.sty_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.jsr_abs:
+            elif _on == Code6502.Opcode.jsr_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.eor_zpg:
+            elif _on == Code6502.Opcode.eor_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.eor_abs:
+            elif _on == Code6502.Opcode.eor_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lda_abs_y:
+            elif _on == Code6502.Opcode.lda_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lda_zpg_x:
+            elif _on == Code6502.Opcode.lda_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.bmi_rel:
+            elif _on == Code6502.Opcode.bmi_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.sty_zpg_x:
+            elif _on == Code6502.Opcode.sty_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.adc_x_ind:
+            elif _on == Code6502.Opcode.adc_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.rol_abs_x:
+            elif _on == Code6502.Opcode.rol_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.stx_zpg:
+            elif _on == Code6502.Opcode.stx_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.asl_abs_x:
+            elif _on == Code6502.Opcode.asl_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lsr_zpg_x:
+            elif _on == Code6502.Opcode.lsr_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ora_zpg_x:
+            elif _on == Code6502.Opcode.ora_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.adc_abs_y:
+            elif _on == Code6502.Opcode.adc_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldy_abs:
+            elif _on == Code6502.Opcode.ldy_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.cmp_abs_x:
+            elif _on == Code6502.Opcode.cmp_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lda_abs_x:
+            elif _on == Code6502.Opcode.lda_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.bvs_rel:
+            elif _on == Code6502.Opcode.bvs_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.lda_x_ind:
+            elif _on == Code6502.Opcode.lda_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_imm:
+            elif _on == Code6502.Opcode.cmp_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.inc_zpg_x:
+            elif _on == Code6502.Opcode.inc_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.asl_zpg:
+            elif _on == Code6502.Opcode.asl_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.and_abs_y:
+            elif _on == Code6502.Opcode.and_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldx_imm:
+            elif _on == Code6502.Opcode.ldx_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.and_zpg:
+            elif _on == Code6502.Opcode.and_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cpx_abs:
+            elif _on == Code6502.Opcode.cpx_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.dec_zpg:
+            elif _on == Code6502.Opcode.dec_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ror_zpg_x:
+            elif _on == Code6502.Opcode.ror_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ldx_zpg:
+            elif _on == Code6502.Opcode.ldx_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.dec_zpg_x:
+            elif _on == Code6502.Opcode.dec_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_zpg:
+            elif _on == Code6502.Opcode.sbc_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_abs:
+            elif _on == Code6502.Opcode.cmp_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ror_zpg:
+            elif _on == Code6502.Opcode.ror_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.inc_abs:
+            elif _on == Code6502.Opcode.inc_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.and_x_ind:
+            elif _on == Code6502.Opcode.and_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_abs_x:
+            elif _on == Code6502.Opcode.sbc_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.asl_abs:
+            elif _on == Code6502.Opcode.asl_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.eor_x_ind:
+            elif _on == Code6502.Opcode.eor_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ora_abs_x:
+            elif _on == Code6502.Opcode.ora_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldy_abs_x:
+            elif _on == Code6502.Opcode.ldy_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sbc_x_ind:
+            elif _on == Code6502.Opcode.sbc_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.asl_zpg_x:
+            elif _on == Code6502.Opcode.asl_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_abs_y:
+            elif _on == Code6502.Opcode.sbc_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.rol_abs:
+            elif _on == Code6502.Opcode.rol_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lsr_zpg:
+            elif _on == Code6502.Opcode.lsr_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.stx_zpg_y:
+            elif _on == Code6502.Opcode.stx_zpg_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ora_abs_y:
+            elif _on == Code6502.Opcode.ora_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.eor_abs_y:
+            elif _on == Code6502.Opcode.eor_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.bit_abs:
+            elif _on == Code6502.Opcode.bit_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldx_abs:
+            elif _on == Code6502.Opcode.ldx_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ldy_imm:
+            elif _on == Code6502.Opcode.ldy_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.jmp_abs:
+            elif _on == Code6502.Opcode.jmp_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.beq_rel:
+            elif _on == Code6502.Opcode.beq_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.dec_abs_x:
+            elif _on == Code6502.Opcode.dec_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.and_ind_y:
+            elif _on == Code6502.Opcode.and_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.and_zpg_x:
+            elif _on == Code6502.Opcode.and_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_zpg_x:
+            elif _on == Code6502.Opcode.cmp_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.eor_zpg_x:
+            elif _on == Code6502.Opcode.eor_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_abs:
+            elif _on == Code6502.Opcode.sbc_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.cmp_abs_y:
+            elif _on == Code6502.Opcode.cmp_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sbc_ind_y:
+            elif _on == Code6502.Opcode.sbc_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_zpg:
+            elif _on == Code6502.Opcode.cmp_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.stx_abs:
+            elif _on == Code6502.Opcode.stx_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sty_abs:
+            elif _on == Code6502.Opcode.sty_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.cpy_zpg:
+            elif _on == Code6502.Opcode.cpy_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.dec_abs:
+            elif _on == Code6502.Opcode.dec_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.ror_abs:
+            elif _on == Code6502.Opcode.ror_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sta_abs_y:
+            elif _on == Code6502.Opcode.sta_abs_y:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.inc_abs_x:
+            elif _on == Code6502.Opcode.inc_abs_x:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.lda_zpg:
+            elif _on == Code6502.Opcode.lda_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_ind_y:
+            elif _on == Code6502.Opcode.cmp_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cpy_imm:
+            elif _on == Code6502.Opcode.cpy_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ldx_zpg_y:
+            elif _on == Code6502.Opcode.ldx_zpg_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.sbc_zpg_x:
+            elif _on == Code6502.Opcode.sbc_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ora_x_ind:
+            elif _on == Code6502.Opcode.ora_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.rol_zpg_x:
+            elif _on == Code6502.Opcode.rol_zpg_x:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ora_abs:
+            elif _on == Code6502.Opcode.ora_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.sta_ind_y:
+            elif _on == Code6502.Opcode.sta_ind_y:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.and_abs:
+            elif _on == Code6502.Opcode.and_abs:
                 self.args = self._io.read_u2le()
-            elif _on == self._root.Opcode.and_imm:
+            elif _on == Code6502.Opcode.and_imm:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.cmp_x_ind:
+            elif _on == Code6502.Opcode.cmp_x_ind:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.ldy_zpg:
+            elif _on == Code6502.Opcode.ldy_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.inc_zpg:
+            elif _on == Code6502.Opcode.inc_zpg:
                 self.args = self._io.read_u1()
-            elif _on == self._root.Opcode.bvc_rel:
+            elif _on == Code6502.Opcode.bvc_rel:
                 self.args = self._io.read_s1()
-            elif _on == self._root.Opcode.ora_zpg:
+            elif _on == Code6502.Opcode.ora_zpg:
                 self.args = self._io.read_u1()
             self._debug['args']['end'] = self._io.pos()
 

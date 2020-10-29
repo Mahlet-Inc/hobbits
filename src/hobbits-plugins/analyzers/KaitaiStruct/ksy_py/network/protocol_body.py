@@ -10,10 +10,10 @@ import collections
 if parse_version(kaitaistruct.__version__) < parse_version('0.9'):
     raise Exception("Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s" % (kaitaistruct.__version__))
 
-import ipv6_packet
+import icmp_packet
 import udp_datagram
 import ipv4_packet
-import icmp_packet
+import ipv6_packet
 import tcp_segment
 class ProtocolBody(KaitaiStruct):
     """Protocol body represents particular payload on transport level (OSI
@@ -189,25 +189,25 @@ class ProtocolBody(KaitaiStruct):
     def _read(self):
         self._debug['body']['start'] = self._io.pos()
         _on = self.protocol
-        if _on == self._root.ProtocolEnum.ipv6_nonxt:
-            self.body = self._root.NoNextHeader(self._io, self, self._root)
+        if _on == ProtocolBody.ProtocolEnum.ipv6_nonxt:
+            self.body = ProtocolBody.NoNextHeader(self._io, self, self._root)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.ipv4:
+        elif _on == ProtocolBody.ProtocolEnum.ipv4:
             self.body = ipv4_packet.Ipv4Packet(self._io)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.udp:
+        elif _on == ProtocolBody.ProtocolEnum.udp:
             self.body = udp_datagram.UdpDatagram(self._io)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.icmp:
+        elif _on == ProtocolBody.ProtocolEnum.icmp:
             self.body = icmp_packet.IcmpPacket(self._io)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.hopopt:
-            self.body = self._root.OptionHopByHop(self._io, self, self._root)
+        elif _on == ProtocolBody.ProtocolEnum.hopopt:
+            self.body = ProtocolBody.OptionHopByHop(self._io, self, self._root)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.ipv6:
+        elif _on == ProtocolBody.ProtocolEnum.ipv6:
             self.body = ipv6_packet.Ipv6Packet(self._io)
             self.body._read()
-        elif _on == self._root.ProtocolEnum.tcp:
+        elif _on == ProtocolBody.ProtocolEnum.tcp:
             self.body = tcp_segment.TcpSegment(self._io)
             self.body._read()
         self._debug['body']['end'] = self._io.pos()
@@ -254,7 +254,7 @@ class ProtocolBody(KaitaiStruct):
         if hasattr(self, '_m_protocol'):
             return self._m_protocol if hasattr(self, '_m_protocol') else None
 
-        self._m_protocol = KaitaiStream.resolve_enum(self._root.ProtocolEnum, self.protocol_num)
+        self._m_protocol = KaitaiStream.resolve_enum(ProtocolBody.ProtocolEnum, self.protocol_num)
         return self._m_protocol if hasattr(self, '_m_protocol') else None
 
 

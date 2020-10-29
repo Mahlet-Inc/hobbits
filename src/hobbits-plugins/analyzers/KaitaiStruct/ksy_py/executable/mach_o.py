@@ -116,10 +116,10 @@ class MachO(KaitaiStruct):
 
     def _read(self):
         self._debug['magic']['start'] = self._io.pos()
-        self.magic = KaitaiStream.resolve_enum(self._root.MagicType, self._io.read_u4be())
+        self.magic = KaitaiStream.resolve_enum(MachO.MagicType, self._io.read_u4be())
         self._debug['magic']['end'] = self._io.pos()
         self._debug['header']['start'] = self._io.pos()
-        self.header = self._root.MachHeader(self._io, self, self._root)
+        self.header = MachO.MachHeader(self._io, self, self._root)
         self.header._read()
         self._debug['header']['end'] = self._io.pos()
         self._debug['load_commands']['start'] = self._io.pos()
@@ -128,7 +128,7 @@ class MachO(KaitaiStruct):
             if not 'arr' in self._debug['load_commands']:
                 self._debug['load_commands']['arr'] = []
             self._debug['load_commands']['arr'].append({'start': self._io.pos()})
-            _t_load_commands = self._root.LoadCommand(self._io, self, self._root)
+            _t_load_commands = MachO.LoadCommand(self._io, self, self._root)
             _t_load_commands._read()
             self.load_commands[i] = _t_load_commands
             self._debug['load_commands']['arr'][i]['end'] = self._io.pos()
@@ -252,47 +252,47 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['magic']['start'] = self._io.pos()
-            self.magic = KaitaiStream.resolve_enum(self._root.CsBlob.CsMagic, self._io.read_u4be())
+            self.magic = KaitaiStream.resolve_enum(MachO.CsBlob.CsMagic, self._io.read_u4be())
             self._debug['magic']['end'] = self._io.pos()
             self._debug['length']['start'] = self._io.pos()
             self.length = self._io.read_u4be()
             self._debug['length']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.magic
-            if _on == self._root.CsBlob.CsMagic.requirement:
+            if _on == MachO.CsBlob.CsMagic.requirement:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.Requirement(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.Requirement(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.code_directory:
+            elif _on == MachO.CsBlob.CsMagic.code_directory:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.CodeDirectory(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.CodeDirectory(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.entitlement:
+            elif _on == MachO.CsBlob.CsMagic.entitlement:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.Entitlement(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.Entitlement(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.requirements:
+            elif _on == MachO.CsBlob.CsMagic.requirements:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.Requirements(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.Requirements(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.blob_wrapper:
+            elif _on == MachO.CsBlob.CsMagic.blob_wrapper:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.BlobWrapper(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.BlobWrapper(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.embedded_signature:
+            elif _on == MachO.CsBlob.CsMagic.embedded_signature:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.SuperBlob(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.SuperBlob(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.CsBlob.CsMagic.detached_signature:
+            elif _on == MachO.CsBlob.CsMagic.detached_signature:
                 self._raw_body = self._io.read_bytes((self.length - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CsBlob.SuperBlob(_io__raw_body, self, self._root)
+                self.body = MachO.CsBlob.SuperBlob(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes((self.length - 8))
@@ -453,7 +453,7 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['blobs']:
                         self._debug['blobs']['arr'] = []
                     self._debug['blobs']['arr'].append({'start': self._io.pos()})
-                    _t_blobs = self._root.CsBlob.BlobIndex(self._io, self, self._root)
+                    _t_blobs = MachO.CsBlob.BlobIndex(self._io, self, self._root)
                     _t_blobs._read()
                     self.blobs[i] = _t_blobs
                     self._debug['blobs']['arr'][i]['end'] = self._io.pos()
@@ -494,48 +494,48 @@ class MachO(KaitaiStruct):
 
             def _read(self):
                 self._debug['op']['start'] = self._io.pos()
-                self.op = KaitaiStream.resolve_enum(self._root.CsBlob.Expr.OpEnum, self._io.read_u4be())
+                self.op = KaitaiStream.resolve_enum(MachO.CsBlob.Expr.OpEnum, self._io.read_u4be())
                 self._debug['op']['end'] = self._io.pos()
                 self._debug['data']['start'] = self._io.pos()
                 _on = self.op
-                if _on == self._root.CsBlob.Expr.OpEnum.ident:
-                    self.data = self._root.CsBlob.Expr.IdentExpr(self._io, self, self._root)
+                if _on == MachO.CsBlob.Expr.OpEnum.ident:
+                    self.data = MachO.CsBlob.Expr.IdentExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.or_op:
-                    self.data = self._root.CsBlob.Expr.OrExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.or_op:
+                    self.data = MachO.CsBlob.Expr.OrExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.info_key_value:
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.info_key_value:
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.anchor_hash:
-                    self.data = self._root.CsBlob.Expr.AnchorHashExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.anchor_hash:
+                    self.data = MachO.CsBlob.Expr.AnchorHashExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.info_key_field:
-                    self.data = self._root.CsBlob.Expr.InfoKeyFieldExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.info_key_field:
+                    self.data = MachO.CsBlob.Expr.InfoKeyFieldExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.not_op:
-                    self.data = self._root.CsBlob.Expr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.not_op:
+                    self.data = MachO.CsBlob.Expr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.entitlement_field:
-                    self.data = self._root.CsBlob.Expr.EntitlementFieldExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.entitlement_field:
+                    self.data = MachO.CsBlob.Expr.EntitlementFieldExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.trusted_cert:
-                    self.data = self._root.CsBlob.Expr.CertSlotExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.trusted_cert:
+                    self.data = MachO.CsBlob.Expr.CertSlotExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.and_op:
-                    self.data = self._root.CsBlob.Expr.AndExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.and_op:
+                    self.data = MachO.CsBlob.Expr.AndExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.cert_generic:
-                    self.data = self._root.CsBlob.Expr.CertGenericExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.cert_generic:
+                    self.data = MachO.CsBlob.Expr.CertGenericExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.cert_field:
-                    self.data = self._root.CsBlob.Expr.CertFieldExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.cert_field:
+                    self.data = MachO.CsBlob.Expr.CertFieldExpr(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.cd_hash:
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.cd_hash:
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
-                elif _on == self._root.CsBlob.Expr.OpEnum.apple_generic_anchor:
-                    self.data = self._root.CsBlob.Expr.AppleGenericAnchorExpr(self._io, self, self._root)
+                elif _on == MachO.CsBlob.Expr.OpEnum.apple_generic_anchor:
+                    self.data = MachO.CsBlob.Expr.AppleGenericAnchorExpr(self._io, self, self._root)
                     self.data._read()
                 self._debug['data']['end'] = self._io.pos()
 
@@ -549,11 +549,11 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
                     self._debug['match']['start'] = self._io.pos()
-                    self.match = self._root.CsBlob.Match(self._io, self, self._root)
+                    self.match = MachO.CsBlob.Match(self._io, self, self._root)
                     self.match._read()
                     self._debug['match']['end'] = self._io.pos()
 
@@ -568,7 +568,7 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['value']['start'] = self._io.pos()
-                    self.value = KaitaiStream.resolve_enum(self._root.CsBlob.Expr.CertSlot, self._io.read_u4be())
+                    self.value = KaitaiStream.resolve_enum(MachO.CsBlob.Expr.CertSlot, self._io.read_u4be())
                     self._debug['value']['end'] = self._io.pos()
 
 
@@ -582,14 +582,14 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['cert_slot']['start'] = self._io.pos()
-                    self.cert_slot = KaitaiStream.resolve_enum(self._root.CsBlob.Expr.CertSlot, self._io.read_u4be())
+                    self.cert_slot = KaitaiStream.resolve_enum(MachO.CsBlob.Expr.CertSlot, self._io.read_u4be())
                     self._debug['cert_slot']['end'] = self._io.pos()
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
                     self._debug['match']['start'] = self._io.pos()
-                    self.match = self._root.CsBlob.Match(self._io, self, self._root)
+                    self.match = MachO.CsBlob.Match(self._io, self, self._root)
                     self.match._read()
                     self._debug['match']['end'] = self._io.pos()
 
@@ -604,7 +604,7 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['identifier']['start'] = self._io.pos()
-                    self.identifier = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.identifier = MachO.CsBlob.Data(self._io, self, self._root)
                     self.identifier._read()
                     self._debug['identifier']['end'] = self._io.pos()
 
@@ -619,14 +619,14 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['cert_slot']['start'] = self._io.pos()
-                    self.cert_slot = KaitaiStream.resolve_enum(self._root.CsBlob.Expr.CertSlot, self._io.read_u4be())
+                    self.cert_slot = KaitaiStream.resolve_enum(MachO.CsBlob.Expr.CertSlot, self._io.read_u4be())
                     self._debug['cert_slot']['end'] = self._io.pos()
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
                     self._debug['match']['start'] = self._io.pos()
-                    self.match = self._root.CsBlob.Match(self._io, self, self._root)
+                    self.match = MachO.CsBlob.Match(self._io, self, self._root)
                     self.match._read()
                     self._debug['match']['end'] = self._io.pos()
 
@@ -641,10 +641,10 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['cert_slot']['start'] = self._io.pos()
-                    self.cert_slot = KaitaiStream.resolve_enum(self._root.CsBlob.Expr.CertSlot, self._io.read_u4be())
+                    self.cert_slot = KaitaiStream.resolve_enum(MachO.CsBlob.Expr.CertSlot, self._io.read_u4be())
                     self._debug['cert_slot']['end'] = self._io.pos()
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
 
@@ -679,11 +679,11 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
                     self._debug['match']['start'] = self._io.pos()
-                    self.match = self._root.CsBlob.Match(self._io, self, self._root)
+                    self.match = MachO.CsBlob.Match(self._io, self, self._root)
                     self.match._read()
                     self._debug['match']['end'] = self._io.pos()
 
@@ -698,11 +698,11 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['left']['start'] = self._io.pos()
-                    self.left = self._root.CsBlob.Expr(self._io, self, self._root)
+                    self.left = MachO.CsBlob.Expr(self._io, self, self._root)
                     self.left._read()
                     self._debug['left']['end'] = self._io.pos()
                     self._debug['right']['start'] = self._io.pos()
-                    self.right = self._root.CsBlob.Expr(self._io, self, self._root)
+                    self.right = MachO.CsBlob.Expr(self._io, self, self._root)
                     self.right._read()
                     self._debug['right']['end'] = self._io.pos()
 
@@ -717,11 +717,11 @@ class MachO(KaitaiStruct):
 
                 def _read(self):
                     self._debug['left']['start'] = self._io.pos()
-                    self.left = self._root.CsBlob.Expr(self._io, self, self._root)
+                    self.left = MachO.CsBlob.Expr(self._io, self, self._root)
                     self.left._read()
                     self._debug['left']['end'] = self._io.pos()
                     self._debug['right']['start'] = self._io.pos()
-                    self.right = self._root.CsBlob.Expr(self._io, self, self._root)
+                    self.right = MachO.CsBlob.Expr(self._io, self, self._root)
                     self.right._read()
                     self._debug['right']['end'] = self._io.pos()
 
@@ -747,7 +747,7 @@ class MachO(KaitaiStruct):
 
             def _read(self):
                 self._debug['type']['start'] = self._io.pos()
-                self.type = KaitaiStream.resolve_enum(self._root.CsBlob.BlobIndex.CsslotType, self._io.read_u4be())
+                self.type = KaitaiStream.resolve_enum(MachO.CsBlob.BlobIndex.CsslotType, self._io.read_u4be())
                 self._debug['type']['end'] = self._io.pos()
                 self._debug['offset']['start'] = self._io.pos()
                 self.offset = self._io.read_u4be()
@@ -764,7 +764,7 @@ class MachO(KaitaiStruct):
                 self._debug['_m_blob']['start'] = io.pos()
                 self._raw__m_blob = io.read_bytes_full()
                 _io__raw__m_blob = KaitaiStream(BytesIO(self._raw__m_blob))
-                self._m_blob = self._root.CsBlob(_io__raw__m_blob, self, self._root)
+                self._m_blob = MachO.CsBlob(_io__raw__m_blob, self, self._root)
                 self._m_blob._read()
                 self._debug['_m_blob']['end'] = io.pos()
                 io.seek(_pos)
@@ -792,11 +792,11 @@ class MachO(KaitaiStruct):
 
             def _read(self):
                 self._debug['match_op']['start'] = self._io.pos()
-                self.match_op = KaitaiStream.resolve_enum(self._root.CsBlob.Match.Op, self._io.read_u4be())
+                self.match_op = KaitaiStream.resolve_enum(MachO.CsBlob.Match.Op, self._io.read_u4be())
                 self._debug['match_op']['end'] = self._io.pos()
-                if self.match_op != self._root.CsBlob.Match.Op.exists:
+                if self.match_op != MachO.CsBlob.Match.Op.exists:
                     self._debug['data']['start'] = self._io.pos()
-                    self.data = self._root.CsBlob.Data(self._io, self, self._root)
+                    self.data = MachO.CsBlob.Data(self._io, self, self._root)
                     self.data._read()
                     self._debug['data']['end'] = self._io.pos()
 
@@ -815,7 +815,7 @@ class MachO(KaitaiStruct):
                 self.kind = self._io.read_u4be()
                 self._debug['kind']['end'] = self._io.pos()
                 self._debug['expr']['start'] = self._io.pos()
-                self.expr = self._root.CsBlob.Expr(self._io, self, self._root)
+                self.expr = MachO.CsBlob.Expr(self._io, self, self._root)
                 self.expr._read()
                 self._debug['expr']['end'] = self._io.pos()
 
@@ -838,7 +838,7 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.CsBlob.RequirementsBlobIndex(self._io, self, self._root)
+                    _t_items = MachO.CsBlob.RequirementsBlobIndex(self._io, self, self._root)
                     _t_items._read()
                     self.items[i] = _t_items
                     self._debug['items']['arr'][i]['end'] = self._io.pos()
@@ -876,7 +876,7 @@ class MachO(KaitaiStruct):
 
             def _read(self):
                 self._debug['type']['start'] = self._io.pos()
-                self.type = KaitaiStream.resolve_enum(self._root.CsBlob.RequirementsBlobIndex.RequirementType, self._io.read_u4be())
+                self.type = KaitaiStream.resolve_enum(MachO.CsBlob.RequirementsBlobIndex.RequirementType, self._io.read_u4be())
                 self._debug['type']['end'] = self._io.pos()
                 self._debug['offset']['start'] = self._io.pos()
                 self.offset = self._io.read_u4be()
@@ -890,7 +890,7 @@ class MachO(KaitaiStruct):
                 _pos = self._io.pos()
                 self._io.seek((self.offset - 8))
                 self._debug['_m_value']['start'] = self._io.pos()
-                self._m_value = self._root.CsBlob(self._io, self, self._root)
+                self._m_value = MachO.CsBlob(self._io, self, self._root)
                 self._m_value._read()
                 self._debug['_m_value']['end'] = self._io.pos()
                 self._io.seek(_pos)
@@ -925,7 +925,7 @@ class MachO(KaitaiStruct):
                 if not 'arr' in self._debug['tools']:
                     self._debug['tools']['arr'] = []
                 self._debug['tools']['arr'].append({'start': self._io.pos()})
-                _t_tools = self._root.BuildVersionCommand.BuildToolVersion(self._io, self, self._root)
+                _t_tools = MachO.BuildVersionCommand.BuildToolVersion(self._io, self, self._root)
                 _t_tools._read()
                 self.tools[i] = _t_tools
                 self._debug['tools']['arr'][i]['end'] = self._io.pos()
@@ -1282,11 +1282,11 @@ class MachO(KaitaiStruct):
             self.filesize = self._io.read_u8le()
             self._debug['filesize']['end'] = self._io.pos()
             self._debug['maxprot']['start'] = self._io.pos()
-            self.maxprot = self._root.VmProt(self._io, self, self._root)
+            self.maxprot = MachO.VmProt(self._io, self, self._root)
             self.maxprot._read()
             self._debug['maxprot']['end'] = self._io.pos()
             self._debug['initprot']['start'] = self._io.pos()
-            self.initprot = self._root.VmProt(self._io, self, self._root)
+            self.initprot = MachO.VmProt(self._io, self, self._root)
             self.initprot._read()
             self._debug['initprot']['end'] = self._io.pos()
             self._debug['nsects']['start'] = self._io.pos()
@@ -1301,7 +1301,7 @@ class MachO(KaitaiStruct):
                 if not 'arr' in self._debug['sections']:
                     self._debug['sections']['arr'] = []
                 self._debug['sections']['arr'].append({'start': self._io.pos()})
-                _t_sections = self._root.SegmentCommand64.Section64(self._io, self, self._root)
+                _t_sections = MachO.SegmentCommand64.Section64(self._io, self, self._root)
                 _t_sections._read()
                 self.sections[i] = _t_sections
                 self._debug['sections']['arr'][i]['end'] = self._io.pos()
@@ -1370,7 +1370,7 @@ class MachO(KaitaiStruct):
                         if not 'arr' in self._debug['items']:
                             self._debug['items']['arr'] = []
                         self._debug['items']['arr'].append({'start': self._io.pos()})
-                        _t_items = self._root.SegmentCommand64.Section64.CfString(self._io, self, self._root)
+                        _t_items = MachO.SegmentCommand64.Section64.CfString(self._io, self, self._root)
                         _t_items._read()
                         self.items.append(_t_items)
                         self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
@@ -1428,7 +1428,7 @@ class MachO(KaitaiStruct):
                         if _on == 0:
                             self._raw_body = self._io.read_bytes((self.length - 4))
                             _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                            self.body = self._root.SegmentCommand64.Section64.EhFrameItem.Cie(_io__raw_body, self, self._root)
+                            self.body = MachO.SegmentCommand64.Section64.EhFrameItem.Cie(_io__raw_body, self, self._root)
                             self.body._read()
                         else:
                             self.body = self._io.read_bytes((self.length - 4))
@@ -1449,7 +1449,7 @@ class MachO(KaitaiStruct):
                         self._debug['chr']['end'] = self._io.pos()
                         if self.chr != 0:
                             self._debug['next']['start'] = self._io.pos()
-                            self.next = self._root.SegmentCommand64.Section64.EhFrameItem.CharChain(self._io, self, self._root)
+                            self.next = MachO.SegmentCommand64.Section64.EhFrameItem.CharChain(self._io, self, self._root)
                             self.next._read()
                             self._debug['next']['end'] = self._io.pos()
 
@@ -1468,15 +1468,15 @@ class MachO(KaitaiStruct):
                         self.version = self._io.read_u1()
                         self._debug['version']['end'] = self._io.pos()
                         self._debug['aug_str']['start'] = self._io.pos()
-                        self.aug_str = self._root.SegmentCommand64.Section64.EhFrameItem.CharChain(self._io, self, self._root)
+                        self.aug_str = MachO.SegmentCommand64.Section64.EhFrameItem.CharChain(self._io, self, self._root)
                         self.aug_str._read()
                         self._debug['aug_str']['end'] = self._io.pos()
                         self._debug['code_alignment_factor']['start'] = self._io.pos()
-                        self.code_alignment_factor = self._root.Uleb128(self._io, self, self._root)
+                        self.code_alignment_factor = MachO.Uleb128(self._io, self, self._root)
                         self.code_alignment_factor._read()
                         self._debug['code_alignment_factor']['end'] = self._io.pos()
                         self._debug['data_alignment_factor']['start'] = self._io.pos()
-                        self.data_alignment_factor = self._root.Uleb128(self._io, self, self._root)
+                        self.data_alignment_factor = MachO.Uleb128(self._io, self, self._root)
                         self.data_alignment_factor._read()
                         self._debug['data_alignment_factor']['end'] = self._io.pos()
                         self._debug['return_address_register']['start'] = self._io.pos()
@@ -1484,7 +1484,7 @@ class MachO(KaitaiStruct):
                         self._debug['return_address_register']['end'] = self._io.pos()
                         if self.aug_str.chr == 122:
                             self._debug['augmentation']['start'] = self._io.pos()
-                            self.augmentation = self._root.SegmentCommand64.Section64.EhFrameItem.AugmentationEntry(self._io, self, self._root)
+                            self.augmentation = MachO.SegmentCommand64.Section64.EhFrameItem.AugmentationEntry(self._io, self, self._root)
                             self.augmentation._read()
                             self._debug['augmentation']['end'] = self._io.pos()
 
@@ -1500,7 +1500,7 @@ class MachO(KaitaiStruct):
 
                     def _read(self):
                         self._debug['length']['start'] = self._io.pos()
-                        self.length = self._root.Uleb128(self._io, self, self._root)
+                        self.length = MachO.Uleb128(self._io, self, self._root)
                         self.length._read()
                         self._debug['length']['end'] = self._io.pos()
                         if self._parent.aug_str.next.chr == 82:
@@ -1527,7 +1527,7 @@ class MachO(KaitaiStruct):
                         if not 'arr' in self._debug['items']:
                             self._debug['items']['arr'] = []
                         self._debug['items']['arr'].append({'start': self._io.pos()})
-                        _t_items = self._root.SegmentCommand64.Section64.EhFrameItem(self._io, self, self._root)
+                        _t_items = MachO.SegmentCommand64.Section64.EhFrameItem(self._io, self, self._root)
                         _t_items._read()
                         self.items.append(_t_items)
                         self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
@@ -1595,87 +1595,87 @@ class MachO(KaitaiStruct):
                 if _on == u"__objc_nlclslist":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_methname":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__nl_symbol_ptr":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__la_symbol_ptr":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_selrefs":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__cstring":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_classlist":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_protolist":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_imageinfo":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_methtype":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__cfstring":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.CfStringList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.CfStringList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_classrefs":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_protorefs":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_classname":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.StringList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__got":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__eh_frame":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.EhFrame(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.EhFrame(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 elif _on == u"__objc_superrefs":
                     self._raw__m_data = io.read_bytes(self.size)
                     _io__raw__m_data = KaitaiStream(BytesIO(self._raw__m_data))
-                    self._m_data = self._root.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
+                    self._m_data = MachO.SegmentCommand64.Section64.PointerList(_io__raw__m_data, self, self._root)
                     self._m_data._read()
                 else:
                     self._m_data = io.read_bytes(self.size)
@@ -1695,31 +1695,31 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['strip_read']['start'] = self._io.pos()
-            self.strip_read = self._io.read_bits_int(1) != 0
+            self.strip_read = self._io.read_bits_int_be(1) != 0
             self._debug['strip_read']['end'] = self._io.pos()
             self._debug['is_mask']['start'] = self._io.pos()
-            self.is_mask = self._io.read_bits_int(1) != 0
+            self.is_mask = self._io.read_bits_int_be(1) != 0
             self._debug['is_mask']['end'] = self._io.pos()
             self._debug['reserved0']['start'] = self._io.pos()
-            self.reserved0 = self._io.read_bits_int(1) != 0
+            self.reserved0 = self._io.read_bits_int_be(1) != 0
             self._debug['reserved0']['end'] = self._io.pos()
             self._debug['copy']['start'] = self._io.pos()
-            self.copy = self._io.read_bits_int(1) != 0
+            self.copy = self._io.read_bits_int_be(1) != 0
             self._debug['copy']['end'] = self._io.pos()
             self._debug['no_change']['start'] = self._io.pos()
-            self.no_change = self._io.read_bits_int(1) != 0
+            self.no_change = self._io.read_bits_int_be(1) != 0
             self._debug['no_change']['end'] = self._io.pos()
             self._debug['execute']['start'] = self._io.pos()
-            self.execute = self._io.read_bits_int(1) != 0
+            self.execute = self._io.read_bits_int_be(1) != 0
             self._debug['execute']['end'] = self._io.pos()
             self._debug['write']['start'] = self._io.pos()
-            self.write = self._io.read_bits_int(1) != 0
+            self.write = self._io.read_bits_int_be(1) != 0
             self._debug['write']['end'] = self._io.pos()
             self._debug['read']['start'] = self._io.pos()
-            self.read = self._io.read_bits_int(1) != 0
+            self.read = self._io.read_bits_int_be(1) != 0
             self._debug['read']['end'] = self._io.pos()
             self._debug['reserved1']['start'] = self._io.pos()
-            self.reserved1 = self._io.read_bits_int(24)
+            self.reserved1 = self._io.read_bits_int_be(24)
             self._debug['reserved1']['end'] = self._io.pos()
 
 
@@ -1819,13 +1819,13 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['cputype']['start'] = self._io.pos()
-            self.cputype = KaitaiStream.resolve_enum(self._root.CpuType, self._io.read_u4le())
+            self.cputype = KaitaiStream.resolve_enum(MachO.CpuType, self._io.read_u4le())
             self._debug['cputype']['end'] = self._io.pos()
             self._debug['cpusubtype']['start'] = self._io.pos()
             self.cpusubtype = self._io.read_u4le()
             self._debug['cpusubtype']['end'] = self._io.pos()
             self._debug['filetype']['start'] = self._io.pos()
-            self.filetype = KaitaiStream.resolve_enum(self._root.FileType, self._io.read_u4le())
+            self.filetype = KaitaiStream.resolve_enum(MachO.FileType, self._io.read_u4le())
             self._debug['filetype']['end'] = self._io.pos()
             self._debug['ncmds']['start'] = self._io.pos()
             self.ncmds = self._io.read_u4le()
@@ -1836,7 +1836,7 @@ class MachO(KaitaiStruct):
             self._debug['flags']['start'] = self._io.pos()
             self.flags = self._io.read_u4le()
             self._debug['flags']['end'] = self._io.pos()
-            if  ((self._root.magic == self._root.MagicType.macho_be_x64) or (self._root.magic == self._root.MagicType.macho_le_x64)) :
+            if  ((self._root.magic == MachO.MagicType.macho_be_x64) or (self._root.magic == MachO.MagicType.macho_le_x64)) :
                 self._debug['reserved']['start'] = self._io.pos()
                 self.reserved = self._io.read_u4le()
                 self._debug['reserved']['end'] = self._io.pos()
@@ -1848,7 +1848,7 @@ class MachO(KaitaiStruct):
                 return self._m_flags_obj if hasattr(self, '_m_flags_obj') else None
 
             self._debug['_m_flags_obj']['start'] = self._io.pos()
-            self._m_flags_obj = self._root.MachoFlags(self.flags, self._io, self, self._root)
+            self._m_flags_obj = MachO.MachoFlags(self.flags, self._io, self, self._root)
             self._m_flags_obj._read()
             self._debug['_m_flags_obj']['end'] = self._io.pos()
             return self._m_flags_obj if hasattr(self, '_m_flags_obj') else None
@@ -1881,7 +1881,7 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.LcStr(self._io, self, self._root)
+            self.name = MachO.LcStr(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
 
@@ -1944,7 +1944,7 @@ class MachO(KaitaiStruct):
             self._debug['cryptid']['start'] = self._io.pos()
             self.cryptid = self._io.read_u4le()
             self._debug['cryptid']['end'] = self._io.pos()
-            if  ((self._root.magic == self._root.MagicType.macho_be_x64) or (self._root.magic == self._root.MagicType.macho_le_x64)) :
+            if  ((self._root.magic == MachO.MagicType.macho_be_x64) or (self._root.magic == MachO.MagicType.macho_le_x64)) :
                 self._debug['pad']['start'] = self._io.pos()
                 self.pad = self._io.read_u4le()
                 self._debug['pad']['end'] = self._io.pos()
@@ -1978,7 +1978,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_code_signature']['start'] = io.pos()
             self._raw__m_code_signature = io.read_bytes(self.data_size)
             _io__raw__m_code_signature = KaitaiStream(BytesIO(self._raw__m_code_signature))
-            self._m_code_signature = self._root.CsBlob(_io__raw__m_code_signature, self, self._root)
+            self._m_code_signature = MachO.CsBlob(_io__raw__m_code_signature, self, self._root)
             self._m_code_signature._read()
             self._debug['_m_code_signature']['end'] = io.pos()
             io.seek(_pos)
@@ -2052,19 +2052,19 @@ class MachO(KaitaiStruct):
                 self._debug['opcode_and_immediate']['start'] = self._io.pos()
                 self.opcode_and_immediate = self._io.read_u1()
                 self._debug['opcode_and_immediate']['end'] = self._io.pos()
-                if  ((self.opcode == self._root.DyldInfoCommand.BindOpcode.set_dylib_ordinal_uleb) or (self.opcode == self._root.DyldInfoCommand.BindOpcode.set_append_sleb) or (self.opcode == self._root.DyldInfoCommand.BindOpcode.set_segment_and_offset_uleb) or (self.opcode == self._root.DyldInfoCommand.BindOpcode.add_address_uleb) or (self.opcode == self._root.DyldInfoCommand.BindOpcode.do_bind_add_address_uleb) or (self.opcode == self._root.DyldInfoCommand.BindOpcode.do_bind_uleb_times_skipping_uleb)) :
+                if  ((self.opcode == MachO.DyldInfoCommand.BindOpcode.set_dylib_ordinal_uleb) or (self.opcode == MachO.DyldInfoCommand.BindOpcode.set_append_sleb) or (self.opcode == MachO.DyldInfoCommand.BindOpcode.set_segment_and_offset_uleb) or (self.opcode == MachO.DyldInfoCommand.BindOpcode.add_address_uleb) or (self.opcode == MachO.DyldInfoCommand.BindOpcode.do_bind_add_address_uleb) or (self.opcode == MachO.DyldInfoCommand.BindOpcode.do_bind_uleb_times_skipping_uleb)) :
                     self._debug['uleb']['start'] = self._io.pos()
-                    self.uleb = self._root.Uleb128(self._io, self, self._root)
+                    self.uleb = MachO.Uleb128(self._io, self, self._root)
                     self.uleb._read()
                     self._debug['uleb']['end'] = self._io.pos()
 
-                if self.opcode == self._root.DyldInfoCommand.BindOpcode.do_bind_uleb_times_skipping_uleb:
+                if self.opcode == MachO.DyldInfoCommand.BindOpcode.do_bind_uleb_times_skipping_uleb:
                     self._debug['skip']['start'] = self._io.pos()
-                    self.skip = self._root.Uleb128(self._io, self, self._root)
+                    self.skip = MachO.Uleb128(self._io, self, self._root)
                     self.skip._read()
                     self._debug['skip']['end'] = self._io.pos()
 
-                if self.opcode == self._root.DyldInfoCommand.BindOpcode.set_symbol_trailing_flags_immediate:
+                if self.opcode == MachO.DyldInfoCommand.BindOpcode.set_symbol_trailing_flags_immediate:
                     self._debug['symbol']['start'] = self._io.pos()
                     self.symbol = (self._io.read_bytes_term(0, False, True, True)).decode(u"ascii")
                     self._debug['symbol']['end'] = self._io.pos()
@@ -2075,7 +2075,7 @@ class MachO(KaitaiStruct):
                 if hasattr(self, '_m_opcode'):
                     return self._m_opcode if hasattr(self, '_m_opcode') else None
 
-                self._m_opcode = KaitaiStream.resolve_enum(self._root.DyldInfoCommand.BindOpcode, (self.opcode_and_immediate & 240))
+                self._m_opcode = KaitaiStream.resolve_enum(MachO.DyldInfoCommand.BindOpcode, (self.opcode_and_immediate & 240))
                 return self._m_opcode if hasattr(self, '_m_opcode') else None
 
             @property
@@ -2114,12 +2114,12 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.DyldInfoCommand.RebaseData.RebaseItem(self._io, self, self._root)
+                    _t_items = MachO.DyldInfoCommand.RebaseData.RebaseItem(self._io, self, self._root)
                     _t_items._read()
                     _ = _t_items
                     self.items.append(_)
                     self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
-                    if _.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.done:
+                    if _.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.done:
                         break
                     i += 1
                 self._debug['items']['end'] = self._io.pos()
@@ -2136,15 +2136,15 @@ class MachO(KaitaiStruct):
                     self._debug['opcode_and_immediate']['start'] = self._io.pos()
                     self.opcode_and_immediate = self._io.read_u1()
                     self._debug['opcode_and_immediate']['end'] = self._io.pos()
-                    if  ((self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.set_segment_and_offset_uleb) or (self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.add_address_uleb) or (self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times) or (self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.do_rebase_add_address_uleb) or (self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times_skipping_uleb)) :
+                    if  ((self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.set_segment_and_offset_uleb) or (self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.add_address_uleb) or (self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times) or (self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.do_rebase_add_address_uleb) or (self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times_skipping_uleb)) :
                         self._debug['uleb']['start'] = self._io.pos()
-                        self.uleb = self._root.Uleb128(self._io, self, self._root)
+                        self.uleb = MachO.Uleb128(self._io, self, self._root)
                         self.uleb._read()
                         self._debug['uleb']['end'] = self._io.pos()
 
-                    if self.opcode == self._root.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times_skipping_uleb:
+                    if self.opcode == MachO.DyldInfoCommand.RebaseData.Opcode.do_rebase_uleb_times_skipping_uleb:
                         self._debug['skip']['start'] = self._io.pos()
-                        self.skip = self._root.Uleb128(self._io, self, self._root)
+                        self.skip = MachO.Uleb128(self._io, self, self._root)
                         self.skip._read()
                         self._debug['skip']['end'] = self._io.pos()
 
@@ -2154,7 +2154,7 @@ class MachO(KaitaiStruct):
                     if hasattr(self, '_m_opcode'):
                         return self._m_opcode if hasattr(self, '_m_opcode') else None
 
-                    self._m_opcode = KaitaiStream.resolve_enum(self._root.DyldInfoCommand.RebaseData.Opcode, (self.opcode_and_immediate & 240))
+                    self._m_opcode = KaitaiStream.resolve_enum(MachO.DyldInfoCommand.RebaseData.Opcode, (self.opcode_and_immediate & 240))
                     return self._m_opcode if hasattr(self, '_m_opcode') else None
 
                 @property
@@ -2177,7 +2177,7 @@ class MachO(KaitaiStruct):
 
             def _read(self):
                 self._debug['terminal_size']['start'] = self._io.pos()
-                self.terminal_size = self._root.Uleb128(self._io, self, self._root)
+                self.terminal_size = MachO.Uleb128(self._io, self, self._root)
                 self.terminal_size._read()
                 self._debug['terminal_size']['end'] = self._io.pos()
                 self._debug['children_count']['start'] = self._io.pos()
@@ -2189,7 +2189,7 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['children']:
                         self._debug['children']['arr'] = []
                     self._debug['children']['arr'].append({'start': self._io.pos()})
-                    _t_children = self._root.DyldInfoCommand.ExportNode.Child(self._io, self, self._root)
+                    _t_children = MachO.DyldInfoCommand.ExportNode.Child(self._io, self, self._root)
                     _t_children._read()
                     self.children[i] = _t_children
                     self._debug['children']['arr'][i]['end'] = self._io.pos()
@@ -2212,7 +2212,7 @@ class MachO(KaitaiStruct):
                     self.name = (self._io.read_bytes_term(0, False, True, True)).decode(u"ascii")
                     self._debug['name']['end'] = self._io.pos()
                     self._debug['node_offset']['start'] = self._io.pos()
-                    self.node_offset = self._root.Uleb128(self._io, self, self._root)
+                    self.node_offset = MachO.Uleb128(self._io, self, self._root)
                     self.node_offset._read()
                     self._debug['node_offset']['end'] = self._io.pos()
 
@@ -2224,7 +2224,7 @@ class MachO(KaitaiStruct):
                     _pos = self._io.pos()
                     self._io.seek(self.node_offset.value)
                     self._debug['_m_value']['start'] = self._io.pos()
-                    self._m_value = self._root.DyldInfoCommand.ExportNode(self._io, self, self._root)
+                    self._m_value = MachO.DyldInfoCommand.ExportNode(self._io, self, self._root)
                     self._m_value._read()
                     self._debug['_m_value']['end'] = self._io.pos()
                     self._io.seek(_pos)
@@ -2248,12 +2248,12 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.DyldInfoCommand.BindItem(self._io, self, self._root)
+                    _t_items = MachO.DyldInfoCommand.BindItem(self._io, self, self._root)
                     _t_items._read()
                     _ = _t_items
                     self.items.append(_)
                     self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
-                    if _.opcode == self._root.DyldInfoCommand.BindOpcode.done:
+                    if _.opcode == MachO.DyldInfoCommand.BindOpcode.done:
                         break
                     i += 1
                 self._debug['items']['end'] = self._io.pos()
@@ -2275,7 +2275,7 @@ class MachO(KaitaiStruct):
                     if not 'arr' in self._debug['items']:
                         self._debug['items']['arr'] = []
                     self._debug['items']['arr'].append({'start': self._io.pos()})
-                    _t_items = self._root.DyldInfoCommand.BindItem(self._io, self, self._root)
+                    _t_items = MachO.DyldInfoCommand.BindItem(self._io, self, self._root)
                     _t_items._read()
                     self.items.append(_t_items)
                     self._debug['items']['arr'][len(self.items) - 1]['end'] = self._io.pos()
@@ -2295,7 +2295,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_rebase']['start'] = io.pos()
             self._raw__m_rebase = io.read_bytes(self.rebase_size)
             _io__raw__m_rebase = KaitaiStream(BytesIO(self._raw__m_rebase))
-            self._m_rebase = self._root.DyldInfoCommand.RebaseData(_io__raw__m_rebase, self, self._root)
+            self._m_rebase = MachO.DyldInfoCommand.RebaseData(_io__raw__m_rebase, self, self._root)
             self._m_rebase._read()
             self._debug['_m_rebase']['end'] = io.pos()
             io.seek(_pos)
@@ -2312,7 +2312,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_bind']['start'] = io.pos()
             self._raw__m_bind = io.read_bytes(self.bind_size)
             _io__raw__m_bind = KaitaiStream(BytesIO(self._raw__m_bind))
-            self._m_bind = self._root.DyldInfoCommand.BindData(_io__raw__m_bind, self, self._root)
+            self._m_bind = MachO.DyldInfoCommand.BindData(_io__raw__m_bind, self, self._root)
             self._m_bind._read()
             self._debug['_m_bind']['end'] = io.pos()
             io.seek(_pos)
@@ -2329,7 +2329,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_lazy_bind']['start'] = io.pos()
             self._raw__m_lazy_bind = io.read_bytes(self.lazy_bind_size)
             _io__raw__m_lazy_bind = KaitaiStream(BytesIO(self._raw__m_lazy_bind))
-            self._m_lazy_bind = self._root.DyldInfoCommand.LazyBindData(_io__raw__m_lazy_bind, self, self._root)
+            self._m_lazy_bind = MachO.DyldInfoCommand.LazyBindData(_io__raw__m_lazy_bind, self, self._root)
             self._m_lazy_bind._read()
             self._debug['_m_lazy_bind']['end'] = io.pos()
             io.seek(_pos)
@@ -2346,7 +2346,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_exports']['start'] = io.pos()
             self._raw__m_exports = io.read_bytes(self.export_size)
             _io__raw__m_exports = KaitaiStream(BytesIO(self._raw__m_exports))
-            self._m_exports = self._root.DyldInfoCommand.ExportNode(_io__raw__m_exports, self, self._root)
+            self._m_exports = MachO.DyldInfoCommand.ExportNode(_io__raw__m_exports, self, self._root)
             self._m_exports._read()
             self._debug['_m_exports']['end'] = io.pos()
             io.seek(_pos)
@@ -2363,7 +2363,7 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['name']['start'] = self._io.pos()
-            self.name = self._root.LcStr(self._io, self, self._root)
+            self.name = MachO.LcStr(self._io, self, self._root)
             self.name._read()
             self._debug['name']['end'] = self._io.pos()
 
@@ -2419,11 +2419,11 @@ class MachO(KaitaiStruct):
             self.filesize = self._io.read_u4le()
             self._debug['filesize']['end'] = self._io.pos()
             self._debug['maxprot']['start'] = self._io.pos()
-            self.maxprot = self._root.VmProt(self._io, self, self._root)
+            self.maxprot = MachO.VmProt(self._io, self, self._root)
             self.maxprot._read()
             self._debug['maxprot']['end'] = self._io.pos()
             self._debug['initprot']['start'] = self._io.pos()
-            self.initprot = self._root.VmProt(self._io, self, self._root)
+            self.initprot = MachO.VmProt(self._io, self, self._root)
             self.initprot._read()
             self._debug['initprot']['end'] = self._io.pos()
             self._debug['nsects']['start'] = self._io.pos()
@@ -2438,7 +2438,7 @@ class MachO(KaitaiStruct):
                 if not 'arr' in self._debug['sections']:
                     self._debug['sections']['arr'] = []
                 self._debug['sections']['arr'].append({'start': self._io.pos()})
-                _t_sections = self._root.SegmentCommand.Section(self._io, self, self._root)
+                _t_sections = MachO.SegmentCommand.Section(self._io, self, self._root)
                 _t_sections._read()
                 self.sections[i] = _t_sections
                 self._debug['sections']['arr'][i]['end'] = self._io.pos()
@@ -2531,212 +2531,212 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['type']['start'] = self._io.pos()
-            self.type = KaitaiStream.resolve_enum(self._root.LoadCommandType, self._io.read_u4le())
+            self.type = KaitaiStream.resolve_enum(MachO.LoadCommandType, self._io.read_u4le())
             self._debug['type']['end'] = self._io.pos()
             self._debug['size']['start'] = self._io.pos()
             self.size = self._io.read_u4le()
             self._debug['size']['end'] = self._io.pos()
             self._debug['body']['start'] = self._io.pos()
             _on = self.type
-            if _on == self._root.LoadCommandType.id_dylinker:
+            if _on == MachO.LoadCommandType.id_dylinker:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylinkerCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylinkerCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.reexport_dylib:
+            elif _on == MachO.LoadCommandType.reexport_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.build_version:
+            elif _on == MachO.LoadCommandType.build_version:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.BuildVersionCommand(_io__raw_body, self, self._root)
+                self.body = MachO.BuildVersionCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.source_version:
+            elif _on == MachO.LoadCommandType.source_version:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SourceVersionCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SourceVersionCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.function_starts:
+            elif _on == MachO.LoadCommandType.function_starts:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkeditDataCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkeditDataCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.rpath:
+            elif _on == MachO.LoadCommandType.rpath:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.RpathCommand(_io__raw_body, self, self._root)
+                self.body = MachO.RpathCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.sub_framework:
+            elif _on == MachO.LoadCommandType.sub_framework:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SubCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SubCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.routines:
+            elif _on == MachO.LoadCommandType.routines:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.RoutinesCommand(_io__raw_body, self, self._root)
+                self.body = MachO.RoutinesCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.sub_library:
+            elif _on == MachO.LoadCommandType.sub_library:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SubCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SubCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.dyld_info_only:
+            elif _on == MachO.LoadCommandType.dyld_info_only:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DyldInfoCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DyldInfoCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.dyld_environment:
+            elif _on == MachO.LoadCommandType.dyld_environment:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylinkerCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylinkerCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.load_dylinker:
+            elif _on == MachO.LoadCommandType.load_dylinker:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylinkerCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylinkerCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.segment_split_info:
+            elif _on == MachO.LoadCommandType.segment_split_info:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkeditDataCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkeditDataCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.main:
+            elif _on == MachO.LoadCommandType.main:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.EntryPointCommand(_io__raw_body, self, self._root)
+                self.body = MachO.EntryPointCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.load_dylib:
+            elif _on == MachO.LoadCommandType.load_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.encryption_info:
+            elif _on == MachO.LoadCommandType.encryption_info:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.EncryptionInfoCommand(_io__raw_body, self, self._root)
+                self.body = MachO.EncryptionInfoCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.dysymtab:
+            elif _on == MachO.LoadCommandType.dysymtab:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DysymtabCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DysymtabCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.twolevel_hints:
+            elif _on == MachO.LoadCommandType.twolevel_hints:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.TwolevelHintsCommand(_io__raw_body, self, self._root)
+                self.body = MachO.TwolevelHintsCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.encryption_info_64:
+            elif _on == MachO.LoadCommandType.encryption_info_64:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.EncryptionInfoCommand(_io__raw_body, self, self._root)
+                self.body = MachO.EncryptionInfoCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.linker_option:
+            elif _on == MachO.LoadCommandType.linker_option:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkerOptionCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkerOptionCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.dyld_info:
+            elif _on == MachO.LoadCommandType.dyld_info:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DyldInfoCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DyldInfoCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.version_min_tvos:
+            elif _on == MachO.LoadCommandType.version_min_tvos:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.VersionMinCommand(_io__raw_body, self, self._root)
+                self.body = MachO.VersionMinCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.load_upward_dylib:
+            elif _on == MachO.LoadCommandType.load_upward_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.segment_64:
+            elif _on == MachO.LoadCommandType.segment_64:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SegmentCommand64(_io__raw_body, self, self._root)
+                self.body = MachO.SegmentCommand64(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.segment:
+            elif _on == MachO.LoadCommandType.segment:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SegmentCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SegmentCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.sub_umbrella:
+            elif _on == MachO.LoadCommandType.sub_umbrella:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SubCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SubCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.version_min_watchos:
+            elif _on == MachO.LoadCommandType.version_min_watchos:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.VersionMinCommand(_io__raw_body, self, self._root)
+                self.body = MachO.VersionMinCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.routines_64:
+            elif _on == MachO.LoadCommandType.routines_64:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.RoutinesCommand64(_io__raw_body, self, self._root)
+                self.body = MachO.RoutinesCommand64(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.id_dylib:
+            elif _on == MachO.LoadCommandType.id_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.sub_client:
+            elif _on == MachO.LoadCommandType.sub_client:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SubCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SubCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.dylib_code_sign_drs:
+            elif _on == MachO.LoadCommandType.dylib_code_sign_drs:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkeditDataCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkeditDataCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.symtab:
+            elif _on == MachO.LoadCommandType.symtab:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.SymtabCommand(_io__raw_body, self, self._root)
+                self.body = MachO.SymtabCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.linker_optimization_hint:
+            elif _on == MachO.LoadCommandType.linker_optimization_hint:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkeditDataCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkeditDataCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.data_in_code:
+            elif _on == MachO.LoadCommandType.data_in_code:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.LinkeditDataCommand(_io__raw_body, self, self._root)
+                self.body = MachO.LinkeditDataCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.code_signature:
+            elif _on == MachO.LoadCommandType.code_signature:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.CodeSignatureCommand(_io__raw_body, self, self._root)
+                self.body = MachO.CodeSignatureCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.version_min_iphoneos:
+            elif _on == MachO.LoadCommandType.version_min_iphoneos:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.VersionMinCommand(_io__raw_body, self, self._root)
+                self.body = MachO.VersionMinCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.load_weak_dylib:
+            elif _on == MachO.LoadCommandType.load_weak_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.lazy_load_dylib:
+            elif _on == MachO.LoadCommandType.lazy_load_dylib:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.DylibCommand(_io__raw_body, self, self._root)
+                self.body = MachO.DylibCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.uuid:
+            elif _on == MachO.LoadCommandType.uuid:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.UuidCommand(_io__raw_body, self, self._root)
+                self.body = MachO.UuidCommand(_io__raw_body, self, self._root)
                 self.body._read()
-            elif _on == self._root.LoadCommandType.version_min_macosx:
+            elif _on == MachO.LoadCommandType.version_min_macosx:
                 self._raw_body = self._io.read_bytes((self.size - 8))
                 _io__raw_body = KaitaiStream(BytesIO(self._raw_body))
-                self.body = self._root.VersionMinCommand(_io__raw_body, self, self._root)
+                self.body = MachO.VersionMinCommand(_io__raw_body, self, self._root)
                 self.body._read()
             else:
                 self.body = self._io.read_bytes((self.size - 8))
@@ -2904,35 +2904,35 @@ class MachO(KaitaiStruct):
                     self._debug['_m_symbols']['arr'] = []
                 self._debug['_m_symbols']['arr'].append({'start': io.pos()})
                 _on = self._root.magic
-                if _on == self._root.MagicType.macho_le_x64:
+                if _on == MachO.MagicType.macho_le_x64:
                     if not 'arr' in self._debug['_m_symbols']:
                         self._debug['_m_symbols']['arr'] = []
                     self._debug['_m_symbols']['arr'].append({'start': io.pos()})
-                    _t__m_symbols = self._root.SymtabCommand.Nlist64(io, self, self._root)
+                    _t__m_symbols = MachO.SymtabCommand.Nlist64(io, self, self._root)
                     _t__m_symbols._read()
                     self._m_symbols[i] = _t__m_symbols
                     self._debug['_m_symbols']['arr'][i]['end'] = io.pos()
-                elif _on == self._root.MagicType.macho_be_x64:
+                elif _on == MachO.MagicType.macho_be_x64:
                     if not 'arr' in self._debug['_m_symbols']:
                         self._debug['_m_symbols']['arr'] = []
                     self._debug['_m_symbols']['arr'].append({'start': io.pos()})
-                    _t__m_symbols = self._root.SymtabCommand.Nlist64(io, self, self._root)
+                    _t__m_symbols = MachO.SymtabCommand.Nlist64(io, self, self._root)
                     _t__m_symbols._read()
                     self._m_symbols[i] = _t__m_symbols
                     self._debug['_m_symbols']['arr'][i]['end'] = io.pos()
-                elif _on == self._root.MagicType.macho_le_x86:
+                elif _on == MachO.MagicType.macho_le_x86:
                     if not 'arr' in self._debug['_m_symbols']:
                         self._debug['_m_symbols']['arr'] = []
                     self._debug['_m_symbols']['arr'].append({'start': io.pos()})
-                    _t__m_symbols = self._root.SymtabCommand.Nlist(io, self, self._root)
+                    _t__m_symbols = MachO.SymtabCommand.Nlist(io, self, self._root)
                     _t__m_symbols._read()
                     self._m_symbols[i] = _t__m_symbols
                     self._debug['_m_symbols']['arr'][i]['end'] = io.pos()
-                elif _on == self._root.MagicType.macho_be_x86:
+                elif _on == MachO.MagicType.macho_be_x86:
                     if not 'arr' in self._debug['_m_symbols']:
                         self._debug['_m_symbols']['arr'] = []
                     self._debug['_m_symbols']['arr'].append({'start': io.pos()})
-                    _t__m_symbols = self._root.SymtabCommand.Nlist(io, self, self._root)
+                    _t__m_symbols = MachO.SymtabCommand.Nlist(io, self, self._root)
                     _t__m_symbols._read()
                     self._m_symbols[i] = _t__m_symbols
                     self._debug['_m_symbols']['arr'][i]['end'] = io.pos()
@@ -2953,7 +2953,7 @@ class MachO(KaitaiStruct):
             self._debug['_m_strs']['start'] = io.pos()
             self._raw__m_strs = io.read_bytes(self.str_size)
             _io__raw__m_strs = KaitaiStream(BytesIO(self._raw__m_strs))
-            self._m_strs = self._root.SymtabCommand.StrTable(_io__raw__m_strs, self, self._root)
+            self._m_strs = MachO.SymtabCommand.StrTable(_io__raw__m_strs, self, self._root)
             self._m_strs._read()
             self._debug['_m_strs']['end'] = io.pos()
             io.seek(_pos)
@@ -2970,11 +2970,11 @@ class MachO(KaitaiStruct):
 
         def _read(self):
             self._debug['version']['start'] = self._io.pos()
-            self.version = self._root.Version(self._io, self, self._root)
+            self.version = MachO.Version(self._io, self, self._root)
             self.version._read()
             self._debug['version']['end'] = self._io.pos()
             self._debug['sdk']['start'] = self._io.pos()
-            self.sdk = self._root.Version(self._io, self, self._root)
+            self.sdk = MachO.Version(self._io, self, self._root)
             self.sdk._read()
             self._debug['sdk']['end'] = self._io.pos()
 
