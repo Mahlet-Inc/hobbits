@@ -1,3 +1,10 @@
+## [0.41.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.1...v0.41.2) (2020-10-29)
+
+
+### Bug Fixes
+
+* [plugin] correct some (not all) problems in kaitai runner ([2edfe19](https://github.com/Mahlet-Inc/hobbits/commit/2edfe1921f8333dd6352c6a4bfabf47856cede00))
+
 ## [0.41.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.0...v0.41.1) (2020-10-28)
 
 
