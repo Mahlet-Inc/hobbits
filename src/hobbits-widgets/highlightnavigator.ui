@@ -50,12 +50,16 @@
      </item>
      <item>
       <widget class="QToolButton" name="tb_gotoPrevious">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Previous</string>
        </property>
        <property name="icon">
         <iconset resource="hobbitswidgets.qrc">
-         <normaloff>:/images/icons/arrow-left.png</normaloff>:/images/icons/arrow-left.png</iconset>
+         <normaloff>:/images/icons/arrow-left-light.png</normaloff>
+         <disabledoff>:/images/icons/arrow-left-999.png</disabledoff>:/images/icons/arrow-left-light.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -80,12 +84,16 @@
      </item>
      <item>
       <widget class="QToolButton" name="tb_gotoNext">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Next</string>
        </property>
        <property name="icon">
         <iconset resource="hobbitswidgets.qrc">
-         <normaloff>:/images/icons/arrow-right.png</normaloff>:/images/icons/arrow-right.png</iconset>
+         <normaloff>:/images/icons/arrow-right-light.png</normaloff>
+         <disabledoff>:/images/icons/arrow-right-999.png</disabledoff>:/images/icons/arrow-right-light.png</iconset>
        </property>
        <property name="iconSize">
         <size>

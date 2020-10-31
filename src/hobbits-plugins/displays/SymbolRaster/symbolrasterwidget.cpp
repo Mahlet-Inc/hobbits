@@ -76,16 +76,18 @@ void SymbolRasterWidget::paintEvent(QPaintEvent*)
 
     QPainter painter(this);
 
+    QFont font = monoFont(10);
+    QColor headerFg = headerForegroundColor();
+    QColor headerBg = headerBackgroundColor();
+
     painter.save();
     if (m_showFrameOffsets) {
-        painter.fillRect(0, 0, m_displayOffset.x(), height(), Qt::lightGray);
+        painter.fillRect(0, 0, m_displayOffset.x(), height(), headerBg);
     }
     if (m_showColumnOffsets) {
-        painter.fillRect(0, 0, width(), m_displayOffset.y(), Qt::lightGray);
+        painter.fillRect(0, 0, width(), m_displayOffset.y(), headerBg);
     }
 
-    QFont font = QFont("monospace", 10);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
     if (m_showFrameOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
@@ -102,10 +104,10 @@ void SymbolRasterWidget::paintEvent(QPaintEvent*)
                         m_displayOffset.y() + (i * m_scale),
                         m_headerFontSize.width() / 2,
                         m_scale,
-                        Qt::darkGray);
+                        headerFg);
             }
 
-            painter.setPen(Qt::darkGray);
+            painter.setPen(headerFg);
             painter.setFont(font);
             painter.drawText(
                     m_headerFontSize.width() / 2,
@@ -136,12 +138,12 @@ void SymbolRasterWidget::paintEvent(QPaintEvent*)
                         m_displayOffset.y() - m_headerFontSize.width() / 2,
                         m_scale,
                         m_headerFontSize.width() / 2,
-                        Qt::darkGray);
+                        headerFg);
             }
 
             painter.save();
             painter.rotate(-90);
-            painter.setPen(Qt::darkGray);
+            painter.setPen(headerFg);
             painter.setFont(font);
             painter.drawText(
                     -1 * m_displayOffset.y() + m_headerFontSize.width() / 2,

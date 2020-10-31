@@ -41,7 +41,7 @@
       <widget class="QPlainTextEdit" name="te_pythonScript">
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>Cantarell</family>
         </font>
        </property>
        <property name="lineWrapMode">
@@ -64,11 +64,6 @@ def process_bits(input, output_bits, output_info, progress):
      </item>
      <item>
       <widget class="QPlainTextEdit" name="te_pluginOutput">
-       <property name="font">
-        <font>
-         <family>Monospace</family>
-        </font>
-       </property>
        <property name="lineWrapMode">
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>

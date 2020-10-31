@@ -6,14 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>403</width>
-    <height>111</height>
+    <width>586</width>
+    <height>141</height>
    </rect>
-  </property>
-  <property name="font">
-   <font>
-    <pointsize>8</pointsize>
-   </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -100,17 +95,6 @@
      </item>
      <item>
       <widget class="QLineEdit" name="coeffInput">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>42</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
        <property name="placeholderText">
         <string>1</string>
        </property>
@@ -130,17 +114,6 @@
      </item>
      <item>
       <widget class="QSpinBox" name="expInput">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>42</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
        <property name="minimum">
         <number>-5000</number>
        </property>

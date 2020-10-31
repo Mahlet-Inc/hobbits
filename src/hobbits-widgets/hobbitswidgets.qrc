@@ -2,5 +2,39 @@
     <qresource prefix="/">
         <file>images/icons/arrow-left.png</file>
         <file>images/icons/arrow-right.png</file>
+        <file>images/icons/x-light.png</file>
+        <file>images/icons/x-999.png</file>
+        <file>images/icons/windows-light.png</file>
+        <file>images/icons/tear.png</file>
+        <file>images/icons/size-grip-999.png</file>
+        <file>images/icons/size-grip-666.png</file>
+        <file>images/icons/minus-light-blue.png</file>
+        <file>images/icons/minus-light.png</file>
+        <file>images/icons/minus-bright-blue.png</file>
+        <file>images/icons/minus-blue.png</file>
+        <file>images/icons/minus-999.png</file>
+        <file>images/icons/menu-light.png</file>
+        <file>images/icons/handle-horizontal-999.png</file>
+        <file>images/icons/handle-999.png</file>
+        <file>images/icons/circle-light-blue.png</file>
+        <file>images/icons/circle-light.png</file>
+        <file>images/icons/circle-bright-blue.png</file>
+        <file>images/icons/circle-blue.png</file>
+        <file>images/icons/circle-999.png</file>
+        <file>images/icons/check-light-blue.png</file>
+        <file>images/icons/check-light.png</file>
+        <file>images/icons/check-bright-blue.png</file>
+        <file>images/icons/check-blue.png</file>
+        <file>images/icons/check-999.png</file>
+        <file>images/icons/arrow-up-light.png</file>
+        <file>images/icons/arrow-up-999.png</file>
+        <file>images/icons/arrow-up.png</file>
+        <file>images/icons/arrow-right-light.png</file>
+        <file>images/icons/arrow-right-999.png</file>
+        <file>images/icons/arrow-left-light.png</file>
+        <file>images/icons/arrow-left-999.png</file>
+        <file>images/icons/arrow-down-light.png</file>
+        <file>images/icons/arrow-down-999.png</file>
+        <file>images/icons/arrow-down.png</file>
     </qresource>
 </RCC>

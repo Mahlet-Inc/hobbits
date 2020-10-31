@@ -17,7 +17,11 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QTableView" name="tv_mappings"/>
+      <widget class="QTableView" name="tv_mappings">
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">

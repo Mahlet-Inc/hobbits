@@ -4,6 +4,7 @@
 #include <QCommandLineParser>
 #include <QStyle>
 #include "settingsmanager.h"
+#include "hobbitsstyle.h"
 #ifdef Q_OS_UNIX
 #include <iostream>
 #include <unistd.h>
@@ -12,6 +13,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    HobbitsStyle::applyStyle(a);
 
     QCoreApplication::setOrganizationName("Mahlet");
     QCoreApplication::setApplicationName("hobbits");

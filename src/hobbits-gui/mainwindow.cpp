@@ -55,14 +55,16 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     // Populate View Menu
     ui->menu_View->addAction(ui->dock_bitContainerSelect->toggleViewAction());
     ui->menu_View->addAction(ui->dock_operatorPlugins->toggleViewAction());
-    ui->menu_View->addSeparator();
     ui->menu_View->addAction(ui->dock_findBits->toggleViewAction());
     ui->menu_View->addSeparator();
     ui->menu_View->addMenu(m_splitViewMenu);
 
+    ui->dock_bitContainerSelect->setContentsMargins(0, 0, 0, 0);
+    ui->dock_operatorPlugins->setContentsMargins(0, 0, 0, 0);
+    ui->dock_findBits->setContentsMargins(0, 0, 0, 0);
     ui->dock_bitContainerSelect->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_B));
     ui->dock_operatorPlugins->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
-    ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
+    ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_A));
 
     // More menu initialization
     populateRecentBatchesMenu();
@@ -265,8 +267,7 @@ void MainWindow::initializeDisplays()
 void MainWindow::addDisplayGroup()
 {
     QTabWidget *tabs = new QTabWidget(this);
-    tabs->setElideMode(Qt::ElideLeft);
-    tabs->setDocumentMode(true);
+    tabs->setElideMode(Qt::ElideNone);
 
     m_displayTabsSplitter->addWidget(tabs);
 
