@@ -27,6 +27,11 @@ documentation and/or watch
 [this walkthrough video](https://youtu.be/6ygkhze36qM)
 
 ## Adding plugins
+```
+Notice (November 2020): Several plugin interfaces are currently being refactored
+and much of the documentation is out of date by a few minor version numbers. The
+documentation will be updated as the 1.0 interface is decided upon.
+```
 1. Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)
 in the documentation and/or watch
