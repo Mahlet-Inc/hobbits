@@ -1159,11 +1159,6 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
     menu->setEnabled(recentlyExported.length() - invalidStateCount > 0);
 }
 
-void MainWindow::on_tb_scrollReset_clicked()
-{
-    m_displayHandle->setOffsets(0, 0);
-}
-
 void MainWindow::on_action_BatchEditor_triggered()
 {
     m_batchEditor->show();

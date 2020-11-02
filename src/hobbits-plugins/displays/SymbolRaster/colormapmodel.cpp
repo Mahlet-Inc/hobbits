@@ -131,12 +131,12 @@ QVariant ColorMapModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::FontRole) {
-        return QFont("monospace", 12);
+        return QFont("Roboto Mono");
     }
     else if (role == Qt::BackgroundRole) {
         return m_mappings.at(index.row()).second;
     }
-    else if (role == Qt::ForegroundRole) {
+    else if (role == Qt::ForegroundRole && index.column() == 1) {
         QColor color = m_mappings.at(index.row()).second;
         if (color.lightnessF() > 0.5) {
             return QColor(Qt::black);

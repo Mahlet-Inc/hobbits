@@ -134,7 +134,7 @@ void FrequencyPlotWidget::paintEvent(QPaintEvent*) {
 
         painter.save();
         painter.fillRect(box, QColor(0x00, 0x00, 0x00, 0x99));
-        QFont font = QFont("monospace", 10);
+        QFont font = QFont("Roboto Mono", 10);
         font.setStyleStrategy(QFont::ForceIntegerMetrics);
         painter.setFont(font);
         painter.setPen(QColor(0xff, 0xff, 0xff));

@@ -94,11 +94,11 @@ void PeakSelector::paintEvent(QPaintEvent*)
     painter.setPen(lineColor);
     painter.drawPath(path);
 
-    QFont font = QFont("monospace", 11);
+    QFont font = QFont("Roboto Mono", 11);
     font.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
 
-    QFont bigFont = QFont("monospace", 12);
+    QFont bigFont = QFont("Roboto Mono", 12);
     bigFont.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics bigFontMetrics = QFontMetrics(bigFont, painter.device());
 

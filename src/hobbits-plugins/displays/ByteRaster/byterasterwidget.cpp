@@ -155,7 +155,7 @@ void ByteRasterWidget::prepareHeaders()
     }
 
     QPainter painter(this);
-    QFont font = QFont("monospace", 10);
+    QFont font = QFont("Roboto Mono", 10);
     font.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
     int fontWidth = fontMetrics.width("0");
