@@ -1,3 +1,10 @@
+# [0.42.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.2...v0.42.0) (2020-11-03)
+
+
+### Features
+
+* add custom UI theme ([469cc6f](https://github.com/Mahlet-Inc/hobbits/commit/469cc6f829cee1bb98ae11da28851a907d69d370))
+
 ## [0.41.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.1...v0.41.2) (2020-10-29)
 
 
