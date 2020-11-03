@@ -30,19 +30,20 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
     int displayWidth = (this->width() - m_displayOffset.x()) / m_scale;
     int displayHeight = (this->height() - m_displayOffset.y()) / m_scale;
 
+    QFont font = monoFont(10);
+    QColor headerFg = headerForegroundColor();
+    QColor headerBg = headerBackgroundColor();
 
     QPainter painter(this);
 
     painter.save();
     if (m_showFrameOffsets) {
-        painter.fillRect(0, 0, m_displayOffset.x(), height(), Qt::lightGray);
+        painter.fillRect(0, 0, m_displayOffset.x(), height(), headerBg);
     }
     if (m_showColumnOffsets) {
-        painter.fillRect(0, 0, width(), m_displayOffset.y(), Qt::lightGray);
+        painter.fillRect(0, 0, width(), m_displayOffset.y(), headerBg);
     }
 
-    QFont font = QFont("monospace", 10);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
     if (m_showFrameOffsets) {
         int increment = qCeil(double(m_headerFontSize.height()) / double(m_scale));
         for (int i = 0; i <= displayHeight; i += increment) {
@@ -59,10 +60,10 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
                         m_displayOffset.y() + (i * m_scale),
                         m_headerFontSize.width() / 2,
                         m_scale,
-                        Qt::darkGray);
+                        headerFg);
             }
 
-            painter.setPen(Qt::darkGray);
+            painter.setPen(headerFg);
             painter.setFont(font);
             painter.drawText(
                     m_headerFontSize.width() / 2,
@@ -92,12 +93,12 @@ void BitRasterWidget::paintEvent(QPaintEvent*)
                         m_displayOffset.y() - m_headerFontSize.width() / 2,
                         m_scale,
                         m_headerFontSize.width() / 2,
-                        Qt::darkGray);
+                        headerFg);
             }
 
             painter.save();
             painter.rotate(-90);
-            painter.setPen(Qt::darkGray);
+            painter.setPen(headerFg);
             painter.setFont(font);
             painter.drawText(
                     -1 * m_displayOffset.y() + m_headerFontSize.width() / 2,
@@ -151,8 +152,7 @@ void BitRasterWidget::prepareHeaders()
     }
 
     QPainter painter(this);
-    QFont font = QFont("monospace", 10);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+    QFont font = monoFont(10);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
     int fontWidth = fontMetrics.width("0");
     int fontHeight = fontMetrics.height();

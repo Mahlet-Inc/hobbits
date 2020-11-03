@@ -29,7 +29,7 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillRect(QRect(QPoint(0,0), this->size()), Qt::darkGray);
+    painter.fillRect(QRect(QPoint(0,0), this->size()), qRgb(0x1c, 0x1c, 0x1c));
 
     if (m_manager.isNull() || m_manager->currentContainer().isNull()) {
         return;
@@ -211,7 +211,7 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     int width = int(container->info()->maxFrameWidth() / 8);
     int height = qMin(10000ll, frames->size());
     QImage image(width, height, QImage::Format_ARGB32);
-    image.fill(qRgb(50, 50, 90));
+    image.fill(qRgb(0x1c, 0x1c, 0x1c));
     QPainter imagePainter(&image);
     imagePainter.setRenderHint(QPainter::Antialiasing, true);
 

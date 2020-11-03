@@ -50,17 +50,22 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
         return;
     }
 
+    QColor headerBg = headerBackgroundColor();
+    QColor headerFg = headerForegroundColor();
+    QColor textBg = QColor("#1c1c1c");
+    QColor textFg = QColor("#eeeeee");
+
     QPainter painter(this);
-    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPointSize(m_fontSize);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+
+    painter.fillRect(0, 0, width(), height(), textBg);
+    auto font = monoFont(m_fontSize);
     if (m_showFrameOffsets) {
-        painter.fillRect(0, 0, m_displayOffset.x() - m_fontWidth / 2, height(), Qt::lightGray);
+        painter.fillRect(0, 0, m_displayOffset.x() - m_fontWidth / 2, height(), headerBg);
         for (int i = 0; i < h; i++) {
             if (i + frameOffset >= m_displayHandle->getContainer()->frameCount()) {
                 break;
             }
-            painter.setPen(Qt::darkGray);
+            painter.setPen(headerFg);
             painter.setFont(font);
             painter.drawText(
                     m_fontWidth / 2,
@@ -73,7 +78,7 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
     }
 
     if (m_showColumnOffsets) {
-        painter.fillRect(0, 0, width(), m_displayOffset.y() - m_fontWidth / 2, Qt::lightGray);
+        painter.fillRect(0, 0, width(), m_displayOffset.y() - m_fontWidth / 2, headerBg);
         for (int i = 0; i < w; i += 2) {
             if ((i + charOffset) * bitsPerChar() >= m_displayHandle->getContainer()->maxFrameWidth()) {
                 break;
@@ -81,10 +86,8 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
 
             painter.save();
             painter.rotate(-90);
-            painter.setPen(Qt::darkGray);
-
+            painter.setPen(headerFg);
             int xOffset = qRound(getGroupedOffset(i, m_fontWidth, m_columnGrouping, charOffset, 1));
-            painter.setPen(Qt::darkGray);
             painter.setFont(font);
             painter.drawText(
                     -1 * m_displayOffset.y() + m_fontWidth,
@@ -122,7 +125,7 @@ void DisplayBaseText::paintEvent(QPaintEvent*)
             }
         }
         painter.setFont(font);
-        painter.setPen(Qt::black);
+        painter.setPen(textFg);
         painter.drawText(
                 0,
                 i * m_frameHeight,
@@ -160,9 +163,7 @@ void DisplayBaseText::mouseMoveEvent(QMouseEvent *event)
 void DisplayBaseText::prepareHeaders()
 {
     QPainter painter(this);
-    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPointSize(m_fontSize);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+    QFont font = monoFont(m_fontSize);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
     m_fontWidth = fontMetrics.width("0");
     m_fontHeight = fontMetrics.height();

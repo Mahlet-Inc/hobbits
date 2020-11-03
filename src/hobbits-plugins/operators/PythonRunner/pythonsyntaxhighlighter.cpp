@@ -22,16 +22,15 @@ PythonSyntaxHighlighter::PythonSyntaxHighlighter(QTextDocument *parent) :
 
     braces = QStringList() << "{" << "}" << "\\(" << "\\)" << "\\[" << "]";
 
-    basicStyles.insert("keyword", getTextCharFormat("blue"));
-    basicStyles.insert("operator", getTextCharFormat("red"));
-    basicStyles.insert("brace", getTextCharFormat("darkGray"));
-    basicStyles.insert("defclass", getTextCharFormat("black", "bold"));
-    basicStyles.insert("brace", getTextCharFormat("darkGray"));
-    basicStyles.insert("string", getTextCharFormat("magenta"));
-    basicStyles.insert("string2", getTextCharFormat("darkMagenta"));
-    basicStyles.insert("comment", getTextCharFormat("darkGreen", "italic"));
-    basicStyles.insert("self", getTextCharFormat("black", "italic"));
-    basicStyles.insert("numbers", getTextCharFormat("brown"));
+    basicStyles.insert("keyword", getTextCharFormat("paleturquoise"));
+    basicStyles.insert("operator", getTextCharFormat("peachpuff"));
+    basicStyles.insert("defclass", getTextCharFormat("peachpuff", "bold"));
+    basicStyles.insert("brace", getTextCharFormat("peachpuff"));
+    basicStyles.insert("string", getTextCharFormat("thistle"));
+    basicStyles.insert("string2", getTextCharFormat("plum"));
+    basicStyles.insert("comment", getTextCharFormat("greenyellow", "italic"));
+    basicStyles.insert("self", getTextCharFormat("tomato", "italic"));
+    basicStyles.insert("numbers", getTextCharFormat("orange"));
 
     triSingleQuote.setPattern("'''");
     triDoubleQuote.setPattern("\"\"\"");

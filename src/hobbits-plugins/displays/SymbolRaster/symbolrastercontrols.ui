@@ -67,6 +67,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
       </widget>
      </item>
      <item>

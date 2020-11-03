@@ -32,6 +32,10 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void leaveEvent(QEvent *event) override;
 
+    static QFont monoFont(int pointSize);
+    static QColor headerBackgroundColor();
+    static QColor headerForegroundColor();
+
     QList<RangeHighlight> getHighlightSpots(QList<RangeHighlight> highlights, int &highlightMinIndex, Frame frame);
 
     QPoint getOffset(int x, int y, int xSize, int ySize, int xGrouping, int bitsPerX);

@@ -10,16 +10,13 @@ HighlightNavigator::HighlightNavigator(QWidget *parent) :
     m_allHighlightCount(0),
     m_shouldHighlightSelection(false)
 {
+    Q_INIT_RESOURCE(hobbitswidgets);
     ui->setupUi(this);
 
     connect(ui->tb_gotoNext, &QToolButton::pressed, this, &HighlightNavigator::selectNext);
     connect(ui->tb_gotoPrevious, &QToolButton::pressed, this, &HighlightNavigator::selectPrevious);
     connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SLOT(updateSelection()));
     connect(ui->tw_highlights, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged()));
-
-    Q_INIT_RESOURCE(hobbitswidgets);
-    ui->tb_gotoNext->setIcon(QIcon(":/images/icons/arrow-right.png"));
-    ui->tb_gotoPrevious->setIcon(QIcon(":/images/icons/arrow-left.png"));
 }
 
 HighlightNavigator::~HighlightNavigator()

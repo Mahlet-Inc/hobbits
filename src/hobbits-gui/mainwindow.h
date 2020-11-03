@@ -78,7 +78,6 @@ private slots:
     void on_action_Save_Batch_triggered();
     void on_action_About_triggered();
     void on_actionPreferences_triggered();
-    void on_tb_scrollReset_clicked();
 
     void pluginActionStarted(QUuid);
     void pluginActionFinished(QUuid);

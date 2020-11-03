@@ -47,10 +47,8 @@
      </item>
      <item>
       <widget class="QLineEdit" name="le_takeSkip">
-       <property name="font">
-        <font>
-         <family>Monospace</family>
-        </font>
+       <property name="styleSheet">
+        <string notr="true">font: 11pt &quot;Roboto Mono&quot;;</string>
        </property>
       </widget>
      </item>

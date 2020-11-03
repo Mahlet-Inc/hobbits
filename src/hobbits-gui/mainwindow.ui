@@ -6,19 +6,43 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1299</width>
-    <height>799</height>
+    <width>1604</width>
+    <height>1067</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Hobbits</string>
   </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="displayScrollLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="displayTabsLayout">
           <property name="spacing">
@@ -68,28 +92,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QToolButton" name="tb_scrollReset">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>14</width>
-            <height>14</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
@@ -99,16 +101,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dock_bitContainerSelect">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -120,27 +117,61 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_10">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
         <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
        </property>
        <item>
         <widget class="QToolButton" name="tb_removeBitContainer">
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Remove</string>
          </property>
          <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/hobbitsgui/images/icons/trash.png</normaloff>:/hobbitsgui/images/icons/trash.png</iconset>
+          <iconset resource="../hobbits-widgets/hobbitswidgets.qrc">
+           <normaloff>:/images/icons/minus-light.png</normaloff>
+           <disabledoff>:/images/icons/minus-999.png</disabledoff>:/images/icons/minus-light.png</iconset>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="tb_containersMenu">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -151,8 +182,11 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/hobbitsgui/images/icons/menu.png</normaloff>:/hobbitsgui/images/icons/menu.png</iconset>
+          <iconset resource="../hobbits-widgets/hobbitswidgets.qrc">
+           <normaloff>:/images/icons/menu-light.png</normaloff>:/images/icons/menu-light.png</iconset>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
          </property>
         </widget>
        </item>
@@ -172,7 +206,11 @@
       </layout>
      </item>
      <item>
-      <widget class="QTreeView" name="tv_bitContainers"/>
+      <widget class="QTreeView" name="tv_bitContainers">
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -198,6 +236,21 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_13">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
@@ -211,6 +264,21 @@
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
            <item>
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
@@ -241,6 +309,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dock_findBits">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
    </property>
@@ -252,8 +326,29 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout" name="verticalLayout_7">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QTabWidget" name="analyzerTabs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="currentIndex">
         <number>-1</number>
        </property>
@@ -261,6 +356,21 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>6</number>
+       </property>
        <item>
         <spacer name="horizontalSpacer_5">
          <property name="orientation">
@@ -294,7 +404,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1299</width>
+     <width>1604</width>
      <height>29</height>
     </rect>
    </property>
@@ -410,7 +520,7 @@
   <tabstop>pb_operate</tabstop>
  </tabstops>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../hobbits-widgets/hobbitswidgets.qrc"/>
  </resources>
  <connections/>
 </ui>

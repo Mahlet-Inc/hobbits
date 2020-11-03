@@ -54,6 +54,24 @@ void DisplayBase::leaveEvent(QEvent *event)
     m_displayHandle->setBitHover(false, 0, 0);
 }
 
+QFont DisplayBase::monoFont(int pointSize)
+{
+    QFont font("Roboto Mono");
+    font.setPointSize(pointSize);
+    font.setStyleStrategy(QFont::ForceIntegerMetrics);
+    return font;
+}
+
+QColor DisplayBase::headerBackgroundColor()
+{
+    return QColor("#2f2f2f");
+}
+
+QColor DisplayBase::headerForegroundColor()
+{
+    return QColor("#999999");
+}
+
 QPoint DisplayBase::getOffset(int x, int y, int xSize, int ySize, int xGrouping, int bitsPerX)
 {
     int xDiff = x / xSize;

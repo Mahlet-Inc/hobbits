@@ -159,11 +159,6 @@
              </item>
              <item>
               <widget class="QPlainTextEdit" name="te_ksy">
-               <property name="font">
-                <font>
-                 <family>Monospace</family>
-                </font>
-               </property>
                <property name="documentTitle">
                 <string/>
                </property>
@@ -201,11 +196,6 @@
           <widget class="QPlainTextEdit" name="te_output">
            <property name="enabled">
             <bool>true</bool>
-           </property>
-           <property name="font">
-            <font>
-             <family>Monospace</family>
-            </font>
            </property>
            <property name="undoRedoEnabled">
             <bool>true</bool>

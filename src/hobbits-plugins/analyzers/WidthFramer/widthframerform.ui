@@ -26,7 +26,7 @@
      <item>
       <widget class="QLineEdit" name="sb_width">
        <property name="styleSheet">
-        <string notr="true">border-color: rgb(250, 0, 0);</string>
+        <string notr="true"/>
        </property>
       </widget>
      </item>

@@ -71,7 +71,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
 
     m_renderer->setMaxSpectrums(displayHeight);
 
-    QFont font = QFont("monospace", 10);
+    QFont font = QFont("Roboto Mono", 10);
     font.setStyleStrategy(QFont::ForceIntegerMetrics);
 
     QPainter painter(this);
@@ -252,10 +252,10 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
         bPanel.setTopLeft(QPoint(0, m_displayCenterSize.height() + borderSize));
         bPanel.setBottomRight(rPanel.bottomRight());
 
-        painter.fillRect(rPanel, Qt::black);
-        painter.fillRect(bPanel, Qt::black);
-        painter.fillRect(rBorder, Qt::darkGray);
-        painter.fillRect(bBorder, Qt::darkGray);
+        painter.fillRect(rPanel, QColor(0x1c, 0x1c, 0x1c));
+        painter.fillRect(bPanel, QColor(0x1c, 0x1c, 0x1c));
+        painter.fillRect(rBorder, QColor(0x2f, 0x2f, 0x2f));
+        painter.fillRect(bBorder, QColor(0x2f, 0x2f, 0x2f));
 
         int graphPad = 8;
 
@@ -277,7 +277,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                 }
 
                 painter.setRenderHint(QPainter::Antialiasing, true);
-                painter.setPen(qRgb(0xdd, 0xdd, 0xdd));
+                painter.setPen(qRgb(0xa3, 0xbe, 0xdb));
                 painter.drawPath(path);
 
                 painter.restore();
@@ -301,7 +301,7 @@ void SpectrogramWidget::paintEvent(QPaintEvent*) {
                 }
 
                 painter.setRenderHint(QPainter::Antialiasing, true);
-                painter.setPen(qRgb(0xdd, 0xdd, 0xdd));
+                painter.setPen(qRgb(0xa3, 0xbe, 0xdb));
                 painter.drawPath(path);
 
 
@@ -437,7 +437,7 @@ void SpectrogramWidget::prepareHeaders()
     }
 
     QPainter painter(this);
-    QFont font = QFont("monospace", 10);
+    QFont font = QFont("Roboto Mono", 10);
     font.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
     int fontWidth = fontMetrics.width("0");

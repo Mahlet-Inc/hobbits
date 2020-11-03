@@ -24,6 +24,7 @@ SOURCES += \
         batchcreationdialog.cpp \
         containerselectiondialog.cpp \
         hobbitsguiinfo.cpp \
+        hobbitsstyle.cpp \
         main.cpp \
         mainwindow.cpp \
         preferencesdialog.cpp
@@ -32,6 +33,7 @@ HEADERS += \
         batchcreationdialog.h \
         containerselectiondialog.h \
         hobbitsguiinfo.h \
+        hobbitsstyle.h \
         mainwindow.h \
         preferencesdialog.h
 
@@ -76,7 +78,8 @@ mac {
 }
 
 RESOURCES += \
-    icons.qrc
+    icons.qrc \
+    style.qrc
 
 INSTALLS =
 

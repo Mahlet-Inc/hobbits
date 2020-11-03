@@ -94,7 +94,7 @@ QVariant RemapModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::FontRole) {
-        return QFont("monospace", 12);
+        return QFont("Roboto Mono");
     }
     return QVariant();
 }

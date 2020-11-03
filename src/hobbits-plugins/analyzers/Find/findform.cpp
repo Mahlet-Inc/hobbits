@@ -19,7 +19,7 @@ FindForm::FindForm(QSharedPointer<ParameterDelegate> delegate):
 
     // Initialize default color settings
     QVariant findColor = SettingsManager::getPluginSetting(FIND_COLOR_KEY);
-    if (findColor.isNull() || !findColor.canConvert<QColor>()) {
+    if (!findColor.isValid() || findColor.isNull() || !findColor.canConvert<QColor>()) {
         findColor = QColor(0, 150, 230, 85);
     }
     SettingsManager::setPluginSetting(FIND_COLOR_KEY, findColor);

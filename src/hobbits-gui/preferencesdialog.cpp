@@ -218,25 +218,21 @@ QWidget* PreferencesDialog::createPluginLoaderPage()
     for (auto plugin : m_pluginManager->displays()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
-        path->setDisabled(true);
         uiSettingsLayout->addRow(plugin->name(), path);
     }
     for (auto plugin : m_pluginManager->importerExporters()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
-        path->setDisabled(true);
         uiSettingsLayout->addRow(plugin->name(), path);
     }
     for (auto plugin : m_pluginManager->analyzers()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
-        path->setDisabled(true);
         uiSettingsLayout->addRow(plugin->name(), path);
     }
     for (auto plugin : m_pluginManager->operators()) {
         QLineEdit *path = new QLineEdit(m_pluginManager->getPluginLocation(plugin->name()));
         path->setReadOnly(true);
-        path->setDisabled(true);
         uiSettingsLayout->addRow(plugin->name(), path);
     }
 
