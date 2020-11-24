@@ -29,6 +29,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     QList<QPair<QString, QColor>> getMappings();
+    void setMappings(QList<QPair<QString, QColor>> mappings);
 
 public slots:
     void setRemapLength(int length);

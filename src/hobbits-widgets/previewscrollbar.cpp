@@ -3,6 +3,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include "settingsmanager.h"
 #include <QMouseEvent>
+#include <QTimer>
 
 PreviewScrollBar::PreviewScrollBar(QWidget *parent) : QWidget(parent)
 {
@@ -19,7 +20,7 @@ PreviewScrollBar::~PreviewScrollBar()
     }
 }
 
-int PreviewScrollBar::getFrameOffset()
+qint64 PreviewScrollBar::getFrameOffset()
 {
     return m_frameOffset;
 }
@@ -112,8 +113,18 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
     // draw frame offset
     painter.setCompositionMode(QPainter::CompositionMode_Difference);
     painter.setPen(QPen(QBrush(Qt::white), 2));
-    int pos = int(this->height() * double(m_frameOffset) / double(container->frameCount()));
-    painter.drawLine(0, pos, this->width(), pos);
+    if (!m_renderedRange.isNull()) {
+        qint64 start = container->info()->frameOffsetContaining(m_renderedRange.start());
+        qint64 end = container->info()->frameOffsetContaining(m_renderedRange.end());
+        int top = int(this->height() * double(start) / double(container->frameCount()));
+        int bottom = int(this->height() * double(end) / double(container->frameCount()));
+        int height = qMax(1, bottom - top);
+        painter.fillRect(0, top, this->width(), height, Qt::white);
+    }
+    else {
+        int pos = int(this->height() * double(m_frameOffset) / double(container->frameCount()));
+        painter.drawLine(0, pos, this->width(), pos);
+    }
 }
 
 void PreviewScrollBar::mouseMoveEvent(QMouseEvent *event)
@@ -150,15 +161,15 @@ void PreviewScrollBar::getOffsetFromEvent(QMouseEvent* event)
     setFrameOffset(int(double(m_manager->currentContainer()->frameCount()) * percent));
 }
 
-void PreviewScrollBar::setFrameOffset(int offset)
+void PreviewScrollBar::setFrameOffset(qint64 offset)
 {
     if (offset != m_frameOffset) {
         m_frameOffset = offset;
-        if (!m_displayHandle.isNull() && m_frameOffset != m_displayHandle->getFrameOffset()) {
-            m_displayHandle->setOffsets(m_displayHandle->getBitOffset(), m_frameOffset);
+        if (!m_displayHandle.isNull() && m_frameOffset != m_displayHandle->frameOffset()) {
+            m_displayHandle->setOffsets(m_displayHandle->bitOffset(), m_frameOffset);
         }
         emit frameOffsetChanged(m_frameOffset);
-        repaint();
+        update();
     }
 }
 
@@ -172,19 +183,21 @@ void PreviewScrollBar::setBitContainerManager(QSharedPointer<BitContainerManager
 
     connect(m_manager.data(), SIGNAL(currSelectionChanged(QSharedPointer<BitContainer>, QSharedPointer<BitContainer>)), this, SLOT(repaint()));
 
-    repaint();
+    update();
 }
 
 
 void PreviewScrollBar::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     if (!m_displayHandle.isNull()) {
-        disconnect(m_displayHandle.data(), &DisplayHandle::newOffsets, this, &PreviewScrollBar::checkDisplayHandleOffset);
+        disconnect(m_displayHandle.data(), &DisplayHandle::newFrameOffset, this, &PreviewScrollBar::checkDisplayHandleOffset);
     }
 
     m_displayHandle = displayHandle;
 
-    connect(m_displayHandle.data(), &DisplayHandle::newOffsets, this, &PreviewScrollBar::checkDisplayHandleOffset);
+    connect(m_displayHandle.data(), &DisplayHandle::newFrameOffset, this, &PreviewScrollBar::checkDisplayHandleOffset);
+    connect(m_displayHandle.data(), &DisplayHandle::renderedRangeChanged, this, &PreviewScrollBar::checkDisplayRenderRange);
+    connect(m_displayHandle.data(), &DisplayHandle::newActiveDisplays, this, &PreviewScrollBar::checkActiveDisplays);
     checkDisplayHandleOffset();
 }
 
@@ -194,7 +207,24 @@ void PreviewScrollBar::checkDisplayHandleOffset()
         return;
     }
 
-    setFrameOffset(m_displayHandle->getFrameOffset());
+    setFrameOffset(m_displayHandle->frameOffset());
+}
+
+void PreviewScrollBar::checkDisplayRenderRange(Range range)
+{
+    m_renderedRange = range;
+    update();
+}
+
+void PreviewScrollBar::checkActiveDisplays(QSet<DisplayWidget *> activeDisplays)
+{
+    m_renderedRange = Range();
+    for (auto displayWidget : activeDisplays) {
+        Range renderedRange = m_displayHandle->renderedRange(displayWidget->display().data());
+        if (!renderedRange.isNull() && renderedRange.size() > m_renderedRange.size()) {
+            m_renderedRange = renderedRange;
+        }
+    }
 }
 
 void PreviewScrollBar::newContainer()
@@ -209,7 +239,7 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     }
     auto frames = container->info()->frames();
     int width = int(container->info()->maxFrameWidth() / 8);
-    int height = qMin(10000ll, frames->size());
+    int height = int(qMin(10000ll, frames->size()));
     QImage image(width, height, QImage::Format_ARGB32);
     image.fill(qRgb(0x1c, 0x1c, 0x1c));
     QPainter imagePainter(&image);
@@ -219,7 +249,7 @@ QImage PreviewScrollBar::renderPreview(QSharedPointer<BitContainer> container, Q
     int hue = c.hue();
     int saturation = c.saturation();
     qint64 chunkHeight = qMax(50, qMin(10000, 5000000/width));
-    int chunkSize = qMin(frames->size(), chunkHeight);
+    int chunkSize = int(qMin(frames->size(), chunkHeight));
     double chunkHeightRatio = double(chunkSize)/double(frames->size());
     double targetChunkHeight = chunkHeightRatio * height;
     QImage bufferChunk(width, chunkSize, QImage::Format_ARGB32);

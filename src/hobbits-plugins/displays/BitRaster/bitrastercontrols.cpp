@@ -2,15 +2,30 @@
 #include "ui_bitrastercontrols.h"
 
 
-BitRasterControls::BitRasterControls() :
-    ui(new Ui::BitRasterControls())
+BitRasterControls::BitRasterControls(QSharedPointer<ParameterDelegate> delegate) :
+    ui(new Ui::BitRasterControls()),
+    m_stateHelper(new ParameterHelper(delegate))
 {
     ui->setupUi(this);
 
-    connect(ui->hs_scale, SIGNAL(valueChanged(int)), this, SIGNAL(scaleSet(int)));
+    connect(ui->hs_scale, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+    connect(ui->cb_showHeaders, SIGNAL(stateChanged(int)), this, SIGNAL(changed()));
+
+    m_stateHelper->addSliderIntParameter("scale", ui->hs_scale);
+    m_stateHelper->addCheckBoxBoolParameter("show_headers", ui->cb_showHeaders);
 }
 
-void BitRasterControls::on_cb_showHeaders_stateChanged(int state)
+QString BitRasterControls::title()
 {
-    emit showHeadersChanged(state != Qt::Unchecked);
+    return "Configure Bit Raster";
+}
+
+bool BitRasterControls::setParameters(QJsonObject parameters)
+{
+    return m_stateHelper->applyParametersToUi(parameters);
+}
+
+QJsonObject BitRasterControls::parameters()
+{
+    return m_stateHelper->getParametersFromUi();
 }

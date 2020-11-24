@@ -22,6 +22,9 @@ public:
     virtual bool setParameters(QJsonObject parameters) override;
     virtual QJsonObject parameters() override;
 
+signals:
+    void parametersChanged();
+
 private:
     Ui::BitsErrorForm *ui;
     QSharedPointer<ParameterHelper> m_stateHelper;

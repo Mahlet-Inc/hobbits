@@ -37,6 +37,7 @@ public:
 signals:
     void accepted();
     void rejected();
+    void changed();
 
 protected slots:
     /**

@@ -77,6 +77,41 @@ mac {
     QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks,-rpath,@executable_path/../Frameworks/python/lib\'"
 }
 
+# since plugins cannot synchronize fftw planner calls, the GUI must force thread-safe planning if fftw is available
+win32-msvc* {
+    exists($$OUT_PWD/../../../../windows/libfftw3-3.lib) {
+        LIBS += -L$$OUT_PWD/../../../../windows -llibfftw3-3
+        INCLUDEPATH += $$OUT_PWD/../../../../windows
+        DEPENDPATH += $$OUT_PWD/../../../../windows
+
+        DEFINES += FFTW_AVAILABLE
+    }
+    else {
+        warning("The FFTW3 .lib file could not be found, so the GUI will be unable to force fftw planner thead-safety across plugins")
+        warning("Did you turn the .def into a .lib with 'lib.exe /def:libfftw3-3.def' ?")
+    }
+}
+win32-g++ {
+    LIBS += -L$$OUT_PWD/../../../../windows -lfftw3-3
+    INCLUDEPATH += $$OUT_PWD/../../../../windows
+    DEPENDPATH += $$OUT_PWD/../../../../windows
+
+    DEFINES += FFTW_AVAILABLE
+}
+unix {
+    packagesExist(fftw3) {
+        mac {
+            INCLUDEPATH += /usr/local/include
+            LIBS += -L/usr/local/lib
+        }
+        LIBS += -lfftw3 -lfftw3_threads
+        DEFINES += FFTW_AVAILABLE
+    }
+    else {
+        warning("The FFTW3 package could not be found, so the GUI will be unable to force fftw planner thead-safety across plugins")
+    }
+}
+
 RESOURCES += \
     icons.qrc \
     style.qrc

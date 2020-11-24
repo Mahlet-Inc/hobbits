@@ -3,7 +3,8 @@
 
 #include "displayinterface.h"
 #include "spectrogramcontrols.h"
-#include "spectrogramwidget.h"
+#include "fftw3.h"
+#include "metadatahelper.h"
 
 class Spectrogram : public QObject, DisplayInterface
 {
@@ -20,13 +21,39 @@ public:
     QString description() override;
     QStringList tags() override;
 
-    QWidget* display(QSharedPointer<DisplayHandle> displayHandle) override;
-    QWidget* controls(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<DisplayRenderConfig> renderConfig() override;
+    void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
+
+    QImage renderDisplay(
+            QSize viewportSize,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
+
+    QImage renderOverlay(
+            QSize viewportSize,
+            const QJsonObject &parameters) override;
 
 private:
-    void initialize(QSharedPointer<DisplayHandle> displayHandle);
-    SpectrogramWidget* m_displayWidget;
-    SpectrogramControls* m_controlsWidget;
+    QRect spectrogramRectangle(QSize viewportSize,
+                           QSharedPointer<DisplayHandle> displayHandle,
+                           const QJsonObject &parameters);
+    QString timeString(qint64 sample, double sampleRate);
+    void fillSamples(fftw_complex* buffer,
+                        qint64 offset,
+                        QSharedPointer<BitContainer> bitContainer,
+                        const MetadataHelper::SampleFormat &sampleFormat,
+                        int fftSize,
+                        SpectrogramControls::DataType dataType);
+
+    void setSpectrums(QList<QVector<double>> spectrums);
+
+    QSharedPointer<ParameterDelegate> m_delegate;
+    QSharedPointer<DisplayRenderConfig> m_renderConfig;
+    QSharedPointer<DisplayHandle> m_handle;
+
+    QMutex m_mutex;
+    QList<QVector<double>> m_spectrums;
 };
 
 #endif // SPECTROGRAM_H

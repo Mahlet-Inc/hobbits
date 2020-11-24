@@ -1,5 +1,6 @@
 #include "pluginactionprogress.h"
 #include <QMutexLocker>
+#include <QVariant>
 
 PluginActionProgress::PluginActionProgress(QObject *parent) :
     QObject(parent),
@@ -50,4 +51,10 @@ void PluginActionProgress::setProgress(double completed, double required)
 {
     int percent = int(completed / required * 100.0);
     setProgressPercent(percent);
+}
+
+void PluginActionProgress::sendUpdate(QString type, QVariant value)
+{
+    QMutexLocker locker(&m_mutex);
+    emit progressUpdate(type, value);
 }

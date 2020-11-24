@@ -4,6 +4,8 @@
 #include <QMutex>
 #include <QObject>
 #include "hobbits-core_global.h"
+#include <QMap>
+#include <QVariant>
 
 /**
   * @brief The PluginActionProgress class facilitates communication to and from executing plugin actions
@@ -27,8 +29,11 @@ public Q_SLOTS:
     void setProgress(int completed, int required);
     void setProgress(double completed, double required);
 
+    void sendUpdate(QString type, QVariant value);
+
 Q_SIGNALS:
-    void progressPercentChanged(int);
+    void progressPercentChanged(int percent);
+    void progressUpdate(QString type, QVariant value);
 
 protected:
     int m_lastProgressPercent;

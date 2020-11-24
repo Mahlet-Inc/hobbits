@@ -2,45 +2,42 @@
 #define SPECTROGRAMCONTROLS_H
 
 #include <QWidget>
+#include "parameterdelegate.h"
+#include "abstractparametereditor.h"
+#include "parameterhelper.h"
 
 namespace Ui
 {
 class SpectrogramControls;
 }
 
-class SpectrogramControls : public QWidget
+class SpectrogramControls : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    SpectrogramControls();
-    void sendCurrentValues();
+    enum DataType {
+        Real = 1,
+        RealComplexInterleaved = 2
+    };
+
+    SpectrogramControls(QSharedPointer<ParameterDelegate> delegate);
+
+    QString title() override;
+
+    virtual bool setParameters(QJsonObject parameters) override;
+    virtual QJsonObject parameters() override;
 
 public slots:
     void setSampleFormat(QString id);
 
 signals:
-    void overlapSet(int);
-    void fftSizeSet(int);
-    void sampleFormatSet(QString);
-    void dataTypeSet(int);
-    void sensitivitySet(double);
-    void sampleRateSet(double);
-    void headersShowSet(bool);
-    void sliceShowSet(bool);
-    void logarithmicSet(bool);
 
 private slots:
-    void on_cb_sampleFormat_currentIndexChanged(int index);
-    void on_cb_dataType_currentIndexChanged(int index);
-    void on_hs_sensitivity_valueChanged(int value);
-
-    void on_sb_sampleRate_valueChanged(double arg1);
-
-    void on_cb_rateUnits_currentIndexChanged(int index);
 
 private:
     Ui::SpectrogramControls *ui;
+    QSharedPointer<ParameterHelper> m_paramHelper;
 };
 
 #endif // SPECTROGRAMCONTROLS_H

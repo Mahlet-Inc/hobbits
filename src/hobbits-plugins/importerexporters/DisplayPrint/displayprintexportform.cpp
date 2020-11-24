@@ -5,19 +5,38 @@
 
 DisplayPrintExportForm::DisplayPrintExportForm(QSharedPointer<ParameterDelegate> delegate):
     ui(new Ui::DisplayPrintExportForm()),
-    m_paramHelper(new ParameterHelper(delegate))
+    m_paramHelper(new ParameterHelper(delegate)),
+    m_displayEditor(nullptr)
 {
     ui->setupUi(this);
+
+    ui->gb_displayConfig->setLayout(new QVBoxLayout());
 
     m_paramHelper->addComboBoxParameter("plugin_name", ui->cb_pluginName);
     m_paramHelper->addSpinBoxIntParameter("image_width", ui->sb_width);
     m_paramHelper->addSpinBoxIntParameter("image_height", ui->sb_height);
     m_paramHelper->addLineEditStringParameter("image_filename", ui->le_file);
 
-    auto manager = loadUpPluginManager();
-    for (auto display : manager->displays()) {
+    m_paramHelper->addParameter("display_params", [this](QJsonValue params) {
+        if (!m_displayEditor) {
+            return false;
+        }
+        m_displayEditor->setParameters(params.toObject());
+        return true;
+    }, [this]() {
+        if (!m_displayEditor) {
+            return QJsonValue();
+        }
+        return QJsonValue(m_displayEditor->parameters());
+    });
+
+    m_pluginManager = loadUpPluginManager();
+    for (auto display : m_pluginManager->displays()) {
         ui->cb_pluginName->addItem(display->name(), display->name());
     }
+
+    connect(ui->cb_pluginName, SIGNAL(currentIndexChanged(int)), this, SLOT(displaySelected()));
+    displaySelected();
 }
 
 DisplayPrintExportForm::~DisplayPrintExportForm()
@@ -80,4 +99,20 @@ void DisplayPrintExportForm::on_tb_selectFile_clicked()
     }
 
     ui->le_file->setText(file);
+}
+
+void DisplayPrintExportForm::displaySelected()
+{
+    if (ui->cb_pluginName->currentText().isEmpty()) {
+        return;
+    }
+
+    if (m_displayEditor) {
+        delete m_displayEditor;
+    }
+
+    auto displayPlugin = m_pluginManager->getDisplay(ui->cb_pluginName->currentText());
+    m_displayEditor = displayPlugin->parameterDelegate()->createEditor();
+    ui->gb_displayConfig->setTitle(m_displayEditor->title());
+    ui->gb_displayConfig->layout()->addWidget(m_displayEditor);
 }

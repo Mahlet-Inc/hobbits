@@ -27,12 +27,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         spectrogram.cpp         spectrogramwidget.cpp         spectrogramcontrols.cpp \
-    spectrogramrenderer.cpp
+SOURCES +=      spectrogram.cpp \
+                spectrogramcontrols.cpp
 
-HEADERS +=         spectrogram.h         spectrogramwidget.h         spectrogramcontrols.h \
-    spectrogramrenderer.h \
-    viridis.h
+HEADERS +=      spectrogram.h \
+                spectrogramcontrols.h \
+                viridis.h
 
 FORMS +=         spectrogramcontrols.ui
 

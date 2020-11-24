@@ -1,29 +1,29 @@
 #ifndef BYTERASTERCONTROLS_H
 #define BYTERASTERCONTROLS_H
 
-#include <QWidget>
+#include "abstractparametereditor.h"
+#include "parameterhelper.h"
 
 namespace Ui
 {
 class ByteRasterControls;
 }
 
-class ByteRasterControls : public QWidget
+class ByteRasterControls : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    ByteRasterControls();
+    ByteRasterControls(QSharedPointer<ParameterDelegate> delegate);
 
-signals:
-    void scaleSet(int);
-    void showHeadersChanged(bool);
+    QString title() override;
 
-public slots:
-    void on_cb_showHeaders_stateChanged(int state);
+    bool setParameters(QJsonObject parameters) override;
+    QJsonObject parameters() override;
 
 private:
     Ui::ByteRasterControls *ui;
+    QSharedPointer<ParameterHelper> m_stateHelper;
 };
 
 #endif // BYTERASTERCONTROLS_H

@@ -30,6 +30,7 @@ SOURCES += \
     bitcontainermanager.cpp \
     bitcontainerpreview.cpp \
     bitinfo.cpp \
+    displayrenderconfig.cpp \
     exporterrunner.cpp \
     exportresult.cpp \
     frame.cpp \
@@ -65,6 +66,7 @@ HEADERS += \
     bitcontainerpreview.h \
     bitinfo.h \
     displayinterface.h \
+    displayrenderconfig.h \
     exporterrunner.h \
     exportresult.h \
     frame.h \

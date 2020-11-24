@@ -2,15 +2,31 @@
 #include "ui_byterastercontrols.h"
 
 
-ByteRasterControls::ByteRasterControls() :
-    ui(new Ui::ByteRasterControls())
+ByteRasterControls::ByteRasterControls(QSharedPointer<ParameterDelegate> delegate) :
+    ui(new Ui::ByteRasterControls()),
+    m_stateHelper(new ParameterHelper(delegate))
 {
     ui->setupUi(this);
 
-    connect(ui->hs_scale, SIGNAL(valueChanged(int)), this, SIGNAL(scaleSet(int)));
+    connect(ui->hs_scale, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+    connect(ui->cb_showHeaders, SIGNAL(stateChanged(int)), this, SIGNAL(changed()));
+
+    m_stateHelper->addSliderIntParameter("scale", ui->hs_scale);
+    m_stateHelper->addCheckBoxBoolParameter("show_headers", ui->cb_showHeaders);
 }
 
-void ByteRasterControls::on_cb_showHeaders_stateChanged(int state)
+QString ByteRasterControls::title()
 {
-    emit showHeadersChanged(state != Qt::Unchecked);
+    return "Configure Byte Raster";
 }
+
+bool ByteRasterControls::setParameters(QJsonObject parameters)
+{
+    return m_stateHelper->applyParametersToUi(parameters);
+}
+
+QJsonObject ByteRasterControls::parameters()
+{
+    return m_stateHelper->getParametersFromUi();
+}
+

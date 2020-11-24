@@ -1,10 +1,37 @@
 #include "symbolraster.h"
+#include "symbolrastercontrols.h"
+#include "displayhelper.h"
+#include <QJsonArray>
+#include <QPainter>
 
 SymbolRaster::SymbolRaster() :
-    m_displayWidget(nullptr),
-    m_controlsWidget(nullptr)
+    m_renderConfig(new DisplayRenderConfig()),
+    m_symbolLength(0)
 {
+    m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
+    m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        {"scale", QJsonValue::Double},
+        {"show_headers", QJsonValue::Bool},
+        {"color_map", QJsonValue::Array}
+    };
+
+    m_delegate = ParameterDelegate::create(
+                    infos,
+                    [](const QJsonObject &parameters) {
+                        int scale = parameters.value("scale").toInt();
+                        if (parameters.value("show_headers").toBool()) {
+                            return QString("Symbol Raster %1x with headers").arg(scale);
+                        }
+                        else {
+                            return QString("Byte Raster %1x without headers").arg(scale);
+                        }
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new SymbolRasterControls(delegate);
+                    });
 }
 
 DisplayInterface* SymbolRaster::createDefaultDisplay()
@@ -27,32 +54,199 @@ QStringList SymbolRaster::tags()
     return {"Generic"};
 }
 
-QWidget* SymbolRaster::display(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<DisplayRenderConfig> SymbolRaster::renderConfig()
 {
-    initialize(displayHandle);
-    return m_displayWidget;
+    return m_renderConfig;
 }
 
-QWidget* SymbolRaster::controls(QSharedPointer<DisplayHandle> displayHandle)
+void SymbolRaster::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
-    initialize(displayHandle);
-    return m_controlsWidget;
+    m_handle = displayHandle;
+    connect(m_handle.data(), &DisplayHandle::newMouseHover, this, [this](DisplayInterface *display, QPoint hover) {
+        if (display != this) {
+            return;
+        }
+        if (hover.isNull()
+                || m_handle->currentContainer().isNull()
+                || !m_delegate->validate(m_lastParams)) {
+            m_handle->setBitHover(false);
+            return;
+        }
+
+        QPoint offset = headerOffset(m_lastParams);
+        int scale = m_lastParams.value("scale").toInt();
+
+        qint64 frameOffset = ((hover.y() - offset.y()) / scale);
+        qint64 symbolOffset = ((hover.x() - offset.x()) / scale);
+
+        m_handle->setBitHover(true, symbolOffset * m_symbolLength, frameOffset);
+    });
 }
 
-void SymbolRaster::initialize(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<ParameterDelegate> SymbolRaster::parameterDelegate()
 {
-    if (!m_displayWidget) {
-        m_displayWidget = new SymbolRasterWidget(displayHandle, this);
-        m_controlsWidget = new SymbolRasterControls();
+    return m_delegate;
+}
 
-        connect(m_controlsWidget, SIGNAL(scaleSet(int)), m_displayWidget, SLOT(setScale(int)));
-        connect(m_controlsWidget, SIGNAL(showHeadersChanged(bool)), m_displayWidget, SLOT(setShowHeaders(bool)));
-        connect(
-                m_controlsWidget,
-                SIGNAL(colorMappingChanged(QList<QPair<QString,QColor>>)),
-                m_displayWidget,
-                SLOT(setColorMapping(QList<QPair<QString,QColor>>)));
-
-        m_controlsWidget->updateColorMap();
+QImage SymbolRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+{
+    Q_UNUSED(progress)
+    m_lastParams = parameters;
+    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(m_lastParams)) {
+        return QImage();
     }
+
+    QJsonArray colorMapValues = parameters.value("color_map").toArray();
+    if (colorMapValues.size() < 1) {
+        return QImage();
+    }
+    m_symbolLength = colorMapValues.at(0).toObject().value("value").toString().length();
+    if (m_symbolLength < 1) {
+        return QImage();
+    }
+
+    int scale = parameters.value("scale").toInt();
+    QPoint offset = headerOffset(parameters);
+    QSize rasterSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
+    QSize sourceSize(qMax(1, rasterSize.width() / scale), qMax(1, rasterSize.height() / scale));
+
+    QImage raster = getSymbolMapImage(sourceSize, parameters);
+
+    QImage destImage(viewportSize, QImage::Format_ARGB32);
+    destImage.fill(Qt::transparent);
+    QPainter painter(&destImage);
+    painter.translate(offset);
+    painter.scale(scale, scale);
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.drawImage(0, 0, raster);
+
+    painter.resetTransform();
+    painter.translate(offset);
+    QSize highlightSize(sourceSize.width() * 8, sourceSize.height());
+    DisplayHelper::drawHighlights(
+                m_handle,
+                &painter,
+                QSizeF(double(scale) / double(m_symbolLength), scale),
+                highlightSize,
+                (m_handle->bitOffset() / m_symbolLength) * m_symbolLength,
+                m_handle->frameOffset(),
+                1);
+
+    DisplayHelper::setRenderRange(this, m_handle, sourceSize.height());
+
+    return destImage;
+}
+
+QImage SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+{
+    m_lastParams = parameters;
+    if (!m_delegate->validate(m_lastParams)) {
+        return QImage();
+    }
+
+    auto offset = headerOffset(parameters);
+    if (offset.x() == 0 && offset.y() == 0) {
+        return QImage();
+    }
+
+    QJsonArray colorMapValues = parameters.value("color_map").toArray();
+    if (colorMapValues.size() < 1) {
+        return QImage();
+    }
+    m_symbolLength = colorMapValues.at(0).toObject().value("value").toString().length();
+    if (m_symbolLength < 1) {
+        return QImage();
+    }
+
+    QImage headers(viewportSize, QImage::Format_ARGB32);
+    headers.fill(Qt::transparent);
+    QPainter painter(&headers);
+    painter.fillRect(0, 0, offset.x(), offset.y(), DisplayHelper::headerBackgroundColor());
+    int scale = parameters.value("scale").toInt();
+
+    painter.translate(offset);
+    DisplayHelper::drawFramesHeader(&painter,
+                                    QSize(offset.x(), viewportSize.height() - offset.y()),
+                                    m_handle,
+                                    scale);
+
+    DisplayHelper::drawFramesHeader(&painter,
+                                    QSize(viewportSize.width() - offset.x(), offset.y()),
+                                    m_handle,
+                                    double(scale) / double(m_symbolLength),
+                                    Qt::Horizontal);
+
+    return headers;
+}
+
+QPoint SymbolRaster::headerOffset(const QJsonObject &parameters)
+{
+    if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
+        return QPoint(0, 0);
+    }
+
+    auto font = DisplayHelper::monoFont(10);
+    auto container = m_handle->currentContainer();
+    auto margin = DisplayHelper::textSize(font, "0").width() * 2;
+    return  QPoint(
+                DisplayHelper::textSize(font, container->frameCount()).width() + margin,
+                DisplayHelper::textSize(font, container->maxFrameWidth()).width() + margin);
+}
+
+QImage SymbolRaster::getSymbolMapImage(const QSize &size, const QJsonObject &parameters)
+{
+    if (m_symbolLength < 1) {
+        return QImage();
+    }
+
+    QJsonArray colorMapValues = parameters.value("color_map").toArray();
+    QMap<quint64, QColor> colorMapping;
+    for (auto mappingValue: colorMapValues) {
+        QJsonObject mapping = mappingValue.toObject();
+        bool ok = false;
+        quint64 symbolValue = mapping.value("value").toString().toULongLong(&ok, 2);
+        if (ok) {
+            colorMapping.insert(symbolValue, QColor(mapping.value("color").toString()));
+        }
+    }
+
+    QImage raster(size, QImage::Format_ARGB32);
+    raster.fill(Qt::transparent);
+
+
+    qint64 frameOffset = m_handle->frameOffset();
+    qint64 symbolOffset = m_handle->bitOffset() / m_symbolLength;
+    qint64 bitOffset = symbolOffset * m_symbolLength;
+
+    if (frameOffset < 0) {
+        return raster;
+    }
+
+    auto container = m_handle->currentContainer();
+
+    for (int i = 0; i < size.height(); i++) {
+        if (i + frameOffset >= container->frameCount()) {
+            break;
+        }
+        Frame frame = container->frameAt(i + frameOffset);
+
+        for (int ii = 0; ii < size.width() * m_symbolLength; ii += m_symbolLength) {
+            if (ii + bitOffset + m_symbolLength > frame.size()) {
+                break;
+            }
+
+            quint64 symbolVal = 0;
+            for (int bit = m_symbolLength - 1; bit >= 0; bit--) {
+                if (frame.at(ii + bit + bitOffset)) {
+                    symbolVal |= 0x01 << (m_symbolLength - bit - 1);
+                }
+            }
+
+            if (colorMapping.contains(symbolVal)) {
+                raster.setPixel(ii / m_symbolLength, i, colorMapping.value(symbolVal).rgba());
+            }
+
+        }
+    }
+    return raster;
 }

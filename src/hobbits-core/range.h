@@ -51,4 +51,6 @@ private:
 
 bool HOBBITSCORESHARED_EXPORT operator<(const Range &a, const Range &b);
 
+Q_DECLARE_METATYPE(Range);
+
 #endif // RANGE_H

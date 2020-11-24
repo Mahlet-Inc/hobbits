@@ -2,14 +2,11 @@
 #define HOBBITSSTYLE_H
 
 #include <QApplication>
-#include <QProxyStyle>
 
-class HobbitsStyle : public QProxyStyle
+class HobbitsStyle
 {
 public:
     HobbitsStyle();
-
-    void drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget = nullptr) const override;
 
     static void applyStyle(QApplication &app);
 

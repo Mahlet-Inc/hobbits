@@ -1,6 +1,7 @@
 #include "displayprint.h"
 #include "displayprintexportform.h"
 #include <QScrollBar>
+#include <QPainter>
 
 DisplayPrint::DisplayPrint()
 {
@@ -8,7 +9,8 @@ DisplayPrint::DisplayPrint()
         {"plugin_name", QJsonValue::String},
         {"image_width", QJsonValue::Double},
         {"image_height", QJsonValue::Double},
-        {"image_filename", QJsonValue::String}
+        {"image_filename", QJsonValue::String},
+        {"display_params", QJsonValue::Object}
     };
 
     m_exportDelegate = ParameterDelegate::create(
@@ -79,6 +81,9 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
         return ExportResult::error(QString("Invalid parameters passed to %1").arg(name()));
     }
 
+    int imageWidth = parameters.value("image_width").toInt();
+    int imageHeight = parameters.value("image_height").toInt();
+
     auto pluginManager = DisplayPrintExportForm::loadUpPluginManager();
     auto displayPlugin = pluginManager->getDisplay(parameters.value("plugin_name").toString());
     if (displayPlugin.isNull()) {
@@ -86,21 +91,23 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
     }
 
     QSharedPointer<BitContainerManager> containerManager(new BitContainerManager());
-    QScopedPointer<QScrollBar> vScrollDummy(new QScrollBar());
-    QScopedPointer<QScrollBar> hScrollDummy(new QScrollBar());
-
-    QSharedPointer<DisplayHandle> displayHandle(new DisplayHandle(containerManager, vScrollDummy.data(), hScrollDummy.data()));
+    QSharedPointer<DisplayHandle> displayHandle(new DisplayHandle(containerManager));
+    displayPlugin->setDisplayHandle(displayHandle);
 
     //TODO: make this less hacky
     auto noConstContainer = BitContainer::create(container->bits(), container->info());
-
-    auto display = displayPlugin->display(displayHandle);
-    display->setGeometry(0, 0, parameters.value("image_width").toInt(), parameters.value("image_height").toInt());
     containerManager->addContainer(noConstContainer);
     containerManager->selectContainer(noConstContainer);
 
-    QPixmap pixmap(parameters.value("image_width").toInt(), parameters.value("image_height").toInt());
-    display->render(&pixmap);
+    QJsonObject displayParams = parameters.value("display_params").toObject();
+
+    QImage display = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
+    QImage overlay = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
+
+    QPixmap pixmap(imageWidth, imageHeight);
+    QPainter painter(&pixmap);
+    painter.drawImage(0, 0, display);
+    painter.drawImage(0, 0, overlay);
 
     QFile file(parameters.value("image_filename").toString());
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {

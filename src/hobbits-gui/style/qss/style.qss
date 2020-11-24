@@ -80,6 +80,11 @@ QMenu::icon {
     padding:5px;
 }
 
+QMenu::item:disabled {
+    color: #999999;
+    font-style: italic;
+}
+
 QMenu::item:selected {
     background: #666666;
 }
