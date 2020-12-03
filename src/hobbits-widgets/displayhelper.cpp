@@ -284,11 +284,48 @@ double DisplayHelper::getGroupedOffset(qint64 idx, double width, int groupSize, 
     }
 }
 
+
+
+QImage DisplayHelper::drawHeadersFull(QSize viewportSize,
+                                      QPoint offset,
+                                      QSharedPointer<DisplayHandle> handle,
+                                      QSizeF bitSize,
+                                      int columnGrouping,
+                                      int groupMargin)
+{
+    if (offset.x() == 0 && offset.y() == 0) {
+        return QImage();
+    }
+
+    QImage headers(viewportSize, QImage::Format_ARGB32);
+    headers.fill(Qt::transparent);
+    QPainter painter(&headers);
+    painter.fillRect(0, 0, offset.x(), offset.y(), DisplayHelper::headerBackgroundColor());
+
+    painter.translate(offset);
+    DisplayHelper::drawFramesHeader(&painter,
+                                    QSize(offset.x(), viewportSize.height() - offset.y()),
+                                    handle,
+                                    bitSize.height());
+
+    DisplayHelper::drawFramesHeader(&painter,
+                                    QSize(viewportSize.width() - offset.x(), offset.y()),
+                                    handle,
+                                    bitSize.width(),
+                                    Qt::Horizontal,
+                                    columnGrouping,
+                                    groupMargin);
+
+    return headers;
+}
+
 void DisplayHelper::drawFramesHeader(QPainter *painter,
                                      QSize headerSize,
                                      QSharedPointer<DisplayHandle> displayHandle,
                                      double frameHeight,
-                                     int orientation)
+                                     int orientation,
+                                     int grouping,
+                                     int groupMargin)
 {
     painter->save();
 
@@ -313,7 +350,7 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
 
     QFont font = DisplayHelper::monoFont(10);
     QSize fontSize = DisplayHelper::textSize(font, "0");
-    int framesPerMarker = qCeil(double(fontSize.height() + 2) / frameHeight);
+    int framesPerMarker = qMax(1, qRound(double(fontSize.height()) / frameHeight));
 
     int margin = fontSize.width();
     int tickSize = qMax(1, margin / 2);
@@ -329,10 +366,15 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
             break;
         }
 
+        int y = qRound(i * frameHeight);
+        if (grouping) {
+            y = int(getGroupedOffset(i, frameHeight, grouping, offset, groupMargin));
+        }
+
         if (framesPerMarker > 1) {
             painter->fillRect(
                     xOrient * tickSize,
-                    qRound(i * frameHeight),
+                    y,
                     tickSize,
                     qCeil(frameHeight),
                     tickColor);
@@ -340,7 +382,7 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
 
         painter->drawText(
                 margin + (xOrient * (textSize + 2 * margin)),
-                qRound(i * frameHeight) + yOffset,
+                y + yOffset,
                 textSize,
                 fontSize.height(),
                 textAlign,
@@ -349,26 +391,30 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
 
     if (highlightOffset >= 0) {
         qint64 screenOffset = highlightOffset - offset;
+        int y = qRound(screenOffset * frameHeight);
+        if (grouping) {
+            y = int(getGroupedOffset(screenOffset, frameHeight, grouping, offset, groupMargin));
+        }
         font.setBold(true);
         painter->setFont(font);
         painter->setPen(highlightForegroundColor());
         QRect backRect(
                     0,
-                    qRound(screenOffset * frameHeight) + yOffset,
+                    y + yOffset,
                     headerSize.width() + (xOrient * headerSize.width() * 2),
                     fontSize.height());
         painter->fillRect(backRect, highlightBackgroundColor());
 
         painter->fillRect(
                 xOrient * tickSize,
-                qRound(screenOffset * frameHeight),
+                y,
                 tickSize,
                 qCeil(frameHeight),
                 highlightForegroundColor());
 
         QRect textRect(
                     margin + (xOrient * (textSize + 2 * margin)),
-                    qRound(screenOffset * frameHeight) + yOffset,
+                    y + yOffset,
                     textSize,
                     fontSize.height());
         painter->drawText(
@@ -403,7 +449,7 @@ void DisplayHelper::drawHoverBox(QPainter *painter,
     int pad = 4;
     int textHeight = fontSize.height() + 3;
     int boxWidth = fontSize.width() * maxLineLength + pad*textLines.length();
-    int boxHeight = textHeight * 2 + pad*2;
+    int boxHeight = textHeight * textLines.size() + pad*2;
 
     QRect box;
     if (hoverPoint.x() > targetRect.width() / 2) {
@@ -453,4 +499,157 @@ void DisplayHelper::setRenderRange(DisplayInterface *display, QSharedPointer<Dis
     else {
         handle->setRenderedRange(display, Range());
     }
+}
+
+QImage DisplayHelper::drawTextRasterFull(QSize viewportSize,
+                                         QPoint offset,
+                                         DisplayInterface * display,
+                                         QSharedPointer<DisplayHandle> handle,
+                                         const QJsonObject &parameters,
+                                         int bitsPerChar,
+                                         std::function<QString (const Frame &, qint64 &)> textConverter)
+{
+    if (handle.isNull() || handle->currentContainer().isNull() || !display->parameterDelegate()->validate(parameters)) {
+        return QImage();
+    }
+
+    int fontSize = parameters.value("font_size").toInt();
+    int columnGrouping = parameters.value("column_grouping").toInt();
+    QSize textSectionSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
+
+    QColor textBg = QColor("#1c1c1c");
+    QColor textFg = QColor("#eeeeee");
+    QImage textImage(viewportSize, QImage::Format_ARGB32);
+    textImage.fill(textBg);
+    QPainter painter(&textImage);
+    painter.translate(offset);
+    painter.setPen(textFg);
+
+    int rows = drawTextRaster(&painter, textSectionSize, handle, bitsPerChar, columnGrouping, fontSize, textConverter);
+
+    DisplayHelper::setRenderRange(display, handle, rows);
+
+    return textImage;
+}
+
+int DisplayHelper::drawTextRaster(QPainter *painter,
+                                   QSize textSectionSize,
+                                   QSharedPointer<DisplayHandle> handle,
+                                  int bitsPerChar,
+                                   int columnGrouping,
+                                   int fontSize,
+                                   std::function<QString (const Frame &, qint64 &)> textConverter)
+{
+    QFont font = DisplayHelper::monoFont(fontSize);
+    QSize textSize = DisplayHelper::textSize(font, "0");
+    int rowH = textRowHeight(textSize.height());
+
+    double charWidth = textSize.width();
+    if (columnGrouping > 1) {
+        charWidth *= double(columnGrouping + 1) / double(columnGrouping);
+    }
+    int charsPerRow = qCeil(double(textSectionSize.width()) / charWidth);
+    int rows = textSectionSize.height() / rowH + 1;
+
+    painter->setFont(font);
+
+    for (int row = 0; row < rows; row++) {
+        qint64 frameOffset = row + handle->frameOffset();
+        if (frameOffset >= handle->currentContainer()->frameCount()) {
+            break;
+        }
+        Frame f = handle->currentContainer()->frameAt(frameOffset);
+        QString frameString = "";
+        qint64 bitOffset = (handle->bitOffset() / bitsPerChar) * bitsPerChar;
+        for (int col = 0; col < charsPerRow; col++) {
+            if (bitOffset >= f.size()) {
+                break;
+            }
+
+            if (columnGrouping > 1 && col > 0 && bitOffset % (columnGrouping * bitsPerChar) == 0) {
+                frameString += " ";
+            }
+
+            frameString += textConverter(f, bitOffset);
+        }
+        painter->drawText(
+                        0,
+                        row * rowH,
+                        textSectionSize.width(),
+                        rowH,
+                        Qt::AlignLeft,
+                        frameString);
+    }
+
+    drawHighlights(
+                handle,
+                painter,
+                QSizeF(double(textSize.width()) / double(bitsPerChar), rowH),
+                textSectionSize,
+                handle->bitOffset(),
+                handle->frameOffset(),
+                columnGrouping,
+                columnGrouping > 1 ? 1 : 0);
+
+    return rows;
+}
+
+int DisplayHelper::textRowHeight(int textHeight)
+{
+    return textHeight + 2;
+}
+
+void DisplayHelper::connectHoverUpdates(DisplayInterface *display,
+                                        QObject *displayObject,
+                                        QSharedPointer<DisplayHandle> handle,
+                                        std::function<bool (QPoint &,QSize &, int &, int &)> paramSet)
+{
+    QObject::connect(handle.data(), &DisplayHandle::newMouseHover, displayObject, [display, handle, paramSet](DisplayInterface *hoverDisplay, QPoint hover) {
+        if (display != hoverDisplay) {
+            return;
+        }
+        if (hover.isNull()
+                || handle->currentContainer().isNull()) {
+            handle->setBitHover(false);
+            return;
+        }
+
+        QPoint offset(0, 0);
+        QSize symbolSize(1, 1);
+        int xGrouping = 1;
+        int bitsPerSymbol = 1;
+        if (!paramSet(offset, symbolSize, xGrouping, bitsPerSymbol)) {
+            handle->setBitHover(false);
+            return;
+        }
+
+        DisplayHelper::sendHoverUpdate(
+                    handle,
+                    hover - offset,
+                    symbolSize,
+                    xGrouping,
+                    bitsPerSymbol);
+    });
+}
+
+void DisplayHelper::sendHoverUpdate(QSharedPointer<DisplayHandle> handle, QPoint hover, QSize symbolSize, int xGrouping, int bitsPerSymbol)
+{
+    if (handle->currentContainer().isNull()) {
+        handle->setBitHover(false);
+        return;
+    }
+
+    if (hover.x() < 0 || hover.y() < 0) {
+        handle->setBitHover(false);
+        return;
+    }
+
+    QPoint diff = getOffset(handle->bitOffset(), hover.x(), hover.y(), symbolSize.width(), symbolSize.height(), xGrouping, bitsPerSymbol);
+
+    if (diff.x() < 0 || diff.y() < 0) {
+        handle->setBitHover(false);
+        return;
+    }
+
+    handle->setBitHover(true, diff.x(), diff.y());
 }

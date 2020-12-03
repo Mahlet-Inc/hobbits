@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-20T23:20:36.427Z
+# Project created by QtCreator 2020-12-01T21:25:30.357Z
 #
 #-------------------------------------------------
 
@@ -27,11 +27,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         frequencyplot.cpp         frequencyplotwidget.cpp         frequencyplotcontrols.cpp
+SOURCES +=         frequencyplot.cpp         frequencyplotform.cpp
 
-HEADERS +=         frequencyplot.h         frequencyplotwidget.h         frequencyplotcontrols.h
+HEADERS +=         frequencyplot.h         frequencyplotform.h
 
-FORMS +=         frequencyplotcontrols.ui
+FORMS +=         frequencyplotform.ui
+
+DISTFILES +=
+
+RESOURCES += 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
@@ -40,12 +44,12 @@ DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'$$ORIGIN/../../lib:$$ORIGIN'"
 }
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'@executable_path/../Frameworks'"
 }
 
 unix {

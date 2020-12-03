@@ -62,24 +62,16 @@ QSharedPointer<DisplayRenderConfig> SymbolRaster::renderConfig()
 void SymbolRaster::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_handle = displayHandle;
-    connect(m_handle.data(), &DisplayHandle::newMouseHover, this, [this](DisplayInterface *display, QPoint hover) {
-        if (display != this) {
-            return;
+    DisplayHelper::connectHoverUpdates(this, this, m_handle, [this](QPoint& offset, QSize &symbolSize, int &grouping, int &bitsPerSymbol) {
+        if (!m_delegate->validate(m_lastParams) || m_symbolLength < 1) {
+            return false;
         }
-        if (hover.isNull()
-                || m_handle->currentContainer().isNull()
-                || !m_delegate->validate(m_lastParams)) {
-            m_handle->setBitHover(false);
-            return;
-        }
-
-        QPoint offset = headerOffset(m_lastParams);
         int scale = m_lastParams.value("scale").toInt();
-
-        qint64 frameOffset = ((hover.y() - offset.y()) / scale);
-        qint64 symbolOffset = ((hover.x() - offset.x()) / scale);
-
-        m_handle->setBitHover(true, symbolOffset * m_symbolLength, frameOffset);
+        offset = headerOffset(m_lastParams);
+        symbolSize = QSize(scale, scale);
+        grouping = 1;
+        bitsPerSymbol = m_symbolLength;
+        return true;
     });
 }
 
@@ -144,11 +136,6 @@ QImage SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parame
         return QImage();
     }
 
-    auto offset = headerOffset(parameters);
-    if (offset.x() == 0 && offset.y() == 0) {
-        return QImage();
-    }
-
     QJsonArray colorMapValues = parameters.value("color_map").toArray();
     if (colorMapValues.size() < 1) {
         return QImage();
@@ -158,25 +145,13 @@ QImage SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parame
         return QImage();
     }
 
-    QImage headers(viewportSize, QImage::Format_ARGB32);
-    headers.fill(Qt::transparent);
-    QPainter painter(&headers);
-    painter.fillRect(0, 0, offset.x(), offset.y(), DisplayHelper::headerBackgroundColor());
     int scale = parameters.value("scale").toInt();
 
-    painter.translate(offset);
-    DisplayHelper::drawFramesHeader(&painter,
-                                    QSize(offset.x(), viewportSize.height() - offset.y()),
-                                    m_handle,
-                                    scale);
-
-    DisplayHelper::drawFramesHeader(&painter,
-                                    QSize(viewportSize.width() - offset.x(), offset.y()),
-                                    m_handle,
-                                    double(scale) / double(m_symbolLength),
-                                    Qt::Horizontal);
-
-    return headers;
+    return DisplayHelper::drawHeadersFull(
+                viewportSize,
+                headerOffset(parameters),
+                m_handle,
+                QSizeF(double(scale) / double(m_symbolLength), scale));
 }
 
 QPoint SymbolRaster::headerOffset(const QJsonObject &parameters)

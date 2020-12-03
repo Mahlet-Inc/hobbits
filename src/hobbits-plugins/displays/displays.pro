@@ -1,15 +1,17 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-#    AsciiView \
-#    BinaryView \
+    Ascii \
+    Binary \
     BitRaster \
     ByteRaster \
-#    DigraphPlot \
-#    DotPlot \
 #    FrequencyPlot \
-#    HexView \
 #    HilbertPlot \
 #    Metadata \
+    DigraphPlot \
+    DotPlot \
+    FrequencyPlot \
+    Hex \
+    HilbertPlot \
     Spectrogram \
     SymbolRaster

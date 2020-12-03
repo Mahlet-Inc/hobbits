@@ -47,6 +47,7 @@ Q_SIGNALS:
     void newStatus(QString);
     void newActiveDisplays(QSet<DisplayWidget*>);
     void containerChanged();
+    void currentContainerChanged();
     void renderedRangeChanged(Range);
 
     void overlayRedrawRequested(DisplayInterface* display);
@@ -68,7 +69,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void offsetControlUpdate();
     void configureControls();
-    void managerUpdate();
+    void checkCurrentContainer();
     void containerUpdate();
 
 private:

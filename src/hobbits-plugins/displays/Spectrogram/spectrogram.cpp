@@ -226,6 +226,8 @@ QImage Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &paramet
         sampleOffset /= 2;
     }
 
+    m_handle->currentContainer()->info()->setMetadata(MetadataHelper::sampleFormatKey(), sampleFormat.id);
+
     QStringList freqUnits = {"Hz", "kHz", "MHz", "GHz", "THz"};
     int fftSize = parameters.value("fft_size").toInt();
     int overlap = parameters.value("fft_overlap").toInt();

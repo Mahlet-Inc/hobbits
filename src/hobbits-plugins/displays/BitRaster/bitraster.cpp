@@ -60,24 +60,16 @@ QSharedPointer<DisplayRenderConfig> BitRaster::renderConfig()
 void BitRaster::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_handle = displayHandle;
-    connect(m_handle.data(), &DisplayHandle::newMouseHover, this, [this](DisplayInterface *display, QPoint hover) {
-        if (display != this) {
-            return;
+    DisplayHelper::connectHoverUpdates(this, this, m_handle, [this](QPoint& offset, QSize &symbolSize, int &grouping, int &bitsPerSymbol) {
+        if (!m_delegate->validate(m_lastParams)) {
+            return false;
         }
-        if (hover.isNull()
-                || m_handle->currentContainer().isNull()
-                || !m_delegate->validate(m_lastParams)) {
-            m_handle->setBitHover(false);
-            return;
-        }
-
-        QPoint offset = headerOffset(m_lastParams);
         int scale = m_lastParams.value("scale").toInt();
-
-        qint64 frameOffset = ((hover.y() - offset.y()) / scale);
-        qint64 bitOffset = ((hover.x() - offset.x()) / scale);
-
-        m_handle->setBitHover(true, bitOffset, frameOffset);
+        offset = headerOffset(m_lastParams);
+        symbolSize = QSize(scale, scale);
+        grouping = 1;
+        bitsPerSymbol = 1;
+        return true;
     });
 }
 
@@ -136,31 +128,13 @@ QImage BitRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameter
     if (!m_delegate->validate(m_lastParams)) {
         return QImage();
     }
-
-    auto offset = headerOffset(parameters);
-    if (offset.x() == 0 && offset.y() == 0) {
-        return QImage();
-    }
-
-    QImage headers(viewportSize, QImage::Format_ARGB32);
-    headers.fill(Qt::transparent);
-    QPainter painter(&headers);
-    painter.fillRect(0, 0, offset.x(), offset.y(), DisplayHelper::headerBackgroundColor());
     int scale = parameters.value("scale").toInt();
 
-    painter.translate(offset);
-    DisplayHelper::drawFramesHeader(&painter,
-                                    QSize(offset.x(), viewportSize.height() - offset.y()),
-                                    m_handle,
-                                    scale);
-
-    DisplayHelper::drawFramesHeader(&painter,
-                                    QSize(viewportSize.width() - offset.x(), offset.y()),
-                                    m_handle,
-                                    scale,
-                                    Qt::Horizontal);
-
-    return headers;
+    return DisplayHelper::drawHeadersFull(
+                viewportSize,
+                headerOffset(parameters),
+                m_handle,
+                QSizeF(scale, scale));
 }
 
 QPoint BitRaster::headerOffset(const QJsonObject &parameters)

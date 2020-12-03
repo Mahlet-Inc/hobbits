@@ -2,8 +2,8 @@
 #define HILBERTPLOT_H
 
 #include "displayinterface.h"
-#include "hilbertplotcontrols.h"
-#include "hilbertplotwidget.h"
+#include <QMap>
+#include <QPoint>
 
 class HilbertPlot : public QObject, DisplayInterface
 {
@@ -20,13 +20,30 @@ public:
     QString description() override;
     QStringList tags() override;
 
-    QWidget* display(QSharedPointer<DisplayHandle> displayHandle) override;
-    QWidget* controls(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<DisplayRenderConfig> renderConfig() override;
+    void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
+
+    QImage renderDisplay(
+            QSize viewportSize,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
+
+    QImage renderOverlay(
+            QSize viewportSize,
+            const QJsonObject &parameters) override;
 
 private:
-    void initialize(QSharedPointer<DisplayHandle> displayHandle);
-    HilbertPlotWidget* m_displayWidget;
-    HilbertPlotControls* m_controlsWidget;
+    void rotate(QPoint &p, int n, bool rx, bool ry);
+    QPoint toHilbertCoordinate(int n, int idx);
+    QVector<QPoint> getPointsForOrder(int order);
+
+    QSharedPointer<ParameterDelegate> m_delegate;
+    QSharedPointer<DisplayRenderConfig> m_renderConfig;
+    QSharedPointer<DisplayHandle> m_handle;
+
+    QMap<int, QVector<QPoint>> m_hilbertPoints;
+    QList<int> m_hilbertRecursionOrders;
 };
 
 #endif // HILBERTPLOT_H

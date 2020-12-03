@@ -1,9 +1,7 @@
 #ifndef BITRASTER_H
 #define BITRASTER_H
 
-#include "bitrastercontrols.h"
 #include "displayinterface.h"
-
 
 class BitRaster : public QObject, DisplayInterface
 {

@@ -15,7 +15,7 @@ DisplayHandle::DisplayHandle(QSharedPointer<BitContainerManager> bitManager) :
             m_bitManager.data(),
             SIGNAL(currSelectionChanged(QSharedPointer<BitContainer>, QSharedPointer<BitContainer>)),
             this,
-            SLOT(managerUpdate()));
+            SLOT(checkCurrentContainer()));
 }
 
 QSharedPointer<BitContainer> DisplayHandle::currentContainer() const
@@ -264,13 +264,14 @@ void DisplayHandle::configureControls()
     }
 }
 
-void DisplayHandle::managerUpdate()
+void DisplayHandle::checkCurrentContainer()
 {
     disconnect(this, SLOT(containerUpdate()));
 
     if (!currentContainer().isNull()) {
         connect(currentContainer().data(), SIGNAL(changed()), this, SLOT(containerUpdate()));
     }
+    emit currentContainerChanged();
 
     containerUpdate();
 }

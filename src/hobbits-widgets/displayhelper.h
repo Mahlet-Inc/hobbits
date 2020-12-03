@@ -51,11 +51,21 @@ namespace DisplayHelper
     QSize HOBBITSWIDGETSSHARED_EXPORT textSize(QFont font, QString text);
     QSize HOBBITSWIDGETSSHARED_EXPORT textSize(QFont font, qint64 maxValue);
 
+
+    QImage HOBBITSWIDGETSSHARED_EXPORT drawHeadersFull(QSize viewportSize,
+                                                       QPoint offset,
+                                                      QSharedPointer<DisplayHandle> displayHandle,
+                                                      QSizeF bitSize,
+                                                      int columnGrouping = 1,
+                                                      int groupMargin = 0);
+
     void HOBBITSWIDGETSSHARED_EXPORT drawFramesHeader(QPainter *painter,
                                                       QSize viewportSize,
                                                       QSharedPointer<DisplayHandle> displayHandle,
                                                       double frameHeight,
-                                                      int orientation = Qt::Vertical);
+                                                      int orientation = Qt::Vertical,
+                                                      int grouping = 1,
+                                                      int groupMargin = 0);
 
 
     void HOBBITSWIDGETSSHARED_EXPORT drawHoverBox(QPainter *painter,
@@ -67,6 +77,30 @@ namespace DisplayHelper
     void HOBBITSWIDGETSSHARED_EXPORT setRenderRange(DisplayInterface *display,
                                                     QSharedPointer<DisplayHandle> displayHandle,
                                                     int visibleFrames);
+
+    QImage HOBBITSWIDGETSSHARED_EXPORT drawTextRasterFull(QSize viewportSize,
+                                                          QPoint offset,
+                                                          DisplayInterface * display,
+                                                       QSharedPointer<DisplayHandle> displayHandle,
+                                                       const QJsonObject &parameters,
+                                                       int bitsPerChar,
+                                                       std::function<QString(const Frame&, qint64&)> textConverter);
+
+    int HOBBITSWIDGETSSHARED_EXPORT drawTextRaster(QPainter *painter,
+                                                    QSize textSectionSize,
+                                                    QSharedPointer<DisplayHandle> displayHandle,
+                                                   int bitsPerChar,
+                                                    int columnGrouping,
+                                                    int fontSize,
+                                                    std::function<QString(const Frame&, qint64&)> textConverter);
+
+    int HOBBITSWIDGETSSHARED_EXPORT textRowHeight(int textHeight);
+
+    void HOBBITSWIDGETSSHARED_EXPORT connectHoverUpdates(DisplayInterface* display,
+                                                         QObject* displayObject,
+                                                         QSharedPointer<DisplayHandle> handle,
+                                                         std::function<bool(QPoint &offset, QSize &symbolSize, int &xGrouping, int &bitsPerSymbol)> paramSet);
+    void HOBBITSWIDGETSSHARED_EXPORT sendHoverUpdate(QSharedPointer<DisplayHandle> handle, QPoint hover, QSize symbolSize, int xGrouping, int bitsPerSymbol);
 };
 
 #endif // DISPLAYHELPER_H

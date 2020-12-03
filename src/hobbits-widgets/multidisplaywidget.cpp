@@ -70,6 +70,10 @@ AbstractParameterEditor* MultiDisplayWidget::createEditorForActiveDisplay()
     }
 
     auto editor = parts->interface->parameterDelegate()->createEditor();
+    if (editor == nullptr) {
+        return nullptr;
+    }
+
     if (parts->display->displayParameters().isEmpty()) {
         parts->display->setDisplayParameters(editor->parameters());
     }
@@ -77,6 +81,11 @@ AbstractParameterEditor* MultiDisplayWidget::createEditorForActiveDisplay()
         editor->setParameters(parts->display->displayParameters());
     }
     connect(editor, &AbstractParameterEditor::changed, parts->display, [parts, editor]() {
+        parts->display->setDisplayParameters(editor->parameters());
+    });
+    connect(parts->display, &DisplayWidget::aboutToRedraw, editor, [parts, editor]() {
+        auto preview = BitContainerPreview::wrap(parts->display->handle()->currentContainer());
+        editor->previewBits(preview, QSharedPointer<PluginActionProgress>());
         parts->display->setDisplayParameters(editor->parameters());
     });
 

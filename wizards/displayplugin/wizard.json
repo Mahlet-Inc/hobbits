@@ -13,16 +13,13 @@
     [
         { "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
         { "key": "IsTopLevelProject", "value": "%{JS: !'%{Exists:ProjectExplorer.Profile.Ids}'}" },
-        { "key": "PluginName", "value": "%{JS: '%{ProjectName}'}" },
-        { "key": "DisplayWidgetName", "value": "%{JS: '%{ProjectName}' + 'Widget'}" },
-        { "key": "ControlWidgetName", "value": "%{JS: '%{ProjectName}' + 'Controls'}" },
-        { "key": "PluginCppFileName", "value": "%{JS: Cpp.classToFileName('%{PluginName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
-        { "key": "PluginHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{PluginName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
-        { "key": "WidgetCppFileName", "value": "%{JS: Cpp.classToFileName('%{DisplayWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
-        { "key": "WidgetHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{DisplayWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
-        { "key": "ControlsCppFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
-        { "key": "ControlsHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
-        { "key": "ControlsUiFileName", "value": "%{JS: Cpp.classToFileName('%{ControlWidgetName}', '.ui')}" }
+        { "key": "ClassName", "value": "%{JS: '%{ProjectName}'}" },
+        { "key": "FormClassName", "value": "%{JS: '%{ClassName}Form'}" },
+        { "key": "CppFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "HeaderFileName", "value": "%{JS: Cpp.classToFileName('%{ClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "FormCppFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '%{JS: Util.preferredSuffix('text/x-c++src')}')}" },
+        { "key": "FormHeaderFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" },
+        { "key": "FormUiFileName", "value": "%{JS: Cpp.classToFileName('%{FormClassName}', '.ui')}" }
     ],
 
     "pages":
@@ -59,31 +56,23 @@
                 },
                 {
                     "source": "displayplugintemplate.cpp",
-                    "target": "%{PluginCppFileName}"
+                    "target": "%{CppFileName}"
                 },
                 {
                     "source": "displayplugintemplate.h",
-                    "target": "%{PluginHeaderFileName}"
+                    "target": "%{HeaderFileName}"
                 },
                 {
-                    "source": "displaywidget.cpp",
-                    "target": "%{WidgetCppFileName}"
+                    "source": "formplugintemplate.cpp",
+                    "target": "%{FormCppFileName}"
                 },
                 {
-                    "source": "displaywidget.h",
-                    "target": "%{WidgetHeaderFileName}"
+                    "source": "formplugintemplate.h",
+                    "target": "%{FormHeaderFileName}"
                 },
                 {
-                    "source": "displaycontrols.cpp",
-                    "target": "%{ControlsCppFileName}"
-                },
-                {
-                    "source": "displaycontrols.h",
-                    "target": "%{ControlsHeaderFileName}"
-                },
-                {
-                    "source": "displaycontrols.ui",
-                    "target": "%{ControlsUiFileName}"
+                    "source": "formplugintemplate.ui",
+                    "target": "%{FormUiFileName}"
                 }
                 
             ]

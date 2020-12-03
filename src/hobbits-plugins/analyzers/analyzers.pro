@@ -4,4 +4,5 @@ SUBDIRS += \
     Find \
     KaitaiStruct \
     Highlight \
+    Metadata \
     WidthFramer

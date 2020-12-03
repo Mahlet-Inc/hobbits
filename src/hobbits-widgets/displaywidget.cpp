@@ -12,12 +12,14 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
                              QWidget *parent) :
     QWidget(parent),
     m_display(display),
-    m_handle(handle)
+    m_handle(handle),
+    m_redrawing(false)
 {
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     this->setMouseTracking(true);
 
     connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
+    connect(m_handle.data(), SIGNAL(currentContainerChanged()), this, SLOT(checkNewContainer()));
 
     connect(m_handle.data(), SIGNAL(overlayRedrawRequested(DisplayInterface*)), this, SLOT(checkOverlayRedraw(DisplayInterface*)));
     connect(m_handle.data(), SIGNAL(fullRedrawRequested(DisplayInterface*)), this, SLOT(checkFullRedraw(DisplayInterface*)));
@@ -182,10 +184,20 @@ void DisplayWidget::resetRendering()
     }
 }
 
-void DisplayWidget::fullRedraw()
+void DisplayWidget::fullRedraw(bool newContainer)
 {
+    if (m_redrawing) {
+        return;
+    }
+    m_redrawing = true;
+    disconnect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
+    if (newContainer) {
+        emit aboutToRedraw();
+    }
     performDisplayRender();
     update();
+    connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
+    m_redrawing = false;
 }
 
 void DisplayWidget::showContextMenu(const QPoint &point)
@@ -197,7 +209,6 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             || m_handle->bitOffsetHover() >= m_handle->currentContainer()->frameAt(m_handle->frameOffsetHover()).size()) {
         return;
     }
-
 
     QMenu menu(this);
 
@@ -420,7 +431,12 @@ void DisplayWidget::showContextMenu(const QPoint &point)
     menu.exec(this->mapToGlobal(point));
 }
 
-void DisplayWidget::checkFullRedraw(DisplayInterface *display)
+void DisplayWidget::checkNewContainer()
+{
+    checkFullRedraw(nullptr, true);
+}
+
+void DisplayWidget::checkFullRedraw(DisplayInterface *display, bool newContainer)
 {
     if (!m_handle->activeDisplays().contains(this)) {
         return;
@@ -428,7 +444,7 @@ void DisplayWidget::checkFullRedraw(DisplayInterface *display)
     if (display != nullptr && display != m_display.data()) {
         return;
     }
-    fullRedraw();
+    fullRedraw(newContainer);
 }
 
 void DisplayWidget::checkOverlayRedraw(DisplayInterface *display)
@@ -440,6 +456,11 @@ void DisplayWidget::checkOverlayRedraw(DisplayInterface *display)
         return;
     }
     update();
+}
+
+QSharedPointer<DisplayHandle> DisplayWidget::handle() const
+{
+    return m_handle;
 }
 
 QSharedPointer<DisplayInterface> DisplayWidget::display() const

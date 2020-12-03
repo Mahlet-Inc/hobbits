@@ -67,3 +67,27 @@ QJsonObject SpectrogramControls::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
+
+void SpectrogramControls::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
+{
+    if (container.isNull()) {
+        return;
+    }
+
+    QString currId = ui->cb_sampleFormat->currentData().toString();
+    QString name = container->name();
+
+    QVariant sampleFormat = container->info()->metadata(MetadataHelper::sampleFormatKey());
+    if (sampleFormat.isValid()) {
+        int idx = ui->cb_sampleFormat->findData(sampleFormat.toString());
+        if (idx >= 0) {
+            ui->cb_sampleFormat->setCurrentIndex(idx);
+        }
+        else {
+            container->setMetadata(MetadataHelper::sampleFormatKey(), currId);
+        }
+    }
+    else {
+        container->setMetadata(MetadataHelper::sampleFormatKey(), currId);
+    }
+}

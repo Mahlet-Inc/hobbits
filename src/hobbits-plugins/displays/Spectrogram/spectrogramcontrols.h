@@ -36,6 +36,7 @@ signals:
 private slots:
 
 private:
+    void previewBitsUiImpl(QSharedPointer<BitContainerPreview> container) override;
     Ui::SpectrogramControls *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
 };
