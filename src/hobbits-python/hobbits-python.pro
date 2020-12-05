@@ -7,10 +7,9 @@
 requires(defined(HOBBITS_PYPATH, var))
 message(HOBBITS_PYPATH: $$HOBBITS_PYPATH)
 
-QT       -= gui
-
 TARGET = hobbits-python
 TEMPLATE = lib
+QT += core gui widgets
 
 CONFIG += c++11
 CONFIG -= debug_and_release_target
@@ -31,6 +30,7 @@ SOURCES += \
         py_hobbits.cpp \
         pythonanalyzer.cpp \
         pythonarg.cpp \
+        pythondisplay.cpp \
         pythonimporter.cpp \
         pythoninterpreter.cpp \
         pythonoperator.cpp \
@@ -48,6 +48,7 @@ HEADERS += \
         py_hobbits.h \
         pythonanalyzer.h \
         pythonarg.h \
+        pythondisplay.h \
         pythonimporter.h \
         pythoninterpreter.h \
         pythonoperator.h \
@@ -56,8 +57,9 @@ HEADERS += \
         pythonresult.h
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-INCLUDEPATH += $$PWD/../hobbits-core
-DEPENDPATH += $$PWD/../hobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
+DEPENDPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
 
 include(python-link.pri)
 

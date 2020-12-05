@@ -3,6 +3,7 @@
 #include "pythonoperator.h"
 #include "pythonimporter.h"
 #include "pythonanalyzer.h"
+#include "pythondisplay.h"
 #include <QJsonArray>
 
 PythonPluginConfig::PythonPluginConfig()
@@ -53,6 +54,20 @@ QStringList PythonPluginConfig::loadPythonPlugins(QString path,
             errors.append(QString("Duplicate plugin %1 not loaded from %2").arg(plugin->name()).arg(pluginDir));
         }
     }
+
+    QDir displayDir(path + "/python_displays");
+    for (QString subDir : displayDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QSharedPointer<PythonPluginConfig> config(new PythonPluginConfig());
+        auto pluginDir = displayDir.absoluteFilePath(subDir);
+        auto plugin = loadDisplay(pluginDir, editorCreator, errors);
+        if (plugin.isNull()) {
+            continue;
+        }
+        if (!pluginManager->addDisplay(pluginDir, plugin)) {
+            errors.append(QString("Duplicate plugin %1 not loaded from %2").arg(plugin->name()).arg(pluginDir));
+        }
+    }
+
     return errors;
 }
 
@@ -100,6 +115,21 @@ QSharedPointer<ImporterExporterInterface> PythonPluginConfig::loadImporter(QStri
         return nullptr;
     }
     return QSharedPointer<ImporterExporterInterface>(new PythonImporter(config));
+}
+
+QSharedPointer<DisplayInterface> PythonPluginConfig::loadDisplay(QString configFolder, std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator, QStringList &errors)
+{
+    QSharedPointer<PythonPluginConfig> config(new PythonPluginConfig());
+    auto configErrors = config->configure(configFolder, editorCreator);
+    if (!configErrors.isEmpty()) {
+        errors.append(configErrors);
+        return nullptr;
+    }
+    if (config->type() != "display") {
+        return nullptr;
+    }
+
+    return QSharedPointer<DisplayInterface>(new PythonDisplay(config));
 }
 
 QStringList PythonPluginConfig::configure(QString configFolder,
