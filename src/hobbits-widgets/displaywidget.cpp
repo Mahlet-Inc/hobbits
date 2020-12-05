@@ -184,16 +184,13 @@ void DisplayWidget::resetRendering()
     }
 }
 
-void DisplayWidget::fullRedraw(bool newContainer)
+void DisplayWidget::fullRedraw()
 {
     if (m_redrawing) {
         return;
     }
     m_redrawing = true;
     disconnect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
-    if (newContainer) {
-        emit aboutToRedraw();
-    }
     performDisplayRender();
     update();
     connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
@@ -433,10 +430,11 @@ void DisplayWidget::showContextMenu(const QPoint &point)
 
 void DisplayWidget::checkNewContainer()
 {
-    checkFullRedraw(nullptr, true);
+    emit hasNewContainer();
+    checkFullRedraw();
 }
 
-void DisplayWidget::checkFullRedraw(DisplayInterface *display, bool newContainer)
+void DisplayWidget::checkFullRedraw(DisplayInterface *display)
 {
     if (!m_handle->activeDisplays().contains(this)) {
         return;
@@ -444,7 +442,7 @@ void DisplayWidget::checkFullRedraw(DisplayInterface *display, bool newContainer
     if (display != nullptr && display != m_display.data()) {
         return;
     }
-    fullRedraw(newContainer);
+    fullRedraw();
 }
 
 void DisplayWidget::checkOverlayRedraw(DisplayInterface *display)

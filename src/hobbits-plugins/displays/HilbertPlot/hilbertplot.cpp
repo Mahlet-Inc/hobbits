@@ -80,7 +80,11 @@ QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &paramet
 
     auto bits = m_handle->currentContainer()->bits();
     qint64 byteOffset = m_handle->currentContainer()->info()->frames()->at(m_handle->frameOffset()).start() / 8;
+    QTime lastTime = QTime::currentTime();
     for (int i = 0; i + byteOffset < bits->sizeInBytes() && i < rasterLength * rasterLength; i++) {
+        if (progress->isCancelled()) {
+            return QImage();
+        }
         int chunkLength = 1;
         int chunk = i;
         QPoint p(0, 0);
@@ -108,15 +112,18 @@ QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &paramet
         else {
             raster.setPixel(p, qRgba(255, 130, 130, 255));
         }
-        if ( i % 8192 == 0
-             && !progress.isNull()
-             && !progress->isCancelled()) {
-            QImage preview(viewportSize, QImage::Format_ARGB32);
-            preview.fill(Qt::transparent);
-            QPainter previewPaint(&preview);
-            previewPaint.drawImage(0, 0, raster, 0, 0, rasterLength, rasterLength);
-            progress->sendUpdate("image_preview", QVariant(preview));
-            progress->setProgress(i, rasterLength * rasterLength);
+        if (i % 8192 == 0) {
+            if ( !progress.isNull()
+                 && !progress->isCancelled()
+                 && lastTime.msecsTo(QTime::currentTime()) > 250) {
+                QImage preview(viewportSize, QImage::Format_ARGB32);
+                preview.fill(Qt::transparent);
+                QPainter previewPaint(&preview);
+                previewPaint.drawImage(0, 0, raster, 0, 0, rasterLength, rasterLength);
+                progress->sendUpdate("image_preview", QVariant(preview));
+                progress->setProgress(i, rasterLength * rasterLength);
+                lastTime = QTime::currentTime();
+            }
         }
     }
 

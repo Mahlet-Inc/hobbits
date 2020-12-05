@@ -1,6 +1,7 @@
 #include "spectrogram.h"
 #include "displayhelper.h"
 #include <QPainter>
+#include <QPainterPath>
 #include "math.h"
 #include <QTime>
 #include "viridis.h"

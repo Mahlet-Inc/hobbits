@@ -74,6 +74,7 @@ void SpectrogramControls::previewBitsUiImpl(QSharedPointer<BitContainerPreview> 
         return;
     }
 
+    disconnect(ui->cb_sampleFormat, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));
     QString currId = ui->cb_sampleFormat->currentData().toString();
     QString name = container->name();
 
@@ -90,4 +91,5 @@ void SpectrogramControls::previewBitsUiImpl(QSharedPointer<BitContainerPreview> 
     else {
         container->setMetadata(MetadataHelper::sampleFormatKey(), currId);
     }
+    connect(ui->cb_sampleFormat, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));
 }

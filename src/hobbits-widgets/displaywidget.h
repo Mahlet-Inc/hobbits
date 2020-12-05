@@ -36,7 +36,7 @@ public:
     QSharedPointer<DisplayHandle> handle() const;
 
 signals:
-    void aboutToRedraw();
+    void hasNewContainer();
 
 public slots:
 
@@ -45,11 +45,11 @@ private slots:
     void handleDisplayRenderPreview(QString type, QVariant value);
     void setDisplayImage(QImage image);
     void resetRendering();
-    void fullRedraw(bool newContainer = false);
+    void fullRedraw();
     void showContextMenu(const QPoint &point);
 
     void checkNewContainer();
-    void checkFullRedraw(DisplayInterface* display = nullptr, bool newContainer = false);
+    void checkFullRedraw(DisplayInterface* display = nullptr);
     void checkOverlayRedraw(DisplayInterface* display = nullptr);
 
 private:

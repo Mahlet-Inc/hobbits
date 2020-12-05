@@ -83,7 +83,7 @@ AbstractParameterEditor* MultiDisplayWidget::createEditorForActiveDisplay()
     connect(editor, &AbstractParameterEditor::changed, parts->display, [parts, editor]() {
         parts->display->setDisplayParameters(editor->parameters());
     });
-    connect(parts->display, &DisplayWidget::aboutToRedraw, editor, [parts, editor]() {
+    connect(parts->display, &DisplayWidget::hasNewContainer, editor, [parts, editor]() {
         auto preview = BitContainerPreview::wrap(parts->display->handle()->currentContainer());
         editor->previewBits(preview, QSharedPointer<PluginActionProgress>());
         parts->display->setDisplayParameters(editor->parameters());
