@@ -3,7 +3,8 @@
 #include "py_actionprogress.h"
 #include "py_bitinfo.h"
 #include "py_bitcontainer.h"
-
+#include "imagebuffer.h"
+#include "py_displayhandle.h"
 
 static struct PyModuleDef HobbitsModuleDef = {
     PyModuleDef_HEAD_INIT, // PyModuleDef_Base m_base;
@@ -39,6 +40,12 @@ PyObject* PyInit_hobbits(void){
     if (PyType_Ready(&PyImmutableBitInfo) < 0)
         return nullptr;
 
+    if (PyType_Ready(&ImageBuffer) < 0)
+        return nullptr;
+
+    if (PyType_Ready(&PyDisplayHandle) < 0)
+        return nullptr;
+
     PyObject *m = PyModule_Create(&HobbitsModuleDef);
     if (m == nullptr)
         return nullptr;
@@ -50,13 +57,17 @@ PyObject* PyInit_hobbits(void){
     Py_INCREF(&PyImmutableBitInfo);
     Py_INCREF(&PyBitContainer);
     Py_INCREF(&PyImmutableBitContainer);
+    Py_INCREF(&ImageBuffer);
+    Py_INCREF(&PyDisplayHandle);
     if (PyModule_AddObject(m, "BitArray", (PyObject*)&PyBitArray) < 0
             || PyModule_AddObject(m, "ImmutableBitArray", (PyObject*)&PyImmutableBitArray) < 0
             || PyModule_AddObject(m, "PluginActionProgress", (PyObject*)&PyActionProgress) < 0
             || PyModule_AddObject(m, "BitInfo", (PyObject*)&PyBitInfo) < 0
             || PyModule_AddObject(m, "ImmutableBitInfo", (PyObject*)&PyImmutableBitInfo) < 0
             || PyModule_AddObject(m, "BitContainer", (PyObject*)&PyBitContainer) < 0
-            || PyModule_AddObject(m, "ImmutableBitContainer", (PyObject*)&PyImmutableBitContainer) < 0) {
+            || PyModule_AddObject(m, "ImmutableBitContainer", (PyObject*)&PyImmutableBitContainer) < 0
+            || PyModule_AddObject(m, "ImageBuffer", (PyObject*)&ImageBuffer) < 0
+            || PyModule_AddObject(m, "DisplayHandle", (PyObject*)&PyDisplayHandle) < 0) {
         Py_DECREF(&PyBitArray);
         Py_DECREF(&PyImmutableBitArray);
         Py_DECREF(&PyActionProgress);
@@ -64,6 +75,8 @@ PyObject* PyInit_hobbits(void){
         Py_DECREF(&PyImmutableBitInfo);
         Py_DECREF(&PyBitContainer);
         Py_DECREF(&PyImmutableBitContainer);
+        Py_DECREF(&ImageBuffer);
+        Py_DECREF(&PyDisplayHandle);
         Py_DECREF(m);
         return nullptr;
     }

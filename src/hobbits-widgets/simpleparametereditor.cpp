@@ -22,6 +22,9 @@ SimpleParameterEditor::SimpleParameterEditor(QSharedPointer<ParameterDelegate> d
         else if (param.type == QJsonValue::Double) {
             auto spinBox = new QSpinBox();
             spinBox->setRange(0, 0x7fffffff);
+            if (param.hasIntLimits) {
+                spinBox->setRange(param.intMin, param.intMax);
+            }
             ui->formLayout->addRow(param.name, spinBox);
             m_stateHelper->addSpinBoxIntParameter(param.name, spinBox);
             connect(spinBox, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));

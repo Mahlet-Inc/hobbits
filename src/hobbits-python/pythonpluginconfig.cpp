@@ -174,7 +174,19 @@ QStringList PythonPluginConfig::configure(QString configFolder,
             m_parameterInfos.append({name, QJsonValue::String});
         }
         else if (type == "integer") {
-            m_parameterInfos.append({name, QJsonValue::Double});
+            ParameterDelegate::ParameterInfo info = {name, QJsonValue::Double};
+            if (param.contains("min") || param.contains("max")) {
+                info.hasIntLimits = true;
+                info.intMax = INT_MAX;
+                info.intMin = INT_MIN;
+            }
+            if (param.contains("min")) {
+                info.intMin = param.value("min").toInt();
+            }
+            if (param.contains("max")) {
+                info.intMax = param.value("max").toInt();
+            }
+            m_parameterInfos.append(info);
             m_paramNumberTypes.insert(name, NumberType::Integer);
         }
         else if (type == "decimal") {
@@ -212,6 +224,28 @@ QStringList PythonPluginConfig::configure(QString configFolder,
     if (config.contains("extra_paths")) {
         for (auto path : config.value("extra_paths").toArray()) {
             m_extraPaths.append(path.toString());
+        }
+    }
+
+    if (m_type == "display") {
+        m_renderConfig = QSharedPointer<DisplayRenderConfig>(new DisplayRenderConfig());
+        m_renderConfig->setAsynchronous(true);
+        m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewFrameOffset | DisplayRenderConfig::NewBitOffset);
+
+        if (config.contains("render_config")) {
+            if (!config.value("render_config").isObject()) {
+                return {"render_config field is formatted incorrectly"};
+            }
+            QJsonObject rConfig = config.value("render_config").toObject();
+            if (rConfig.contains("asynchronous")) {
+                m_renderConfig->setAsynchronous(rConfig.value("asynchronous").toBool());
+            }
+            if (rConfig.contains("hide_frame_offset_controls")) {
+                m_renderConfig->setHideFrameOffsetControls(rConfig.value("hide_frame_offset_controls").toBool());
+            }
+            if (rConfig.contains("hide_bit_offset_controls")) {
+                m_renderConfig->setHideBitOffsetControls(rConfig.value("hide_bit_offset_controls").toBool());
+            }
         }
     }
 
@@ -256,6 +290,11 @@ QString PythonPluginConfig::type() const
 QStringList PythonPluginConfig::extraPaths() const
 {
     return m_extraPaths;
+}
+
+QSharedPointer<DisplayRenderConfig> PythonPluginConfig::renderConfig() const
+{
+    return m_renderConfig;
 }
 
 PythonPluginConfig::NumberType PythonPluginConfig::parameterNumberType(QString paramName)

@@ -35,8 +35,12 @@ public:
         bool optional;
         QList<ParameterInfo> subInfos;
 
+        bool hasIntLimits;
+        int intMin;
+        int intMax;
+
         ParameterInfo(QString name, QJsonValue::Type type, bool optional = true, QList<ParameterInfo> subInfos = {}):
-            name{name}, type{type}, optional{optional}, subInfos{subInfos} {}
+            name{name}, type{type}, optional{optional}, subInfos{subInfos}, hasIntLimits(false), intMin(0), intMax(INT_MAX) {}
 
         ParameterInfo() = default;
         ParameterInfo(const ParameterInfo&) = default;

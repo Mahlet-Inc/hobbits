@@ -5,6 +5,7 @@
 #include "operatorinterface.h"
 #include "hobbitspluginmanager.h"
 #include "hobbits-python_global.h"
+#include "displayrenderconfig.h"
 
 class HOBBITSPYTHONSHARED_EXPORT PythonPluginConfig
 {
@@ -46,6 +47,7 @@ public:
     QString script() const;
     QString type() const;
     QStringList extraPaths() const;
+    QSharedPointer<DisplayRenderConfig> renderConfig() const;
     NumberType parameterNumberType(QString paramName);
 
 private:
@@ -58,6 +60,7 @@ private:
     QString m_script;
     QString m_type;
     QStringList m_extraPaths;
+    QSharedPointer<DisplayRenderConfig> m_renderConfig;
 };
 
 #endif // PYTHONPLUGINCONFIG_H

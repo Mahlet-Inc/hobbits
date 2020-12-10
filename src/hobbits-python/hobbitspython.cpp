@@ -22,6 +22,11 @@ QString HobbitsPython::pythonVersion()
     return version;
 }
 
+void HobbitsPython::waitForInterpreterLock()
+{
+    PythonInterpreter::waitForLock();
+}
+
 QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult> > > HobbitsPython::runProcessScript(
         QSharedPointer<PythonRequest> request,
         bool includeActionProgressArg)

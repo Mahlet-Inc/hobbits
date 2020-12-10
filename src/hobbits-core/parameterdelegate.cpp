@@ -101,6 +101,12 @@ bool ParameterDelegate::validateAgainstInfos(const QJsonObject &parameters, QLis
                 return false;
             }
         }
+        else if (param.type == QJsonValue::Double && param.hasIntLimits) {
+            int value = parameters.value(param.name).toInt();
+            if (value > param.intMax || value < param.intMin) {
+                return false;
+            }
+        }
     }
 
     return true;

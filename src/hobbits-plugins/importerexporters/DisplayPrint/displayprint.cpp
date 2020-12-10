@@ -94,7 +94,6 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
     QSharedPointer<DisplayHandle> displayHandle(new DisplayHandle(containerManager));
     displayPlugin->setDisplayHandle(displayHandle);
 
-    //TODO: make this less hacky
     auto noConstContainer = BitContainer::create(container->bits(), container->info());
     containerManager->addContainer(noConstContainer);
     containerManager->selectContainer(noConstContainer);
@@ -102,7 +101,7 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
     QJsonObject displayParams = parameters.value("display_params").toObject();
 
     QImage display = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
-    QImage overlay = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
+    QImage overlay = displayPlugin->renderOverlay(QSize(imageWidth, imageHeight), displayParams);
 
     QPixmap pixmap(imageWidth, imageHeight);
     QPainter painter(&pixmap);

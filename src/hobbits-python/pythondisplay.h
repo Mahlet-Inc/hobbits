@@ -32,7 +32,6 @@ public:
 
 private:
     QSharedPointer<PythonPluginConfig> m_config;
-    QSharedPointer<DisplayRenderConfig> m_renderConfig;
     QSharedPointer<DisplayHandle> m_handle;
 };
 

@@ -9,6 +9,11 @@ PythonArg::PythonArg()
     m_doubleData = 0;
 }
 
+QSize PythonArg::sizeData() const
+{
+    return m_sizeData;
+}
+
 int PythonArg::integerData() const
 {
     return m_integerData;
@@ -114,6 +119,16 @@ PythonArg *PythonArg::constBitInfo(QSharedPointer<const BitInfo> info)
     return arg;
 }
 
+PythonArg *PythonArg::displayHandle(QSharedPointer<DisplayHandle> handle)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::HobbitsWrapper;
+    arg->m_wrapType = "DisplayHandle";
+    arg->m_argSymbol = "O";
+    arg->m_pointer = handle.data();
+    return arg;
+}
+
 PythonArg *PythonArg::qString(QString s)
 {
     PythonArg *arg = new PythonArg();
@@ -147,5 +162,25 @@ PythonArg *PythonArg::boolean(bool n)
     arg->m_type = Type::Integer;
     arg->m_argSymbol = "p";
     arg->m_integerData = n ? 1 : 0;
+    return arg;
+}
+
+PythonArg *PythonArg::byteBuffer(char *bytes, int size)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::ByteBuffer;
+    arg->m_argSymbol = "";
+    arg->m_integerData = size;
+    arg->m_pointer = bytes;
+    return arg;
+}
+
+PythonArg *PythonArg::imageBuffer(char *bytes, QSize size)
+{
+    PythonArg *arg = new PythonArg();
+    arg->m_type = Type::ImageBuffer;
+    arg->m_argSymbol = "";
+    arg->m_sizeData = size;
+    arg->m_pointer = bytes;
     return arg;
 }

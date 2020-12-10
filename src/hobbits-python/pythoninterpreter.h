@@ -17,6 +17,7 @@ private:
     void initialize();
 
 public:
+    static void waitForLock();
     static QSharedPointer<PythonResult> runProcessScript(QSharedPointer<PythonRequest> request);
 
 private:

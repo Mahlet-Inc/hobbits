@@ -6,12 +6,8 @@
 #include "hobbitspython.h"
 
 PythonDisplay::PythonDisplay(QSharedPointer<PythonPluginConfig> config) :
-    m_config(config),
-    m_renderConfig(new DisplayRenderConfig())
+    m_config(config)
 {
-    // TODO: configurable render config for python displays
-    m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewFrameOffset);
-
 }
 
 DisplayInterface *PythonDisplay::createDefaultDisplay()
@@ -36,7 +32,7 @@ QStringList PythonDisplay::tags()
 
 QSharedPointer<DisplayRenderConfig> PythonDisplay::renderConfig()
 {
-    return m_renderConfig;
+    return m_config->renderConfig();
 }
 
 void PythonDisplay::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
@@ -71,15 +67,13 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
     userScriptFile.close();
 
     int imageBytes = viewportSize.width() * viewportSize.height() * 4;
-    auto imageBufferBits = QSharedPointer<BitArray>(new BitArray(imageBytes * 8));
+    char* byteBuffer = new char[imageBytes];
     auto pyRequest = PythonRequest::create(userScriptFile.fileName())->setFunctionName("render_display");
     for (auto extraPath: m_config->extraPaths()) {
         pyRequest->addPathExtension(extraPath);
     }
-    pyRequest->addArg(PythonArg::constBitContainer(m_handle->currentContainer()));
-    pyRequest->addArg(PythonArg::bitArray(imageBufferBits));
-    pyRequest->addArg(PythonArg::integer(viewportSize.width()));
-    pyRequest->addArg(PythonArg::integer(viewportSize.height()));
+    pyRequest->addArg(PythonArg::displayHandle(m_handle));
+    pyRequest->addArg(PythonArg::imageBuffer(byteBuffer, viewportSize));
     for (auto param : m_config->parameterInfos()) {
         if (param.type == QJsonValue::String) {
             pyRequest->addArg(PythonArg::qString(parameters.value(param.name).toString()));
@@ -97,9 +91,21 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
         }
     }
 
+    // If there are several render requests in quick succession, this will prevent all but the most recent from running their script
+    HobbitsPython::waitForInterpreterLock();
+    if (progress->isCancelled()) {
+        delete[] byteBuffer;
+        return QImage();
+    }
+
     auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, progress);
     watcher->watcher()->future().waitForFinished();
     auto result = watcher->result();
+
+    if (progress->isCancelled()) {
+        delete[] byteBuffer;
+        return QImage();
+    }
 
     QString output = "";
     bool error = false;
@@ -115,11 +121,13 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
         output += "Other errors:\n" + result->errors().join("\n") + "\n\n";
     }
     if (error) {
+        delete[] byteBuffer;
         return QImage();
     }
 
-    auto buff = QImage(reinterpret_cast<uchar*>(imageBufferBits->readBytes(0, imageBytes).data()), viewportSize.width(), viewportSize.height(), QImage::Format_ARGB32);
-    return buff.copy();
+    return QImage(reinterpret_cast<uchar*>(byteBuffer), viewportSize.width(), viewportSize.height(), QImage::Format_ARGB32, [](void *info) {
+        delete[] reinterpret_cast<char*>(info);
+    }, byteBuffer);
 }
 
 QImage PythonDisplay::renderOverlay(QSize viewportSize, const QJsonObject &parameters)

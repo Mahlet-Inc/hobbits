@@ -23,10 +23,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         hobbitspython.cpp \
+        imagebuffer.cpp \
         py_actionprogress.cpp \
         py_bitarray.cpp \
         py_bitcontainer.cpp \
         py_bitinfo.cpp \
+        py_displayhandle.cpp \
         py_hobbits.cpp \
         pythonanalyzer.cpp \
         pythonarg.cpp \
@@ -41,10 +43,12 @@ SOURCES += \
 HEADERS += \
         hobbitspython.h \
         hobbits-python_global.h  \
+        imagebuffer.h \
         py_actionprogress.h \
         py_bitarray.h \
         py_bitcontainer.h \
         py_bitinfo.h \
+        py_displayhandle.h \
         py_hobbits.h \
         pythonanalyzer.h \
         pythonarg.h \
