@@ -8,7 +8,7 @@
 #include "actionrenderprogress.h"
 #include "abstractparametereditor.h"
 
-class DisplayWidget : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT DisplayWidget : public QWidget
 {
     Q_OBJECT
 public:

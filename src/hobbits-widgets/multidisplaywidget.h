@@ -6,7 +6,7 @@
 #include "displaywidget.h"
 #include "hobbitspluginmanager.h"
 
-class MultiDisplayWidget : public QWidget
+class HOBBITSWIDGETSSHARED_EXPORT MultiDisplayWidget : public QWidget
 {
     Q_OBJECT
 public:
