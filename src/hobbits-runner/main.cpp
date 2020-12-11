@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
     QTextStream out(stdout);
     QTextStream err(stderr);
     if (parser.positionalArguments().size() != 1) {
-        err << "Error: Cannot run without specifying a mode" << Qt::endl;
-        err << parser.helpText() << Qt::endl;
+        err << "Error: Cannot run without specifying a mode" << "\n";
+        err << parser.helpText() << "\n";
         return -1;
     }
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(pythonHomePathOption)) {
         SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
-        err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << Qt::endl;
+        err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << "\n";
     }
 
     // Initialize some stuff
@@ -158,15 +158,15 @@ int main(int argc, char *argv[])
 
 
     for (auto warning : warnings) {
-        err << "Plugin load warning: " << warning << Qt::endl;
+        err << "Plugin load warning: " << warning << "\n";
     }
 
     // Run
     QString mode = parser.positionalArguments().at(0);
     if (mode == "run") {
         if (!parser.isSet(batchOption)) {
-            err << "Error: Cannot run in 'run' mode without a batch specified" << Qt::endl;
-            err << parser.helpText() << Qt::endl;
+            err << "Error: Cannot run in 'run' mode without a batch specified" << "\n";
+            err << parser.helpText() << "\n";
             return -1;
         }
         QList<QSharedPointer<BitContainer>> targetContainers;
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
             for (QString fileName : parser.values(inputFileOption)) {
                 QFile inputFile(fileName);
                 if (!inputFile.open(QIODevice::ReadOnly)) {
-                    err << "Error: cannot open input file: " << parser.value(inputFileOption) << Qt::endl;
+                    err << "Error: cannot open input file: " << parser.value(inputFileOption) << "\n";
                     return -1;
                 }
                 auto container = BitContainer::create(&inputFile);
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
         QObject::connect(
                 bitManager.data(),
                 &BitContainerManager::containerAdded,
-                [&a, bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> container) {
+                [bitManager, &outputNumber, pluginActionManager, outputPrefix](QSharedPointer<BitContainer> container) {
             QFile output(QString("%1%2").arg(outputPrefix).arg(outputNumber++));
             output.open(QIODevice::WriteOnly);
             container->bits()->writeTo(&output);
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
         QObject::connect(
                 pluginActionManager.data(),
                 &PluginActionManager::batchFinished,
-                [&a, &err](QUuid id) {
+                [&a](QUuid id) {
             Q_UNUSED(id)
             a.exit();
         });
@@ -254,8 +254,8 @@ int main(int argc, char *argv[])
         a.exec();
     }
     else {
-        err << QString("Error: Cannot run with mode option '%1'").arg(mode) << Qt::endl;
-        err << parser.helpText() << Qt::endl;
+        err << QString("Error: Cannot run with mode option '%1'").arg(mode) << "\n";
+        err << parser.helpText() << "\n";
         return -1;
     }
 }
