@@ -47,11 +47,11 @@ QStringList HobbitsPluginManager::loadPlugins(const QString &pluginPath)
     QStringList warnings;
 
     QMap<QString, QObject*> plugins;
-    QSet<QString> blacklist;
+    QStringList blacklist;
     QVariant oldBlacklist = SettingsManager::getPluginLoaderSetting(SettingsManager::PLUGIN_BLACKLIST_KEY);
     if (oldBlacklist.isValid() && oldBlacklist.canConvert<QStringList>()) {
-        auto list = oldBlacklist.toStringList();
-        blacklist = QSet<QString>(list.begin(), list.end());
+        blacklist = oldBlacklist.toStringList();
+        blacklist.removeDuplicates();
     }
 
     // Load analyzer plugins
