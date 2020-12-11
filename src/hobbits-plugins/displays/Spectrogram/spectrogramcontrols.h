@@ -28,9 +28,6 @@ public:
     virtual bool setParameters(QJsonObject parameters) override;
     virtual QJsonObject parameters() override;
 
-public slots:
-    void setSampleFormat(QString id);
-
 signals:
 
 private slots:
