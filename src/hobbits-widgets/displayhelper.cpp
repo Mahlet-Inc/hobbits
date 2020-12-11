@@ -107,7 +107,7 @@ QPixmap DisplayHelper::bitRasterThumbnail(const BitContainer * const bits)
 QSize DisplayHelper::textSize(QFont font, QString text)
 {
     QFontMetrics fontMetrics = QFontMetrics(font);
-    return QSize(fontMetrics.width(text), fontMetrics.height());
+    return QSize(fontMetrics.horizontalAdvance(text), fontMetrics.height());
 }
 
 QSize DisplayHelper::textSize(QFont font, qint64 maxValue)

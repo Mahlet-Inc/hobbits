@@ -459,7 +459,8 @@ void MainWindow::loadPlugins()
 {
     QVariant badPluginPaths = SettingsManager::getPrivateSetting(SettingsManager::PLUGINS_RUNNING_KEY);
     if (badPluginPaths.isValid() && badPluginPaths.canConvert<QStringList>()) {
-        for (auto badPluginPath : badPluginPaths.toStringList().toSet()) {
+        auto list = badPluginPaths.toStringList();
+        for (auto badPluginPath : QSet<QString>(list.begin(), list.end())) {
             if (QMessageBox::question(
                     this,
                     "Blacklist Plugin?",

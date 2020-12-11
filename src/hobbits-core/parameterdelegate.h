@@ -10,8 +10,7 @@
 #include <QSharedPointer>
 #include <QJsonObject>
 #include "hobbits-core_global.h"
-
-class HOBBITSCORESHARED_EXPORT AbstractParameterEditor;
+#include "fwd_abstractparametereditor.h"
 
 /**
   * @brief The ParameterDelegate class facilitates plugin parameter validation and configuration

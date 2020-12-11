@@ -88,11 +88,18 @@ void DisplayWidget::paintEvent(QPaintEvent *event)
 
 void DisplayWidget::wheelEvent(QWheelEvent *event)
 {
-    if (event->delta() > 0) {
+    if (event->angleDelta().y() > 0) {
         m_handle->setOffsets(m_handle->bitOffset(), m_handle->frameOffset() - 1);
     }
-    else if (event->delta() < 0) {
+    else if (event->angleDelta().y() < 0) {
         m_handle->setOffsets(m_handle->bitOffset(), m_handle->frameOffset() + 1);
+    }
+
+    if (event->angleDelta().x() > 0) {
+        m_handle->setOffsets(m_handle->bitOffset() - 1, m_handle->frameOffset());
+    }
+    else if (event->angleDelta().x() < 0) {
+        m_handle->setOffsets(m_handle->bitOffset() + 1, m_handle->frameOffset());
     }
 }
 

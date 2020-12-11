@@ -1,6 +1,7 @@
 #include "imagebuffer.h"
 #include <structmember.h>
 #include "math.h"
+#define UNUSED(expr) do { (void)(expr); } while (0);
 
 typedef struct {
     PyObject_HEAD
@@ -17,6 +18,8 @@ static void ImageBuffer_dealloc(ImageBufferPyObj *self)
 
 static PyObject* ImageBuffer_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     ImageBufferPyObj *self;
     self = reinterpret_cast<ImageBufferPyObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -27,6 +30,7 @@ static PyObject* ImageBuffer_new(PyTypeObject *type, PyObject *args, PyObject *k
 
 static int ImageBuffer_init(ImageBufferPyObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *memview;
     unsigned int width;
     unsigned int height;
@@ -108,7 +112,7 @@ static PyGetSetDef ImageBuffer_getsets[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject ImageBuffer = {
+PyTypeObject ImageBuffer = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.ImageBuffer", // const char *tp_name; /* For printing, in format "<module>.<name>" */

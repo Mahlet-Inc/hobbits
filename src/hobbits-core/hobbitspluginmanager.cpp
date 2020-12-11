@@ -50,7 +50,8 @@ QStringList HobbitsPluginManager::loadPlugins(const QString &pluginPath)
     QSet<QString> blacklist;
     QVariant oldBlacklist = SettingsManager::getPluginLoaderSetting(SettingsManager::PLUGIN_BLACKLIST_KEY);
     if (oldBlacklist.isValid() && oldBlacklist.canConvert<QStringList>()) {
-        blacklist = oldBlacklist.toStringList().toSet();
+        auto list = oldBlacklist.toStringList();
+        blacklist = QSet<QString>(list.begin(), list.end());
     }
 
     // Load analyzer plugins

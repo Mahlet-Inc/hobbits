@@ -4,6 +4,7 @@
 
 #include <structmember.h>
 
+#define UNUSED(expr) do { (void)(expr); } while (0);
 #define BITS(X) static_cast<BitArray*>(PyCapsule_GetPointer(X, nullptr))
 
 typedef struct {
@@ -19,6 +20,8 @@ static void BitArrayPy_dealloc(BitArrayPyObj *self)
 
 static PyObject* BitArrayPy_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     BitArrayPyObj *self;
     self = reinterpret_cast<BitArrayPyObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -29,6 +32,7 @@ static PyObject* BitArrayPy_new(PyTypeObject *type, PyObject *args, PyObject *kw
 
 static int BitArrayPy_init(BitArrayPyObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *bitArrayCapsule;
     if (!PyArg_ParseTuple(args, "O", &bitArrayCapsule)) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a bit array capsule");
@@ -222,7 +226,7 @@ static PyMemberDef BitArrayPy_members[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject PyBitArray = {
+PyTypeObject PyBitArray = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.BitArray", // const char *tp_name; /* For printing, in format "<module>.<name>" */
@@ -307,7 +311,7 @@ extern PyTypeObject PyBitArray = {
     // Py_DEPRECATED(3.8) int (*tp_print)(PyObject *, FILE *, int);
 };
 
-extern PyTypeObject PyImmutableBitArray = {
+PyTypeObject PyImmutableBitArray = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.ImmutableBitArray", // const char *tp_name; /* For printing, in format "<module>.<name>" */

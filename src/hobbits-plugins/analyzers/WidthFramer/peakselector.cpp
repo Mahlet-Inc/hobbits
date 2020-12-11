@@ -116,7 +116,7 @@ void PeakSelector::paintEvent(QPaintEvent*)
             painter.setPen(QColor("#eeeeee"));
             painter.setFont(bigFont);
             QString valString = QString("%1").arg(peak.x());
-            int textWidth = bigFontMetrics.width(valString);
+            int textWidth = bigFontMetrics.horizontalAdvance(valString);
             int textX = int(peakPoint.x() - textWidth/2);
             if (textX < textPad) {
                 textX = textPad;
@@ -140,7 +140,7 @@ void PeakSelector::paintEvent(QPaintEvent*)
         if (location >= 0 && location < m_data.size()) {
             QString valString = QString("%1").arg(location);
             painter.setFont(font);
-            int textWidth = fontMetrics.width(valString);
+            int textWidth = fontMetrics.horizontalAdvance(valString);
             int textHeight = fontMetrics.height();
             int textX = m_hover.x() + textPad;
             if (textWidth + textX > this->width() - textPad) {

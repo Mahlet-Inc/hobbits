@@ -15,6 +15,7 @@ HilbertPlot::HilbertPlot() :
     m_delegate = ParameterDelegate::create(
                 infos,
                 [this](const QJsonObject &parameters) {
+        Q_UNUSED(parameters)
         return QString("Hilbert Plot").arg(this->name());
     },
     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
@@ -65,6 +66,7 @@ QSharedPointer<ParameterDelegate> HilbertPlot::parameterDelegate()
 
 QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
+    Q_UNUSED(parameters)
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());
         return QImage();

@@ -5,6 +5,8 @@
 
 #include <structmember.h>
 
+#define SET_METH_VARARGS_KEYWORDS(func) (PyCFunction)(void *)(PyCFunctionWithKeywords)(func), METH_VARARGS|METH_KEYWORDS
+#define UNUSED(expr) do { (void)(expr); } while (0);
 #define BITINFO(X) static_cast<BitInfo*>(PyCapsule_GetPointer(X, nullptr))
 #define C_TEXT(X) const_cast<char*>(X)
 
@@ -21,6 +23,8 @@ static void BitInfoPy_dealloc(BitInfoPyObj *self)
 
 static PyObject* BitInfoPy_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     BitInfoPyObj *self;
     self = reinterpret_cast<BitInfoPyObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -31,6 +35,7 @@ static PyObject* BitInfoPy_new(PyTypeObject *type, PyObject *args, PyObject *kwd
 
 static int BitInfoPy_init(BitInfoPyObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *bitArrayCapsule;
     if (!PyArg_ParseTuple(args, "O", &bitArrayCapsule)) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a bit array capsule");
@@ -110,8 +115,8 @@ static PyObject* BitInfoPy_get_metadata(BitInfoPyObj *self, PyObject *args)
 }
 
 static PyMethodDef BitInfoPy_methods[] = {
-    { "add_highlight", PyCFunction(BitInfoPy_add_highlight), METH_VARARGS | METH_KEYWORDS, nullptr },
-    { "get_highlights", PyCFunction(BitInfoPy_get_highlights), METH_VARARGS | METH_KEYWORDS, nullptr },
+    { "add_highlight", SET_METH_VARARGS_KEYWORDS(BitInfoPy_add_highlight), nullptr },
+    { "get_highlights", SET_METH_VARARGS_KEYWORDS(BitInfoPy_get_highlights), nullptr },
     { "set_metadata", PyCFunction(BitInfoPy_set_metadata), METH_VARARGS, nullptr },
     { "get_metadata", PyCFunction(BitInfoPy_get_metadata), METH_VARARGS, nullptr },
     {}  /* Sentinel */
@@ -122,7 +127,7 @@ static PyMemberDef BitInfoPy_members[] = {
 };
 
 static PyMethodDef ImmutableBitInfoPy_methods[] = {
-    { "get_highlights", PyCFunction(BitInfoPy_get_highlights), METH_VARARGS | METH_KEYWORDS, nullptr },
+    { "get_highlights", SET_METH_VARARGS_KEYWORDS(BitInfoPy_get_highlights), nullptr },
     { "get_metadata", PyCFunction(BitInfoPy_get_metadata), METH_VARARGS, nullptr },
     {}  /* Sentinel */
 };
@@ -131,7 +136,7 @@ static PyMemberDef ImmutableBitInfoPy_members[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject PyBitInfo = {
+PyTypeObject PyBitInfo = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.BitInfo", // const char *tp_name; /* For printing, in format "<module>.<name>" */
@@ -216,7 +221,7 @@ extern PyTypeObject PyBitInfo = {
     // Py_DEPRECATED(3.8) int (*tp_print)(PyObject *, FILE *, int);
 };
 
-extern PyTypeObject PyImmutableBitInfo = {
+PyTypeObject PyImmutableBitInfo = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.ImmutableBitInfo", // const char *tp_name; /* For printing, in format "<module>.<name>" */

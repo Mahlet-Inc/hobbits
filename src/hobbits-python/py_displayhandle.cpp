@@ -4,6 +4,7 @@
 
 #include <structmember.h>
 
+#define UNUSED(expr) do { (void)(expr); } while (0);
 #define HANDLE(X) static_cast<DisplayHandle*>(PyCapsule_GetPointer(X, nullptr))
 
 typedef struct {
@@ -19,6 +20,8 @@ static void PyDisplayHandle_dealloc(DisplayHandlePyObj *self)
 
 static PyObject* PyDisplayHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     DisplayHandlePyObj *self;
     self = reinterpret_cast<DisplayHandlePyObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -29,6 +32,7 @@ static PyObject* PyDisplayHandle_new(PyTypeObject *type, PyObject *args, PyObjec
 
 static int PyDisplayHandle_init(DisplayHandlePyObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *bitArrayCapsule;
     if (!PyArg_ParseTuple(args, "O", &bitArrayCapsule)) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a bit array capsule");
@@ -100,7 +104,7 @@ static PyGetSetDef PyDisplayHandle_getsets[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject PyDisplayHandle = {
+PyTypeObject PyDisplayHandle = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.DisplayHandle", // const char *tp_name; /* For printing, in format "<module>.<name>" */
