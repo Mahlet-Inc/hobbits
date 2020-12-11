@@ -2,8 +2,9 @@
 #define DISPLAYRENDERCONFIG_H
 
 #include <QObject>
+#include "hobbits-core_global.h"
 
-class DisplayRenderConfig : public QObject
+class HOBBITSCORESHARED_EXPORT DisplayRenderConfig : public QObject
 {
     Q_OBJECT
 public:

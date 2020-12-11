@@ -7,7 +7,7 @@
 #include "bitcontainerpreview.h"
 #include "parameterdelegate.h"
 #include <QSharedPointer>
-#include "hobbits-core_global.h"
+#include "hobbitsplugin.h"
 
 /**
   * @brief Implementations of the OperatorInterface plugin interface process bit data into new bit data
@@ -16,16 +16,12 @@
   *
   * \see ParameterDelegate OperatorResult BitContainer ActionProgress
 */
-class HOBBITSCORESHARED_EXPORT OperatorInterface
+class HOBBITSCORESHARED_EXPORT OperatorInterface : public virtual HobbitsPlugin
 {
 public:
     virtual ~OperatorInterface() = default;
 
     virtual OperatorInterface* createDefaultOperator() = 0;
-
-    virtual QString name() = 0;
-    virtual QString description() = 0;
-    virtual QStringList tags() = 0;
 
     virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
 

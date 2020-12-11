@@ -73,6 +73,7 @@ HEADERS += \
     fwd_abstractparametereditor.h \
     hobbits-core_global.h  \
     hobbitscoreinfo.h \
+    hobbitsplugin.h \
     hobbitspluginmanager.h \
     importerrunner.h \
     importexportinterface.h \

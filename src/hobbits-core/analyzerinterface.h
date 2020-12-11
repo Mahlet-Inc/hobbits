@@ -7,7 +7,7 @@
 #include "bitcontainer.h"
 #include "bitcontainerpreview.h"
 #include "parameterdelegate.h"
-#include "hobbits-core_global.h"
+#include "hobbitsplugin.h"
 
 /**
   * @brief Implementations of the AnalyzerInterface plugin interface enrich BitContainer metadata
@@ -22,16 +22,12 @@
   *
   * \see ParameterDelegate AnalyzerResult BitContainer ActionProgress
 */
-class HOBBITSCORESHARED_EXPORT AnalyzerInterface
+class HOBBITSCORESHARED_EXPORT AnalyzerInterface : public virtual HobbitsPlugin
 {
 public:
     virtual ~AnalyzerInterface() = default;
 
     virtual AnalyzerInterface* createDefaultAnalyzer() = 0;
-
-    virtual QString name() = 0;
-    virtual QString description() = 0;
-    virtual QStringList tags() = 0;
 
     virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
 

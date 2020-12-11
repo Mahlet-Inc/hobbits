@@ -1,7 +1,7 @@
 #ifndef DISPLAYINTERFACE_H
 #define DISPLAYINTERFACE_H
 
-#include "hobbits-core_global.h"
+#include "hobbitsplugin.h"
 #include <QSharedPointer>
 #include "parameterdelegate.h"
 #include "pluginactionprogress.h"
@@ -15,16 +15,12 @@ class DisplayHandle;
   *
   * \see BitContainer DisplayHandle
 */
-class HOBBITSCORESHARED_EXPORT DisplayInterface
+class HOBBITSCORESHARED_EXPORT DisplayInterface : public virtual HobbitsPlugin
 {
 public:
     virtual ~DisplayInterface() = default;
 
     virtual DisplayInterface* createDefaultDisplay() = 0;
-
-    virtual QString name() = 0;
-    virtual QString description() = 0;
-    virtual QStringList tags() = 0;
 
     virtual QSharedPointer<DisplayRenderConfig> renderConfig() = 0;
     virtual void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) = 0;
