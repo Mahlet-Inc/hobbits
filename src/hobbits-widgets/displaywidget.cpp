@@ -13,12 +13,12 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
     QWidget(parent),
     m_display(display),
     m_handle(handle),
-    m_redrawing(false)
+    m_repaintScheduled(false)
 {
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     this->setMouseTracking(true);
 
-    connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
+    connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()), Qt::QueuedConnection);
     connect(m_handle.data(), SIGNAL(currentContainerChanged()), this, SLOT(checkNewContainer()));
 
     connect(m_handle.data(), SIGNAL(overlayRedrawRequested(DisplayInterface*)), this, SLOT(checkOverlayRedraw(DisplayInterface*)));
@@ -84,6 +84,8 @@ void DisplayWidget::paintEvent(QPaintEvent *event)
     if (!overlay.isNull()) {
         painter.drawImage(0, 0, overlay);
     }
+
+    m_repaintScheduled = false;
 }
 
 void DisplayWidget::wheelEvent(QWheelEvent *event)
@@ -152,7 +154,7 @@ void DisplayWidget::performDisplayRender()
                                         this->size(),
                                         m_displayParameters,
                                         m_displayRenderProgress);
-        connect(&m_displayRenderWatcher, &QFutureWatcher<QImage>::finished, [this]() {
+        connect(&m_displayRenderWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
             if (this->m_displayRenderWatcher.isFinished()) {
                 this->setDisplayImage(this->m_displayRenderWatcher.result());
             }
@@ -175,8 +177,9 @@ void DisplayWidget::handleDisplayRenderPreview(QString type, QVariant value)
 
 void DisplayWidget::setDisplayImage(QImage image)
 {
+    QMutexLocker lock(&m_mutex);
     m_displayImage = image;
-    update();
+    scheduleRepaint();
 }
 
 void DisplayWidget::resetRendering()
@@ -193,15 +196,8 @@ void DisplayWidget::resetRendering()
 
 void DisplayWidget::fullRedraw()
 {
-    if (m_redrawing) {
-        return;
-    }
-    m_redrawing = true;
-    disconnect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
     performDisplayRender();
-    update();
-    connect(m_handle.data(), SIGNAL(containerChanged()), this, SLOT(checkFullRedraw()));
-    m_redrawing = false;
+    scheduleRepaint();
 }
 
 void DisplayWidget::showContextMenu(const QPoint &point)
@@ -443,6 +439,7 @@ void DisplayWidget::checkNewContainer()
 
 void DisplayWidget::checkFullRedraw(DisplayInterface *display)
 {
+    QMutexLocker lock(&m_mutex);
     if (!m_handle->activeDisplays().contains(this)) {
         return;
     }
@@ -454,12 +451,22 @@ void DisplayWidget::checkFullRedraw(DisplayInterface *display)
 
 void DisplayWidget::checkOverlayRedraw(DisplayInterface *display)
 {
+    QMutexLocker lock(&m_mutex);
     if (!m_handle->activeDisplays().contains(this)) {
         return;
     }
     if (display != nullptr && display != m_display.data()) {
         return;
     }
+    scheduleRepaint();
+}
+
+void DisplayWidget::scheduleRepaint()
+{
+    if (m_repaintScheduled) {
+        return;
+    }
+    m_repaintScheduled = true;
     update();
 }
 

@@ -62,7 +62,7 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                 }
                 m_previewImageCache.remove(containerPtr);
                 m_previewImageCache.insert(containerPtr, QImage(preview));
-                this->repaint();
+                this->update();
             }, Qt::QueuedConnection);
 
             connect(container.data(), &BitContainer::changed, this, [containerPtr, watcherRef, this]() {
@@ -74,8 +74,8 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                 m_imageCache.remove(containerPtr);
                 m_previewImageCache.remove(containerPtr);
                 m_renderWatchers.remove(containerPtr);
-                this->repaint();
-            });
+                this->update();
+            }, Qt::QueuedConnection);
 
             connect(actionWatcher->watcher(), &QFutureWatcher<QImage>::finished, this, [containerPtr, watcherRef, this]() {
                 auto watcher = watcherRef.toStrongRef();
@@ -90,7 +90,7 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                     }
                     m_renderWatchers.remove(containerPtr);
                 }
-                this->repaint();
+                this->update();
             });
 
             // clean out any deleted containers

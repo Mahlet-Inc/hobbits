@@ -52,12 +52,15 @@ private slots:
     void checkFullRedraw(DisplayInterface* display = nullptr);
     void checkOverlayRedraw(DisplayInterface* display = nullptr);
 
+    void scheduleRepaint();
+
 private:
     QSharedPointer<DisplayInterface> m_display;
     QSharedPointer<DisplayHandle> m_handle;
     QJsonObject m_displayParameters;
     QImage m_displayImage;
-    bool m_redrawing;
+    bool m_repaintScheduled;
+    QMutex m_mutex;
 
     QFutureWatcher<QImage> m_displayRenderWatcher;
     QSharedPointer<PluginActionProgress> m_displayRenderProgress;

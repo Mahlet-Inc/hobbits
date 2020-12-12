@@ -269,7 +269,7 @@ void DisplayHandle::checkCurrentContainer()
     disconnect(this, SLOT(containerUpdate()));
 
     if (!currentContainer().isNull()) {
-        connect(currentContainer().data(), SIGNAL(changed()), this, SLOT(containerUpdate()));
+        connect(currentContainer().data(), SIGNAL(changed()), this, SLOT(containerUpdate()), Qt::QueuedConnection);
     }
     emit currentContainerChanged();
 
