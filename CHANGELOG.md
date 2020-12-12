@@ -1,3 +1,15 @@
+# [0.43.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.42.0...v0.43.0) (2020-12-12)
+
+
+### Bug Fixes
+
+* issue with QWidget painting off the main thread ([8790b4e](https://github.com/Mahlet-Inc/hobbits/commit/8790b4e84aea6c4e7e548601e11de7d39db61e03))
+
+
+### Features
+
+* add python display plugin interface ([91a47d8](https://github.com/Mahlet-Inc/hobbits/commit/91a47d8823833aaa28ce2ec4ca431e7140ffa179))
+
 # [0.42.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.41.2...v0.42.0) (2020-11-03)
 
 
