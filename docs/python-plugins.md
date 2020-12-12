@@ -43,6 +43,21 @@ Here's an example JSON file:
 }
 ```
 
+Display plugins can optionally set their `render_config` (default values shown):
+```
+{
+    ...
+    "type": "display",
+    "render_config": {
+        "asynchronous": true,
+        "hide_bit_offset_controls": false,
+        "hide_frame_offset_controls": false
+    },
+    ...
+}
+```
+
+
 ### Python Script Structure
 
 The Python script must be valid Python, and it must define a valid entry point
@@ -72,6 +87,13 @@ that takes:
     - A `hobbits.ImmutableBitContainer` that will contain the bits and info to be operated on
     - A `hobbits.BitArray` that will be the output bits of the operation
     - A `hobbits.BitInfo` that will be the output bits info of the operation
+    - A parameter for each parameter object specified in the `"parameters"` array of the JSON configuration
+    - A `hobbits.ActionProgess` that can be used to update progress and check for cancellation
+
+A `"display"` type plugin must have a function named `render_display`
+that takes:
+    - A `hobbits.DisplayHandle` that will contain the bit container and offsets
+    - A `hobbits.ImageBuffer` that will have a size and should be filled with raw ARGB image data
     - A parameter for each parameter object specified in the `"parameters"` array of the JSON configuration
     - A `hobbits.ActionProgess` that can be used to update progress and check for cancellation
 
@@ -111,3 +133,16 @@ that takes:
 `ActionProgess.is_cancelled()` returns true if the plugin action was cancelled and should be aborted
 `ActionProgress.set_progress_percent(x)` reports the progress of the plugin action as `x` out of 100
 `ActionProgress.set_progress(x, n)` reports the progress of the plugin action as `x` out of `n`
+
+### hobbits.DisplayHandle
+
+`DisplayHandle.current_container` the `BitContainer` that should be displayed
+`DisplayHandle.bit_offset` the current bit offset 
+`DisplayHandle.frame_offset` the current frame offset
+`DisplayHandle.total_bit_offset` the total bit offset (start of offset frame + bit offset)
+
+### hobbits.ImageBuffer
+
+`ImageBuffer.set_bytes(x)` sets the image data to bytes-like object `x` (should be 4 * `width` * `height` long)
+`ImageBuffer.width` width of the image (read-only)
+`ImageBuffer.height` the height of the image (read-only)
