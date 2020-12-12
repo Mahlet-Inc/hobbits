@@ -17,17 +17,23 @@ SimpleParameterEditor::SimpleParameterEditor(QSharedPointer<ParameterDelegate> d
             auto lineEdit = new QLineEdit();
             ui->formLayout->addRow(param.name, lineEdit);
             m_stateHelper->addLineEditStringParameter(param.name, lineEdit);
+            connect(lineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(changed()));
         }
         else if (param.type == QJsonValue::Double) {
             auto spinBox = new QSpinBox();
             spinBox->setRange(0, 0x7fffffff);
+            if (param.hasIntLimits) {
+                spinBox->setRange(param.intMin, param.intMax);
+            }
             ui->formLayout->addRow(param.name, spinBox);
             m_stateHelper->addSpinBoxIntParameter(param.name, spinBox);
+            connect(spinBox, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
         }
         else if (param.type == QJsonValue::Bool) {
             auto checkBox = new QCheckBox(param.name);
             ui->formLayout->addRow("", checkBox);
             m_stateHelper->addCheckBoxBoolParameter(param.name, checkBox);
+            connect(checkBox, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
         }
     }
 }

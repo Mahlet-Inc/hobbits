@@ -84,6 +84,23 @@ QList<QPair<QString, QColor>> ColorMapModel::getMappings()
     return m_mappings;
 }
 
+void ColorMapModel::setMappings(QList<QPair<QString, QColor> > mappings)
+{
+    beginRemoveRows(QModelIndex(), 0, m_mappings.length() - 1);
+    m_mappings.clear();
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), 0, mappings.length() - 1);
+    m_mappings = mappings;
+    endInsertRows();
+
+    for (int i = 0; i < m_mappings.size(); i++) {
+        if (m_mappings.at(i).second.isValid()) {
+            SettingsManager::setPrivateSetting(COLOR[i % 8], m_mappings.at(i).second);
+        }
+    }
+}
+
 QVariant ColorMapModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole) {

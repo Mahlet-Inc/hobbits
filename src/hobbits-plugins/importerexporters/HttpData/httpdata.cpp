@@ -113,19 +113,6 @@ QSharedPointer<ExportResult> HttpData::exportBits(QSharedPointer<const BitContai
                                                   QJsonObject parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
-    // TODO: make this part of post-result reporting
-//    if (container->bits()->sizeInBytes() > 10000000) {
-//        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(
-//                nullptr,
-//                "Data Truncation Warning",
-//                QString("Uploaded data will be truncated at 10MB. Do you want to proceed anyways?"),
-//                QMessageBox::Yes | QMessageBox::No);
-//        if (reply != QMessageBox::Yes) {
-//            return ExportResult::nullResult();
-//        }
-//    }
-
     if (!m_exportDelegate->validate(parameters)) {
         return ExportResult::error("Invalid parameters passed to HTTP Import");
     }

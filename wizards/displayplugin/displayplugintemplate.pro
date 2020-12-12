@@ -8,10 +8,10 @@ QT       += widgets
 
 QT       -= gui
 
-TARGET = %{PluginName}
+TARGET = %{ClassName}
 TEMPLATE = lib
 
-DEFINES += %{JS: '%{PluginName}'.toUpperCase()}_LIBRARY
+DEFINES += %{JS: '%{ClassName}'.toUpperCase()}_LIBRARY
 
 CONFIG += c++11 plugin
 CONFIG -= debug_and_release_target
@@ -28,17 +28,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        %{PluginCppFileName} \
-        %{WidgetCppFileName} \
-        %{ControlsCppFileName}
+        %{CppFileName} \
+        %{FormCppFileName}
 
 HEADERS += \
-        %{PluginHeaderFileName} \
-        %{WidgetHeaderFileName} \
-        %{ControlsHeaderFileName}
+        %{HeaderFileName} \
+        %{FormHeaderFileName}
 
 FORMS += \
-        %{ControlsUiFileName}
+        %{FormUiFileName}
 
 DISTFILES +=
 

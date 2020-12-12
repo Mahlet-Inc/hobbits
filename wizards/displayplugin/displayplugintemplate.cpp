@@ -1,52 +1,83 @@
-#include "%{PluginHeaderFileName}"
+#include "%{HeaderFileName}"
+#include "%{FormHeaderFileName}"
 
-%{PluginName}::%{PluginName}() :
-    m_displayWidget(nullptr),
-    m_controlsWidget(nullptr)
+%{ClassName}::%{ClassName}() :
+    m_renderConfig(new DisplayRenderConfig())
 {
+    // TODO: set up actual render config for this display (e.g. when it updates, if it's asynchronous, etc)
+    m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
+    m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        // TODO: add parameters like {"myparametername", QJsonValue::Double}
+    };
+
+    m_delegate = ParameterDelegate::create(
+                    infos,
+                    [this](const QJsonObject &parameters) {
+                        // TODO: use parameters to describe action better
+                        return QString("Apply %1").arg(this->name());
+                    },
+                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new %{FormClassName}(delegate);
+                    });
 }
 
-DisplayInterface* %{PluginName}::createDefaultDisplay()
+DisplayInterface* %{ClassName}::createDefaultDisplay()
 {
-    return new %{PluginName}();
+    return new %{ClassName}();
 }
 
-QString %{PluginName}::name()
+QString %{ClassName}::name()
 {
-    return "%{PluginName}";
+    return "%{ClassName}";
 }
 
-QString %{PluginName}::description()
+QString %{ClassName}::description()
 {
     // TODO: add description
-    return "%{PluginName}";
+    return "%{ClassName}";
 }
 
-QStringList %{PluginName}::tags()
+QStringList %{ClassName}::tags()
 {
     // TODO: make tags relevant
     return {"Generic"};
 }
 
-QWidget* %{PluginName}::display(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<DisplayRenderConfig> %{ClassName}::renderConfig()
 {
-    initialize(displayHandle);
-    return m_displayWidget;
+    return m_renderConfig;
 }
 
-QWidget* %{PluginName}::controls(QSharedPointer<DisplayHandle> displayHandle)
+void %{ClassName}::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
-    initialize(displayHandle);
-    return m_controlsWidget;
+    m_handle = displayHandle;
 }
 
-void %{PluginName}::initialize(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<ParameterDelegate> %{ClassName}::parameterDelegate()
 {
-    if (!m_displayWidget) {
-        m_displayWidget = new %{DisplayWidgetName}(displayHandle, this);
-        m_controlsWidget = new %{ControlWidgetName}();
+    return m_delegate;
+}
 
-        // TODO: make necessary connections here
+QImage %{ClassName}::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+{
+    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return QImage();
     }
+
+    // TODO: render and return the display image
+    return QImage();
+}
+
+QImage %{ClassName}::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+{
+    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(parameters)) {
+        return QImage();
+    }
+
+    // TODO: render and return the overlay image
+    return QImage();
 }

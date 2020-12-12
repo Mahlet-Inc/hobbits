@@ -2,32 +2,31 @@
 #define SYMBOLRASTERCONTROLS_H
 
 #include "colormapmodel.h"
-#include <QWidget>
+#include "abstractparametereditor.h"
+#include "parameterhelper.h"
 
 namespace Ui
 {
 class SymbolRasterControls;
 }
 
-class SymbolRasterControls : public QWidget
+class SymbolRasterControls : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    SymbolRasterControls();
+    SymbolRasterControls(QSharedPointer<ParameterDelegate> delegate);
 
 public slots:
-    void on_cb_showHeaders_stateChanged(int state);
-    void updateColorMap();
+    QString title() override;
 
-signals:
-    void scaleSet(int);
-    void showHeadersChanged(bool);
-    void colorMappingChanged(QList<QPair<QString, QColor>>);
+    bool setParameters(QJsonObject parameters) override;
+    QJsonObject parameters() override;
 
 private:
     Ui::SymbolRasterControls *ui;
     ColorMapModel *m_colorMapModel;
+    QSharedPointer<ParameterHelper> m_stateHelper;
 };
 
 #endif // SYMBOLRASTERCONTROLS_H

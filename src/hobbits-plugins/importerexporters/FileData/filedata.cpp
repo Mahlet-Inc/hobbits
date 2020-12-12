@@ -95,6 +95,7 @@ QSharedPointer<ParameterDelegate> FileData::exportParameterDelegate()
 QSharedPointer<ImportResult> FileData::importBits(QJsonObject parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
+    Q_UNUSED(progress)
     QString fileName = parameters.value("filename").toString();
     if (fileName.isEmpty()) {
         return ImportResult::error("No file selected for import");

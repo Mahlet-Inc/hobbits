@@ -2,28 +2,30 @@
 #define BITRASTERCONTROLS_H
 
 #include <QWidget>
+#include "parameterdelegate.h"
+#include "abstractparametereditor.h"
+#include "parameterhelper.h"
 
 namespace Ui
 {
 class BitRasterControls;
 }
 
-class BitRasterControls : public QWidget
+class BitRasterControls : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    BitRasterControls();
+    BitRasterControls(QSharedPointer<ParameterDelegate> delegate);
 
-signals:
-    void scaleSet(int);
-    void showHeadersChanged(bool);
+    QString title() override;
 
-public slots:
-    void on_cb_showHeaders_stateChanged(int state);
+    virtual bool setParameters(QJsonObject parameters) override;
+    virtual QJsonObject parameters() override;
 
 private:
     Ui::BitRasterControls *ui;
+    QSharedPointer<ParameterHelper> m_stateHelper;
 };
 
 #endif // BITRASTERCONTROLS_H

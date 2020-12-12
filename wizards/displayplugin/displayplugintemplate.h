@@ -1,18 +1,16 @@
-#ifndef %{JS: '%{PluginName}'.toUpperCase()}_H
-#define %{JS: '%{PluginName}'.toUpperCase()}_H
+#ifndef %{JS: '%{ClassName}'.toUpperCase()}_H
+#define %{JS: '%{ClassName}'.toUpperCase()}_H
 
 #include "displayinterface.h"
-#include "%{ControlsHeaderFileName}"
-#include "%{WidgetHeaderFileName}"
 
-class %{PluginName} : public QObject, DisplayInterface
+class %{ClassName} : public QObject, DisplayInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "hobbits.DisplayInterface.%{PluginName}")
+    Q_PLUGIN_METADATA(IID "hobbits.DisplayInterface.%{ClassName}")
     Q_INTERFACES(DisplayInterface)
 
 public:
-    %{PluginName}();
+    %{ClassName}();
 
     DisplayInterface* createDefaultDisplay() override;
 
@@ -20,13 +18,23 @@ public:
     QString description() override;
     QStringList tags() override;
 
-    QWidget* display(QSharedPointer<DisplayHandle> displayHandle) override;
-    QWidget* controls(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<DisplayRenderConfig> renderConfig() override;
+    void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
+
+    QImage renderDisplay(
+            QSize viewportSize,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
+
+    QImage renderOverlay(
+            QSize viewportSize,
+            const QJsonObject &parameters) override;
 
 private:
-    void initialize(QSharedPointer<DisplayHandle> displayHandle);
-    %{DisplayWidgetName}* m_displayWidget;
-    %{ControlWidgetName}* m_controlsWidget;
+    QSharedPointer<ParameterDelegate> m_delegate;
+    QSharedPointer<DisplayRenderConfig> m_renderConfig;
+    QSharedPointer<DisplayHandle> m_handle;
 };
 
-#endif // %{JS: '%{PluginName}'.toUpperCase()}_H
+#endif // %{JS: '%{ClassName}'.toUpperCase()}_H

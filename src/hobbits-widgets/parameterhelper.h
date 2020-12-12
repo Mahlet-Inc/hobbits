@@ -27,6 +27,9 @@ public:
     void addSpinBoxIntParameter(QString name,
                       QSpinBox* spinBox);
 
+    void addSliderIntParameter(QString name,
+                      QAbstractSlider* slider);
+
     void addLineEditStringParameter(QString name,
                       QLineEdit* lineEdit);
 

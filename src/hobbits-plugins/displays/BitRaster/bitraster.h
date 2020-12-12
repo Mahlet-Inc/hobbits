@@ -1,10 +1,7 @@
 #ifndef BITRASTER_H
 #define BITRASTER_H
 
-#include "bitrastercontrols.h"
-#include "bitrasterwidget.h"
 #include "displayinterface.h"
-
 
 class BitRaster : public QObject, DisplayInterface
 {
@@ -21,14 +18,25 @@ public:
     QString description() override;
     QStringList tags() override;
 
-    QWidget* display(QSharedPointer<DisplayHandle> displayHandle) override;
-    QWidget* controls(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<DisplayRenderConfig> renderConfig() override;
+    void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
+    QSharedPointer<ParameterDelegate> parameterDelegate() override;
+
+    QImage renderDisplay(
+            QSize viewportSize,
+            const QJsonObject &parameters,
+            QSharedPointer<PluginActionProgress> progress) override;
+
+    QImage renderOverlay(
+            QSize viewportSize,
+            const QJsonObject &parameters) override;
 
 private:
-    void initialize(QSharedPointer<DisplayHandle> displayHandle);
-
-    BitRasterWidget *m_displayWidget;
-    BitRasterControls *m_controlsWidget;
+    QPoint headerOffset(const QJsonObject &parameters);
+    QSharedPointer<ParameterDelegate> m_delegate;
+    QSharedPointer<DisplayRenderConfig> m_renderConfig;
+    QSharedPointer<DisplayHandle> m_handle;
+    QJsonObject m_lastParams;
 };
 
 #endif // BITRASTER_H

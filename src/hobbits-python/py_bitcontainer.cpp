@@ -4,6 +4,7 @@
 
 #include <structmember.h>
 
+#define UNUSED(expr) do { (void)(expr); } while (0);
 #define BITCON(X) static_cast<BitContainer*>(PyCapsule_GetPointer(X, nullptr))
 
 typedef struct {
@@ -19,6 +20,8 @@ static void BitContainerPy_dealloc(BitContainerPyObj *self)
 
 static PyObject* BitContainerPy_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     BitContainerPyObj *self;
     self = reinterpret_cast<BitContainerPyObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -29,6 +32,7 @@ static PyObject* BitContainerPy_new(PyTypeObject *type, PyObject *args, PyObject
 
 static int BitContainerPy_init(BitContainerPyObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *bitContainerCapsule;
     if (!PyArg_ParseTuple(args, "O", &bitContainerCapsule)) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a bit array capsule");
@@ -116,7 +120,7 @@ static PyGetSetDef ImmutableBitContainerPy_getsets[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject PyBitContainer = {
+PyTypeObject PyBitContainer = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.BitContainer", // const char *tp_name; /* For printing, in format "<module>.<name>" */
@@ -201,7 +205,7 @@ extern PyTypeObject PyBitContainer = {
     // Py_DEPRECATED(3.8) int (*tp_print)(PyObject *, FILE *, int);
 };
 
-extern PyTypeObject PyImmutableBitContainer = {
+PyTypeObject PyImmutableBitContainer = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.ImmutableBitContainer", // const char *tp_name; /* For printing, in format "<module>.<name>" */

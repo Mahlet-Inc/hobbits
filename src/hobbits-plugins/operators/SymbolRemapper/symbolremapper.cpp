@@ -16,6 +16,7 @@ SymbolRemapper::SymbolRemapper()
     m_delegate = ParameterDelegateUi::create(
                 infos,
                 [](const QJsonObject &parameters) {
+                    Q_UNUSED(parameters)
                     return QString("Symbol Remap");
                 },
                 [](QSharedPointer<ParameterDelegate> delegate, QSize size) {

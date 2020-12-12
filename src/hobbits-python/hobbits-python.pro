@@ -7,10 +7,9 @@
 requires(defined(HOBBITS_PYPATH, var))
 message(HOBBITS_PYPATH: $$HOBBITS_PYPATH)
 
-QT       -= gui
-
 TARGET = hobbits-python
 TEMPLATE = lib
+QT += core gui widgets
 
 CONFIG += c++11
 CONFIG -= debug_and_release_target
@@ -24,13 +23,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         hobbitspython.cpp \
+        imagebuffer.cpp \
         py_actionprogress.cpp \
         py_bitarray.cpp \
         py_bitcontainer.cpp \
         py_bitinfo.cpp \
+        py_displayhandle.cpp \
         py_hobbits.cpp \
         pythonanalyzer.cpp \
         pythonarg.cpp \
+        pythondisplay.cpp \
         pythonimporter.cpp \
         pythoninterpreter.cpp \
         pythonoperator.cpp \
@@ -41,13 +43,16 @@ SOURCES += \
 HEADERS += \
         hobbitspython.h \
         hobbits-python_global.h  \
+        imagebuffer.h \
         py_actionprogress.h \
         py_bitarray.h \
         py_bitcontainer.h \
         py_bitinfo.h \
+        py_displayhandle.h \
         py_hobbits.h \
         pythonanalyzer.h \
         pythonarg.h \
+        pythondisplay.h \
         pythonimporter.h \
         pythoninterpreter.h \
         pythonoperator.h \
@@ -56,8 +61,9 @@ HEADERS += \
         pythonresult.h
 
 LIBS += -L$$OUT_PWD/../hobbits-core/ -lhobbits-core
-INCLUDEPATH += $$PWD/../hobbits-core
-DEPENDPATH += $$PWD/../hobbits-core
+LIBS += -L$$OUT_PWD/../hobbits-widgets/ -lhobbits-widgets
+INCLUDEPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
+DEPENDPATH += $$PWD/../hobbits-core $$PWD/../hobbits-widgets
 
 include(python-link.pri)
 

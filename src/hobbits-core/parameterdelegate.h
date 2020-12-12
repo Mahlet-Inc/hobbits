@@ -10,8 +10,7 @@
 #include <QSharedPointer>
 #include <QJsonObject>
 #include "hobbits-core_global.h"
-
-class HOBBITSCORESHARED_EXPORT AbstractParameterEditor;
+#include "fwd_abstractparametereditor.h"
 
 /**
   * @brief The ParameterDelegate class facilitates plugin parameter validation and configuration
@@ -35,8 +34,12 @@ public:
         bool optional;
         QList<ParameterInfo> subInfos;
 
+        bool hasIntLimits;
+        int intMin;
+        int intMax;
+
         ParameterInfo(QString name, QJsonValue::Type type, bool optional = true, QList<ParameterInfo> subInfos = {}):
-            name{name}, type{type}, optional{optional}, subInfos{subInfos} {}
+            name{name}, type{type}, optional{optional}, subInfos{subInfos}, hasIntLimits(false), intMin(0), intMax(INT_MAX) {}
 
         ParameterInfo() = default;
         ParameterInfo(const ParameterInfo&) = default;

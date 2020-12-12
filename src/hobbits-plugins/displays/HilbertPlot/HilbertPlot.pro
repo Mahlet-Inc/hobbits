@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-21T21:34:06.622Z
+# Project created by QtCreator 2020-11-27T22:43:34.966Z
 #
 #-------------------------------------------------
 
@@ -27,13 +27,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         hilbertplot.cpp         hilbertplotwidget.cpp         hilbertplotcontrols.cpp
+SOURCES +=         hilbertplot.cpp         hilbertplotform.cpp
 
-HEADERS +=         hilbertplot.h         hilbertplotwidget.h         hilbertplotcontrols.h
+HEADERS +=         hilbertplot.h         hilbertplotform.h
 
-FORMS +=         hilbertplotcontrols.ui
+FORMS +=         hilbertplotform.ui
 
 DISTFILES +=
+
+RESOURCES += 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets

@@ -2,9 +2,12 @@
 #define ABSTRACTPARAMETEREDITOR_H
 
 #include <QWidget>
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
 #include "bitcontainerpreview.h"
 #include "pluginactionprogress.h"
 #include "displayhandle.h"
+#include "fwd_abstractparametereditor.h"
 #include "hobbits-widgets_global.h"
 
 class HOBBITSWIDGETSSHARED_EXPORT AbstractParameterEditor : public QWidget
@@ -25,8 +28,16 @@ public:
                              QSharedPointer<PluginActionProgress> progress)
     {
         QMutexLocker(&this->m_previewLock);
-        previewBitsImpl(container, progress);
-        QMetaObject::invokeMethod(this, "previewBitsUiImpl", Qt::QueuedConnection, Q_ARG(QSharedPointer<BitContainerPreview>, container));
+        if (QThread::currentThread() == this->thread()) {
+            // Called from UI thread
+            previewBitsImpl(container, progress);
+            previewBitsUiImpl(container);
+        }
+        else {
+            // Called from worker thread
+            previewBitsImpl(container, progress);
+            QMetaObject::invokeMethod(this, "previewBitsUiImpl", Qt::QueuedConnection, Q_ARG(QSharedPointer<BitContainerPreview>, container));
+        }
     }
 
     virtual void giveDisplayHandle(QSharedPointer<DisplayHandle> handle)
@@ -37,6 +48,7 @@ public:
 signals:
     void accepted();
     void rejected();
+    void changed();
 
 protected slots:
     /**

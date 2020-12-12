@@ -82,6 +82,11 @@ void PythonInterpreter::initialize()
     }
 }
 
+void PythonInterpreter::waitForLock()
+{
+    QMutexLocker lock(&(instance().m_mutex));
+}
+
 QSharedPointer<PythonResult> PythonInterpreter::_runProcessScript(QSharedPointer<PythonRequest> request)
 {
     if (!m_initializationError.isNull()) {
@@ -214,6 +219,16 @@ PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
     }
     else if (arg->type() == PythonArg::Double) {
         return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->doubleData());
+    }
+    else if (arg->type() == PythonArg::ByteBuffer) {
+        return PyMemoryView_FromMemory(reinterpret_cast<char*>(arg->pointer()), arg->integerData(), PyBUF_WRITE);
+    }
+    else if (arg->type() == PythonArg::ImageBuffer) {
+        unsigned int width = uint(arg->sizeData().width());
+        unsigned int height = uint(arg->sizeData().height());
+        PyObject* memview = PyMemoryView_FromMemory(reinterpret_cast<char*>(arg->pointer()), width * height * 4, PyBUF_WRITE);
+        ScopedPyObj type(PyObject_GetAttrString(hobbitsModule, "ImageBuffer"));
+        return PyObject_CallFunction(type.obj(), "OII", memview, width, height);
     }
     else {
         return nullptr;

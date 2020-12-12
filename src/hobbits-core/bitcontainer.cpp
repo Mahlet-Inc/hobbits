@@ -41,14 +41,16 @@ void BitContainer::setInfo(QSharedPointer<const BitInfo> bitInfo)
 {
     m_mutex.lock();
     if (!m_info.isNull()) {
-        disconnect(m_info.data(), SIGNAL(changed()), this, SIGNAL(changed()));
+        disconnect(m_info.data(), nullptr, nullptr, nullptr);
     }
     m_info = BitInfo::create(m_bits->sizeInBits(), bitInfo);
     m_mutex.unlock();
 
     emit changed();
 
-    connect(m_info.data(), SIGNAL(changed()), this, SIGNAL(changed()));
+    connect(m_info.data(), &BitInfo::changed, [this]() {
+        emit changed();
+    });
 }
 
 QSharedPointer<const BitArray> BitContainer::bits() const

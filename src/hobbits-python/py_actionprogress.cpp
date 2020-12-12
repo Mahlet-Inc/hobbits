@@ -1,8 +1,8 @@
 #include "py_actionprogress.h"
 #include "pluginactionprogress.h"
-
 #include <structmember.h>
 
+#define UNUSED(expr) do { (void)(expr); } while (0);
 #define PROGRESS(X) static_cast<PluginActionProgress*>(PyCapsule_GetPointer(X, nullptr))
 
 typedef struct {
@@ -18,6 +18,8 @@ static void PyActionProgress_dealloc(PyActionProgressObj *self)
 
 static PyObject* PyActionProgress_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    UNUSED(args)
+    UNUSED(kwds)
     PyActionProgressObj *self;
     self = reinterpret_cast<PyActionProgressObj*>(type->tp_alloc(type, 0));
     if (self != nullptr) {
@@ -28,6 +30,7 @@ static PyObject* PyActionProgress_new(PyTypeObject *type, PyObject *args, PyObje
 
 static int PyActionProgress_init(PyActionProgressObj *self, PyObject *args, PyObject *kwds)
 {
+    UNUSED(kwds)
     PyObject *progressCapsule;
     if (!PyArg_ParseTuple(args, "O", &progressCapsule)) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a bit array capsule");
@@ -83,7 +86,7 @@ static PyMemberDef PyActionProgress_members[] = {
     {}  /* Sentinel */
 };
 
-extern PyTypeObject PyActionProgress = {
+PyTypeObject PyActionProgress = {
     PyVarObject_HEAD_INIT(nullptr, 0)
 
     "hobbits.PluginActionProgress", // const char *tp_name; /* For printing, in format "<module>.<name>" */

@@ -33,6 +33,16 @@ void ParameterHelper::addSpinBoxIntParameter(QString name, QSpinBox* spinBox)
     });
 }
 
+void ParameterHelper::addSliderIntParameter(QString name, QAbstractSlider *slider)
+{
+    addParameter(name, [slider](QJsonValue value) {
+        slider->setValue(value.toInt());
+        return true;
+    }, [slider]() {
+        return QJsonValue(slider->value());
+    });
+}
+
 void ParameterHelper::addLineEditStringParameter(QString name, QLineEdit* lineEdit)
 {
     addParameter(name, [lineEdit](QJsonValue value) {

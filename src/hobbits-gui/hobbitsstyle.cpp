@@ -1,18 +1,12 @@
 #include "hobbitsstyle.h"
 #include <QFile>
 #include <QFontDatabase>
+#include <QStyleOption>
+#include <QPainter>
 
 HobbitsStyle::HobbitsStyle()
 {
 
-}
-
-void HobbitsStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
-{
-    if (element == PE_FrameFocusRect) {
-        return;
-    }
-    QProxyStyle::drawPrimitive(element, option, painter, widget);
 }
 
 void HobbitsStyle::applyStyle(QApplication &app)
@@ -24,9 +18,6 @@ void HobbitsStyle::applyStyle(QApplication &app)
         QString appStyle = styleFile.readAll();
         app.setStyleSheet(appStyle);
     }
-
-    auto style = new HobbitsStyle();
-    app.setStyle(style);
 }
 
 void HobbitsStyle::loadFonts()

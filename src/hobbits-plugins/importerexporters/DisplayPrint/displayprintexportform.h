@@ -27,10 +27,13 @@ public:
 
 private slots:
     void on_tb_selectFile_clicked();
+    void displaySelected();
 
 private:
     Ui::DisplayPrintExportForm *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
+    QSharedPointer<HobbitsPluginManager> m_pluginManager;
+    AbstractParameterEditor* m_displayEditor;
 };
 
 #endif // DISPLAYPRINTEXPORTFORM_H

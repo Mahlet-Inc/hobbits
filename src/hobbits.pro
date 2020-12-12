@@ -15,8 +15,8 @@ runner.subdir = hobbits-runner
 python.subdir = hobbits-python
 widgets.subdir = hobbits-widgets
 
-python.depends = core
 widgets.depends = core
+python.depends = core widgets
 runner.depends = core python widgets
 plugins.depends = core python widgets
 gui.depends = core python widgets

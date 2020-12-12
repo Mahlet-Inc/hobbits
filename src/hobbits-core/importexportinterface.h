@@ -7,7 +7,7 @@
 #include "parameterdelegate.h"
 #include <QSharedPointer>
 #include "pluginactionprogress.h"
-#include "hobbits-core_global.h"
+#include "hobbitsplugin.h"
 
 /**
   * @brief Implementations of the ImportExportInterface plugin interface import and/or export BitContainers
@@ -18,16 +18,12 @@
   *
   * \see ParameterDelegate ImportResult ExportResult BitContainer ActionProgress
 */
-class HOBBITSCORESHARED_EXPORT ImporterExporterInterface
+class HOBBITSCORESHARED_EXPORT ImporterExporterInterface : public virtual HobbitsPlugin
 {
 public:
     virtual ~ImporterExporterInterface() = default;
 
     virtual ImporterExporterInterface* createDefaultImporterExporter() = 0;
-
-    virtual QString name() = 0;
-    virtual QString description() = 0;
-    virtual QStringList tags() = 0;
 
     virtual bool canImport() = 0;
     virtual bool canExport() = 0;

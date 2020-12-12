@@ -1,10 +1,29 @@
 #include "digraphplot.h"
+#include "digraphplotform.h"
+#include <QPainter>
+#include "displayhelper.h"
 
 DigraphPlot::DigraphPlot() :
-    m_displayWidget(nullptr),
-    m_controlsWidget(nullptr)
+    m_renderConfig(new DisplayRenderConfig())
 {
+    m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
 
+    QList<ParameterDelegate::ParameterInfo> infos = {
+        {"scale", QJsonValue::Double},
+        {"word_size", QJsonValue::Double},
+        {"window_size", QJsonValue::Double}
+    };
+
+    m_delegate = ParameterDelegate::create(
+                infos,
+                [](const QJsonObject &parameters) {
+                    int wordSize = parameters.value("word_size").toInt();
+                    return QString("%1-bit Digraph Plot").arg(wordSize);
+                },
+                [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
+                        Q_UNUSED(size)
+                        return new DigraphPlotForm(delegate);
+                });
 }
 
 DisplayInterface* DigraphPlot::createDefaultDisplay()
@@ -27,35 +46,79 @@ QStringList DigraphPlot::tags()
     return {"Generic"};
 }
 
-QWidget* DigraphPlot::display(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<DisplayRenderConfig> DigraphPlot::renderConfig()
 {
-    initialize(displayHandle);
-    return m_displayWidget;
+    return m_renderConfig;
 }
 
-QWidget* DigraphPlot::controls(QSharedPointer<DisplayHandle> displayHandle)
+void DigraphPlot::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
-    initialize(displayHandle);
-    return m_controlsWidget;
+    m_handle = displayHandle;
 }
 
-void DigraphPlot::initialize(QSharedPointer<DisplayHandle> displayHandle)
+QSharedPointer<ParameterDelegate> DigraphPlot::parameterDelegate()
 {
-    if (!m_displayWidget) {
-        m_displayWidget = new DigraphPlotWidget(displayHandle, this);
-        m_controlsWidget = new DigraphPlotControls();
+    return m_delegate;
+}
 
-        connect(m_controlsWidget,
-                &DigraphPlotControls::newWordSize,
-                m_displayWidget,
-                &DigraphPlotWidget::setWordSize);
-        connect(m_controlsWidget,
-                &DigraphPlotControls::newWindowSize,
-                m_displayWidget,
-                &DigraphPlotWidget::setWindowSize);
-        connect(m_controlsWidget,
-                &DigraphPlotControls::newScale,
-                m_displayWidget,
-                &DigraphPlotWidget::setScale);
+QImage DigraphPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+{
+    Q_UNUSED(progress)
+    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return QImage();
     }
+
+    int wordSize = parameters.value("word_size").toInt(8);
+    int windowSize = parameters.value("window_size").toInt(10000);
+    int scale = parameters.value("scale").toInt(2);
+
+    auto bits = m_handle->currentContainer()->bits();
+    auto frameOffset = m_handle->frameOffset();
+    if (m_handle->currentContainer()->frameCount() <= frameOffset) {
+        return QImage();
+    }
+    qint64 startBit = ((m_handle->currentContainer()->frameAt(frameOffset).start() + m_handle->bitOffset()) / wordSize) * wordSize;
+
+    int plotSize = 1 << wordSize;
+    QRgb background = qRgb(0, 0, 0);
+    QRgb foreground = qRgb(200, 230, 255);
+    QImage digraphPlot(plotSize, plotSize, QImage::Format_ARGB32);
+    digraphPlot.fill(background);
+
+    int lastWord = 0;
+    int nextWord = 0;
+    for (qint64 word = 0; word < windowSize; word++) {
+        qint64 start = startBit + word * wordSize;
+        qint64 end = start + wordSize;
+        if (bits->sizeInBits() < end) {
+            break;
+        }
+        lastWord = nextWord;
+        nextWord = int(bits->parseUIntValue(start, int(wordSize)));
+        if (word == 0) {
+            continue;
+        }
+        digraphPlot.setPixel(lastWord, nextWord, foreground);
+    }
+
+    QImage destImage(viewportSize, QImage::Format_ARGB32);
+    destImage.fill(Qt::transparent);
+    QPainter painter(&destImage);
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.scale(scale, scale);
+    painter.drawImage(0, 0, digraphPlot);
+
+    qint64 lastBit = startBit + (windowSize * wordSize);
+    lastBit = qMin(m_handle->currentContainer()->bits()->sizeInBits() - 1, lastBit);
+    m_handle->setRenderedRange(this, Range(startBit, lastBit));
+
+    return destImage;
+}
+
+QImage DigraphPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+{
+    Q_UNUSED(viewportSize)
+    Q_UNUSED(parameters)
+    return QImage();
 }

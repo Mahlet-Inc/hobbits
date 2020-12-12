@@ -9,6 +9,7 @@
 #include "hobbitspluginmanager.h"
 #include "previewscrollbar.h"
 #include "batcheditor.h"
+#include "multidisplaywidget.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -60,7 +61,7 @@ public slots:
     void deleteCurrentBitcontainer();
     void deleteAllBitContainers();
 
-    void setHoverBit(bool hovering, int bitOffset, int frameOffset);
+    void setStatus(QString status);
 
     void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
     void requestOperatorRun(QString pluginName, QJsonObject pluginState);
@@ -123,7 +124,7 @@ private:
     QMap<int, QSharedPointer<AnalyzerInterface>> m_analyzerMap;
     QMap<QSharedPointer<AnalyzerInterface>, AbstractParameterEditor*> m_analyzerUiMap;
 
-    QList<QPair<QMap<int, QSharedPointer<DisplayInterface>>, QTabWidget*>> m_displayMaps;
+    QList<MultiDisplayWidget*> m_displayWidgets;
     QSplitter *m_displayTabsSplitter;
     QSharedPointer<DisplayHandle> m_displayHandle;
     QList<QWidget*> m_currControlWidgets;

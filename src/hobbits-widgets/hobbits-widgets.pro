@@ -35,11 +35,11 @@ SOURCES += \
         batchinputdialog.cpp \
         bitcontainermanagerui.cpp \
         bitcontainertreemodel.cpp \
+        displaywidget.cpp \
         highlightnavigator.cpp \
-        displaybase.cpp \
-        displaybasetext.cpp \
         displayhandle.cpp \
         displayhelper.cpp \
+    multidisplaywidget.cpp \
         parameterdelegateui.cpp \
         parametereditordialog.cpp \
         parametereditorfileselect.cpp \
@@ -58,7 +58,9 @@ HEADERS += \
         batcheditscene.h \
         batchinputdialog.h \
         bitcontainermanagerui.h \
+        displaywidget.h \
         hobbits-widgets_global.h \
+    multidisplaywidget.h \
         parameterdelegateui.h \
         parametereditordialog.h \
         parametereditorfileselect.h \
@@ -67,8 +69,6 @@ HEADERS += \
         previewscrollbar.h \
         actionrenderprogress.h \
         bitcontainertreemodel.h \
-        displaybase.h \
-        displaybasetext.h \
         displayhandle.h \
         displayhelper.h \
         highlightnavigator.h \

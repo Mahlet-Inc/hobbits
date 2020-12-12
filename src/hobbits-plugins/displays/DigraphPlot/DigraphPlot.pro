@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-20T21:04:46.839Z
+# Project created by QtCreator 2020-11-26T00:03:16.932Z
 #
 #-------------------------------------------------
 
@@ -27,11 +27,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES +=         digraphplot.cpp         digraphplotwidget.cpp         digraphplotcontrols.cpp
+SOURCES +=         digraphplot.cpp         digraphplotform.cpp
 
-HEADERS +=         digraphplot.h         digraphplotwidget.h         digraphplotcontrols.h
+HEADERS +=         digraphplot.h         digraphplotform.h
 
-FORMS +=         digraphplotcontrols.ui
+FORMS +=         digraphplotform.ui
+
+DISTFILES +=
+
+RESOURCES += 
 
 LIBS += -L$$OUT_PWD/../../../hobbits-core/ -lhobbits-core
 LIBS += -L$$OUT_PWD/../../../hobbits-widgets/ -lhobbits-widgets
@@ -40,12 +44,12 @@ DEPENDPATH += $$PWD/../../../hobbits-core $$PWD/../../../hobbits-widgets
 
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../../lib:\$$ORIGIN\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'$$ORIGIN/../../lib:$$ORIGIN'"
 }
 
 mac {
     QMAKE_LFLAGS_RPATH=
-    QMAKE_LFLAGS += "-Wl,-rpath,\'@executable_path/../Frameworks\'"
+    QMAKE_LFLAGS += "-Wl,-rpath,'@executable_path/../Frameworks'"
 }
 
 unix {

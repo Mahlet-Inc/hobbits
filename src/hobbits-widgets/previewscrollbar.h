@@ -8,6 +8,7 @@
 #include "actionrenderprogress.h"
 #include "displayhandle.h"
 #include "hobbits-widgets_global.h"
+#include "displaywidget.h"
 
 class HOBBITSWIDGETSSHARED_EXPORT PreviewScrollBar : public QWidget
 {
@@ -15,7 +16,7 @@ class HOBBITSWIDGETSSHARED_EXPORT PreviewScrollBar : public QWidget
 public:
     explicit PreviewScrollBar(QWidget *parent = nullptr);
     ~PreviewScrollBar() override;
-    int getFrameOffset();
+    qint64 getFrameOffset();
 
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -24,22 +25,25 @@ public:
     void leaveEvent(QEvent *event) override;
 
 signals:
-    void frameOffsetChanged(int);
+    void frameOffsetChanged(qint64);
 
 public slots:
-    void setFrameOffset(int);
+    void setFrameOffset(qint64);
     void setBitContainerManager(QSharedPointer<BitContainerManager> manager);
     void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle);
 
 private slots:
     void newContainer();
     void checkDisplayHandleOffset();
+    void checkDisplayRenderRange(Range range);
+    void checkActiveDisplays(QSet<DisplayWidget*> activeDisplays);
 
 private:
     void getOffsetFromEvent(QMouseEvent* event);
     static QImage renderPreview(QSharedPointer<BitContainer> bits, QSharedPointer<ActionRenderProgress> progress);
 
-    int m_frameOffset = 0;
+    Range m_renderedRange;
+    qint64 m_frameOffset = 0;
     bool m_mousePressing = false;
     QSharedPointer<BitContainerManager> m_manager;
     QSharedPointer<DisplayHandle> m_displayHandle;

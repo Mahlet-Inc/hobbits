@@ -10,6 +10,7 @@
 #include <QQueue>
 #include <QSettings>
 
+#include "displaywidget.h"
 #include "containerselectiondialog.h"
 #include "hobbitscoreinfo.h"
 #include "hobbitsguiinfo.h"
@@ -175,16 +176,14 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     // Configure display handle and plugin callback
     ui->displayScrollLayout->addWidget(m_previewScroll);
-    m_displayHandle = QSharedPointer<DisplayHandle>(
-            new DisplayHandle(
-                    m_bitContainerManager,
-                    ui->displayVScroll,
-                    ui->displayHScroll));
+    m_displayHandle = QSharedPointer<DisplayHandle>(new DisplayHandle(m_bitContainerManager));
+    m_displayHandle->setBitOffsetControl(ui->displayHScroll);
+    m_displayHandle->setFrameOffsetControl(ui->displayVScroll);
     connect(
             m_displayHandle.data(),
-            &DisplayHandle::newBitHover,
+            &DisplayHandle::newStatus,
             this,
-            &MainWindow::setHoverBit);
+            &MainWindow::setStatus);
 
     m_previewScroll->setBitContainerManager(m_bitContainerManager);
     m_previewScroll->setDisplayHandle(m_displayHandle);
@@ -266,63 +265,29 @@ void MainWindow::initializeDisplays()
 
 void MainWindow::addDisplayGroup()
 {
-    QTabWidget *tabs = new QTabWidget(this);
-    tabs->setElideMode(Qt::ElideNone);
-
-    m_displayTabsSplitter->addWidget(tabs);
-
-    // Instantiate displays for this display set
-    QList<QSharedPointer<DisplayInterface>> displays;
-    QSet<QString> queued;
-    for (QString pluginString : SettingsManager::getPluginLoaderSetting(
-            SettingsManager::DISPLAY_DISPLAY_ORDER_KEY).toStringList()) {
-        QSharedPointer<DisplayInterface> plugin = m_pluginManager->getDisplay(pluginString.trimmed());
-        if (!plugin.isNull()) {
-            displays.append(QSharedPointer<DisplayInterface>(plugin->createDefaultDisplay()));
-            queued.insert(pluginString.trimmed());
-        }
-    }
-    for (QSharedPointer<DisplayInterface> plugin : m_pluginManager->displays()) {
-        if (!queued.contains(plugin->name())) {
-            displays.append(QSharedPointer<DisplayInterface>(plugin->createDefaultDisplay()));
-        }
-    }
-
-    // Add the widgets to the tabs
-    tabs->setUpdatesEnabled(false);
-    QPair<QMap<int, QSharedPointer<DisplayInterface>>, QTabWidget*> displayMap;
-    displayMap.second = tabs;
-    for (QSharedPointer<DisplayInterface> displayPlugin : displays) {
-        QWidget *display = displayPlugin->display(m_displayHandle);
-        int idx = tabs->addTab(display, displayPlugin->name());
-        displayMap.first.insert(idx, displayPlugin);
-    }
-    tabs->setUpdatesEnabled(true);
+    auto multiDisplay = new MultiDisplayWidget(m_pluginManager, m_displayHandle, this);
+    m_displayTabsSplitter->addWidget(multiDisplay);
 
     // Add this display group to the list of displays
-    m_displayMaps.append(displayMap);
+    m_displayWidgets.append(multiDisplay);
 
-    // Set up the display controls when necessary
-    if (displayMap.first.size() > 0) {
-        tabs->setCurrentIndex(0);
-        checkCurrentDisplays();
-    }
-    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(checkCurrentDisplays()));
-
+    // Set up the display controls
+    checkCurrentDisplays();
     setupSplitViewMenu();
+
+    connect(multiDisplay, SIGNAL(activeDisplayChanged(QSharedPointer<DisplayInterface>)), this, SLOT(checkCurrentDisplays()));
 }
 
 void MainWindow::removeDisplayGroup(int idx)
 {
-    if (idx <= 0 || idx >= m_displayMaps.length()) {
+    if (idx <= 0 || idx >= m_displayWidgets.length()) {
         warningMessage(QString("Cannot delete display group %1").arg(idx + 1));
         return;
     }
 
-    m_displayMaps.at(idx).second->deleteLater();
-    m_displayMaps.removeAt(idx);
+    auto multiDisplay = m_displayWidgets.takeAt(idx);
+    delete multiDisplay;
     checkCurrentDisplays();
-
     setupSplitViewMenu();
 }
 
@@ -330,7 +295,7 @@ void MainWindow::setupSplitViewMenu()
 {
     m_splitViewMenu->clear();
 
-    if (m_displayMaps.size() < 5) {
+    if (m_displayWidgets.size() < 5) {
         m_splitViewMenu->addAction(
                 "Add split view",
                 [this]() {
@@ -338,13 +303,13 @@ void MainWindow::setupSplitViewMenu()
         })->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
     }
 
-    for (int i = 1; i < m_displayMaps.size(); i++) {
+    for (int i = 1; i < m_displayWidgets.size(); i++) {
         QAction *remove = m_splitViewMenu->addAction(
                 QString("Remove split view %1").arg(i + 1),
                 [this, i]() {
             this->removeDisplayGroup(i);
         });
-        if (i == m_displayMaps.size() - 1) {
+        if (i == m_displayWidgets.size() - 1) {
             remove->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
         }
     }
@@ -391,30 +356,27 @@ void MainWindow::warningMessage(QString message, QString windowTitle)
 
 void MainWindow::checkCurrentDisplays()
 {
-
     for (auto controls : m_currControlWidgets) {
-        controls->setVisible(false);
         ui->displayControlsLayout->removeWidget(controls);
+        controls->deleteLater();
     }
     m_currControlWidgets.clear();
 
-    QSet<DisplayInterface*> focusDisplays;
-    for (auto displayMap : m_displayMaps) {
-        QSharedPointer<DisplayInterface> currDisplay = displayMap.first.value(
-                displayMap.second->currentIndex());
+    QSet<DisplayWidget*> activeDisplays;
+    for (auto multiDisplay : m_displayWidgets) {
+        QSharedPointer<DisplayInterface> currDisplay = multiDisplay->activeDisplay();
         if (!currDisplay.isNull()) {
-            focusDisplays.insert(currDisplay.data());
-            auto controls = currDisplay->controls(m_displayHandle);
+            activeDisplays.insert(multiDisplay->activeDisplayWidget());
+            auto controls = multiDisplay->createEditorForActiveDisplay();
             if (controls) {
                 m_currControlWidgets.append(controls);
             }
         }
     }
-    m_displayHandle->setFocusDisplays(focusDisplays);
+    m_displayHandle->setActiveDisplays(activeDisplays);
 
     for (auto controls : m_currControlWidgets) {
         ui->displayControlsLayout->addWidget(controls);
-        controls->setVisible(true);
     }
 }
 
@@ -497,7 +459,9 @@ void MainWindow::loadPlugins()
 {
     QVariant badPluginPaths = SettingsManager::getPrivateSetting(SettingsManager::PLUGINS_RUNNING_KEY);
     if (badPluginPaths.isValid() && badPluginPaths.canConvert<QStringList>()) {
-        for (auto badPluginPath : badPluginPaths.toStringList().toSet()) {
+        QStringList badList = badPluginPaths.toStringList();
+        badList.removeDuplicates();
+        for (auto badPluginPath : badList) {
             if (QMessageBox::question(
                     this,
                     "Blacklist Plugin?",
@@ -746,6 +710,11 @@ void MainWindow::deleteAllBitContainers()
     m_bitContainerManager->deleteAllContainers();
 }
 
+void MainWindow::setStatus(QString status)
+{
+    ui->statusBar->showMessage(status);
+}
+
 void MainWindow::requestAnalyzerRun(QString pluginName, QJsonObject parameters)
 {
     if (!currContainer().isNull()) {
@@ -836,20 +805,6 @@ void MainWindow::on_pb_analyze_clicked()
         parameters = editor->parameters();
     }
     requestAnalyzerRun(plugin->name(), parameters);
-}
-
-void MainWindow::setHoverBit(bool hovering, int bitOffset, int frameOffset)
-{
-    if (!hovering || frameOffset < 0 || bitOffset < 0 || currContainer().isNull()) {
-        this->statusBar()->showMessage("");
-    }
-    else {
-        qint64 totalBitOffset = currContainer()->frameAt(frameOffset).start() + bitOffset;
-        qint64 totalByteOffset = totalBitOffset / 8;
-        this->statusBar()->showMessage(
-                QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(
-                        totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset));
-    }
 }
 
 void MainWindow::on_action_Apply_Batch_triggered()

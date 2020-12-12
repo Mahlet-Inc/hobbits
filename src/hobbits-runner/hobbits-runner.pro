@@ -1,5 +1,5 @@
 
-QT += core gui widgets
+QT += core widgets
 
 CONFIG += c++11 cmdline
 CONFIG -= app_bundle debug_and_release_target
