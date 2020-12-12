@@ -5,11 +5,22 @@ code. Hobbits has a built-in interpreter, and a Python API that allows you to
 process data at near-native speeds while still taking full advantage of the
 flexibility and power of Python.
 
-## Basic plugin structure
+## Basic Plugin Structure
 
 Plugins are broken into 2 main parts:
     - A JSON file describing the plugin
     - A Python script implementing the described plugin
+
+## Plugin Installation
+
+Python plugins can be installed in `python_displays`, `python_analyzers`,
+`python_operators`, or `python_importers` folders wherever hobbits searches for
+plugins (e.g. `~/.local/share/hobbits/plugins` or the `plugins` folder adjacent
+to the hobbits binary.) For example, you could add display plugin files like:
+```
+~/.local/share/hobbits/plugins/python_displays/MyPyDisplay/plugin.json
+~/.local/share/hobbits/plugins/python_displays/MyPyDisplay/plugin.py
+```
 
 ### JSON File Structure
 
