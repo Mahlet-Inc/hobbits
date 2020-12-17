@@ -1,3 +1,10 @@
+# [0.44.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.43.0...v0.44.0) (2020-12-17)
+
+
+### Features
+
+* [api] improve error reporting in display interface ([668b25d](https://github.com/Mahlet-Inc/hobbits/commit/668b25dae1f5e9af4f9f05f9caa697e1c91941c3))
+
 # [0.43.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.42.0...v0.43.0) (2020-12-12)
 
 
