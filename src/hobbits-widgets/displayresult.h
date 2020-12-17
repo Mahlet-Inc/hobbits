@@ -3,14 +3,15 @@
 
 #include <QJsonObject>
 #include <QImage>
-#include "hobbits-core_global.h"
+#include <QSharedPointer>
+#include "hobbits-widgets_global.h"
 
 /**
   * @brief The DisplayResult class contains the result of a DisplayInterface::renderDisplay() or DisplayInterface::renderOverlay() run
   *
   * \see DisplayInterface
 */
-class HOBBITSCORESHARED_EXPORT DisplayResult
+class HOBBITSWIDGETSSHARED_EXPORT DisplayResult
 {
 public:
     DisplayResult();
