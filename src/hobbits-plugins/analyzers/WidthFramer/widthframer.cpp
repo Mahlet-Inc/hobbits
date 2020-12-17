@@ -10,8 +10,7 @@ WidthFramer::WidthFramer()
         {"width", QJsonValue::Double}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
                     [](const QJsonObject &parameters) {
                         int width = parameters.value("width").toInt();
@@ -21,7 +20,7 @@ WidthFramer::WidthFramer()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new WidthFramerForm(delegate);
-                    }));
+                    });
 }
 
 AnalyzerInterface* WidthFramer::createDefaultAnalyzer()

@@ -2,7 +2,7 @@
 #define WIDTHFRAMER_H
 
 #include "analyzerinterface.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 class WidthFramer : public QObject, AnalyzerInterface
 {
@@ -27,7 +27,7 @@ public:
             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 };
 
 #endif // WIDTHFRAMER_H

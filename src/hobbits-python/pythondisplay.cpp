@@ -4,6 +4,7 @@
 #include <QTemporaryDir>
 #include "pythonarg.h"
 #include "hobbitspython.h"
+#include "displayresult.h"
 
 PythonDisplay::PythonDisplay(QSharedPointer<PythonPluginConfig> config) :
     m_config(config)
@@ -46,22 +47,26 @@ QSharedPointer<ParameterDelegate> PythonDisplay::parameterDelegate()
     return m_config->delegate();
 }
 
-QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    if (m_handle.isNull()
-            || m_handle->currentContainer().isNull()
-            || !m_config->delegate()->validate(parameters)) {
-        return QImage();
+
+    if (!m_config->delegate()->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     QTemporaryDir dir;
     if (!dir.isValid()) {
-        return QImage();
+        return DisplayResult::error("Failed to create temporary directory for python files");
     }
 
     QFile userScriptFile(dir.filePath("user_script.py"));
     if (!userScriptFile.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        return QImage();
+        return DisplayResult::error("Failed to write python script to temporary directory");
     }
     userScriptFile.write(m_config->script().toLatin1());
     userScriptFile.close();
@@ -95,7 +100,7 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
     HobbitsPython::waitForInterpreterLock();
     if (progress->isCancelled()) {
         delete[] byteBuffer;
-        return QImage();
+        return DisplayResult::error("Render cancelled");
     }
 
     auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, progress);
@@ -104,7 +109,7 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
 
     if (progress->isCancelled()) {
         delete[] byteBuffer;
-        return QImage();
+        return DisplayResult::error("Render cancelled");
     }
 
     QString output = "";
@@ -122,20 +127,22 @@ QImage PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &param
     }
     if (error) {
         delete[] byteBuffer;
-        return QImage();
+        return DisplayResult::error(output);
     }
 
-    return QImage(reinterpret_cast<uchar*>(byteBuffer), viewportSize.width(), viewportSize.height(), QImage::Format_ARGB32, [](void *info) {
+    auto image = QImage(reinterpret_cast<uchar*>(byteBuffer), viewportSize.width(), viewportSize.height(), QImage::Format_ARGB32, [](void *info) {
         delete[] reinterpret_cast<char*>(info);
     }, byteBuffer);
+
+    return DisplayResult::result(image, parameters);
 }
 
-QImage PythonDisplay::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> PythonDisplay::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)
 
     // TODO: display overlays and interactivity for python displays
 
-    return QImage();
+    return DisplayResult::nullResult();
 }

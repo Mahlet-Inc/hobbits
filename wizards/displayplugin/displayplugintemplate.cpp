@@ -61,23 +61,30 @@ QSharedPointer<ParameterDelegate> %{ClassName}::parameterDelegate()
     return m_delegate;
 }
 
-QImage %{ClassName}::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> %{ClassName}::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(parameters)) {
-        m_handle->setRenderedRange(this, Range());
-        return QImage();
+    if (!m_delegate->validate(parameters)) {
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        return DisplayResult::nullResult();
     }
 
     // TODO: render and return the display image
-    return QImage();
+    return DisplayResult::nullResult();
 }
 
-QImage %{ClassName}::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> %{ClassName}::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(parameters)) {
-        return QImage();
+    if (!m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     // TODO: render and return the overlay image
-    return QImage();
+    return DisplayResult::nullResult();
 }

@@ -76,13 +76,19 @@ void DisplayWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    if (!m_displayImage.isNull()) {
-        painter.drawImage(0, 0, m_displayImage);
+    if (!m_displayResult->errorString().isEmpty()) {
+        drawError(&painter, m_displayResult->errorString());
+    }
+    else if (!m_displayResult->getImage().isNull()) {
+        painter.drawImage(0, 0, m_displayResult->getImage());
     }
 
-    QImage overlay = m_display->renderOverlay(this->size(), m_displayParameters);
-    if (!overlay.isNull()) {
-        painter.drawImage(0, 0, overlay);
+    QSharedPointer<DisplayResult> overlay = m_display->renderOverlay(this->size(), m_displayParameters);
+    if (!overlay->errorString().isEmpty()) {
+        drawError(&painter, overlay->errorString());
+    }
+    else if (!overlay->getImage().isNull()) {
+        painter.drawImage(0, 0, overlay->getImage());
     }
 
     m_repaintScheduled = false;
@@ -122,7 +128,7 @@ void DisplayWidget::resizeEvent(QResizeEvent *event)
     fullRedraw();
 }
 
-QImage DisplayWidget::render(QSharedPointer<DisplayInterface> display,
+QSharedPointer<DisplayResult> DisplayWidget::render(QSharedPointer<DisplayInterface> display,
                              QSize viewportSize,
                              const QJsonObject &parameters,
                              QSharedPointer<PluginActionProgress> progress)
@@ -156,14 +162,14 @@ void DisplayWidget::performDisplayRender()
                                         m_displayRenderProgress);
         connect(&m_displayRenderWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
             if (this->m_displayRenderWatcher.isFinished()) {
-                this->setDisplayImage(this->m_displayRenderWatcher.result());
+                this->setDisplayResult(this->m_displayRenderWatcher.result());
             }
         });
 
         m_displayRenderWatcher.setFuture(future);
     }
     else {
-        m_displayImage = m_display->renderDisplay(this->size(), m_displayParameters, QSharedPointer<PluginActionProgress>());
+        m_displayResult = m_display->renderDisplay(this->size(), m_displayParameters, QSharedPointer<PluginActionProgress>());
     }
 }
 
@@ -172,19 +178,19 @@ void DisplayWidget::handleDisplayRenderPreview(QString type, QVariant value)
     if (type != "image_preview") {
         return;
     }
-    this->setDisplayImage(value.value<QImage>());
+    this->setDisplayResult(DisplayResult::result(value.value<QImage>(), m_displayParameters));
 }
 
-void DisplayWidget::setDisplayImage(QImage image)
+void DisplayWidget::setDisplayResult(QSharedPointer<DisplayResult> result)
 {
     QMutexLocker lock(&m_mutex);
-    m_displayImage = image;
+    m_displayResult = result;
     scheduleRepaint();
 }
 
 void DisplayWidget::resetRendering()
 {
-    m_displayImage = QImage();
+    m_displayResult = DisplayResult::nullResult();
     if (!m_displayRenderProgress.isNull()) {
         m_displayRenderProgress->setCancelled(true);
         disconnect(m_displayRenderProgress.data(), SIGNAL(progressUpdate(QString, QVariant)), this, SLOT(handleDisplayRenderPreview(QString, QVariant)));
@@ -468,6 +474,17 @@ void DisplayWidget::scheduleRepaint()
     }
     m_repaintScheduled = true;
     update();
+}
+
+void DisplayWidget::drawError(QPainter *painter, QString error)
+{
+    painter->save();
+    painter->setPen(QColor(255, 128, 128));
+    QFont font("Roboto Mono");
+    font.setPointSize(14);
+    painter->setFont(font);
+    painter->drawText(QRect({0, 0}, this->size()), Qt::TextWordWrap, error);
+    painter->restore();
 }
 
 QSharedPointer<DisplayHandle> DisplayWidget::handle() const

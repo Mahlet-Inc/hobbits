@@ -31,6 +31,9 @@ documentation and/or watch
 Notice (November 2020): Several plugin interfaces are currently being refactored
 and much of the documentation is out of date by a few minor version numbers. The
 documentation will be updated as the 1.0 interface is decided upon.
+
+Update (December 2020): most of the text documentation is updated, but videos
+and screenshots are still lagging a little behind.
 ```
 1. Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)

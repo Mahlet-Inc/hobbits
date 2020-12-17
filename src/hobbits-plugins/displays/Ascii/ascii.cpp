@@ -3,6 +3,7 @@
 #include "displayhelper.h"
 #include "asciidecode.h"
 #include "cp437decode.h"
+#include "displayresult.h"
 
 Ascii::Ascii() :
     m_renderConfig(new DisplayRenderConfig())
@@ -81,10 +82,13 @@ QSharedPointer<ParameterDelegate> Ascii::parameterDelegate()
     return m_delegate;
 }
 
-QImage Ascii::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
+    if (!m_delegate->validate(parameters)) {
+        return DisplayResult::error("Invalid parameters");
+    }
 
     QString encoding = parameters.value("encoding").toString();
     std::function<QString(const Frame&, qint64 &)> decodeFunction;
@@ -95,24 +99,27 @@ QImage Ascii::renderDisplay(QSize viewportSize, const QJsonObject &parameters, Q
         decodeFunction = &decodeAsciiBits;
     }
 
-    return DisplayHelper::drawTextRasterFull(viewportSize, headerOffset(parameters), this, m_handle, parameters, 8, decodeFunction);
+    auto image = DisplayHelper::drawTextRasterFull(viewportSize, headerOffset(parameters), this, m_handle, parameters, 8, decodeFunction);
+    return DisplayResult::result(image, parameters);
 }
 
-QImage Ascii::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Ascii::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     if (!m_delegate->validate(m_lastParams)) {
-        return QImage();
+        return DisplayResult::nullResult();
     }
     QSize fontSize = DisplayHelper::textSize(DisplayHelper::monoFont(m_lastParams.value("font_size").toInt()), "0");
     int columnGrouping = m_lastParams.value("column_grouping").toInt();
 
-    return DisplayHelper::drawHeadersFull(
+    auto image = DisplayHelper::drawHeadersFull(
                 viewportSize,
                 headerOffset(parameters),
                 m_handle,
                 QSizeF(double(fontSize.width()) / 8.0, DisplayHelper::textRowHeight(fontSize.height())),
                 columnGrouping,
                 columnGrouping > 1 ? 1 : 0);
+
+    return DisplayResult::result(image, parameters);
 }
 
 QPoint Ascii::headerOffset(const QJsonObject &parameters)

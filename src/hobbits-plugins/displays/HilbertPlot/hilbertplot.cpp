@@ -1,5 +1,6 @@
 #include "hilbertplot.h"
 #include "hilbertplotform.h"
+#include "displayresult.h"
 #include <QPainter>
 
 HilbertPlot::HilbertPlot() :
@@ -64,12 +65,15 @@ QSharedPointer<ParameterDelegate> HilbertPlot::parameterDelegate()
     return m_delegate;
 }
 
-QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(parameters)
+
+    if (!m_delegate->validate(parameters)) {
+        return DisplayResult::error("Invalid parameters");
+    }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
-        m_handle->setRenderedRange(this, Range());
-        return QImage();
+        return DisplayResult::nullResult();
     }
 
     int rasterLength = 1;
@@ -85,7 +89,7 @@ QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &paramet
     QTime lastTime = QTime::currentTime();
     for (int i = 0; i + byteOffset < bits->sizeInBytes() && i < rasterLength * rasterLength; i++) {
         if (progress->isCancelled()) {
-            return QImage();
+            return DisplayResult::error("Render Cancelled");
         }
         int chunkLength = 1;
         int chunk = i;
@@ -129,16 +133,20 @@ QImage HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &paramet
         }
     }
 
-    return raster;
+    return DisplayResult::result(raster, parameters);
 }
 
-QImage HilbertPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> HilbertPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)
+    if (!m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());
-        return QImage();
+        return DisplayResult::nullResult();
     }
 
     int rasterLength = 1;
@@ -151,7 +159,7 @@ QImage HilbertPlot::renderOverlay(QSize viewportSize, const QJsonObject &paramet
     qint64 lastBit = qMin(m_handle->currentContainer()->bits()->sizeInBits() - 1, lastByte * 8);
     m_handle->setRenderedRange(this, Range(byteOffset * 8, lastBit));
 
-    return QImage();
+    return DisplayResult::nullResult();
 }
 
 void HilbertPlot::rotate(QPoint &p, int n, bool rx, bool ry) {

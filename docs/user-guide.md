@@ -104,13 +104,20 @@ Importer/Exporters are the primary way to get bitstreams in and out of hobbits.
 For example, if you want to open a file as bits, selecting the `File Data`
 import plugin will let you select a file and then load it in as a Bit Container.
 
-## Batch Execution
+## Batch Creation and Execution
 
 Sequences of operator, analyzer, and importer actions can be saved as "batches"
-that can be executed all at once. You can create a batch by selecting either
-the container that starts the sequence or the container that ends the sequence
-and then navigating to `File->Save Batch...`. The saved batch can later be
-executed via `File->Apply Batch...`.
+that can be executed all at once. You can combine and connect these actions in
+the Batch Editor by navigating to `File->Open Batch Editor`. Once you finish
+editing, you can save the batch to a file from the Batch Editor's menu at
+`File->Save Batch As...`.
+
+You can also create a batch by selecting either the container that starts an
+action sequence or the container that ends the sequence and then navigating to
+`File->Save Batch...`. This will prompt yout and then open the Batch Editor so
+that you can verify and save the batch.
+
+Saved batches can be executed via `File->Apply Batch...`.
 
 ## Command line execution
 

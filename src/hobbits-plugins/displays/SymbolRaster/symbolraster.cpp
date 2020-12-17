@@ -1,6 +1,7 @@
 #include "symbolraster.h"
 #include "symbolrastercontrols.h"
 #include "displayhelper.h"
+#include "displayresult.h"
 #include <QJsonArray>
 #include <QPainter>
 
@@ -80,21 +81,27 @@ QSharedPointer<ParameterDelegate> SymbolRaster::parameterDelegate()
     return m_delegate;
 }
 
-QImage SymbolRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
-    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(m_lastParams)) {
-        return QImage();
+
+    if (!m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     QJsonArray colorMapValues = parameters.value("color_map").toArray();
     if (colorMapValues.size() < 1) {
-        return QImage();
+        return DisplayResult::error("Empty color map parameter");
     }
     m_symbolLength = colorMapValues.at(0).toObject().value("value").toString().length();
     if (m_symbolLength < 1) {
-        return QImage();
+        return DisplayResult::error("Empty color map symbol");
     }
 
     int scale = parameters.value("scale").toInt();
@@ -126,32 +133,34 @@ QImage SymbolRaster::renderDisplay(QSize viewportSize, const QJsonObject &parame
 
     DisplayHelper::setRenderRange(this, m_handle, sourceSize.height());
 
-    return destImage;
+    return DisplayResult::result(destImage, parameters);
 }
 
-QImage SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     m_lastParams = parameters;
-    if (!m_delegate->validate(m_lastParams)) {
-        return QImage();
+    if (!m_delegate->validate(parameters)) {
+        return DisplayResult::error("Invalid parameters");
     }
 
     QJsonArray colorMapValues = parameters.value("color_map").toArray();
     if (colorMapValues.size() < 1) {
-        return QImage();
+        return DisplayResult::error("Empty color map parameter");
     }
     m_symbolLength = colorMapValues.at(0).toObject().value("value").toString().length();
     if (m_symbolLength < 1) {
-        return QImage();
+        return DisplayResult::error("Empty color map symbol");
     }
 
     int scale = parameters.value("scale").toInt();
 
-    return DisplayHelper::drawHeadersFull(
+    auto overlay = DisplayHelper::drawHeadersFull(
                 viewportSize,
                 headerOffset(parameters),
                 m_handle,
                 QSizeF(double(scale) / double(m_symbolLength), scale));
+
+    return DisplayResult::result(overlay, parameters);
 }
 
 QPoint SymbolRaster::headerOffset(const QJsonObject &parameters)

@@ -9,6 +9,7 @@
 
 class QWidget;
 class DisplayHandle;
+class DisplayResult;
 
 /**
   * @brief Implementations of the DisplayInterface plugin interface display BitContainer information
@@ -26,14 +27,14 @@ public:
     virtual void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) = 0;
     virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
 
-    virtual QImage renderDisplay(
-            QSize viewportSize,
-            const QJsonObject &parameters,
-            QSharedPointer<PluginActionProgress> progress) = 0;
+    virtual QSharedPointer<DisplayResult> renderDisplay(
+                QSize viewportSize,
+                const QJsonObject &parameters,
+                QSharedPointer<PluginActionProgress> progress) = 0;
 
-    virtual QImage renderOverlay(
-            QSize viewportSize,
-            const QJsonObject &parameters) = 0;
+    virtual QSharedPointer<DisplayResult> renderOverlay(
+                QSize viewportSize,
+                const QJsonObject &parameters) = 0;
 };
 
 Q_DECLARE_INTERFACE(DisplayInterface, "hobbits.DisplayInterface")

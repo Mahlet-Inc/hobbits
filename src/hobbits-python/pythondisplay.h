@@ -21,12 +21,12 @@ public:
     void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
     QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
-    QImage renderDisplay(
+    QSharedPointer<DisplayResult> renderDisplay(
             QSize viewportSize,
             const QJsonObject &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
-    QImage renderOverlay(
+    QSharedPointer<DisplayResult> renderOverlay(
             QSize viewportSize,
             const QJsonObject &parameters) override;
 

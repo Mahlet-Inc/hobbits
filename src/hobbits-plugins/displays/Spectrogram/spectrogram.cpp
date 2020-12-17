@@ -5,6 +5,7 @@
 #include "math.h"
 #include <QTime>
 #include "viridis.h"
+#include "displayresult.h"
 #include <QtMath>
 
 Spectrogram::Spectrogram():
@@ -75,14 +76,15 @@ QSharedPointer<ParameterDelegate> Spectrogram::parameterDelegate()
     return m_delegate;
 }
 
-QImage Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     if (!m_delegate->validate(parameters)) {
-        return QImage();
+        return DisplayResult::error("Invalid parameters");
     }
+
     QRect spectRect = spectrogramRectangle(viewportSize, m_handle, parameters);
     if (spectRect.isNull()) {
-        return QImage();
+        return DisplayResult::nullResult();
     }
 
     int fftSize = parameters.value("fft_size").toInt();
@@ -96,7 +98,7 @@ QImage Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &paramet
     img.fill(Qt::transparent);
 
     if (sampleFormat.wordSize > 64 || sampleFormat.wordSize < 1) {
-        return QImage();
+        return DisplayResult::error(QString("Invalid sample format word size: %1").arg(sampleFormat.wordSize));
     }
 
     fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(fftSize)));
@@ -141,7 +143,7 @@ QImage Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &paramet
             fftw_destroy_plan(plan);
             fftw_free(fftIn);
             fftw_free(fftOut);
-            return QImage();
+            return DisplayResult::error(QString("Render cancelled"));
         }
 
         if (currOffset + fftBits >= container->bits()->sizeInBits()) {
@@ -195,18 +197,20 @@ QImage Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &paramet
     QPainter previewPaint(&result);
     previewPaint.drawImage(spectRect, img);
 
-    return result;
+    return DisplayResult::result(result, parameters);
 }
 
-QImage Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     if (!m_delegate->validate(parameters)) {
-        return QImage();
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
     }
 
     QRect spectRect = spectrogramRectangle(viewportSize, m_handle, parameters);
     if (spectRect.isNull()) {
-        return QImage();
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     QImage overlay(viewportSize, QImage::Format_ARGB32);
@@ -409,7 +413,7 @@ QImage Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &paramet
         DisplayHelper::setRenderRange(this, m_handle, int(frameOffset - m_handle->frameOffset()));
     }
 
-    return overlay;
+    return DisplayResult::result(overlay, parameters);
 }
 
 QRect Spectrogram::spectrogramRectangle(QSize viewportSize, QSharedPointer<DisplayHandle> displayHandle, const QJsonObject &parameters)
