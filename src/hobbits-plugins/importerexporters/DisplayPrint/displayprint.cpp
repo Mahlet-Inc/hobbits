@@ -2,6 +2,7 @@
 #include "displayprintexportform.h"
 #include <QScrollBar>
 #include <QPainter>
+#include "displayresult.h"
 
 DisplayPrint::DisplayPrint()
 {
@@ -100,13 +101,20 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
 
     QJsonObject displayParams = parameters.value("display_params").toObject();
 
-    QImage display = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
-    QImage overlay = displayPlugin->renderOverlay(QSize(imageWidth, imageHeight), displayParams);
+    auto display = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
+    auto overlay = displayPlugin->renderOverlay(QSize(imageWidth, imageHeight), displayParams);
+
+    if (!display->errorString().isEmpty()) {
+        return ExportResult::error(display->errorString());
+    }
+    if (!overlay->errorString().isEmpty()) {
+        return ExportResult::error(overlay->errorString());
+    }
 
     QPixmap pixmap(imageWidth, imageHeight);
     QPainter painter(&pixmap);
-    painter.drawImage(0, 0, display);
-    painter.drawImage(0, 0, overlay);
+    painter.drawImage(0, 0, display->getImage());
+    painter.drawImage(0, 0, overlay->getImage());
 
     QFile file(parameters.value("image_filename").toString());
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {

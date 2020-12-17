@@ -1,6 +1,7 @@
 #include "bitraster.h"
 #include "bitrastercontrols.h"
 #include "displayhelper.h"
+#include "displayresult.h"
 #include <QPainter>
 #include <QtMath>
 
@@ -78,12 +79,18 @@ QSharedPointer<ParameterDelegate> BitRaster::parameterDelegate()
     return m_delegate;
 }
 
-QImage BitRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
-    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(m_lastParams)) {
-        return QImage();
+
+    if (!m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     int scale = parameters.value("scale").toInt();
@@ -119,22 +126,24 @@ QImage BitRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameter
 
     DisplayHelper::setRenderRange(this, m_handle, sourceSize.height());
 
-    return destImage;
+    return DisplayResult::result(destImage, parameters);
 }
 
-QImage BitRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> BitRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     m_lastParams = parameters;
     if (!m_delegate->validate(m_lastParams)) {
-        return QImage();
+        return DisplayResult::error("Invalid parameters");
     }
     int scale = parameters.value("scale").toInt();
 
-    return DisplayHelper::drawHeadersFull(
+    auto overlay = DisplayHelper::drawHeadersFull(
                 viewportSize,
                 headerOffset(parameters),
                 m_handle,
                 QSizeF(scale, scale));
+
+    return DisplayResult::result(overlay, parameters);
 }
 
 QPoint BitRaster::headerOffset(const QJsonObject &parameters)

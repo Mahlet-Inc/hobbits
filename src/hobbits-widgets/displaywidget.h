@@ -7,6 +7,7 @@
 #include "displayinterface.h"
 #include "actionrenderprogress.h"
 #include "abstractparametereditor.h"
+#include "displayresult.h"
 
 class HOBBITSWIDGETSSHARED_EXPORT DisplayWidget : public QWidget
 {
@@ -23,7 +24,7 @@ public:
     void leaveEvent(QEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-    static QImage render(QSharedPointer<DisplayInterface> display,
+    static QSharedPointer<DisplayResult> render(QSharedPointer<DisplayInterface> display,
                          QSize viewportSize,
                          const QJsonObject &parameters,
                          QSharedPointer<PluginActionProgress> progress);
@@ -43,7 +44,7 @@ public slots:
 private slots:
     void performDisplayRender();
     void handleDisplayRenderPreview(QString type, QVariant value);
-    void setDisplayImage(QImage image);
+    void setDisplayResult(QSharedPointer<DisplayResult> result);
     void resetRendering();
     void fullRedraw();
     void showContextMenu(const QPoint &point);
@@ -54,15 +55,17 @@ private slots:
 
     void scheduleRepaint();
 
+    void drawError(QPainter* painter, QString error);
+
 private:
     QSharedPointer<DisplayInterface> m_display;
     QSharedPointer<DisplayHandle> m_handle;
     QJsonObject m_displayParameters;
-    QImage m_displayImage;
+    QSharedPointer<DisplayResult> m_displayResult;
     bool m_repaintScheduled;
     QMutex m_mutex;
 
-    QFutureWatcher<QImage> m_displayRenderWatcher;
+    QFutureWatcher<QSharedPointer<DisplayResult>> m_displayRenderWatcher;
     QSharedPointer<PluginActionProgress> m_displayRenderProgress;
 };
 

@@ -35,6 +35,7 @@ SOURCES += \
         batchinputdialog.cpp \
         bitcontainermanagerui.cpp \
         bitcontainertreemodel.cpp \
+    displayresult.cpp \
         displaywidget.cpp \
         highlightnavigator.cpp \
         displayhandle.cpp \
@@ -58,6 +59,7 @@ HEADERS += \
         batcheditscene.h \
         batchinputdialog.h \
         bitcontainermanagerui.h \
+    displayresult.h \
         displaywidget.h \
         hobbits-widgets_global.h \
     multidisplaywidget.h \

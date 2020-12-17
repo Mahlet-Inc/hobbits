@@ -3,6 +3,7 @@
 #include "displayhelper.h"
 #include <QPainter>
 #include <QtMath>
+#include "displayresult.h"
 
 ByteRaster::ByteRaster() :
     m_renderConfig(new DisplayRenderConfig())
@@ -78,16 +79,24 @@ QSharedPointer<ParameterDelegate> ByteRaster::parameterDelegate()
     return m_delegate;
 }
 
-QImage ByteRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> ByteRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
-    if (m_handle.isNull() || m_handle->currentContainer().isNull() || !m_delegate->validate(m_lastParams)) {
+
+    if (!m_delegate->validate(parameters)) {
         m_handle->setRenderedRange(this, Range());
-        return QImage();
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
     }
 
     int scale = parameters.value("scale").toInt();
+    if (scale < 1) {
+        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
+    }
     QPoint offset = headerOffset(parameters);
     QSize rasterSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
     QSize sourceSize(qMax(1, rasterSize.width() / scale), qMax(1, rasterSize.height() / scale));
@@ -121,22 +130,24 @@ QImage ByteRaster::renderDisplay(QSize viewportSize, const QJsonObject &paramete
 
     DisplayHelper::setRenderRange(this, m_handle, sourceSize.height());
 
-    return destImage;
+    return DisplayResult::result(destImage, parameters);
 }
 
-QImage ByteRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> ByteRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     m_lastParams = parameters;
     if (!m_delegate->validate(m_lastParams)) {
-        return QImage();
+        return DisplayResult::error("Invalid parameters");
     }
     int scale = parameters.value("scale").toInt();
 
-    return DisplayHelper::drawHeadersFull(
+    auto overlay = DisplayHelper::drawHeadersFull(
                 viewportSize,
                 headerOffset(parameters),
                 m_handle,
                 QSizeF(double(scale) / 8.0, scale));
+
+    return DisplayResult::result(overlay, parameters);
 }
 
 QPoint ByteRaster::headerOffset(const QJsonObject &parameters)

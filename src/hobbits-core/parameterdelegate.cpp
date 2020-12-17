@@ -64,8 +64,8 @@ QString ParameterDelegate::actionDescription(const QJsonObject &parameters) cons
 
 bool ParameterDelegate::validateAgainstInfos(const QJsonObject &parameters, QList<ParameterDelegate::ParameterInfo> infos)
 {
-    if (parameters.isEmpty()) {
-        return false;
+    if (infos.isEmpty()) {
+        return true;
     }
 
     for (auto param : infos) {

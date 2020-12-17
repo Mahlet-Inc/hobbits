@@ -1,5 +1,6 @@
 #include "hex.h"
 #include "hexform.h"
+#include "displayresult.h"
 #include "displayhelper.h"
 
 Hex::Hex() :
@@ -77,12 +78,21 @@ QSharedPointer<ParameterDelegate> Hex::parameterDelegate()
     return m_delegate;
 }
 
-QImage Hex::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Hex::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
 
-    return DisplayHelper::drawTextRasterFull(viewportSize, headerOffset(parameters), this, m_handle, parameters, 4,
+    if (!m_delegate->validate(parameters)) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::error("Invalid parameters");
+    }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        m_handle->setRenderedRange(this, Range());
+        return DisplayResult::nullResult();
+    }
+
+    auto image = DisplayHelper::drawTextRasterFull(viewportSize, headerOffset(parameters), this, m_handle, parameters, 4,
                                              [](const Frame& f, qint64 &bitOffset) {
         QString hexString;
         if (f.size() > bitOffset + 3) {
@@ -103,23 +113,31 @@ QImage Hex::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSh
         bitOffset += 4;
         return hexString;
     });
+
+    return DisplayResult::result(image, parameters);
 }
 
-QImage Hex::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(m_lastParams)) {
-        return QImage();
+    if (!m_delegate->validate(parameters)) {
+        return DisplayResult::error("Invalid parameters");
     }
+    if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
+        return DisplayResult::nullResult();
+    }
+
     QSize fontSize = DisplayHelper::textSize(DisplayHelper::monoFont(m_lastParams.value("font_size").toInt()), "0");
     int columnGrouping = m_lastParams.value("column_grouping").toInt();
 
-    return DisplayHelper::drawHeadersFull(
+    auto overlay = DisplayHelper::drawHeadersFull(
                 viewportSize,
                 headerOffset(parameters),
                 m_handle,
                 QSizeF(double(fontSize.width()) / 4.0, DisplayHelper::textRowHeight(fontSize.height())),
                 columnGrouping,
                 columnGrouping > 1 ? 1 : 0);
+
+    return DisplayResult::result(overlay, parameters);
 }
 
 
