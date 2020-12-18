@@ -1,3 +1,10 @@
+## [0.44.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.0...v0.44.1) (2020-12-18)
+
+
+### Bug Fixes
+
+* prevent DisplayPrint from crashing hobbits-runner ([bd93eee](https://github.com/Mahlet-Inc/hobbits/commit/bd93eeeb9933ebc5244dd8f7a70fa8f51a2b0f28))
+
 # [0.44.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.43.0...v0.44.0) (2020-12-17)
 
 
