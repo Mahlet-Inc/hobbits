@@ -45,6 +45,14 @@ defined(HOBBITS_PYPATH, var) {
 unix:!mac {
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN/../python/lib:\$$ORIGIN\'"
+
+    # this is for situations when LD_LIBRARY_PATH won't work for launching hobbits in Qt Creator due to something like setcap
+    defined(DEVELOPER_RPATH, var) {
+        QMAKE_LFLAGS += "-Wl,-rpath,\'$$OUT_PWD/../hobbits-core:$$OUT_PWD/../hobbits-python:$$OUT_PWD/../hobbits-widgets:$$HOBBITS_PYPATH/lib\'"
+    }
+    else {
+        QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib:\$$ORIGIN/../python/lib:\$$ORIGIN\'"
+    }
 }
 
 mac {

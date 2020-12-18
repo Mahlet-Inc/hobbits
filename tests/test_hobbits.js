@@ -60,7 +60,8 @@ async function runTests() {
             let args = [
                 'run',
                 '-b', batch,
-                '-o', testOutputPrefix
+                '-o', testOutputPrefix,
+                '-platform', 'offscreen'
             ]
 
             if (argv.python_home) {

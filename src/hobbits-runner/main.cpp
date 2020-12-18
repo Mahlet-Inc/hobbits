@@ -1,5 +1,5 @@
 #include <QCommandLineParser>
-#include <QCoreApplication>
+#include <QGuiApplication>
 #include <QTextStream>
 #ifdef Q_OS_UNIX
 #include <iostream>
@@ -21,10 +21,10 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
 
-    QCoreApplication::setApplicationName("Hobbits Runner");
-    QCoreApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());
+    QGuiApplication::setApplicationName("Hobbits Runner");
+    QGuiApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());
 
     QString description = "Command-line interface for bitstream analysis and processing";
 #ifdef HAS_EMBEDDED_PYTHON
