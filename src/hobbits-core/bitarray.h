@@ -58,6 +58,7 @@ public:
     void resize(qint64 sizeInBits);
 
     void set(qint64 i, bool value);
+    void setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset, qint64 length);
 
     qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = CopyMode::Copy) const;
 
@@ -68,6 +69,13 @@ public:
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
+    class CacheLoadLocker {
+    public:
+        CacheLoadLocker(qint64 bitIndex, const BitArray* bitArray);
+    private:
+        QMutexLocker m_locker;
+    };
+
     qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
     QByteArray readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const;
     QIODevice* dataReader() const;

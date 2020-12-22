@@ -195,10 +195,8 @@ bool BitArray::at(qint64 i) const
     if (i < 0 || i >= m_size) {
         throw std::invalid_argument(QString("Invalid bit index '%1'").arg(i).toStdString());
     }
+    CacheLoadLocker lock(i, this);
     qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
-    if (!m_dataCaches[cacheIdx]) {
-        loadCacheAt(i);
-    }
     int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     return m_dataCaches[cacheIdx][index / 8] & BIT_MASKS[index % 8];
 }
@@ -209,10 +207,8 @@ char BitArray::byteAt(qint64 i) const
     if (i < 0 || i >= sizeInBytes()) {
         throw std::invalid_argument(QString("Invalid byte index '%1'").arg(i).toStdString());
     }
+    CacheLoadLocker lock(i * 8, this);
     qint64 cacheIdx = i / CACHE_CHUNK_BYTE_SIZE;
-    if (!m_dataCaches[cacheIdx]) {
-        loadCacheAt(i*8);
-    }
     int index = int(i - cacheIdx * CACHE_CHUNK_BYTE_SIZE);
     return m_dataCaches[cacheIdx][index];
 }
@@ -346,7 +342,6 @@ qint64 BitArray::readFloat64Samples(double *data, qint64 sampleOffset, qint64 ma
 
 void BitArray::loadCacheAt(qint64 i) const
 {
-    QMutexLocker lock(&m_cacheMutex);
     qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
     if (m_dataCaches[cacheIdx]) {
         return;
@@ -362,6 +357,7 @@ void BitArray::loadCacheAt(qint64 i) const
 
     unconstDataCaches[cacheIdx] = byteBuffer;
     unconstRecentCacheAccess->enqueue(cacheIdx);
+
     if (unconstRecentCacheAccess->size() > MAX_ACTIVE_CACHE_CHUNKS) {
         qint64 removedCacheIndex = unconstRecentCacheAccess->dequeue();
 
@@ -406,16 +402,40 @@ void BitArray::set(qint64 i, bool value)
 
     m_dirtyCache = true;
 
+    CacheLoadLocker cacheLock(i, this);
     qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
-    if (!m_dataCaches[cacheIdx]) {
-        loadCacheAt(i);
-    }
     int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     if (value) {
         m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] | BIT_MASKS[index % 8];
     }
     else {
         m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] & INVERSE_BIT_MASKS[index % 8];
+    }
+}
+
+void BitArray::setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset, qint64 length)
+{
+    if (sizeInBytes() < byteOffset + length) {
+        resize(byteOffset + length);
+    }
+
+    QMutexLocker lock(&m_mutex);
+    m_dirtyCache = true;
+
+    qint64 bytesToCopy = length;
+    while (bytesToCopy > 0) {
+        CacheLoadLocker lock(byteOffset * 8, this);
+        qint64 cacheIdx = byteOffset / CACHE_CHUNK_BYTE_SIZE;
+
+        qint64 byteIndex = byteOffset - (cacheIdx * CACHE_CHUNK_BYTE_SIZE);
+
+        qint64 chunkLength =  qMin(CACHE_CHUNK_BYTE_SIZE - byteIndex, bytesToCopy);
+
+        memcpy(&m_dataCaches[cacheIdx][byteIndex], src + srcByteOffset, chunkLength);
+
+        bytesToCopy -= chunkLength;
+        byteOffset += chunkLength;
+        srcByteOffset += chunkLength;
     }
 }
 
@@ -440,18 +460,11 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
 
     qint64 bitsCopied = 0;
     while (bitsCopied < bitsToCopy) {
-        qint64 srcCacheIdx = bitOffset / CACHE_CHUNK_BIT_SIZE;
-        if (!m_dataCaches[srcCacheIdx]) {
-            loadCacheAt(bitOffset);
-        }
-        // TODO: race condition if cache is dropped between load and lock. need a recursive mutex
-        m_cacheMutex.lock();
+        CacheLoadLocker srcLock(bitOffset, this);
+        CacheLoadLocker destLock(destBitOffset, dest);
 
+        qint64 srcCacheIdx = bitOffset / CACHE_CHUNK_BIT_SIZE;
         qint64 destCacheIdx = destBitOffset / CACHE_CHUNK_BIT_SIZE;
-        if (!dest->m_dataCaches[destCacheIdx]) {
-            dest->loadCacheAt(destBitOffset);
-        }
-        dest->m_cacheMutex.lock();
 
         int srcByteAlignment = bitOffset % 8;
         int destByteAlignment = destBitOffset % 8;
@@ -576,9 +589,6 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
             destByteOffset = destOffset / 8;
             destByteAlignment = destOffset % 8;
         }
-
-        dest->m_cacheMutex.unlock();
-        m_cacheMutex.unlock();
 
         bitsCopied += bitsThisRound;
         bitOffset += bitsThisRound;
@@ -715,5 +725,13 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
         QByteArray bytes = bitArraySpec.toLocal8Bit();
         size = bitArraySpec.length() * 8;
         return QSharedPointer<BitArray>(new BitArray(bytes, size));
+    }
+}
+
+BitArray::CacheLoadLocker::CacheLoadLocker(qint64 bitIndex, const BitArray *bitArray) :
+    m_locker(&bitArray->m_cacheMutex) {
+    qint64 srcCacheIdx = bitIndex / CACHE_CHUNK_BIT_SIZE;
+    if (!bitArray->m_dataCaches[srcCacheIdx]) {
+        bitArray->loadCacheAt(bitIndex);
     }
 }
