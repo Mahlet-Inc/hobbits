@@ -89,6 +89,13 @@ named `import_bits` that takes the following parameters (in order):
  - A parameter for each parameter object specified in the `"parameters"` array of the JSON configuration
  - A `hobbits.ActionProgess` that can be used to update progress and check for cancellation
 
+Similarly, an `"exporter"` type plugin must have a function named `export_bits`
+that takes:
+
+ - A `hobbits.ImmutableBitContainer` that will be exported
+ - A parameter for each parameter object specified in the `"parameters"` array of the JSON configuration
+ - A `hobbits.ActionProgess` that can be used to update progress and check for cancellation
+
 Similarly, an `"analyzer"` type plugin must have a function named `analyze_bits`
 that takes:
 
@@ -129,7 +136,7 @@ that takes:
  - `BitArray.resize(n)` resizes the `BitArray` to length `n`
  - `BitArray.set(i, x)` sets the `i`th bit to boolean value `x`
  - `BitArray.read_bytes(i, n)` reads `n` bytes starting from the `i`th byte and returns the value as a Python `bytearray`
- - `BitArray.set_bytes(i, x)` writes `bytearray` `x` to the `BitArray` starting at the `i`th byte
+ - `BitArray.set_bytes(i, x)` writes bytes-like object `x` to the `BitArray` starting at the `i`th byte
  - `BitArray.write_to(fname)` writes the contents of the `BitArray` to a file named `fname`
  - `BitArray.read_from(i, fname)` reads the contents of the file named `fname` into the `BitArray` starting at the `BitArray`'s `i`th byte
  - `hobbits.ImmutableBitArray` only supports `size`, `at`, `read_bytes`, and `write_to`

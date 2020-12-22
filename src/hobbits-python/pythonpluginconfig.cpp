@@ -2,6 +2,7 @@
 #include <QDir>
 #include "pythonoperator.h"
 #include "pythonimporter.h"
+#include "pythonexporter.h"
 #include "pythonanalyzer.h"
 #include "pythondisplay.h"
 #include <QJsonArray>
@@ -47,6 +48,19 @@ QStringList PythonPluginConfig::loadPythonPlugins(QString path,
         QSharedPointer<PythonPluginConfig> config(new PythonPluginConfig());
         auto pluginDir = importerDir.absoluteFilePath(subDir);
         auto plugin = loadImporter(pluginDir, editorCreator, errors);
+        if (plugin.isNull()) {
+            continue;
+        }
+        if (!pluginManager->addImporterExporter(pluginDir, plugin)) {
+            errors.append(QString("Duplicate plugin %1 not loaded from %2").arg(plugin->name()).arg(pluginDir));
+        }
+    }
+
+    QDir exporterDir(path + "/python_exporters");
+    for (QString subDir : exporterDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QSharedPointer<PythonPluginConfig> config(new PythonPluginConfig());
+        auto pluginDir = exporterDir.absoluteFilePath(subDir);
+        auto plugin = loadExporter(pluginDir, editorCreator, errors);
         if (plugin.isNull()) {
             continue;
         }
@@ -115,6 +129,20 @@ QSharedPointer<ImporterExporterInterface> PythonPluginConfig::loadImporter(QStri
         return nullptr;
     }
     return QSharedPointer<ImporterExporterInterface>(new PythonImporter(config));
+}
+
+QSharedPointer<ImporterExporterInterface> PythonPluginConfig::loadExporter(QString configFolder, std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator, QStringList &errors)
+{
+    QSharedPointer<PythonPluginConfig> config(new PythonPluginConfig());
+    auto configErrors = config->configure(configFolder, editorCreator);
+    if (!configErrors.isEmpty()) {
+        errors.append(configErrors);
+        return nullptr;
+    }
+    if (config->type() != "exporter") {
+        return nullptr;
+    }
+    return QSharedPointer<ImporterExporterInterface>(new PythonExporter(config));
 }
 
 QSharedPointer<DisplayInterface> PythonPluginConfig::loadDisplay(QString configFolder, std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator, QStringList &errors)

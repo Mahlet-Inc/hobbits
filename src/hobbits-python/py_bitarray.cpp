@@ -127,9 +127,9 @@ static PyObject* BitArrayPy_read_bytes(BitArrayPyObj *self, PyObject *args )
 static PyObject* BitArrayPy_set_bytes(BitArrayPyObj *self, PyObject *args )
 {
     long long byteOffset;
-    PyObject *bytearray;
-    if (!PyArg_ParseTuple(args, "LY", &byteOffset, &bytearray)) {
-        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a byte offset and a bytearray");
+    Py_buffer bytes;
+    if (!PyArg_ParseTuple(args, "Ly*", &byteOffset, &bytes)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a byte offset (int) and a bytes-like object");
         return nullptr;
     }
     if (byteOffset < 0) {
@@ -138,10 +138,7 @@ static PyObject* BitArrayPy_set_bytes(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
-    QByteArray otherBytes(PyByteArray_AsString(bytearray), int(PyByteArray_Size(bytearray)));
-    QScopedPointer<BitArray> otherBits(new BitArray(otherBytes));
-
-    otherBits->copyBits(0, bits, byteOffset * 8, otherBits->sizeInBits());
+    bits->setBytes(byteOffset, reinterpret_cast<const char*>(bytes.buf), 0, bytes.len);
 
     Py_RETURN_NONE;
 }

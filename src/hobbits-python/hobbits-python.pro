@@ -33,6 +33,7 @@ SOURCES += \
         pythonanalyzer.cpp \
         pythonarg.cpp \
         pythondisplay.cpp \
+        pythonexporter.cpp \
         pythonimporter.cpp \
         pythoninterpreter.cpp \
         pythonoperator.cpp \
@@ -53,6 +54,7 @@ HEADERS += \
         pythonanalyzer.h \
         pythonarg.h \
         pythondisplay.h \
+        pythonexporter.h \
         pythonimporter.h \
         pythoninterpreter.h \
         pythonoperator.h \
