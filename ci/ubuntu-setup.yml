@@ -5,7 +5,7 @@ steps:
   - script: sudo apt-get -y install libgl1-mesa-dev
     displayName: 'Install libGL'
 
-  - script: sudo apt-get -y install cmake ninja
+  - script: sudo apt-get -y install cmake
     displayName: 'Install CMake'
 
   - script: sudo apt-get -y install ninja-build
