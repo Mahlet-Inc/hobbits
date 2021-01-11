@@ -1,0 +1,16 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+[*.cmake]
+indent_style = tab
+
+[CMakeLists.txt]
+indent_style = tab
+
+[*.{yml, yaml}]
+indent_size = 2
