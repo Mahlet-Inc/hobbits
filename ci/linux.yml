@@ -41,62 +41,57 @@ steps:
 
   - script: | 
       cd $(Build.SourcesDirectory)/src
-      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
-    displayName: 'Run qmake'
+      mkdir build
+      cd build
+      cmake -GNinja -DCPACK_GENERATOR="DEB;TXZ" ..
+    displayName: 'Configure'
 
   - script: |
-      cd $(Build.SourcesDirectory)/src
+      cd $(Build.SourcesDirectory)/src/build
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_DIR
-      make -j$(nproc)
+      ninja
     displayName: 'Build hobbits'
 
   - script: |
-      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-widgets/libhobbits-widgets.so* release/lib
-      cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
-      cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Core.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5DBus.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Gui.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Network.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5PrintSupport.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Sql.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Test.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5WaylandClient.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Widgets.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5XcbQpa.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* release/lib
-      echo "Checking fftw3: " `ldconfig -p | grep 'fftw3'`
-      cp --preserve=links `ldconfig -p | grep 'fftw3' | awk '{print $NF}'` release/lib
-      echo "Checking libpcap: " `ldconfig -p | grep 'libpcap'`
-      cp --preserve=links `ldconfig -p | grep 'libpcap' | awk '{print $NF}'` release/lib
-      cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
-      find release/python -name "*.so*" -type f -exec chmod +x {} \;
-      chmod +x release/python/bin/*
-      cd release
-      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins python
-    displayName: 'Collect and package release files'
+      cd $(Build.SourcesDirectory)/src/build
+      ninja package
+      mv hobbits-all-*-Linux.deb $(Build.ArtifactStagingDirectory)/
+      mv hobbits-all-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-all-${{ parameters.artifactName }}-Linux.txz
+
+      mkdir -p libs
+      cp --preserve=links -r $QT_PLATFORMS_DIR dependencies/bin
+      cp --preserve=links $QT_LIB_DIR/libicu*.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Core.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5DBus.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Gui.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Network.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5PrintSupport.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Sql.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Test.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5WaylandClient.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Widgets.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5XcbQpa.so* dependencies/lib
+      cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* dependencies/lib
+      cp --preserve=links /usr/lib64/libfftw3.so* dependencies/lib
+      cp --preserve=links /usr/lib/libfftw3.so* dependencies/lib
+      cp --preserve=links /usr/local/lib/libfftw3.so* dependencies/lib
+      cp --preserve=links /usr/local/lib64/libfftw3.so* dependencies/lib
+      cd dependencies
+      tar cvzf hobbits_dependencies_${{ parameters.artifactName }}.tgz bin lib plugins
+    displayName: 'Collect and package dependencies files'
   
   - bash: |
       npm ci
       cd tests
       ./prepare_tests.js
-      ./test_hobbits.js ../release/bin/hobbits-runner ../release/python
+      ./test_hobbits.js (Build.SourcesDirectory)/src/build/hobbits-runner/hobbits-runner (Build.SourcesDirectory)/src/build/python/python
     displayName: 'Run tests'
 
   - task: CopyFiles@2 
     inputs:
-      sourceFolder: release
-      contents: hobbits_${{ parameters.artifactName }}.tgz
+      sourceFolder: dependencies
+      contents: hobbits_dependencies_${{ parameters.artifactName }}.txz
       targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1

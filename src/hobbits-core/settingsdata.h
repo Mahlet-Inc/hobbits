@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QMutex>
 #include "hobbits-core_global.h"
+#include "config.h"
 
 /**
   * @brief The SettingsData class provides a thread-safe, in-memory cache for hobbits settings values

@@ -1,7 +1,10 @@
+/src/*/config.h
 
+CMakeLists.txt.user
 *.pro.user
 *.autosave
 /build*
+/src/build
 .vscode
 *.so
 
