@@ -47,13 +47,13 @@ steps:
     displayName: 'Configure'
 
   - script: |
-      cd $(Build.SourcesDirectory)/src/build
+      cd $(Build.SourcesDirectory)/build
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_DIR
       ninja
     displayName: 'Build hobbits'
 
   - script: |
-      cd $(Build.SourcesDirectory)/src/build
+      cd $(Build.SourcesDirectory)/build
       ninja package
       mv hobbits-all-*-Linux.deb $(Build.ArtifactStagingDirectory)/
       mv hobbits-all-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-all-${{ parameters.artifactName }}-Linux.txz
