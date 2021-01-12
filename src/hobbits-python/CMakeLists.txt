@@ -6,7 +6,7 @@ if ( MANUAL_PYTHON_PATH )
     message("Setting manual Python path")
     message("${MANUAL_PYTHON_PATH}")
     set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
-else()
+endif()
 find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 
 add_library("hobbits-python" "${SRCFILES}")
