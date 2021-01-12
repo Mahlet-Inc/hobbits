@@ -43,7 +43,7 @@ steps:
   - script: | 
       mkdir build
       cd build
-      cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Configure'
 

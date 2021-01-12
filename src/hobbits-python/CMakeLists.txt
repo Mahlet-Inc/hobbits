@@ -2,7 +2,12 @@ file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SO
 file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
-find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
+if ( MANUAL_PYTHON_PATH )
+    message("Setting manual Python path")
+    message("${MANUAL_PYTHON_PATH}")
+    set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
+else()
+find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 
 add_library("hobbits-python" "${SRCFILES}")
 

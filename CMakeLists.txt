@@ -4,6 +4,8 @@ include(GNUInstallDirs)
 include(CheckCCompilerFlag)
 include(CPackComponent)
 
+SET(MANUAL_PYTHON_PATH "" CACHE STRING "user-specified python root path")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(Hardening)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/findFFTW")
