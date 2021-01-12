@@ -55,8 +55,9 @@ steps:
 
   - script: |
       cd $(Build.SourcesDirectory)/build
-      ninja package
+      sudo ninja package
       mv hobbits-all-*-Linux.deb $(Build.ArtifactStagingDirectory)/
+      mv hobbits-all-*-Linux.rpm $(Build.ArtifactStagingDirectory)/
       mv hobbits-all-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-all-${{ parameters.artifactName }}-Linux.txz
 
       mkdir -p libs
