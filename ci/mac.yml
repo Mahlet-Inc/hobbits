@@ -64,16 +64,12 @@ steps:
       python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.14.1 mac desktop -m qtcore qtgui qtnetwork qtwidgets
     displayName: 'Install Qt 5.14.1'
 
-  - bash: |
-      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
-      cat qmake_args
-    workingDirectory: $(Build.SourcesDirectory)/src
-    displayName: 'Get version arguments for qmake'
-
   - script: | 
-      cd $(Build.SourcesDirectory)/src
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/qmake $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
-    displayName: 'Run qmake'
+      mkdir build
+      cd build
+      cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/cmake ..
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: 'Configure'
 
   - script: |
       cd $(Build.SourcesDirectory)/src

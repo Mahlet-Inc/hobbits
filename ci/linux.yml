@@ -40,10 +40,10 @@ steps:
     displayName: 'Get version arguments for qmake'
 
   - script: | 
-      cd $(Build.SourcesDirectory)/src
       mkdir build
       cd build
       cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+    workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Configure'
 
   - script: |
