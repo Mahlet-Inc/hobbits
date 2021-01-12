@@ -1,6 +1,7 @@
 steps:
   - checkout: self
     persistCredentials: true
+    submodules: true
 
   - task: UsePythonVersion@0 
     inputs:

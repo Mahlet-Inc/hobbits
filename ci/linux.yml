@@ -9,6 +9,7 @@ parameters:
 steps:
   - checkout: self
     persistCredentials: true
+    submodules: true
 
   - bash: |
       BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`

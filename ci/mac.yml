@@ -1,6 +1,7 @@
 steps:
   - checkout: self
     persistCredentials: true
+    submodules: true
 
   - script: brew install fftw
     displayName: 'Install FFTW3'
