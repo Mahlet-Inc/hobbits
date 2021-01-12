@@ -43,7 +43,7 @@ steps:
       cd $(Build.SourcesDirectory)/src
       mkdir build
       cd build
-      cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" ..
+      cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
     displayName: 'Configure'
 
   - script: |
