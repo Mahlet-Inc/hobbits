@@ -8,8 +8,7 @@ Find::Find()
         {"search_string", QJsonValue::String}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
                     [](const QJsonObject &parameters) {
         return QString("Find %1").arg(parameters.value("search_string").toString());
@@ -17,7 +16,7 @@ Find::Find()
     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                     Q_UNUSED(size)
                     return new FindForm(delegate);
-                }));
+                });
 }
 
 AnalyzerInterface* Find::createDefaultAnalyzer()

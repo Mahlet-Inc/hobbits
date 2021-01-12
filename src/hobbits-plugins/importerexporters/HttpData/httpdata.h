@@ -1,7 +1,7 @@
 #ifndef HTTPDATA_H
 #define HTTPDATA_H
 
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 #include "importexportinterface.h"
 
 class HttpData : public QObject, ImporterExporterInterface
@@ -32,8 +32,8 @@ public:
                                             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_importDelegate;
-    QSharedPointer<ParameterDelegateUi> m_exportDelegate;
+    QSharedPointer<ParameterDelegate> m_importDelegate;
+    QSharedPointer<ParameterDelegate> m_exportDelegate;
 };
 
 #endif // HTTPDATA_H

@@ -24,7 +24,7 @@ get_target_property(CORE_INCLUDE_DIR "hobbits-core" INTERFACE_INCLUDE_DIRECTORIE
 set(CORE_INCLUDE_DIR "${CORE_INCLUDE_DIR}" PARENT_SCOPE)
 
 target_link_libraries("hobbits-core" Qt5::Core Qt5::Widgets)
-harden("hobbits-core")
+#harden("hobbits-core")
 
 cpack_add_component("core_lib")
 set("CPACK_DEBIAN_CORE_LIB_PACKAGE_NAME" "libhobbits")

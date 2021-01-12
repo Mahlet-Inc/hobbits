@@ -5,7 +5,7 @@ add_library("hobbits-runner" "${SRCFILES}")
 target_include_directories("hobbits-runner" PUBLIC "../hobbits-core" "../hobbits-python")
 target_link_libraries("hobbits-runner" Qt5::Gui Qt5::Widgets)
 target_compile_definitions("hobbits-runner" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITS_RUNNER_VERSION=\"Extra Good Developer Version\"")
-harden("hobbits-runner")
+#harden("hobbits-runner")
 
 cpack_add_component("runner")
 set("CPACK_DEBIAN_RUNNER_PACKAGE_NAME" "hobbits-runner")

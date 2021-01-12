@@ -16,7 +16,7 @@ HeaderFramer::HeaderFramer()
         }
     };
 
-    m_delegate = ParameterDelegateUi::create(
+    m_delegate = ParameterDelegate::create(
                     infos,
                     [](const QJsonObject &parameters) {
                         Q_UNUSED(parameters)

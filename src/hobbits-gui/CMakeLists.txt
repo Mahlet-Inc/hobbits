@@ -7,9 +7,9 @@ file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SO
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
-add_executable("hobbits" "${SRCFILES}" "${HDRFILES}")
-target_include_directories("hobbits" PRIVATE "../hobbits-core")
-target_link_libraries("hobbits" hobbits-core Qt5::Widgets)
+add_executable("hobbits" "${SRCFILES}" "${HDRFILES}" "${resource_files}")
+target_include_directories("hobbits" PRIVATE "${CORE_INCLUDE_DIR}" "${WIDGETS_INCLUDE_DIR}" "${PYHOBBITS_INCLUDE_DIR}")
+target_link_libraries("hobbits" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 target_compile_definitions("hobbits" PRIVATE "-DQT_DEPRECATED_WARNINGS")
 
 
@@ -21,7 +21,7 @@ qt5_add_resources(hobbits "icons"
         "images/icons/trash.png"
 )
 
-harden("hobbits")
+#harden("hobbits")
 
 cpack_add_component("gui")
 set("CPACK_DEBIAN_GUI_PACKAGE_NAME" "hobbits")

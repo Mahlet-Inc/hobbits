@@ -43,7 +43,7 @@ steps:
       cd $(Build.SourcesDirectory)/src
       mkdir build
       cd build
-      cmake -GNinja -DCPACK_GENERATOR="DEB;TXZ" ..
+      cmake -GNinja -DCPACK_GENERATOR="DEB;RPM;TXZ" ..
     displayName: 'Configure'
 
   - script: |

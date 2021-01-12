@@ -12,8 +12,7 @@ HexString::HexString()
         {"hex_string", QJsonValue::String, true},
         {"repeats", QJsonValue::Double, true}
     };
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("filename")) {
@@ -35,14 +34,13 @@ HexString::HexString()
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
                         return new HexStringImportForm();
-                    }));
+                    });
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
         {"filename", QJsonValue::String, false}
     };
-    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("filename")) {
@@ -56,7 +54,7 @@ HexString::HexString()
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
                         return new ParameterEditorFileSelect(QFileDialog::AcceptSave);
-                    }));
+                    });
 }
 
 ImporterExporterInterface* HexString::createDefaultImporterExporter()

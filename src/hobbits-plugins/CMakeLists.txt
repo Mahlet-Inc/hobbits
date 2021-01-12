@@ -5,10 +5,10 @@ macro(pluginInDir pluginType modName modDir)
 	set(pluginName "hobbits-plugin-${pluginType}-${modName}")
 	add_library("${pluginName}" "${SRCFILES}" "${resource_files}")
 	
-	target_include_directories("${pluginName}" PRIVATE "${CORE_INCLUDE_DIR}")
-	target_link_libraries("${pluginName}" PRIVATE hobbits-core Qt5::Core Qt5::Widgets)
+        target_include_directories("${pluginName}" PRIVATE "${PYHOBBITS_INCLUDE_DIR}")
+        target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
 	target_compile_definitions("${pluginName}" PRIVATE "-DQT_DEPRECATED_WARNINGS")
-	harden("${pluginName}")
+        #harden("${pluginName}")
 
 	string(TOUPPER "${pluginName}" pluginNameUpper)
 	cpack_add_component("${pluginName}" GROUP "${pluginType}")

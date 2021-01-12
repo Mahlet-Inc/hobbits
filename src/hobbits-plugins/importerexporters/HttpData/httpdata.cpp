@@ -10,8 +10,7 @@ HttpData::HttpData()
         {"verb", QJsonValue::String}
     };
 
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("url")) {
@@ -29,7 +28,7 @@ HttpData::HttpData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new HttpImportForm(delegate);
-                    }));
+                    });
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
@@ -37,8 +36,7 @@ HttpData::HttpData()
         {"formdataname", QJsonValue::String},
         {"verb", QJsonValue::String}
     };
-    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("url")) {
@@ -56,7 +54,7 @@ HttpData::HttpData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new HttpExportForm(delegate);
-                    }));
+                    });
 }
 
 ImporterExporterInterface* HttpData::createDefaultImporterExporter()

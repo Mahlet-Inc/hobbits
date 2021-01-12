@@ -6,11 +6,15 @@ find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
 
 add_library("hobbits-python" "${SRCFILES}")
 
-target_include_directories("hobbits-python" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${CORE_INCLUDE_DIR}" "${Python3_INCLUDE_DIRS}")
-target_link_libraries("hobbits-python" hobbits-core "${Python3_LIBRARIES}")
+target_include_directories("hobbits-python" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${CORE_INCLUDE_DIR}" "${WIDGETS_INCLUDE_DIR}" "${Python3_INCLUDE_DIRS}")
+
+get_target_property(PYHOBBITS_INCLUDE_DIR "hobbits-python" INTERFACE_INCLUDE_DIRECTORIES)
+set(PYHOBBITS_INCLUDE_DIR "${PYHOBBITS_INCLUDE_DIR}" PARENT_SCOPE)
+
+target_link_libraries("hobbits-python" hobbits-core hobbits-widgets "${Python3_LIBRARIES}")
 target_compile_definitions("hobbits-python" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITSPYTHON_LIBRARY")
 #target_compile_definitions("hobbits-python" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITSPYTHON_LIBRARY" "-DPYTHON_LINK_LIB="\"\""")
-harden("hobbits-python")
+#harden("hobbits-python")
 
 set("CPACK_DEBIAN_HOBBITS-PYTHON_PACKAGE_NAME" "libhobbits-python")
 set("CPACK_RPM_HOBBITS-PYTHON_PACKAGE_NAME" "libhobbits-python")

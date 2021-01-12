@@ -3,7 +3,7 @@
 
 #include "mathparser.h"
 #include "importexportinterface.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 class Lfsr : public QObject, ImporterExporterInterface
 {
@@ -33,7 +33,7 @@ public:
                                             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_importDelegate;
+    QSharedPointer<ParameterDelegate> m_importDelegate;
 };
 
 #endif // PRBSGENERATOR_H
