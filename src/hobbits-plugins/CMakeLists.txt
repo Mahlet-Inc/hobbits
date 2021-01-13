@@ -1,13 +1,11 @@
 macro(pluginInDir pluginType modName modDir)
 	file(GLOB_RECURSE SRCFILES "${modDir}/*.c" "${modDir}/*.cpp")
-	file(GLOB resource_files "${modDir}/*.qrc" "${modDir}/*.ui")
+        file(GLOB RCFILES "${modDir}/*.qrc" "${modDir}/*.ui")
 
 	set(pluginName "hobbits-plugin-${pluginType}-${modName}")
-	add_library("${pluginName}" "${SRCFILES}" "${resource_files}")
-	
-        target_include_directories("${pluginName}" PRIVATE "${PYHOBBITS_INCLUDE_DIR}")
+        add_library("${pluginName}" "${SRCFILES}" "${RCFILES}")
+
         target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
-	target_compile_definitions("${pluginName}" PRIVATE "-DQT_DEPRECATED_WARNINGS")
         #harden("${pluginName}")
 
 	string(TOUPPER "${pluginName}" pluginNameUpper)

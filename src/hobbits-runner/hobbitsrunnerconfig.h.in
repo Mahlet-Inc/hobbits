@@ -1,0 +1,7 @@
+#pragma once
+
+
+namespace HobbitsRunnerConfig
+{
+    const char VERSION[] = "@HOBBITS_RUNNER_VERSION@";
+}

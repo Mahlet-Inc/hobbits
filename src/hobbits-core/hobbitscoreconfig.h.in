@@ -1,0 +1,11 @@
+#pragma once
+
+#include "hobbits-core_global.h"
+
+namespace HobbitsCoreConfig
+{
+
+HOBBITSCORESHARED_EXPORT extern const char VERSION[] = "@HOBBITS_CORE_VERSION@";
+HOBBITSCORESHARED_EXPORT extern const char PLUGINS_DEFAULT_PATH[] = "@HOBBITS_PLUGINS_DEFAULT_PATH@";
+
+}

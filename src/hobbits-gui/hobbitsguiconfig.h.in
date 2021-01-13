@@ -1,0 +1,6 @@
+#pragma once
+
+namespace HobbitsGuiConfig
+{
+    const char VERSION[] = "@HOBBITS_GUI_VERSION@";
+}

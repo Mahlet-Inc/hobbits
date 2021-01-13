@@ -4,6 +4,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QCoreApplication>
+#include "hobbitscoreconfig.h"
 
 SettingsData::SettingsData() :
     m_initialized(false)
@@ -155,9 +156,7 @@ void SettingsData::initialize()
     m_privateSettings.insert(SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
     m_privateSettings.insert(SettingsManager::LAST_CONTAINER_PATH_KEY, QDir::homePath());
 
-    m_pluginLoaderSettings.insert(
-            SettingsManager::PLUGIN_PATH_KEY,
-            "../hobbits-plugins:../plugins:plugins:~/.local/share/hobbits/plugins");
+    m_pluginLoaderSettings.insert(SettingsManager::PLUGIN_PATH_KEY, HobbitsCoreConfig::PLUGINS_DEFAULT_PATH);
     m_pluginLoaderSettings.insert(SettingsManager::PLUGIN_BLACKLIST_KEY, QStringList({}));
     m_pluginLoaderSettings.insert(
             SettingsManager::OPERATOR_DISPLAY_ORDER_KEY,

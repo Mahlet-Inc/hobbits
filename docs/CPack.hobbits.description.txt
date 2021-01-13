@@ -1,2 +1,2 @@
 A multi-platform GUI for bit-based analysis, processing, and visualization.
-	Nice for discoverring patterns when reverse-engineering binary formats.
+    Useful for discovering patterns when reverse-engineering binary formats.

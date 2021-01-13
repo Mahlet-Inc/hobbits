@@ -1,27 +1,28 @@
-set(HOBBITS_GUI_VERSION "Totally Rad Developer Version")
+#
+# Config Header
+#
 
-set(CONFIG_FILE_NAME "config.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}.in" "${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}")
+set(HOBBITS_GUI_VERSION "${BUILD_VERSION}")
+set(CONFIG_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/hobbitsguiconfig.h")
+configure_file("${CONFIG_FILE_NAME}.in" "${CONFIG_FILE_NAME}")
+
+
+#
+# Build
+#
 
 file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
-file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
-add_executable("hobbits" "${SRCFILES}" "${HDRFILES}" "${resource_files}")
-target_include_directories("hobbits" PRIVATE "${CORE_INCLUDE_DIR}" "${WIDGETS_INCLUDE_DIR}" "${PYHOBBITS_INCLUDE_DIR}")
+add_executable("hobbits" "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
 target_link_libraries("hobbits" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
-target_compile_definitions("hobbits" PRIVATE "-DQT_DEPRECATED_WARNINGS")
-
-
-qt5_add_resources(hobbits "icons"
-    PREFIX
-        "/hobbitsgui"
-    FILES
-        "images/icons/HobbitsRingSmall.png"
-        "images/icons/trash.png"
-)
-
 #harden("hobbits")
+
+
+#
+# CPack
+#
 
 cpack_add_component("gui")
 set("CPACK_DEBIAN_GUI_PACKAGE_NAME" "hobbits")

@@ -1,3 +1,0 @@
-#pragma once
-
-const char HOBBITS_GUI_VERSION[] = "@HOBBITS_GUI_VERSION@";

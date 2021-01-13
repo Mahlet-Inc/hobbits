@@ -16,7 +16,6 @@ class HOBBITSPYTHONSHARED_EXPORT HobbitsPython : public QObject
 
 public:
     static HobbitsPython& getInstance();
-    static QString pythonVersion();
     static void waitForInterpreterLock();
 
     QSharedPointer<PluginActionWatcher<QSharedPointer<PythonResult>>> runProcessScript(

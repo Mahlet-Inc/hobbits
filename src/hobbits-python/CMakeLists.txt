@@ -1,6 +1,6 @@
-file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
-file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+#
+# Config Header
+#
 
 if ( MANUAL_PYTHON_PATH )
     message("Setting manual Python path")
@@ -9,17 +9,35 @@ if ( MANUAL_PYTHON_PATH )
 endif()
 find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 
-add_library("hobbits-python" "${SRCFILES}")
+set(HOBBITS_PYTHON_VERSION "${BUILD_VERSION}")
+set(HOBBITS_PYTHON_PYTHON_VERSION "${Python3_VERSION}")
 
-target_include_directories("hobbits-python" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${CORE_INCLUDE_DIR}" "${WIDGETS_INCLUDE_DIR}" "${Python3_INCLUDE_DIRS}")
+set(CONFIG_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/hobbitspythonconfig.h")
+configure_file("${CONFIG_FILE_NAME}.in" "${CONFIG_FILE_NAME}")
 
-get_target_property(PYHOBBITS_INCLUDE_DIR "hobbits-python" INTERFACE_INCLUDE_DIRECTORIES)
-set(PYHOBBITS_INCLUDE_DIR "${PYHOBBITS_INCLUDE_DIR}" PARENT_SCOPE)
+
+#
+# Build
+#
+
+file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+
+add_library("hobbits-python" "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
+
+target_include_directories("hobbits-python"
+                           INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+                           PRIVATE "${Python3_INCLUDE_DIRS}")
 
 target_link_libraries("hobbits-python" hobbits-core hobbits-widgets "${Python3_LIBRARIES}")
-target_compile_definitions("hobbits-python" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITSPYTHON_LIBRARY")
-#target_compile_definitions("hobbits-python" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITSPYTHON_LIBRARY" "-DPYTHON_LINK_LIB="\"\""")
+target_compile_definitions("hobbits-python" PRIVATE "-DHOBBITSPYTHON_LIBRARY")
 #harden("hobbits-python")
+
+
+#
+# CPack
+#
 
 set("CPACK_DEBIAN_HOBBITS-PYTHON_PACKAGE_NAME" "libhobbits-python")
 set("CPACK_RPM_HOBBITS-PYTHON_PACKAGE_NAME" "libhobbits-python")

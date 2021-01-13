@@ -1,16 +1,21 @@
+#
+# Build
+#
+
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
 add_library("hobbits-widgets" "${SRCFILES}" "${HDRFILES}" "${resource_files}")
-
-target_include_directories("hobbits-widgets" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${CORE_INCLUDE_DIR}")
-get_target_property(WIDGETS_INCLUDE_DIR "hobbits-widgets" INTERFACE_INCLUDE_DIRECTORIES)
-set(WIDGETS_INCLUDE_DIR "${WIDGETS_INCLUDE_DIR}" PARENT_SCOPE)
-
+target_include_directories("hobbits-widgets" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries("hobbits-widgets" hobbits-core Qt5::Core Qt5::Widgets)
-target_compile_definitions("hobbits-widgets" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITSWIDGETS_LIBRARY")
+target_compile_definitions("hobbits-widgets" PRIVATE "-DHOBBITSWIDGETS_LIBRARY")
 #harden("hobbits-widgets")
+
+
+#
+# CPack
+#
 
 cpack_add_component("widgets_lib")
 set("CPACK_DEBIAN_HOBBITS-WIDGETS_PACKAGE_NAME" "libhobbits-widgets")

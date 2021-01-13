@@ -87,7 +87,7 @@ steps:
       npm ci
       cd tests
       ./prepare_tests.js
-      ./test_hobbits.js (Build.SourcesDirectory)/src/build/hobbits-runner/hobbits-runner (Build.SourcesDirectory)/src/build/python/python
+      ./test_hobbits.js (Build.SourcesDirectory)/build/hobbits-runner/hobbits-runner (Build.SourcesDirectory)/build/python/python
     displayName: 'Run tests'
 
   - task: CopyFiles@2 

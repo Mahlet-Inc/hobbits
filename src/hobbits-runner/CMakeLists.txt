@@ -1,11 +1,27 @@
-file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-file(GLOB resource_files "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+#
+# Config Header
+#
 
-add_library("hobbits-runner" "${SRCFILES}")
-target_include_directories("hobbits-runner" PUBLIC "../hobbits-core" "../hobbits-python")
-target_link_libraries("hobbits-runner" Qt5::Gui Qt5::Widgets)
-target_compile_definitions("hobbits-runner" PRIVATE "-DQT_DEPRECATED_WARNINGS" "-DHOBBITS_RUNNER_VERSION=\"Extra Good Developer Version\"")
+set(HOBBITS_RUNNER_VERSION "${BUILD_VERSION}")
+set(CONFIG_FILE_NAME "hobbitsrunnerconfig.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}.in" "${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}")
+
+#
+# Build
+#
+
+file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+
+add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
+target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 #harden("hobbits-runner")
+
+
+#
+# CPack
+#
 
 cpack_add_component("runner")
 set("CPACK_DEBIAN_RUNNER_PACKAGE_NAME" "hobbits-runner")

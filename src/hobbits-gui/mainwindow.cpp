@@ -12,8 +12,9 @@
 
 #include "displaywidget.h"
 #include "containerselectiondialog.h"
-#include "hobbitscoreinfo.h"
-#include "hobbitsguiinfo.h"
+#include "hobbitscoreconfig.h"
+#include "hobbitsguiconfig.h"
+#include "hobbitspythonconfig.h"
 #include "pluginactionlineage.h"
 #include "preferencesdialog.h"
 #include "settingsmanager.h"
@@ -957,12 +958,12 @@ void MainWindow::pluginActionProgress(QUuid id, int progress)
 
 void MainWindow::on_action_About_triggered()
 {
-    QString coreLibVersion = HobbitsCoreInfo::getLibVersion();
-    QString guiVersion = HobbitsGuiInfo::getGuiVersion();
+    QString coreLibVersion = HobbitsCoreConfig::VERSION;
+    QString guiVersion = HobbitsGuiConfig::VERSION;
 
     QString info =  QString("Hobbits GUI Version: %1\nHobbits Core Version: %2").arg(guiVersion).arg(coreLibVersion);
 #ifdef HAS_EMBEDDED_PYTHON
-    info += QString("\nIntegrated Python: %1").arg(HobbitsPython::pythonVersion());
+    info += QString("\nIntegrated Python: %1").arg(HobbitsPythonConfig::PYTHON_VERSION);
 #endif
 
     QMessageBox msg;
