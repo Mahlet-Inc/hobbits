@@ -71,15 +71,15 @@ void PythonInterpreter::initialize()
     PyConfig_InitPythonConfig(&config);
 
     std::wstring wsPyHome = SettingsManager::getTransientSetting(SettingsManager::PYTHON_HOME_KEY).toString().toStdWString();
+    QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
     if(wsPyHome.size()){
-        QScopedPointer<wchar_t> pyHome(new wchar_t[wsPyHome.length() + 1]);
         wcscpy(pyHome.data(), wsPyHome.c_str());
         config.home = pyHome.data();
     }
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
-        m_initializationError = PythonResult::result({QString("Failed Py_InitializeFromConfig - is there a valid python at '%1'?").arg(QString::fromStdWString(wsPyHome))});
+        m_initializationError = PythonResult::result({QString("Failed Py_InitializeFromConfig - is there a valid python at '%1'?\nError: %2").arg(QString::fromStdWString(wsPyHome)).arg(status.err_msg)});
         return;
     }
 }
