@@ -2,6 +2,8 @@
 
 #include "hobbits-core_global.h"
 
+#cmakedefine01 SELF_CONTAINED_APP
+
 namespace HobbitsCoreConfig
 {
 

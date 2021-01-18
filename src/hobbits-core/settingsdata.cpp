@@ -135,7 +135,11 @@ void SettingsData::initialize()
         appDirPath += "/";
     }
 #ifdef Q_OS_LINUX
+    #if SELF_CONTAINED_APP
     pythonHome = appDirPath + "../python";
+    #else
+    pythonHome = "";
+    #endif
 #endif
 #ifdef Q_OS_MACOS
     pythonHome = appDirPath + "../Frameworks/python";
@@ -143,11 +147,13 @@ void SettingsData::initialize()
 #ifdef Q_OS_WIN
     pythonHome = appDirPath;
 #endif
+    #if !defined(Q_OS_LINUX) || SELF_CONTAINED_APP
     QString pythonHomeCanonical = QDir(pythonHome).canonicalPath();
     // The canonical path will be empty if it doesn't exist, so we'll fall back on the base path for easier debugging
     if (!pythonHomeCanonical.isEmpty()) {
         pythonHome = pythonHomeCanonical;
     }
+    #endif
     m_transientSettings.insert(SettingsManager::PYTHON_HOME_KEY, pythonHome);
 
     m_privateSettings.insert(SettingsManager::WINDOW_SIZE_KEY, QSize(640, 480));
