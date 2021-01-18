@@ -3,6 +3,7 @@ set(BUILD_SHARED_LIBS ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+add_link_options("LINKER:--disable-new-dtags")
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
