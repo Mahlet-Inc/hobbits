@@ -52,15 +52,15 @@ steps:
     displayName: 'Package self-contained app binaries'
     workingDirectory: $(Build.SourcesDirectory)/build
   
-  - bash: |
-      npm ci
-      mkdir app
-      tar -xf $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz -C app --strip-components=1
-      ./prepare_tests.js
-      export QT_DEBUG_PLUGINS=1
-      ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/python
-    displayName: 'Run tests'
-    workingDirectory: $(Build.SourcesDirectory)/tests
+  # - bash: |
+  #     npm ci
+  #     mkdir app
+  #     tar -xf $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz -C app --strip-components=1
+  #     ./prepare_tests.js
+  #     export QT_DEBUG_PLUGINS=1
+  #     ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/python
+  #   displayName: 'Run tests'
+  #   workingDirectory: $(Build.SourcesDirectory)/tests
 
   - task: PublishBuildArtifacts@1
     inputs:
