@@ -56,8 +56,8 @@ steps:
       npm ci
       mkdir app
       tar -xf $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz -C app --strip-components=1
-      ls -lart app
       ./prepare_tests.js
+      export QT_DEBUG_PLUGINS=1
       ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/python
     displayName: 'Run tests'
     workingDirectory: $(Build.SourcesDirectory)/tests
