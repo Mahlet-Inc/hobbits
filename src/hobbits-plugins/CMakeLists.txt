@@ -8,26 +8,17 @@ macro(pluginInDir pluginType modName modDir)
         target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
         #harden("${pluginName}")
 
-	string(TOUPPER "${pluginName}" pluginNameUpper)
-	cpack_add_component("${pluginName}" GROUP "${pluginType}")
-	
-	set("CPACK_DEBIAN_${pluginNameUpper}_PACKAGE_NAME" "lib${pluginName}")
-	set("CPACK_RPM_${pluginNameUpper}_PACKAGE_NAME" "lib${pluginName}")
-	set("CPACK_DEBIAN_${pluginNameUpper}_PACKAGE_DEPENDS" "libqt${Qt5Core_VERSION_MAJOR}core${Qt5Core_VERSION_MAJOR}a, libqt${Qt5Widgets_VERSION_MAJOR}widgets${Qt5Widgets_VERSION_MAJOR}, ${CPACK_DEBIAN_CORE_LIB_PACKAGE_NAME}")
-	set("CPACK_RPM_${pluginNameUpper}_PACKAGE_DEPENDS" "qt${Qt5Core_VERSION_MAJOR}-qtcore, qt${Qt5Core_VERSION_MAJOR}-qtwidgets, ${CPACK_RPM_CORE_LIB_PACKAGE_NAME}")
-	
+        string(TOUPPER "${pluginName}" pluginNameUpper)
+
 	install(TARGETS "${pluginName}"
-		DESTINATION "${HOBBITS_PLUGINS_SYSTEM_PATH}/${pluginType}"
-		COMPONENT "${pluginName}"
-	)
-	pass_through_cpack_vars()
+                DESTINATION "${HOBBITS_PLUGINS_INSTALL_PATH}/${pluginType}"
+                COMPONENT "runtime"
+        )
 endmacro()
 
 macro(processPluginsType pluginTypeDir)
-	get_filename_component(pluginType "${pluginTypeDir}" NAME)
-	cpack_add_component_group("${pluginType}"
-		PARENT_GROUP "plugins"
-	)
+        get_filename_component(pluginType "${pluginTypeDir}" NAME)
+
 	file(GLOB pluginsDirzInThisDir
 		LIST_DIRECTORIES true
 		"${pluginTypeDir}/*"
@@ -47,10 +38,6 @@ macro(processPluginsType pluginTypeDir)
 
 	pass_through_cpack_vars()
 endmacro()
-
-cpack_add_component_group("plugins"
-	DESCRIPTION "Plugins to Hobbits GUI middleware actually doing the work"
-)
 
 file(GLOB pluginGroupDirzInThisDir
 	LIST_DIRECTORIES true

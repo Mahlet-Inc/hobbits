@@ -94,6 +94,11 @@ void SettingsManager::writeToSettings(QSettings &settings)
 
     settings.beginGroup("Plugin Loader");
     for (QString key : m_data.getPluginLoaderSettingKeys()) {
+#ifdef DEV_BUILD
+        if (key == SettingsManager::PLUGIN_PATH_KEY) {
+            continue;
+        }
+#endif
         settings.setValue(key, m_data.getPluginLoaderSetting(key));
     }
     settings.endGroup();
@@ -121,6 +126,11 @@ void SettingsManager::readFromSettings(QSettings &settings)
 
     settings.beginGroup("Plugin Loader");
     for (QString key : settings.allKeys()) {
+#ifdef DEV_BUILD
+        if (key == SettingsManager::PLUGIN_PATH_KEY) {
+            continue;
+        }
+#endif
         m_data.setPluginLoaderSetting(key, settings.value(key));
     }
     settings.endGroup();

@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-include(GNUInstallDirs)
 include(CheckCCompilerFlag)
 include(CPackComponent)
 
@@ -30,22 +29,62 @@ project("hobbits"
         VERSION "${VERSION_STRING}"
         HOMEPAGE_URL "https://github.com/Mahlet-Inc/hobbits")
 
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
+
+include(GNUInstallDirs)
 
 #
 # Dynamic Config
 #
 
-SET(MANUAL_PYTHON_PATH "" CACHE STRING "user-specified python root path")
+set(MANUAL_PYTHON_PATH "" CACHE STRING "User-specified python root path")
 
-option(HOBBITS_DEVELOPMENT "Plugins directory is relative to the binary" OFF)
+option(DEVELOPMENT_BUILD "Runnable in-place when building" OFF)
+option(SELF_CONTAINED_APP "Package in a self-contained format with relative linking" OFF)
 
-if(WIN32 OR HOBBITS_DEVELOPMENT)
-	list(APPEND HOBBITS_PLUGINS_SYSTEM_PATH "../hobbits-plugins" "../plugins")
+if (SELF_CONTAINED_APP)
+    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    SET(CMAKE_INSTALL_RPATH "")
+
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 endif()
 
-if(NOT WIN32)
-	list(APPEND HOBBITS_PLUGINS_SYSTEM_PATH "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/plugins")
+
+#
+# Python Config
+#
+
+if ( MANUAL_PYTHON_PATH )
+    message("Setting manual Python path")
+    message("${MANUAL_PYTHON_PATH}")
+    set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
+
 endif()
+find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
+
+
+#
+# Plugin installing and loading
+#
+
+if ((WIN32) OR (SELF_CONTAINED_APP))
+    set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}/../plugins")
+    list(APPEND HOBBITS_PLUGINS_PATHS "../plugins")
+else()
+    set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}/hobbits/plugins")
+    list(APPEND HOBBITS_PLUGINS_PATHS "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/plugins")
+    list(APPEND HOBBITS_PLUGINS_PATHS "~/.local/share/hobbits/plugins")
+endif()
+
+# in dev mode, install and search in same absolute dir
+if(DEVELOPMENT_BUILD)
+    add_definitions(-DDEV_BUILD)
+    set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/plugins")
+    set(HOBBITS_PLUGINS_PATHS "${CMAKE_CURRENT_BINARY_DIR}/src/hobbits-plugins")
+endif()
+
+string(REPLACE ";" ":" HOBBITS_PLUGINS_PATH "${HOBBITS_PLUGINS_PATHS}")
 
 
 #
@@ -55,6 +94,8 @@ endif()
 if (NOT DEFINED CPACK_GENERATOR)
     if(WIN32)
         set(CPACK_GENERATOR "ZIP;NSIS")
+    elseif(SELF_CONTAINED_APP)
+        set(CPACK_GENERATOR "TXZ")
     else()
         set(CPACK_GENERATOR "TXZ;RPM;DEB")
     endif()
@@ -82,9 +123,28 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_RPM_COMPRESSION_TYPE "xz")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-list(APPEND CPACK_RPM_RELOCATION_PATHS "${HOBBITS_PLUGINS_SYSTEM_PATH}")
 
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
+
+
+cpack_add_component("runtime")
+set("CPACK_DEBIAN_RUNTIME_PACKAGE_NAME" "hobbits")
+set("CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS" "libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-3, libpcap0.8")
+set("CPACK_RPM_RUNTIME_PACKAGE_NAME" "hobbits")
+set("CPACK_RPM_RUNTIME_PACKAGE_REQUIRES" "qt5-qtbase, qt5-qtbase-gui, fftw, libpcap")
+
+cpack_add_component("dev")
+set("CPACK_DEBIAN_DEV_PACKAGE_NAME" "hobbits-dev")
+set("CPACK_DEBIAN_DEV_PACKAGE_DEPENDS" "hobbits libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-dev, libpcap-dev")
+set("CPACK_RPM_DEV_PACKAGE_NAME" "hobbits-devel")
+set("CPACK_RPM_DEV_PACKAGE_REQUIRES" "hobbits qt5-qtbase-devel, qt5-qtbase-gui-devel, fftw-devel, libpcap-devel")
+
+set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "Hobbits Runtime")
+set(CPACK_COMPONENT_DEV_DISPLAY_NAME "Hobbits Development Tools")
+
+set(CPACK_COMPONENTS_ALL runtime dev)
+
+set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
 #
 # Add Files

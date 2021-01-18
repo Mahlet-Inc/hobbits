@@ -15,6 +15,8 @@ QMap<QString, QObject*> HobbitsPluginManager::loadPluginsFromDirectory(QDir dire
 
     QList<QDir> pluginDirs;
     pluginDirs.append(directory);
+    bool exist = directory.exists();
+    QStringList there = directory.entryList();
     // Check subdirs, 1 deep
     for (QString subDir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         pluginDirs.append(directory.absoluteFilePath(subDir));

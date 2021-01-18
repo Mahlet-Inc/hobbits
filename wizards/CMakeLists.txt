@@ -1,5 +1,11 @@
 set(QT_CREATOR_WIZARDS_BASE "${CMAKE_INSTALL_DATADIR}/qtcreator/templates/wizards/projects/")
 
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/${CMAKE_INSTALL_DATADIR}/qtcreator/templates/wizards/projects")
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/${CMAKE_INSTALL_DATADIR}/qtcreator/templates/wizards")
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/${CMAKE_INSTALL_DATADIR}/qtcreator/templates")
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/${CMAKE_INSTALL_DATADIR}/qtcreator")
+pass_through_cpack_vars()
+
 macro(qtCreatorWizardInDir wizardName wizDir)
 	set(wizardDirName "hobbits-plugin-${wizardName}")
 	set(wizardPackageName "qtcreator-wizard-${wizardDirName}")
@@ -9,24 +15,14 @@ macro(qtCreatorWizardInDir wizardName wizDir)
 		SOURCES "${SRCFILES}"
 	)
 
-	string(TOUPPER "${wizardPackageName}" wizardPackageNameUpper)
-	cpack_add_component("${wizardPackageName}" GROUP "qtcreator_wizards" DISPLAY_NAME "${wizardName}")
-
-	set("CPACK_DEBIAN_${wizardPackageNameUpper}_PACKAGE_NAME" "${wizardPackageName}")
-	set("CPACK_RPM_${wizardPackageNameUpper}_PACKAGE_NAME" "${wizardPackageName}")
+        string(TOUPPER "${wizardPackageName}" wizardPackageNameUpper)
 	
 	install(FILES ${SRCFILES}
 		DESTINATION "${QT_CREATOR_WIZARDS_BASE}/${wizardDirName}"
-		COMPONENT "${wizardPackageName}"
-	)
-	pass_through_cpack_vars()
+                COMPONENT "dev"
+        )
 endmacro()
 
-cpack_add_component_group("qtcreator_wizards"
-	DISPLAY_NAME "Qt Creator Wizards"
-	DESCRIPTION "wizards to Qt Creator to make hobbits plugins"
-	PARENT_GROUP "dev-all"
-)
 file(GLOB wizardsDirzInThisDir
 	LIST_DIRECTORIES true
 	"${CMAKE_CURRENT_SOURCE_DIR}/*"
@@ -43,4 +39,3 @@ foreach(wizDir IN LISTS wizardsDirzInThisDir)
 	endif()
 endforeach()
 
-pass_through_cpack_vars()

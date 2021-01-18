@@ -3,5 +3,5 @@
 
 namespace HobbitsRunnerConfig
 {
-    const char VERSION[] = "dev-8874a4b";
+    const char VERSION[] = "dev-89b073a";
 }

@@ -12,31 +12,22 @@ target_link_libraries("hobbits-widgets" hobbits-core Qt5::Core Qt5::Widgets)
 target_compile_definitions("hobbits-widgets" PRIVATE "-DHOBBITSWIDGETS_LIBRARY")
 #harden("hobbits-widgets")
 
+if (SELF_CONTAINED_APP)
+    set_target_properties("hobbits-widgets"
+                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../python/lib")
+endif()
 
 #
 # CPack
 #
 
-cpack_add_component("widgets_lib")
-set("CPACK_DEBIAN_HOBBITS-WIDGETS_PACKAGE_NAME" "libhobbits-widgets")
-set("CPACK_RPM_HOBBITS-WIDGETS_PACKAGE_NAME" "libhobbits-widgets")
-set("CPACK_DEBIAN_HOBBITS-WIDGETS_PACKAGE_DEPENDS" "libqt${Qt5Core_VERSION_MAJOR}core${Qt5Core_VERSION_MAJOR}a, libqt${Qt5Widgets_VERSION_MAJOR}widgets${Qt5Widgets_VERSION_MAJOR}, ${CPACK_DEBIAN_CORE_LIB_PACKAGE_NAME}")
-set("CPACK_RPM_HOBBITS-WIDGETS_PACKAGE_DEPENDS" "qt${Qt5Core_VERSION_MAJOR}-qtcore, qt${Qt5Core_VERSION_MAJOR}-qtwidgets, ${CPACK_RPM_CORE_LIB_PACKAGE_NAME}")
-
 install(TARGETS "hobbits-widgets"
 	LIBRARY
-        COMPONENT "widgets_lib"
+        COMPONENT "runtime"
 )
-
-cpack_add_component("widgets_lib_dev")
-set("CPACK_DEBIAN_HOBBITS-WIDGETS-DEV_PACKAGE_NAME" "${CPACK_DEBIAN_HOBBITS-WIDGETS_PACKAGE_NAME}-dev")
-set("CPACK_RPM_HOBBITS-WIDGETS-DEV_PACKAGE_NAME" "${CPACK_RPM_HOBBITS-WIDGETS_PACKAGE_NAME}-devel")
-set("CPACK_DEBIAN_HOBBITS-WIDGETS-DEV_PACKAGE_DEPENDS" "qtbase${Qt5Core_VERSION_MAJOR}-dev, ${CPACK_DEBIAN_CORE_LIB_DEV_PACKAGE_NAME}")
-set("CPACK_RPM_HOBBITS-WIDGETS-DEV_PACKAGE_DEPENDS" "qt${Qt5Core_VERSION_MAJOR}-qtcore, qt${Qt5Core_VERSION_MAJOR}-qtwidgets, ${CPACK_RPM_CORE_LIB_DEV_PACKAGE_NAME}")
 
 install(FILES ${HDRFILES}
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits/widgets"
-        COMPONENT "widgets_lib_dev"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
+        COMPONENT "dev"
 )
 
-pass_through_cpack_vars()

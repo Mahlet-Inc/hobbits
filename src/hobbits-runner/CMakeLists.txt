@@ -18,17 +18,20 @@ add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
 target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 #harden("hobbits-runner")
 
+if (SELF_CONTAINED_APP)
+    set_target_properties("hobbits-runner"
+                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../python/lib")
+endif()
+
+# in dev mode, make sure dynamic link is to targetted python
+if(DEVELOPMENT_BUILD)
+    set_target_properties("hobbits-runner"
+                          PROPERTIES BUILD_RPATH "${Python3_LIBRARY_DIRS}")
+endif()
+
 
 #
 # CPack
 #
+install(TARGETS "hobbits-runner" COMPONENT "runtime")
 
-cpack_add_component("runner")
-set("CPACK_DEBIAN_RUNNER_PACKAGE_NAME" "hobbits-runner")
-set("CPACK_RPM_RUNNER_PACKAGE_NAME" "hobbits-runner")
-set("CPACK_DEBIAN_RUNNER_PACKAGE_DEPENDS" "libqt${Qt5Core_VERSION_MAJOR}core${Qt5Core_VERSION_MAJOR}a, libqt5gui5, libqt${Qt5Widgets_VERSION_MAJOR}widgets${Qt5Widgets_VERSION_MAJOR}, ${CPACK_DEBIAN_CORE_LIB_PACKAGE_NAME}")
-set("CPACK_RPM_RUNNER_PACKAGE_DEPENDS" "qt${Qt5Core_VERSION_MAJOR}-qtbase, qt${Qt5Core_VERSION_MAJOR}-qtgui, qt${Qt5Core_VERSION_MAJOR}-qtwidgets, ${CPACK_RPM_CORE_LIB_PACKAGE_NAME}")
-
-install(TARGETS "hobbits-runner" COMPONENT "runner")
-
-pass_through_cpack_vars()
