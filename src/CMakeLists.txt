@@ -3,6 +3,10 @@ set(BUILD_SHARED_LIBS ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5)
+    SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
+endif()
 add_link_options("LINKER:--disable-new-dtags")
 
 include(FindPCAP)

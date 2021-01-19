@@ -27,8 +27,6 @@ project("hobbits"
         VERSION "${VERSION_STRING}"
         HOMEPAGE_URL "https://github.com/Mahlet-Inc/hobbits")
 
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
-
 include(GNUInstallDirs)
 include(CheckCCompilerFlag)
 include(CPackComponent)
