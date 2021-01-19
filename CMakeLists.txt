@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-include(CheckCCompilerFlag)
-include(CPackComponent)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/findFFTW")
@@ -32,6 +30,8 @@ project("hobbits"
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
 
 include(GNUInstallDirs)
+include(CheckCCompilerFlag)
+include(CPackComponent)
 
 #
 # Dynamic Config
