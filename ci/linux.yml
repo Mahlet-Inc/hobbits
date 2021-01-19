@@ -47,7 +47,7 @@ steps:
     workingDirectory: $(Build.SourcesDirectory)/build
 
   - script: |
-      sudo ninja package
+      ninja package
       mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz
     displayName: 'Package self-contained app binaries'
     workingDirectory: $(Build.SourcesDirectory)/build
