@@ -1,6 +1,8 @@
 #include "settingsmanager.h"
 #include "settingsdata.h"
+#include "hobbitscoreconfig.h"
 #include <QDir>
+#include <QCoreApplication>
 
 const QString SettingsManager::ONE_COLOR_KEY = "1-Bit Color";
 const QString SettingsManager::ZERO_COLOR_KEY = "0-Bit Color";
@@ -58,7 +60,15 @@ void SettingsManager::writeSettings()
 {
     QMutexLocker lock(&instance().m_mutex);
     if (instance().m_configFilePath.isEmpty()) {
+#if SELF_CONTAINED_APP
+        QString appDirPath = QCoreApplication::applicationDirPath();
+        if (!appDirPath.isEmpty()) {
+            appDirPath += "/";
+        }
+        QSettings settings(appDirPath + "config.ini", QSettings::IniFormat);
+#else
         QSettings settings("Hobbits", "Hobbits GUI");
+#endif
         instance().writeToSettings(settings);
     }
     else {
@@ -94,7 +104,7 @@ void SettingsManager::writeToSettings(QSettings &settings)
 
     settings.beginGroup("Plugin Loader");
     for (QString key : m_data.getPluginLoaderSettingKeys()) {
-#ifdef DEV_BUILD
+#if DEVELOPMENT_BUILD
         if (key == SettingsManager::PLUGIN_PATH_KEY) {
             continue;
         }
@@ -126,7 +136,7 @@ void SettingsManager::readFromSettings(QSettings &settings)
 
     settings.beginGroup("Plugin Loader");
     for (QString key : settings.allKeys()) {
-#ifdef DEV_BUILD
+#if DEVELOPMENT_BUILD
         if (key == SettingsManager::PLUGIN_PATH_KEY) {
             continue;
         }

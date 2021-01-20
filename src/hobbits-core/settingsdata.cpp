@@ -135,7 +135,11 @@ void SettingsData::initialize()
         appDirPath += "/";
     }
 #ifdef Q_OS_LINUX
+    #if SELF_CONTAINED_APP
     pythonHome = appDirPath + "../python";
+    #else
+    pythonHome = "";
+    #endif
 #endif
 #ifdef Q_OS_MACOS
     pythonHome = appDirPath + "../Frameworks/python";

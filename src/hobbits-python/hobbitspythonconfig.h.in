@@ -1,11 +1,9 @@
 #pragma once
 
-#include "hobbits-python_global.h"
-
 namespace HobbitsPythonConfig
 {
 
-HOBBITSPYTHONSHARED_EXPORT extern const char PYTHON_VERSION[] = "@HOBBITS_PYTHON_PYTHON_VERSION@";
-HOBBITSPYTHONSHARED_EXPORT extern const char VERSION[] = "@HOBBITS_PYTHON_VERSION@";
+    static const char PYTHON_VERSION[] = "@HOBBITS_PYTHON_PYTHON_VERSION@";
+    static const char VERSION[] = "@HOBBITS_PYTHON_VERSION@";
 
 }

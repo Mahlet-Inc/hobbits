@@ -50,10 +50,18 @@ function(pack_python)
     
     install( DIRECTORY "${PYROOT_DIR}/bin"
                 DESTINATION "python"
-                COMPONENT runtime)
+                COMPONENT runtime
+                PATTERN "*"
+                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                            GROUP_READ GROUP_EXECUTE
+                            WORLD_READ WORLD_EXECUTE)
     install( DIRECTORY "${PYROOT_DIR}/lib"
                 DESTINATION "python"
-                COMPONENT runtime)
+                COMPONENT runtime
+                PATTERN "*.so"
+                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                            GROUP_READ GROUP_EXECUTE
+                            WORLD_READ WORLD_EXECUTE)
 endfunction(pack_python)
 
 function(pack_fftw)

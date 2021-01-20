@@ -35,23 +35,45 @@ steps:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script: | 
-      mkdir build
-      cd build
+      mkdir build_sc
+      cd build_sc
       cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DSELF_CONTAINED_APP=1 -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
     workingDirectory: $(Build.SourcesDirectory)
-    displayName: 'Configure'
+    displayName: 'Configure for self-contained'
 
   - script: |
       ninja
-    displayName: 'Build hobbits'
-    workingDirectory: $(Build.SourcesDirectory)/build
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    displayName: 'Build for self-contained'
 
   - script: |
       ninja package
       mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
     displayName: 'Package self-contained app binaries'
-    workingDirectory: $(Build.SourcesDirectory)/build
   
+  - script: | 
+      mkdir build_pack
+      cd build_pack
+      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+    workingDirectory: $(Build.SourcesDirectory)
+    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+    displayName: 'Configure for packagers'
+
+  - script: |
+      ninja
+    workingDirectory: $(Build.SourcesDirectory)/build_pack
+    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+    displayName: 'Build for packagers'
+
+  - script: |
+      ninja package
+      mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)/hobbits.deb
+      mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)/hobbits.rpm
+    workingDirectory: $(Build.SourcesDirectory)/build_pack
+    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+    displayName: 'Create packagers'
+
   # - bash: |
   #     npm ci
   #     mkdir app
@@ -64,5 +86,14 @@ steps:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: ${{ parameters.artifactName }}
+      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz
+  
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits.deb
+    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits.rpm
+    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')

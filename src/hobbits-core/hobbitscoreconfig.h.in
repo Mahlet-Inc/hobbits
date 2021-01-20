@@ -1,11 +1,12 @@
 #pragma once
 
-#include "hobbits-core_global.h"
+#cmakedefine01 SELF_CONTAINED_APP
+#cmakedefine01 DEVELOPMENT_BUILD
 
 namespace HobbitsCoreConfig
 {
 
-HOBBITSCORESHARED_EXPORT extern const char VERSION[] = "@HOBBITS_CORE_VERSION@";
-HOBBITSCORESHARED_EXPORT extern const char PLUGINS_DEFAULT_PATH[] = "@HOBBITS_PLUGINS_PATH@";
+    static const char VERSION[] = "@HOBBITS_CORE_VERSION@";
+    static const char PLUGINS_DEFAULT_PATH[] = "@HOBBITS_PLUGINS_PATH@";
 
 }

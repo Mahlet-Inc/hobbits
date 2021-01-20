@@ -2,5 +2,5 @@
 
 namespace HobbitsGuiConfig
 {
-    const char VERSION[] = "@HOBBITS_GUI_VERSION@";
+    static const char VERSION[] = "@HOBBITS_GUI_VERSION@";
 }
