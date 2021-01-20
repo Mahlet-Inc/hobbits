@@ -29,7 +29,7 @@ target_compile_definitions("hobbits-python" PRIVATE "-DHOBBITSPYTHON_LIBRARY")
 
 if (SELF_CONTAINED_APP)
     set_target_properties("hobbits-python"
-                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../python/lib")
+                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
 endif()
 
 #

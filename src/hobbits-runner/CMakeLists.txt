@@ -20,7 +20,7 @@ target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-co
 
 if (SELF_CONTAINED_APP)
     set_target_properties("hobbits-runner"
-                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../python/lib")
+                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
 endif()
 
 # in dev mode, make sure dynamic link is to targetted python
