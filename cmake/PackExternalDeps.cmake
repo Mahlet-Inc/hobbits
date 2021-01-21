@@ -41,6 +41,23 @@ function(pack_qt_libs)
     install(FILES ${QTPLATFORMS}
             DESTINATION "${CMAKE_INSTALL_BINDIR}/platforms")
 
+    if (UNIX AND NOT APPLE)
+        foreach(PLATFILEFULL ${QTPLATFORMS})
+            get_filename_component(PLATFILE "${PLATFILEFULL}" NAME)
+            install(
+                CODE
+                "
+                message(\"Updating RPATH of bin/platforms/${PLATFILE}\")
+                execute_process(
+                    COMMAND patchelf --remove-rpath \${CMAKE_INSTALL_PREFIX}/bin/platforms/${PLATFILE}
+                )
+                execute_process(
+                    COMMAND patchelf --force-rpath --set-rpath \\$ORIGIN/../../lib64:\\$ORIGIN/../../lib \${CMAKE_INSTALL_PREFIX}/bin/platforms/${PLATFILE}
+                )"
+            )
+        endforeach()
+    endif()
+
 endfunction(pack_qt_libs)
 
 function(pack_python)

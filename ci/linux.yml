@@ -48,7 +48,7 @@ steps:
 
   - script: |
       ninja package
-      mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz
+      mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)
     workingDirectory: $(Build.SourcesDirectory)/build_sc
     displayName: 'Package self-contained app binaries'
   
@@ -68,8 +68,8 @@ steps:
 
   - script: |
       ninja package
-      mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)/hobbits.deb
-      mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)/hobbits.rpm
+      mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)
+      mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)
     workingDirectory: $(Build.SourcesDirectory)/build_pack
     condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
     displayName: 'Create packagers'
@@ -86,14 +86,5 @@ steps:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits-${{ parameters.artifactName }}.txz
-  
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits.deb
-    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/hobbits.rpm
-    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: ${{ parameters.artifactName }}
