@@ -21,7 +21,7 @@ target_link_libraries("hobbits-core" Qt5::Core Qt5::Widgets)
 target_compile_definitions("hobbits-core" PRIVATE "-DHOBBITSCORE_LIBRARY")
 #harden("hobbits-core")
 
-if (SELF_CONTAINED_APP)
+if (SELF_CONTAINED_APP AND LINUX)
     set_target_properties("hobbits-core"
                           PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif()
@@ -30,12 +30,14 @@ endif()
 # CPack
 #
 
-install(TARGETS "hobbits-core"
-	LIBRARY
-        COMPONENT "runtime"
-)
+if (LINUX)
+    install(TARGETS "hobbits-core"
+            LIBRARY
+            COMPONENT "runtime"
+    )
 
-install(FILES ${HDRFILES}
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
-        COMPONENT "dev"
-)
+    install(FILES ${HDRFILES}
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
+            COMPONENT "dev"
+    )
+endif()

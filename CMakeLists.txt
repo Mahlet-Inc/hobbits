@@ -31,6 +31,8 @@ include(GNUInstallDirs)
 include(CheckCCompilerFlag)
 include(CPackComponent)
 
+set(LINUX (UNIX AND NOT APPLE))
+
 #
 # Dynamic Config
 #
@@ -40,7 +42,7 @@ set(MANUAL_PYTHON_PATH "" CACHE STRING "User-specified python root path")
 option(DEVELOPMENT_BUILD "Runnable in-place when building" OFF)
 option(SELF_CONTAINED_APP "Package in a self-contained format with relative linking" OFF)
 
-if (SELF_CONTAINED_APP)
+if (SELF_CONTAINED_APP OR APPLE)
     SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
     SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
     SET(CMAKE_INSTALL_RPATH "")
@@ -65,9 +67,12 @@ find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 # Plugin installing and loading
 #
 
-if ((WIN32) OR (SELF_CONTAINED_APP))
+if ((WIN32) OR (SELF_CONTAINED_APP AND LINUX))
     set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}/../plugins")
     list(APPEND HOBBITS_PLUGINS_PATHS "../plugins")
+elseif(APPLE)
+    set(HOBBITS_PLUGINS_INSTALL_PATH "hobbits.app/Contents/PlugIns/hobbits")
+    list(APPEND HOBBITS_PLUGINS_PATHS "../PlugIns/hobbits")
 else()
     set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}/hobbits/plugins")
     list(APPEND HOBBITS_PLUGINS_PATHS "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/plugins")
@@ -89,8 +94,8 @@ string(REPLACE ";" ":" HOBBITS_PLUGINS_PATH "${HOBBITS_PLUGINS_PATHS}")
 
 if (NOT DEFINED CPACK_GENERATOR)
     if(WIN32)
-        set(CPACK_GENERATOR "ZIP;NSIS")
-    elseif(SELF_CONTAINED_APP)
+        set(CPACK_GENERATOR "ZIP")
+    elseif(SELF_CONTAINED_APP OR APPLE)
         set(CPACK_GENERATOR "TXZ")
     else()
         set(CPACK_GENERATOR "RPM;DEB")
@@ -101,7 +106,7 @@ set(CPACK_PACKAGE_NAME "hobbits")
 set(CPACK_PACKAGE_VENDOR "Hobbits Team")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/docs/CPack.hobbits.description.txt")
 set(CPACK_HELP_LINK "https://mahlet-inc.github.io/")
-set(CPACK_PACKAGE_CONTACT "adam@mahletconsulting.com")
+set(CPACK_PACKAGE_CONTACT "adam@smr.llc")
 set(CPACK_PACKAGE_CHECKSUM "SHA512")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
@@ -122,7 +127,6 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 
-
 cpack_add_component("runtime")
 set("CPACK_DEBIAN_RUNTIME_PACKAGE_NAME" "hobbits")
 set("CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS" "libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-3, libpcap0.8")
@@ -142,11 +146,33 @@ set(CPACK_COMPONENTS_ALL runtime dev)
 
 set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
+
 #
 # Add Files
 #
 
 add_subdirectory(src)
 add_subdirectory(wizards)
+
+
+#
+# Install Additional Files when Necessary
+#
+
+include(PackExternalDeps)
+if (SELF_CONTAINED_APP OR APPLE OR WIN32)
+    pack_qt_libs()
+    pack_python()
+    pack_fftw()
+    pack_pcap()
+endif()
+
+if (APPLE)
+    install(CODE "
+        include(BundleUtilities)
+        set(BU_CHMOD_BUNDLE_ITEMS TRUE)
+        fixup_bundle(\"${CMAKE_BINARY_DIR}/src/hobbits-gui/hobbits.app\" \"\" \"${CMAKE_BINARY_DIR}/src\")
+        ")
+endif()
 
 include(CPack)

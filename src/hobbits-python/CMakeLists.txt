@@ -27,7 +27,7 @@ target_link_libraries("hobbits-python" hobbits-core hobbits-widgets "${Python3_L
 target_compile_definitions("hobbits-python" PRIVATE "-DHOBBITSPYTHON_LIBRARY")
 #harden("hobbits-python")
 
-if (SELF_CONTAINED_APP)
+if (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits-python"
                           PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
 endif()
@@ -36,14 +36,16 @@ endif()
 # CPack
 #
 
-install(TARGETS "hobbits-python"
-	LIBRARY
-        COMPONENT "runtime"
-)
+if (LINUX)
+    install(TARGETS "hobbits-python"
+            LIBRARY
+            COMPONENT "runtime"
+    )
 
-install(FILES ${HDRFILES}
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits/python"
-        COMPONENT "dev"
-)
+    install(FILES ${HDRFILES}
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits/python"
+            COMPONENT "dev"
+    )
+endif()
 
 pass_through_cpack_vars()

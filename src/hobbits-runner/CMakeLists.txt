@@ -18,7 +18,7 @@ add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
 target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 #harden("hobbits-runner")
 
-if (SELF_CONTAINED_APP)
+if (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits-runner"
                           PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
 endif()
@@ -33,5 +33,7 @@ endif()
 #
 # CPack
 #
-install(TARGETS "hobbits-runner" COMPONENT "runtime")
+if (LINUX)
+    install(TARGETS "hobbits-runner" COMPONENT "runtime")
+endif()
 

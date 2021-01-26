@@ -68,67 +68,21 @@ steps:
   - script: | 
       mkdir build
       cd build
-      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCPACK_GENERATOR="DEB;RPM;TXZ" -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/cmake ..
+      cmake -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/cmake ..
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Configure'
 
   - script: |
-      cd $(Build.SourcesDirectory)
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib
-      ninja
+      make
+    workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Build hobbits'
 
   - script: |
-      ls $(Build.SourcesDirectory)/src/hobbits-gui
-      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib
-      ls $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin
-      cd $(Build.SourcesDirectory)/src/hobbits-gui
-      $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/bin/macdeployqt hobbits.app
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner hobbits.app/Contents/MacOS/
-      mkdir -p hobbits.app/Contents/plugins/analyzers hobbits.app/Contents/plugins/operators hobbits.app/Contents/plugins/displays hobbits.app/Contents/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.dylib hobbits.app/Contents/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.dylib hobbits.app/Contents/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.dylib hobbits.app/Contents/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.dylib hobbits.app/Contents/plugins/operators
-      cp $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.*dylib hobbits.app/Contents/Frameworks
-      cp $(Build.SourcesDirectory)/src/hobbits-widgets/libhobbits-widgets.*dylib hobbits.app/Contents/Frameworks
-      cp $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.*dylib hobbits.app/Contents/Frameworks
-      cp -r $(Build.SourcesDirectory)/hobbits_python hobbits.app/Contents/Frameworks/python
-      find hobbits.app/Contents/Frameworks/python/lib -name "*.dylib*" -type f -exec chmod +x {} \;
-      chmod +x hobbits.app/Contents/Frameworks/python/bin/*
-      mkdir -p hobbits.app/Contents/Frameworks/QtNetwork.framework/Versions/5/
-      cd hobbits.app/Contents/Frameworks/QtNetwork.framework
-      cp -r $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/Resources Versions/5/
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/Versions/5/QtNetwork Versions/5/
-      cp $(Build.BinariesDirectory)/Qt/5.14.1/clang_64/lib/QtNetwork.framework/QtNetwork .
-      ln -s Versions/5/Resources Resources
-      cd Versions
-      ln -s 5 Current
-      cd $(Build.SourcesDirectory)/src/hobbits-gui
-      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-core.1.dylib @rpath/libhobbits-core.1.dylib $@ {} \;
-      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-python.1.dylib @rpath/libhobbits-python.1.dylib $@ {} \;
-      find . \( -name "*dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change libhobbits-widgets.1.dylib @rpath/libhobbits-widgets.1.dylib $@ {} \;
-
-      cp /usr/local/opt/fftw/lib/libfftw3.*dylib hobbits.app/Contents/Frameworks
-      install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/analyzers/libWidthFramer.dylib
-      install_name_tool -change /usr/local/opt/fftw/lib/libfftw3.3.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/displays/libSpectrogram.dylib
-      install_name_tool -change /usr/local/opt/libpcap/lib/libpcap.1.9.1.dylib @rpath/libfftw3.3.dylib hobbits.app/Contents/plugins/importerexporters/libPacketCapture.dylib
-      cp /usr/local/opt/gettext/lib/libintl.8.dylib hobbits.app/Contents/Frameworks/
-      install_name_tool -change /usr/local/opt/gettext/lib/libintl.8.dylib @rpath/libintl.8.dylib hobbits.app/Contents/Frameworks/python/lib/libpython3.9.dylib
-
-      PY_DYLIB_PATH=`otool -l hobbits.app/Contents/Frameworks/libhobbits-python.dylib | grep libpython3.9.dylib | awk '{print $2}'`
-      find hobbits.app \( -name "*.dylib" -o -name "hobbits" -o -name "hobbits-runner" \) -exec install_name_tool -change $PY_DYLIB_PATH @rpath/python/lib/libpython3.9.dylib $@ {} \;
-      
-      
-
-      tar cvzf hobbits_mac_release.tgz hobbits.app
+      make package
+      mv hobbits-*.tar.xz $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Create mac app bundle'
-
-  - task: CopyFiles@2 
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)/src/hobbits-gui
-      contents: hobbits_mac_release.tgz
-      targetFolder: $(Build.ArtifactStagingDirectory)
 
   - task: PublishBuildArtifacts@1
     inputs:

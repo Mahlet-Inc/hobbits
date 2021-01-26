@@ -17,10 +17,12 @@ macro(qtCreatorWizardInDir wizardName wizDir)
 
         string(TOUPPER "${wizardPackageName}" wizardPackageNameUpper)
 	
-	install(FILES ${SRCFILES}
-		DESTINATION "${QT_CREATOR_WIZARDS_BASE}/${wizardDirName}"
-                COMPONENT "dev"
-        )
+        if (LINUX)
+            install(FILES ${SRCFILES}
+                    DESTINATION "${QT_CREATOR_WIZARDS_BASE}/${wizardDirName}"
+                    COMPONENT "dev"
+            )
+        endif()
 endmacro()
 
 file(GLOB wizardsDirzInThisDir

@@ -12,7 +12,7 @@ target_link_libraries("hobbits-widgets" hobbits-core Qt5::Core Qt5::Widgets)
 target_compile_definitions("hobbits-widgets" PRIVATE "-DHOBBITSWIDGETS_LIBRARY")
 #harden("hobbits-widgets")
 
-if (SELF_CONTAINED_APP)
+if (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits-widgets"
                           PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif()
@@ -21,13 +21,14 @@ endif()
 # CPack
 #
 
-install(TARGETS "hobbits-widgets"
-	LIBRARY
-        COMPONENT "runtime"
-)
+if (LINUX)
+    install(TARGETS "hobbits-widgets"
+            LIBRARY
+            COMPONENT "runtime"
+    )
 
-install(FILES ${HDRFILES}
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
-        COMPONENT "dev"
-)
-
+    install(FILES ${HDRFILES}
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
+            COMPONENT "dev"
+    )
+endif()
