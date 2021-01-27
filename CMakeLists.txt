@@ -8,7 +8,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/findFFTW")
 # Project Config
 #
 
-set(LINUX (UNIX AND NOT APPLE))
+set(LINUX FALSE)
+if (UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/.version")
     message("Getting build version from .version file")
