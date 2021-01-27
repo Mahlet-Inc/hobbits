@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/findFFTW")
-include(Hardening)
-include(passthroughvars)
 
 
 #
 # Project Config
 #
+
+set(LINUX (UNIX AND NOT APPLE))
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/.version")
     message("Getting build version from .version file")
@@ -30,8 +30,38 @@ project("hobbits"
 include(GNUInstallDirs)
 include(CheckCCompilerFlag)
 include(CPackComponent)
+include(Hardening)
+include(passthroughvars)
+include(FindPCAP)
 
-set(LINUX (UNIX AND NOT APPLE))
+#
+# Compile and Link Config
+#
+
+set(CXX_STANDARD 20)
+set(BUILD_SHARED_LIBS ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+if (LINUX)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5)
+        SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
+    endif()
+    add_link_options("LINKER:--disable-new-dtags")
+endif()
+
+
+#
+# Dependencies
+#
+
+find_package(Qt5Core CONFIG REQUIRED)
+find_package(Qt5Widgets CONFIG REQUIRED)
+find_package(Qt5Network CONFIG REQUIRED)
+find_package(FFTW REQUIRED)
+find_package(PCAP REQUIRED)
+
 
 #
 # Dynamic Config
