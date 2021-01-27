@@ -2,7 +2,12 @@
 function(pack_qt_libs)
 
     get_target_property(QT_CORE_LIB Qt5::Core LOCATION)
-    get_filename_component(QT_LIB_DIR "${QT_CORE_LIB}" DIRECTORY)
+    if (APPLE)
+        get_filename_component(CORE_FRAMEWORK_DIR "${QT_CORE_LIB}" DIRECTORY)
+        get_filename_component(QT_LIB_DIR "${CORE_FRAMEWORK_DIR}" DIRECTORY)
+    else()
+        get_filename_component(QT_LIB_DIR "${QT_CORE_LIB}" DIRECTORY)
+    endif()
     get_filename_component(QT_ROOT_DIR "${QT_LIB_DIR}" DIRECTORY)
     set(QT_PLATFORM_DIR "${QT_ROOT_DIR}/plugins/platforms")
 
