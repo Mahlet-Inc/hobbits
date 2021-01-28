@@ -19,7 +19,7 @@ target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-co
 #harden("hobbits-runner")
 
 if (APPLE)
-    set_target_properties("hobbits"
+    set_target_properties("hobbits-runner"
                           PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/python/lib")
 elseif (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits-runner"
