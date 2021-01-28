@@ -18,7 +18,10 @@ add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
 target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 #harden("hobbits-runner")
 
-if (LINUX AND SELF_CONTAINED_APP)
+if (APPLE)
+    set_target_properties("hobbits"
+                          PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/python/lib")
+elseif (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits-runner"
                           PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
 endif()
@@ -35,5 +38,10 @@ endif()
 #
 if (LINUX)
     install(TARGETS "hobbits-runner" COMPONENT "runtime")
+elseif(APPLE)
+    install(TARGETS "hobbits-runner"
+            COMPONENT "runtime"
+            DESTINATION "hobbits.app/Contents/MacOS"
+    )
 endif()
 

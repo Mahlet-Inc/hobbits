@@ -69,6 +69,9 @@ function(pack_qt_libs)
                           "${QT_LIB_DIR}/QtDBus.framework"
                           "${QT_LIB_DIR}/QtNetwork.framework"
                           "${QT_LIB_DIR}/QtConcurrent.framework"
+                          "${QT_LIB_DIR}/QtCore.framework"
+                          "${QT_LIB_DIR}/QtGui.framework"
+                          "${QT_LIB_DIR}/QtWidgets.framework"
                 DESTINATION "hobbits.app/Contents/Frameworks")
     endif()
 
@@ -102,6 +105,12 @@ function(pack_python)
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                             GROUP_READ GROUP_EXECUTE
                             WORLD_READ WORLD_EXECUTE)
+
+    if(APPLE)
+        file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
+        install(FILES ${INTLLIBS}
+                DESTINATION "hobbits.app/Contents/Frameworks")
+    endif()
 endfunction(pack_python)
 
 function(pack_fftw)
@@ -112,7 +121,7 @@ function(pack_fftw)
         install(FILES ${FFTWLIBS}
                 DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     elseif(APPLE)
-        get_target_property(FFTWLIB FFTW::Double INTERFACE_LINK_LIBRARIES)
+        file(GLOB FFTWLIBS "/usr/local/opt/fftw/lib/fftw3.*dylib")
         install(FILES ${FFTWLIBS}
                 DESTINATION "hobbits.app/Contents/Frameworks")
     elseif(WIN32)
@@ -126,7 +135,8 @@ function(pack_pcap)
         install(FILES ${PCAPLIBS}
                 DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     elseif(APPLE)
-        install(FILES ${PCAP_LIBRARY}
+        file(GLOB PCAPLIBS "/usr/local/opt/libpcap/lib/libpcap.*dylib")
+        install(FILES ${PCAPLIBS}
                 DESTINATION "hobbits.app/Contents/Frameworks")
     elseif(WIN32)
     endif()

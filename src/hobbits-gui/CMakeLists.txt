@@ -21,7 +21,7 @@ target_link_libraries("hobbits" hobbits-python hobbits-widgets hobbits-core Qt5:
 
 if (APPLE)
     set_target_properties("hobbits"
-                          PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks")
+                          PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/python/lib")
 elseif (LINUX AND SELF_CONTAINED_APP)
     set_target_properties("hobbits"
                           PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")

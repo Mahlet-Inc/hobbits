@@ -40,4 +40,10 @@ if (LINUX)
             DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hobbits"
             COMPONENT "dev"
     )
+elseif(APPLE)
+    install(TARGETS "hobbits-core"
+            LIBRARY
+            COMPONENT "runtime"
+            DESTINATION "hobbits.app/Contents/Frameworks"
+    )
 endif()

@@ -200,12 +200,4 @@ if (SELF_CONTAINED_APP OR APPLE OR WIN32)
     pack_pcap()
 endif()
 
-if (APPLE)
-    install(CODE "
-        include(BundleUtilities)
-        set(BU_CHMOD_BUNDLE_ITEMS TRUE)
-        fixup_bundle(\"${CMAKE_BINARY_DIR}/src/hobbits-gui/hobbits.app\" \"\" \"${CMAKE_BINARY_DIR}/src\")
-        ")
-endif()
-
 include(CPack)
