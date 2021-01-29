@@ -152,7 +152,7 @@ function(pack_fftw)
         install(FILES ${FFTWLIBS}
                 DESTINATION "hobbits.app/Contents/Frameworks")
     elseif(WIN32)
-        install(FILES ${FFTWLIB}
+        install(FILES "${CMAKE_SOURCE_DIR}/windows/libfftw3-3.dll"
                 DESTINATION ".")
     endif()
 endfunction(pack_fftw)
