@@ -55,7 +55,7 @@ steps:
   - script: | 
       mkdir build_pack
       cd build_pack
-      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+      cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
     workingDirectory: $(Build.SourcesDirectory)
     condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
     displayName: 'Configure for packagers'
