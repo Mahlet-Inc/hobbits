@@ -52,6 +52,11 @@ elseif(APPLE)
             COMPONENT "runtime"
             DESTINATION "hobbits.app/Contents/Frameworks"
     )
+elseif(WIN32)
+    install(TARGETS "hobbits-python"
+            COMPONENT "runtime"
+            DESTINATION "."
+    )
 endif()
 
 pass_through_cpack_vars()

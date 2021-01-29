@@ -73,6 +73,22 @@ function(pack_qt_libs)
                           "${QT_LIB_DIR}/QtGui.framework"
                           "${QT_LIB_DIR}/QtWidgets.framework"
                 DESTINATION "hobbits.app/Contents/Frameworks")
+    elseif(WIN32)
+        file(GLOB QTPLATFORMS "${QT_PLATFORM_DIR}/*.dll")
+        install(FILES ${QTPLATFORMS}
+                DESTINATION "platforms")
+        file(GLOB QTTOOLS "${QT_ROOT_DIR}/../../Tools/*.dll")
+        install(FILES ${QTTOOLS}
+                DESTINATION ".")
+        install(FILES "${QT_ROOT_DIR}/bin/Qt5Core.dll"
+                      "${QT_ROOT_DIR}/bin/Qt5Gui.dll"
+                      "${QT_ROOT_DIR}/bin/Qt5Widgets.dll"
+                      "${QT_ROOT_DIR}/bin/Qt5Concurrent.dll"
+                      "${QT_ROOT_DIR}/bin/Qt5Network.dll"
+                      "${QT_ROOT_DIR}/bin/libEGL.dll"
+                      "${QT_ROOT_DIR}/bin/libGLSv2.dll"
+                      "${QT_ROOT_DIR}/bin/opengl32sw.dll"
+                DESTINATION ".")
     endif()
 
 endfunction(pack_qt_libs)
@@ -82,34 +98,46 @@ function(pack_python)
     get_filename_component(PYBIN_DIR "${PYBIN}" DIRECTORY)
     get_filename_component(PYROOT_DIR "${PYBIN_DIR}" DIRECTORY)
 
-    set(PY_DEST_DIR "python")
-    set(LIB_WILDCARD "*.so")
-    if (APPLE)
-        set(PY_DEST_DIR "hobbits.app/Contents/Frameworks/python")
-        set(LIB_WILDCARD "*.dylib")
-    elseif(WIN32)
-        set(LIB_WILDCARD "*.dll")
-    endif()
+    if (WIN32)
+        file(GLOB PY_DIRS "${PYROOT_DIR}/bin/*")
+        file(GLOB PY_FILES
+            LIST_DIRECTORIES false
+            "${PYROOT_DIR}/bin/*")
+        list(REMOVE_ITEM PY_DIRS ${PY_FILES})
 
-    install( DIRECTORY "${PYROOT_DIR}/bin"
-                DESTINATION "${PY_DEST_DIR}"
-                COMPONENT runtime
-                PATTERN "*"
-                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                            GROUP_READ GROUP_EXECUTE
-                            WORLD_READ WORLD_EXECUTE)
-    install( DIRECTORY "${PYROOT_DIR}/lib"
-                DESTINATION "${PY_DEST_DIR}"
-                COMPONENT runtime
-                PATTERN "${LIB_WILDCARD}"
-                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                            GROUP_READ GROUP_EXECUTE
-                            WORLD_READ WORLD_EXECUTE)
+        install(FILES ${PY_FILES}
+                DESTINATION ".")
+        install(DIRECTORY ${PY_DIRS}
+                DESTINATION ".")
 
-    if(APPLE)
-        file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
-        install(FILES ${INTLLIBS}
-                DESTINATION "hobbits.app/Contents/Frameworks")
+    else()
+        set(PY_DEST_DIR "python")
+        set(LIB_WILDCARD "*.so")
+        if (APPLE)
+            set(PY_DEST_DIR "hobbits.app/Contents/Frameworks/python")
+            set(LIB_WILDCARD "*.dylib")
+        endif()
+
+        install( DIRECTORY "${PYROOT_DIR}/bin"
+                    DESTINATION "${PY_DEST_DIR}"
+                    COMPONENT runtime
+                    PATTERN "*"
+                    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                                GROUP_READ GROUP_EXECUTE
+                                WORLD_READ WORLD_EXECUTE)
+        install( DIRECTORY "${PYROOT_DIR}/lib"
+                    DESTINATION "${PY_DEST_DIR}"
+                    COMPONENT runtime
+                    PATTERN "${LIB_WILDCARD}"
+                    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                                GROUP_READ GROUP_EXECUTE
+                                WORLD_READ WORLD_EXECUTE)
+
+        if(APPLE)
+            file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
+            install(FILES ${INTLLIBS}
+                    DESTINATION "hobbits.app/Contents/Frameworks")
+        endif()
     endif()
 endfunction(pack_python)
 
@@ -125,6 +153,8 @@ function(pack_fftw)
         install(FILES ${FFTWLIBS}
                 DESTINATION "hobbits.app/Contents/Frameworks")
     elseif(WIN32)
+        install(FILES ${FFTWLIB}
+                DESTINATION ".")
     endif()
 endfunction(pack_fftw)
 

@@ -37,7 +37,14 @@ endif()
 # CPack
 #
 
-install(TARGETS "hobbits" COMPONENT "runtime" BUNDLE DESTINATION ".")
+if(WIN32)
+    install(TARGETS "hobbits"
+            COMPONENT "runtime"
+            DESTINATION "."
+    )
+else()
+    install(TARGETS "hobbits" COMPONENT "runtime" BUNDLE DESTINATION ".")
+endif()
 
 if (LINUX)
     list(APPEND CPACK_PACKAGE_EXECUTABLES "hobbits;Hobbits")

@@ -62,8 +62,10 @@ endif()
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Network CONFIG REQUIRED)
-find_package(FFTW REQUIRED)
-find_package(PCAP REQUIRED)
+find_package(FFTW)
+if (NOT WIN32)
+    find_package(PCAP REQUIRED)
+endif()
 
 
 #
@@ -100,9 +102,12 @@ find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 # Plugin installing and loading
 #
 
-if ((WIN32) OR (SELF_CONTAINED_APP AND LINUX))
+if (SELF_CONTAINED_APP AND LINUX)
     set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}/../plugins")
     list(APPEND HOBBITS_PLUGINS_PATHS "../plugins")
+elseif(WIN32)
+    set(HOBBITS_PLUGINS_INSTALL_PATH "plugins")
+    list(APPEND HOBBITS_PLUGINS_PATHS "plugins")
 elseif(APPLE)
     set(HOBBITS_PLUGINS_INSTALL_PATH "hobbits.app/Contents/PlugIns/hobbits")
     list(APPEND HOBBITS_PLUGINS_PATHS "../PlugIns/hobbits")

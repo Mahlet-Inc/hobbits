@@ -54,46 +54,25 @@ steps:
       dir
     displayName: 'Create FFTW .lib'
 
-  - bash: |
-      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\\\"/\1\\\\\\\\\\\\\\"/g' | sed 's/\([^\\]\)\\"/\1\\\\\\"/g' > qmake_args
-      cat qmake_args
-    workingDirectory: $(Build.SourcesDirectory)/src
-    displayName: 'Get version arguments for qmake'
-
   - script: | 
-      cd $(Build.SourcesDirectory)\src
-      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      set /p QMAKE_VERSION_ARGS= <qmake_args
-      $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\qmake.exe %QMAKE_VERSION_ARGS% HOBBITS_PYPATH=$(Build.SourcesDirectory)\hobbits_python
-    displayName: 'Run qmake'
-
-  - script: |
-      cd $(Build.SourcesDirectory)\src
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
       md build
       cd build
-      cmake -GNinja -DCPACK_GENERATOR="ZIP" ..
+      cmake -GNinja -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\cmake -DFFTW_ROOT=$(Build.SourcesDirectory)\windows -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)\hobbits_python
+    displayName: 'Run cmake'
+
+  - script: |
+      cd $(Build.SourcesDirectory)\src
+      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+      ninja
+    workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Build hobbits'
 
   - script: |
-      dir $(Build.BinariesDirectory)\Qt\Tools\
-      cd $(Build.BinariesDirectory)
       ninja package
       move .\*.zip $(Build.ArtifactStagingDirectory)\
-      
-      mkdir -p dependencies
-      xcopy $(Build.SourcesDirectory)\windows\libfftw3-3.dll dependencies\
-      forfiles /p $(Build.BinariesDirectory)\Qt\Tools\ /m *.dll /s /c "cmd /c xcopy @path $(Build.BinariesDirectory)\dependencies "
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\plugins\platforms dependencies\platforms /i
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Concurrent.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Core.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Gui.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Network.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\Qt5Widgets.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libEGL.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\libGLSv2.dll dependencies\
-      xcopy $(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\bin\opengl32sw.dll dependencies\
-    displayName: 'Collect dependencies files'
+    workingDirectory: $(Build.SourcesDirectory)/build
+    displayName: 'Package binaries'
   
   - task: ArchiveFiles@2
     inputs:

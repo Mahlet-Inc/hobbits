@@ -37,4 +37,9 @@ elseif(APPLE)
             COMPONENT "runtime"
             DESTINATION "hobbits.app/Contents/Frameworks"
     )
+elseif(WIN32)
+    install(TARGETS "hobbits-widgets"
+            COMPONENT "runtime"
+            DESTINATION "."
+    )
 endif()
