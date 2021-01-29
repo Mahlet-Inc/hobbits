@@ -58,7 +58,7 @@ steps:
       call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
       md build
       cd build
-      cmake -GNinja -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\cmake -DFFTW_ROOT=$(Build.SourcesDirectory)\windows -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)\hobbits_python
+      cmake -GNinja -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\cmake -DFFTW_ROOT=$(Build.SourcesDirectory)\windows -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)\hobbits_python ..
     displayName: 'Run cmake'
 
   - script: |
@@ -73,12 +73,6 @@ steps:
       move .\*.zip $(Build.ArtifactStagingDirectory)\
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Package binaries'
-  
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: $(Build.BinariesDirectory)\dependencies
-      includeRootFolder: false
-      archiveFile: $(Build.ArtifactStagingDirectory)\hobbits_windows_dependencies.zip
 
   - task: PublishBuildArtifacts@1
     inputs:
