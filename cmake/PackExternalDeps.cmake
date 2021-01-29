@@ -86,7 +86,6 @@ function(pack_qt_libs)
                       "${QT_ROOT_DIR}/bin/Qt5Concurrent.dll"
                       "${QT_ROOT_DIR}/bin/Qt5Network.dll"
                       "${QT_ROOT_DIR}/bin/libEGL.dll"
-                      "${QT_ROOT_DIR}/bin/libGLSv2.dll"
                       "${QT_ROOT_DIR}/bin/opengl32sw.dll"
                 DESTINATION ".")
     endif()
