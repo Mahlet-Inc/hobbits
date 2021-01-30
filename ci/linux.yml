@@ -52,27 +52,27 @@ steps:
     workingDirectory: $(Build.SourcesDirectory)/build_sc
     displayName: 'Package self-contained app binaries'
   
-  - script: | 
-      mkdir build_pack
-      cd build_pack
-      cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
-    workingDirectory: $(Build.SourcesDirectory)
-    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
-    displayName: 'Configure for packagers'
+  # - script: | 
+  #     mkdir build_pack
+  #     cd build_pack
+  #     cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+  #   workingDirectory: $(Build.SourcesDirectory)
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Configure for packagers'
 
-  - script: |
-      ninja
-    workingDirectory: $(Build.SourcesDirectory)/build_pack
-    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
-    displayName: 'Build for packagers'
+  # - script: |
+  #     ninja
+  #   workingDirectory: $(Build.SourcesDirectory)/build_pack
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Build for packagers'
 
-  - script: |
-      ninja package
-      mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)
-      mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)
-    workingDirectory: $(Build.SourcesDirectory)/build_pack
-    condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
-    displayName: 'Create packagers'
+  # - script: |
+  #     ninja package
+  #     mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)
+  #     mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)
+  #   workingDirectory: $(Build.SourcesDirectory)/build_pack
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Create packagers'
 
   - bash: |
       npm ci

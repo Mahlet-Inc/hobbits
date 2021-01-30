@@ -42,8 +42,10 @@ if(WIN32)
             COMPONENT "runtime"
             DESTINATION "."
     )
-else()
+elseif(APPLE)
     install(TARGETS "hobbits" COMPONENT "runtime" BUNDLE DESTINATION ".")
+else()
+    install(TARGETS "hobbits" COMPONENT "runtime")
 endif()
 
 if (LINUX)

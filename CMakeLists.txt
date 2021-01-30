@@ -142,7 +142,7 @@ endif()
 
 set(CPACK_PACKAGE_NAME "hobbits")
 set(CPACK_PACKAGE_VENDOR "Hobbits Team")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/docs/CPack.hobbits.description.txt")
+set(CPACK_PACKAGE_DESCRIPTION "A multi-platform GUI for bit-based analysis, processing, and visualization.")
 set(CPACK_HELP_LINK "https://mahlet-inc.github.io/")
 set(CPACK_PACKAGE_CONTACT "adam@smr.llc")
 set(CPACK_PACKAGE_CHECKSUM "SHA512")
@@ -154,36 +154,38 @@ set(CPACK_CREATE_DESKTOP_LINKS ON)
 
 set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 
+set(CPACK_DEBIAN_PACKAGE_NAME "hobbits")
 set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 set(CPACK_DEBIAN_DEBUGINFO_PACKAGE ON)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
+set(CPACK_DEB_COMPONENT_INSTALL OFF)
 
 set(CPACK_RPM_COMPRESSION_TYPE "xz")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
-set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_RPM_COMPONENT_INSTALL OFF)
 
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 
 cpack_add_component("runtime")
-set("CPACK_DEBIAN_RUNTIME_PACKAGE_NAME" "hobbits")
-set("CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS" "libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-3, libpcap0.8")
-set("CPACK_RPM_RUNTIME_PACKAGE_NAME" "hobbits")
-set("CPACK_RPM_RUNTIME_PACKAGE_REQUIRES" "qt5-qtbase, qt5-qtbase-gui, fftw, libpcap")
+set(CPACK_DEBIAN_RUNTIME_PACKAGE_NAME "hobbits")
+set(CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-3, libpcap0.8")
+set(CPACK_RPM_RUNTIME_PACKAGE_NAME "hobbits")
+set(CPACK_RPM_RUNTIME_PACKAGE_REQUIRES "qt5-qtbase, qt5-qtbase-gui, fftw, libpcap")
 
 cpack_add_component("dev")
-set("CPACK_DEBIAN_DEV_PACKAGE_NAME" "hobbits-dev")
-set("CPACK_DEBIAN_DEV_PACKAGE_DEPENDS" "hobbits libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-dev, libpcap-dev")
-set("CPACK_RPM_DEV_PACKAGE_NAME" "hobbits-devel")
-set("CPACK_RPM_DEV_PACKAGE_REQUIRES" "hobbits qt5-qtbase-devel, qt5-qtbase-gui-devel, fftw-devel, libpcap-devel")
+set(CPACK_DEBIAN_DEV_PACKAGE_NAME "hobbits-dev")
+set(CPACK_DEBIAN_DEV_PACKAGE_DEPENDS "hobbits, qt5-default")
+set(CPACK_RPM_DEV_PACKAGE_NAME "hobbits-devel")
+set(CPACK_RPM_DEV_PACKAGE_REQUIRES "hobbits, qt5-qtbase-devel")
 
 set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "Hobbits Runtime")
 set(CPACK_COMPONENT_DEV_DISPLAY_NAME "Hobbits Development Tools")
 
 set(CPACK_COMPONENTS_ALL runtime dev)
 
+set(CPACK_RPM_PACKAGE_REQUIRES "qt5-qtbase-devel, qt5-qtbase-gui, fftw, libpcap")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "qt5-default, libfftw3-3, libpcap0.8")
 set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
-
 
 #
 # Add Files
