@@ -13,8 +13,7 @@ FileData::FileData()
         {"filename", QJsonValue::String, false}
     };
 
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     infos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("filename")) {
@@ -28,10 +27,9 @@ FileData::FileData()
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
                         return new ParameterEditorFileSelect(QFileDialog::AcceptOpen);
-                    }));
+                    });
 
-    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_exportDelegate = ParameterDelegate::create(
                     infos,
                     [](const QJsonObject &parameters) {
                         if (parameters.contains("filename")) {
@@ -45,7 +43,7 @@ FileData::FileData()
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
                         return new ParameterEditorFileSelect(QFileDialog::AcceptSave);
-                    }));
+                    });
 }
 
 FileData::~FileData()

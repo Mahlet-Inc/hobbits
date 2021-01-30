@@ -1,0 +1,9 @@
+#pragma once
+
+namespace HobbitsPythonConfig
+{
+
+    static const char PYTHON_VERSION[] = "@HOBBITS_PYTHON_PYTHON_VERSION@";
+    static const char VERSION[] = "@HOBBITS_PYTHON_VERSION@";
+
+}

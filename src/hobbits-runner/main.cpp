@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unistd.h>
 #endif
-#include "hobbitsrunnerinfo.h"
+#include "hobbitsrunnerconfig.h"
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "hobbitspluginmanager.h"
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     QGuiApplication a(argc, argv);
 
     QGuiApplication::setApplicationName("Hobbits Runner");
-    QGuiApplication::setApplicationVersion(HobbitsRunnerInfo::getRunnerVersion());
+    QGuiApplication::setApplicationVersion(HobbitsRunnerConfig::VERSION);
 
     QString description = "Command-line interface for bitstream analysis and processing";
 #ifdef HAS_EMBEDDED_PYTHON

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Hobbits Binary Format analyser
+Exec=hobbits %f
+Icon=HobbitsRingSmall
+Comment=A multi-platform GUI for bit-based analysis, processing, and visualization
+Type=Application
+Categories=Development
+Terminal=false
+X-MultipleArgs=false
+StartupNotify=true

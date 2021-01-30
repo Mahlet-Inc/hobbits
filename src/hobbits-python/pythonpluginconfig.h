@@ -33,6 +33,10 @@ public:
                                                           std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator,
                                                           QStringList &errors);
 
+    static QSharedPointer<ImporterExporterInterface> loadExporter(QString configFolder,
+                                                          std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator,
+                                                          QStringList &errors);
+
     static QSharedPointer<DisplayInterface> loadDisplay(QString configFolder,
                                                           std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator,
                                                           QStringList &errors);

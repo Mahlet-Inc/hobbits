@@ -9,6 +9,7 @@ parameters:
 steps:
   - checkout: self
     persistCredentials: true
+    submodules: true
 
   - bash: |
       BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
@@ -33,71 +34,55 @@ steps:
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
-  - bash: |
-      ./qmake_version_args.sh | sed 's/\([^\\]\)\\\\"/\1\\\\\\"/g' > qmake_args
-      cat qmake_args
-    workingDirectory: $(Build.SourcesDirectory)/src
-    displayName: 'Get version arguments for qmake'
-
   - script: | 
-      cd $(Build.SourcesDirectory)/src
-      $QMAKE_BIN $(cat qmake_args) HOBBITS_PYPATH=$(Build.SourcesDirectory)/hobbits_python
-    displayName: 'Run qmake'
+      mkdir build_sc
+      cd build_sc
+      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DSELF_CONTAINED_APP=1 -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: 'Configure for self-contained'
 
   - script: |
-      cd $(Build.SourcesDirectory)/src
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_DIR
-      make -j$(nproc)
-    displayName: 'Build hobbits'
+      ninja
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    displayName: 'Build for self-contained'
 
   - script: |
-      mkdir -p release/bin release/lib release/plugins/analyzers release/plugins/operators release/plugins/displays release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-gui/hobbits release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-runner/hobbits-runner release/bin
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/analyzers/*/lib*.so release/plugins/analyzers
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/displays/*/lib*.so release/plugins/displays
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/importerexporters/*/lib*.so release/plugins/importerexporters
-      cp $(Build.SourcesDirectory)/src/hobbits-plugins/operators/*/lib*.so release/plugins/operators
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-core/libhobbits-core.so* release/lib
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-python/libhobbits-python.so* release/lib
-      cp --preserve=links $(Build.SourcesDirectory)/src/hobbits-widgets/libhobbits-widgets.so* release/lib
-      cp -r --preserve=links $QT_PLATFORMS_DIR release/bin
-      cp --preserve=links $QT_LIB_DIR/libicu*.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Concurrent.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Core.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5DBus.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Gui.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Network.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5PrintSupport.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Sql.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Test.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5WaylandClient.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Widgets.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5XcbQpa.so* release/lib
-      cp --preserve=links $QT_LIB_DIR/libQt5Xml.so* release/lib
-      echo "Checking fftw3: " `ldconfig -p | grep 'fftw3'`
-      cp --preserve=links `ldconfig -p | grep 'fftw3' | awk '{print $NF}'` release/lib
-      echo "Checking libpcap: " `ldconfig -p | grep 'libpcap'`
-      cp --preserve=links `ldconfig -p | grep 'libpcap' | awk '{print $NF}'` release/lib
-      cp -r --preserve=links $(Build.SourcesDirectory)/hobbits_python release/python
-      find release/python -name "*.so*" -type f -exec chmod +x {} \;
-      chmod +x release/python/bin/*
-      cd release
-      tar cvzf hobbits_${{ parameters.artifactName }}.tgz bin lib plugins python
-    displayName: 'Collect and package release files'
+      ninja package
+      mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    displayName: 'Package self-contained app binaries'
   
+  # - script: | 
+  #     mkdir build_pack
+  #     cd build_pack
+  #     cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
+  #   workingDirectory: $(Build.SourcesDirectory)
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Configure for packagers'
+
+  # - script: |
+  #     ninja
+  #   workingDirectory: $(Build.SourcesDirectory)/build_pack
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Build for packagers'
+
+  # - script: |
+  #     ninja package
+  #     mv hobbits-*-Linux.deb $(Build.ArtifactStagingDirectory)
+  #     mv hobbits-*-Linux.rpm $(Build.ArtifactStagingDirectory)
+  #   workingDirectory: $(Build.SourcesDirectory)/build_pack
+  #   condition: eq('ubuntu18_gcc7_release', '${{ parameters.artifactName }}')
+  #   displayName: 'Create packagers'
+
   - bash: |
       npm ci
-      cd tests
+      mkdir app
+      find $(Build.ArtifactStagingDirectory) -name "hobbits-*-Linux.tar.xz" -type f -exec tar -xf {} -C app --strip-components=1 \;
       ./prepare_tests.js
-      ./test_hobbits.js ../release/bin/hobbits-runner ../release/python
+      export QT_DEBUG_PLUGINS=1
+      ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/python
     displayName: 'Run tests'
-
-  - task: CopyFiles@2 
-    inputs:
-      sourceFolder: release
-      contents: hobbits_${{ parameters.artifactName }}.tgz
-      targetFolder: $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/tests
 
   - task: PublishBuildArtifacts@1
     inputs:

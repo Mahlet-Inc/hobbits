@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/findanalyzer">
-        <file>images/icons/arrow-right.png</file>
-        <file>images/icons/arrow-left.png</file>
-    </qresource>
-</RCC>

@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/bin/sh
+
+export TEMPLS_DIR=$HOME/.config/QtProject/qtcreator/templates/wizards
 
 # make the wizard directory if it doesn't exist
-mkdir -p $HOME/.config/QtProject/qtcreator/templates/wizards
-
-# remove any old wizards
-rm -rf $HOME/.config/QtProject/qtcreator/templates/wizards/*plugin
+mkdir -p $TEMPLS_DIR
 
 # copy new wizards to wizard directory
-cp -r operatorplugin $HOME/.config/QtProject/qtcreator/templates/wizards
-cp -r displayplugin $HOME/.config/QtProject/qtcreator/templates/wizards
-cp -r analyzerplugin $HOME/.config/QtProject/qtcreator/templates/wizards
-cp -r importexportplugin $HOME/.config/QtProject/qtcreator/templates/wizards
+for n in analyzer display importexport operator; do
+	export PLGDIR="$TEMPLS_DIR/hobbits-plugin-${n}"
+	echo $n $PLGDIR;
+	rm -rf $PLGDIR;
+	mkdir -p $PLGDIR
+	cp -r "${n}" $PLGDIR;
+done

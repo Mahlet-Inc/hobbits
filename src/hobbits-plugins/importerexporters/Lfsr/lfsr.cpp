@@ -15,8 +15,7 @@ Lfsr::Lfsr()
         {"taps", QJsonValue::String},
         {"bits_wanted", QJsonValue::Double}
     };
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
                     [](const QJsonObject &parameters) {
                         QString seed = parameters.value("polynomial").toString();
@@ -26,7 +25,7 @@ Lfsr::Lfsr()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new LfsrForm(delegate);
-                }));
+                });
 }
 
 ImporterExporterInterface *Lfsr::createDefaultImporterExporter()

@@ -1,4 +1,4 @@
-#include "hobbitsguiinfo.h"
+#include "hobbitsguiconfig.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QCommandLineParser>
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("Mahlet");
     QCoreApplication::setApplicationName("hobbits");
-    QCoreApplication::setApplicationVersion(HobbitsGuiInfo::getGuiVersion());
+    QCoreApplication::setApplicationVersion(HobbitsGuiConfig::VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription("GUI for bitstream analysis and visualization");

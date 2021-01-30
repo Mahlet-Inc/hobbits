@@ -1,7 +1,7 @@
 #ifndef HEADERFRAMER_H
 #define HEADERFRAMER_H
 
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 #include "operatorinterface.h"
 
 class HeaderFramer : public QObject, OperatorInterface
@@ -38,7 +38,7 @@ public:
 
 private:
 
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 
 };
 

@@ -1,6 +1,7 @@
 #ifndef FINDFORM_H
 #define FINDFORM_H
 
+#include "parameterdelegate.h"
 #include "abstractparametereditor.h"
 #include "parameterhelper.h"
 #include "highlightnavigator.h"

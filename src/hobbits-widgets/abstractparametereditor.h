@@ -7,7 +7,6 @@
 #include "bitcontainerpreview.h"
 #include "pluginactionprogress.h"
 #include "displayhandle.h"
-#include "fwd_abstractparametereditor.h"
 #include "hobbits-widgets_global.h"
 
 class HOBBITSWIDGETSSHARED_EXPORT AbstractParameterEditor : public QWidget

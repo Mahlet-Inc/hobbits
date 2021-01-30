@@ -1,7 +1,10 @@
+/src/*/config.h
 
+CMakeLists.txt.user
 *.pro.user
 *.autosave
 /build*
+/src/build
 .vscode
 *.so
 
@@ -11,3 +14,8 @@ node_modules
 site
 
 /tests/extracted_tests
+
+/src/hobbits-core/hobbitscoreconfig.h
+/src/hobbits-gui/hobbitsguiconfig.h
+/src/hobbits-python/hobbitspythonconfig.h
+/src/hobbits-runner/hobbitsrunnerconfig.h
