@@ -1,3 +1,10 @@
+## [0.46.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.0...v0.46.1) (2021-02-02)
+
+
+### Bug Fixes
+
+* update release file globs ([db61841](https://github.com/Mahlet-Inc/hobbits/commit/db61841037cbdcc4b0e24d942bc4e9d14885b9c7))
+
 # [0.46.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.45.0...v0.46.0) (2021-02-02)
 
 
