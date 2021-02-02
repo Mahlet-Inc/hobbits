@@ -1,3 +1,10 @@
+## [0.46.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.1...v0.46.2) (2021-02-02)
+
+
+### Bug Fixes
+
+* prevent duplicate release file names ([5f5ec94](https://github.com/Mahlet-Inc/hobbits/commit/5f5ec947cdf59fd198368764d5308b91da16b37e))
+
 ## [0.46.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.0...v0.46.1) (2021-02-02)
 
 
