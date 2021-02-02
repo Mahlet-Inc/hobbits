@@ -1,3 +1,10 @@
+# [0.46.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.45.0...v0.46.0) (2021-02-02)
+
+
+### Features
+
+* from 0.45.0 - python exporter plugins and some bug fixes ([dbf0011](https://github.com/Mahlet-Inc/hobbits/commit/dbf001108a5999c932ab4db5ec8e4eb28b218c54))
+
 # [0.45.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.1...v0.45.0) (2021-02-02)
 
 
