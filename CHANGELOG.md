@@ -1,3 +1,16 @@
+# [0.45.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.1...v0.45.0) (2021-02-02)
+
+
+### Bug Fixes
+
+*  [Mac] update python library version in build ([0d8673e](https://github.com/Mahlet-Inc/hobbits/commit/0d8673e7b700813bccd9c1d0ae83c8d6aedba097))
+* prevent python config from deallocating before init ([289b073](https://github.com/Mahlet-Inc/hobbits/commit/289b073aeec4a70d43e6c90ed7d4f35f0b0664d8))
+
+
+### Features
+
+* add python exporter plugin support ([9dec63c](https://github.com/Mahlet-Inc/hobbits/commit/9dec63c4d60729c68af34a20f0ab6274e3095c54))
+
 ## [0.44.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.0...v0.44.1) (2020-12-18)
 
 
