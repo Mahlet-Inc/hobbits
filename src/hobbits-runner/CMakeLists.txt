@@ -15,7 +15,13 @@ file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SO
 file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
 add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
-target_link_libraries("hobbits-runner" hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
+set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
+if (FFTW_FOUND)
+    add_definitions(-DFFTW_AVAILABLE)
+    list(APPEND ALL_LINK_LIBS FFTW::Double FFTW::DoubleThreads)
+    target_include_directories("hobbits-runner" PRIVATE "${FFTW_INCLUDE_DIRS}")
+endif()
+target_link_libraries("hobbits-runner" ${ALL_LINK_LIBS})
 #harden("hobbits-runner")
 
 if (APPLE)
