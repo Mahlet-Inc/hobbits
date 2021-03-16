@@ -1,6 +1,6 @@
 {
   "name": "hobbits",
-  "version": "0.46.2",
+  "version": "0.46.3",
   "private": true,
   "config": {
     "commitizen": {

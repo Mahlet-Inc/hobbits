@@ -1,3 +1,11 @@
+## [0.46.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.2...v0.46.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* correctly enforce FFTW thread-safety ([586042a](https://github.com/Mahlet-Inc/hobbits/commit/586042ae68ca59dee9d3be453dcd02a60a0546ba)), closes [#85](https://github.com/Mahlet-Inc/hobbits/issues/85)
+* load python plugins correctly ([505acae](https://github.com/Mahlet-Inc/hobbits/commit/505acae2ae90f83d1ed4c37aa9f3627872e81300))
+
 ## [0.46.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.1...v0.46.2) (2021-02-02)
 
 
