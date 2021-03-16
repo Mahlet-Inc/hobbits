@@ -147,9 +147,17 @@ function(pack_fftw)
         file(GLOB FFTWLIBS "${BASELIB}*")
         install(FILES ${FFTWLIBS}
                 DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        get_target_property(FFTWLIB_T FFTW::DoubleThreads INTERFACE_LINK_LIBRARIES)
+        string(REGEX REPLACE \.so\..*$ ".so" BASELIB_T ${FFTWLIB_T})
+        file(GLOB FFTW_T_LIBS "${BASELIB_T}*")
+        install(FILES ${FFTW_T_LIBS}
+                DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     elseif(APPLE)
         file(GLOB FFTWLIBS "/usr/local/opt/fftw/lib/fftw3.*dylib")
         install(FILES ${FFTWLIBS}
+                DESTINATION "hobbits.app/Contents/Frameworks")
+        file(GLOB FFTW_T_LIBS "/usr/local/opt/fftw/lib/fftw3_threads.*dylib")
+        install(FILES ${FFTW_T_LIBS}
                 DESTINATION "hobbits.app/Contents/Frameworks")
     elseif(WIN32)
         install(FILES "${CMAKE_SOURCE_DIR}/windows/libfftw3-3.dll"

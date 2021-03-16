@@ -23,10 +23,8 @@
 #include "parametereditordialog.h"
 #include "batcheditor.h"
 
-#ifdef HAS_EMBEDDED_PYTHON
 #include "pythonpluginconfig.h"
 #include "simpleparametereditor.h"
-#endif
 
 const int MAINWINDOW_STATE_VERSION = 1;
 
@@ -516,7 +514,6 @@ void MainWindow::loadPlugins()
         msg.exec();
     }
 
-#ifdef HAS_EMBEDDED_PYTHON
     warnings.clear();
     for (QString pluginPath : pluginPaths) {
         warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, m_pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
@@ -532,7 +529,6 @@ void MainWindow::loadPlugins()
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
     }
-#endif
 
 
     QSet<QString> queued;
@@ -952,9 +948,7 @@ void MainWindow::pluginActionProgress(QUuid id, int progress)
     m_pluginProgress.value(id)->progressBar->setValue(progress);
 }
 
-#ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
-#endif
 
 void MainWindow::on_action_About_triggered()
 {
@@ -962,9 +956,7 @@ void MainWindow::on_action_About_triggered()
     QString guiVersion = HobbitsGuiConfig::VERSION;
 
     QString info =  QString("Hobbits GUI Version: %1\nHobbits Core Version: %2").arg(guiVersion).arg(coreLibVersion);
-#ifdef HAS_EMBEDDED_PYTHON
     info += QString("\nIntegrated Python: %1").arg(HobbitsPythonConfig::PYTHON_VERSION);
-#endif
 
     QMessageBox msg;
     msg.setWindowTitle("About Hobbits");

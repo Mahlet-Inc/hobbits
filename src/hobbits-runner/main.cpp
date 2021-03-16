@@ -14,22 +14,28 @@
 
 #include <QTimer>
 
-#ifdef HAS_EMBEDDED_PYTHON
 #include "hobbitspython.h"
+#include "hobbitspythonconfig.h"
 #include "pythonpluginconfig.h"
+
+#ifdef FFTW_AVAILABLE
+#include "fftw3.h"
 #endif
 
 int main(int argc, char *argv[])
 {
+#ifdef FFTW_AVAILABLE
+    // See http://www.fftw.org/fftw3_doc/Thread-safety.html
+    fftw_make_planner_thread_safe();
+#endif
+
     QGuiApplication a(argc, argv);
 
     QGuiApplication::setApplicationName("Hobbits Runner");
     QGuiApplication::setApplicationVersion(HobbitsRunnerConfig::VERSION);
 
     QString description = "Command-line interface for bitstream analysis and processing";
-#ifdef HAS_EMBEDDED_PYTHON
-    description += QString("(built with embedded python support from %1)").arg(HobbitsPython::pythonVersion());
-#endif
+    description += QString("(built with embedded python support from %1)").arg(HobbitsPythonConfig::PYTHON_VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(description);
@@ -146,7 +152,6 @@ int main(int argc, char *argv[])
         warnings.append(pluginManager->loadPlugins(pluginPath));
     }
 
-#ifdef HAS_EMBEDDED_PYTHON
     for (QString pluginPath : pluginPaths) {
         warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                             Q_UNUSED(size)
@@ -154,7 +159,6 @@ int main(int argc, char *argv[])
                             return nullptr;
         }));
     }
-#endif
 
 
     for (auto warning : warnings) {
