@@ -1,3 +1,10 @@
+## [0.46.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.3...v0.46.4) (2021-04-13)
+
+
+### Bug Fixes
+
+* swapped mac and windows binary releases [#94](https://github.com/Mahlet-Inc/hobbits/issues/94) ([2e102f9](https://github.com/Mahlet-Inc/hobbits/commit/2e102f9c2bbdd7efed3fa5987e0e405fc707d35f))
+
 ## [0.46.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.2...v0.46.3) (2021-03-16)
 
 
