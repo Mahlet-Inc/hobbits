@@ -37,12 +37,12 @@
                 {
                     "path": "hobbits/windows_release/hobbits*.zip",
                     "label": "Hobbits (64-bit Windows 2016 msvc2017)",
-                    "name": "hobbits-${nextRelease.version}-mac.txz"
+                    "name": "hobbits-${nextRelease.version}-win.txz"
                 },
                 {
                     "path": "hobbits/mac_release/hobbits*.tar.xz",
                     "label": "Hobbits (64-bit Mac OSX 10.14)",
-                    "name": "hobbits-${nextRelease.version}-win.txz"
+                    "name": "hobbits-${nextRelease.version}-mac.txz"
                 }
                 ]
             }
