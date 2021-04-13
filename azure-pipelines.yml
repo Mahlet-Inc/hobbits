@@ -2,6 +2,11 @@ trigger:
   - master
   - develop
 
+pr:
+  branches:
+    include:
+    - develop
+
 jobs:
 - job: UbuntuLinuxGCC7
   pool:
