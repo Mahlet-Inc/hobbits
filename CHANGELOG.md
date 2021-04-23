@@ -1,3 +1,10 @@
+## [0.46.6](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.5...v0.46.6) (2021-04-23)
+
+
+### Bug Fixes
+
+* rollback offset changes in kaitai struct plugin ([e2ac3c3](https://github.com/Mahlet-Inc/hobbits/commit/e2ac3c38f2588fc57fb60dba3da942a7ff50ddf4))
+
 ## [0.46.5](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.4...v0.46.5) (2021-04-23)
 
 
