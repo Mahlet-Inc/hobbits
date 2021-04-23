@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QThread>
+#include <QSemaphore>
+#include <QSemaphoreReleaser>
 #include <QtConcurrent/QtConcurrent>
 #include "bitcontainerpreview.h"
 #include "pluginactionprogress.h"
@@ -14,6 +16,8 @@ class HOBBITSWIDGETSSHARED_EXPORT AbstractParameterEditor : public QWidget
     Q_OBJECT
 
 public:
+    AbstractParameterEditor() : m_previewSem(2) {}
+
     virtual QString title() = 0;
 
     virtual bool setParameters(QJsonObject parameters) = 0;
@@ -26,7 +30,11 @@ public:
     void previewBits(QSharedPointer<BitContainerPreview> container,
                              QSharedPointer<PluginActionProgress> progress)
     {
-        QMutexLocker(&this->m_previewLock);
+        if (!this->m_previewSem.tryAcquire()) {
+            return;
+        }
+        QSemaphoreReleaser releaser(&this->m_previewSem);
+        QMutexLocker locker(&this->m_previewLock);
         if (QThread::currentThread() == this->thread()) {
             // Called from UI thread
             previewBitsImpl(container, progress);
@@ -76,6 +84,7 @@ protected:
 
 private:
     QMutex m_previewLock;
+    QSemaphore m_previewSem;
 };
 
 #endif // ABSTRACTPARAMETEREDITOR_H

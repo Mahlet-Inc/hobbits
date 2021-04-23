@@ -7,7 +7,7 @@ import os
 
 from kaitaistruct import KaitaiStruct
 
-def dump_struct(s, sections, prefix=""):
+def dump_struct(s, sections, prefix="", offset=0):
     if isinstance(s, list):
         #print("list")
         for i, item in enumerate(s):
@@ -16,7 +16,7 @@ def dump_struct(s, sections, prefix=""):
                 "label": label,
                 "parent": prefix
             })
-            dump_struct(item, sections, label)
+            dump_struct(item, sections, label, offset)
     elif isinstance(s, KaitaiStruct):
         #print(vars(s))
         if hasattr(s, "_debug"):
@@ -28,13 +28,14 @@ def dump_struct(s, sections, prefix=""):
                 #    print(vars(prop))
                 #print("")
                 label = prefix + "." + name if prefix else name
+                section_offset = descr["start"] + offset
                 sections.append({
-                    "start": descr["start"],
-                    "end": descr["end"],
+                    "start": descr["start"] + offset,
+                    "end": descr["end"] + offset,
                     "label": label,
                     "parent": prefix
                 })
-                dump_struct(prop, sections, label)
+                dump_struct(prop, sections, label, section_offset)
 
 def parse_data(input_filename, output_filename, action_progress):
     # locate the compiled struct module
