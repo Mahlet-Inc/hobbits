@@ -7,35 +7,42 @@ import os
 
 from kaitaistruct import KaitaiStruct
 
-def dump_struct(s, sections, prefix="", offset=0):
+#import pprint
+#pp = pprint.PrettyPrinter(indent=2)
+
+def dump_struct(s, sections, prefix=""):
     if isinstance(s, list):
-        #print("list")
+        #print(f"\n[BEGIN List Under '{prefix}']")
         for i, item in enumerate(s):
             label = prefix + "[" + str(i) + "]"
+            #print(label)
             sections.append({
                 "label": label,
                 "parent": prefix
             })
-            dump_struct(item, sections, label, offset)
+            dump_struct(item, sections, label)
+        #print(f"[END OF List Under '{prefix}']\n")
     elif isinstance(s, KaitaiStruct):
-        #print(vars(s))
+        #pp.pprint(vars(s))
         if hasattr(s, "_debug"):
+
+            #print("\nITEMS {\n")
             for name, descr in s._debug.items():
-                #print(f"name desc: {name} , {descr}")
                 prop = getattr(s, name)
-                #print(prop)
+                label = prefix + "." + name if prefix else name
+                #print(f"(\n  name: {label},\n  descr: {descr},\n  prop: {prop},\n  offset: {offset}\n)\n")
                 #if isinstance(prop, KaitaiStruct):
                 #    print(vars(prop))
-                #print("")
-                label = prefix + "." + name if prefix else name
-                section_offset = descr["start"] + offset
                 sections.append({
-                    "start": descr["start"] + offset,
-                    "end": descr["end"] + offset,
+                    "start": descr["start"],
+                    "end": descr["end"],
                     "label": label,
                     "parent": prefix
                 })
-                dump_struct(prop, sections, label, section_offset)
+
+                dump_struct(prop, sections, label)
+
+            #print("}\n")
 
 def parse_data(input_filename, output_filename, action_progress):
     # locate the compiled struct module
@@ -61,7 +68,7 @@ def parse_data(input_filename, output_filename, action_progress):
     sections = []
     dump_struct(target, sections)
 
-    #print(sections)
+    #pp.pprint(sections)
 
     action_progress.set_progress_percent(80)
 
