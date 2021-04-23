@@ -1,3 +1,11 @@
+## [0.46.5](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.4...v0.46.5) (2021-04-23)
+
+
+### Bug Fixes
+
+* *actually* synchronize parameter editor preview calls (fixes crashes) ([a53e554](https://github.com/Mahlet-Inc/hobbits/commit/a53e5546c4fa1dcf47fb08fcd4e6a447b14ce9d2))
+* track section offsets in kaitai parsing for [#93](https://github.com/Mahlet-Inc/hobbits/issues/93) ([ccd01f3](https://github.com/Mahlet-Inc/hobbits/commit/ccd01f313a09deb5df261bb3b63dd91e77f962d8))
+
 ## [0.46.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.3...v0.46.4) (2021-04-13)
 
 
