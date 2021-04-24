@@ -1,3 +1,10 @@
+## [0.46.7](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.6...v0.46.7) (2021-04-24)
+
+
+### Bug Fixes
+
+* appropriately offset imported sub-sections in kaitai ([#93](https://github.com/Mahlet-Inc/hobbits/issues/93)) ([03067d4](https://github.com/Mahlet-Inc/hobbits/commit/03067d421d7f221791bb92377c4356f23c2566d1))
+
 ## [0.46.6](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.5...v0.46.6) (2021-04-23)
 
 
