@@ -1,7 +1,6 @@
 function(gitversion VAR)
-    execute_process(COMMAND git rev-parse HEAD
-                    OUTPUT_VARIABLE GIT_REV
-                    ERROR_QUIET)
+    execute_process(COMMAND git -C "${CMAKE_SOURCE_DIR}" rev-parse HEAD
+                    OUTPUT_VARIABLE GIT_REV)
 
     if ("${GIT_REV}" STREQUAL "")
         message("Failed to get version from Git")
