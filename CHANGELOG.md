@@ -1,3 +1,10 @@
+## [0.46.8](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.7...v0.46.8) (2021-04-25)
+
+
+### Bug Fixes
+
+* handle bad display parameters without crashing [#99](https://github.com/Mahlet-Inc/hobbits/issues/99) ([7c3c587](https://github.com/Mahlet-Inc/hobbits/commit/7c3c58712ad6ebe165ad0684f4b0afb9433e07f3))
+
 ## [0.46.7](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.6...v0.46.7) (2021-04-24)
 
 
