@@ -78,6 +78,9 @@ QSharedPointer<DisplayResult> DotPlot::renderDisplay(QSize viewportSize, const Q
     int wordSize = parameters.value("word_size").toInt(8);
     int windowSize = parameters.value("window_size").toInt(10000);
     int scale = parameters.value("scale").toInt(2);
+    if (scale <= 0) {
+        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
+    }
 
     auto bits = m_handle->currentContainer()->bits();
     auto frameOffset = m_handle->frameOffset();
