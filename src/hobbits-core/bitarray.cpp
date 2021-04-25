@@ -4,6 +4,7 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
+#include <stdexcept>
 
 #ifdef Q_OS_UNIX
 #define bswap16(X) __builtin_bswap16((X))

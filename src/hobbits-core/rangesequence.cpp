@@ -1,6 +1,7 @@
 #include "rangesequence.h"
 #include <QMutexLocker>
 #include <QSharedPointer>
+#include <stdexcept>
 
 #define CACHE_CHUNK_64_SIZE (1000ll * 10ll)
 #define CACHE_CHUNK_BYTE_SIZE (CACHE_CHUNK_64_SIZE * 8ll)
