@@ -105,6 +105,10 @@ QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, co
     }
 
     int scale = parameters.value("scale").toInt();
+    if (scale <= 0) {
+        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
+    }
+
     QPoint offset = headerOffset(parameters);
     QSize rasterSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
     QSize sourceSize(qMax(1, rasterSize.width() / scale), qMax(1, rasterSize.height() / scale));

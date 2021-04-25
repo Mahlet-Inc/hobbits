@@ -20,7 +20,12 @@ set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 if (FFTW_FOUND)
     add_definitions(-DFFTW_AVAILABLE)
 
-    list(APPEND ALL_LINK_LIBS FFTW::Double FFTW::DoubleThreads)
+    if(WIN32)
+        list(APPEND ALL_LINK_LIBS FFTW::Double)
+    else()
+        list(APPEND ALL_LINK_LIBS FFTW::Double FFTW::DoubleThreads)
+    endif()
+
     target_include_directories("hobbits" PRIVATE "${FFTW_INCLUDE_DIRS}")
 endif()
 target_link_libraries("hobbits" ${ALL_LINK_LIBS})

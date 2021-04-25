@@ -41,7 +41,6 @@ include(CheckCCompilerFlag)
 include(CPackComponent)
 include(Hardening)
 include(passthroughvars)
-include(FindPCAP)
 
 #
 # Compile and Link Config
@@ -65,14 +64,26 @@ endif()
 # Dependencies
 #
 
+
+# Qt
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Network CONFIG REQUIRED)
-find_package(FFTW COMPONENTS DOUBLE_LIB DOUBLE_THREADS_LIB)
+
+# libpcap
 if (NOT WIN32)
+    include(FindPCAP)
     find_package(PCAP REQUIRED)
 endif()
 
+# FFTW
+if (WIN32)
+    set(FFTW_ROOT "${CMAKE_SOURCE_DIR}/windows")
+    message("Windows FFTW root: ${FFTW_ROOT}")
+    find_package(FFTW COMPONENTS DOUBLE_LIB)
+else()
+    find_package(FFTW COMPONENTS DOUBLE_LIB DOUBLE_THREADS_LIB)
+endif()
 
 #
 # Dynamic Config
@@ -95,6 +106,7 @@ endif()
 # Python Config
 #
 
+#set(Python3_FIND_ABI "OFF" "ANY" "ANY")
 if ( MANUAL_PYTHON_PATH )
     message("Setting manual Python path")
     message("${MANUAL_PYTHON_PATH}")
@@ -103,6 +115,7 @@ if ( MANUAL_PYTHON_PATH )
 endif()
 find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
 
+message("Python3 Libs: ${Python3_LIBRARIES}")
 
 #
 # Plugin installing and loading

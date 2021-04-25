@@ -10,7 +10,7 @@ QString decodeAsciiBits(const Frame& f, qint64 &bitOffset) {
         frameString += '.';
     }
     else {
-        char byte = 0;
+        unsigned char byte = 0;
         for (int bit = 0; bit < 8; bit++) {
             byte <<= 1;
             if (f.at(bitOffset + bit)) {
