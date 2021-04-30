@@ -38,6 +38,25 @@ AbstractParameterEditor* ParameterDelegate::createEditor(QSize targetBounds)
     return m_editorCreator(sharedFromThis(), targetBounds);
 }
 
+bool ParameterDelegate::jsonTypeCompatible(QJsonValue::Type jsonType, ParameterDelegate::ParameterType type) {
+    if (jsonType == QJsonValue::Double) {
+        return (type == ParameterType::Decimal) || (type == ParameterType::Integer);
+    }
+    else if (jsonType == QJsonValue::String) {
+        return type == ParameterType::String;
+    }
+    else if (jsonType == QJsonValue::Bool) {
+        return type == ParameterType::Boolean;
+    }
+    else if (jsonType == QJsonValue::Array) {
+        return type == ParameterType::Array;
+    }
+    else if (jsonType == QJsonValue::Object) {
+        return type == ParameterType::Object;
+    }
+    return false;
+}
+
 QList<ParameterDelegate::ParameterInfo> ParameterDelegate::parameterInfos() const
 {
     return m_parameterMap.values();
@@ -48,66 +67,81 @@ ParameterDelegate::ParameterInfo ParameterDelegate::getInfo(QString name) const
     return m_parameterMap.value(name);
 }
 
-bool ParameterDelegate::validate(const QJsonObject &parameters) const
+QStringList ParameterDelegate::validate(const QJsonObject &parameters) const
 {
     return validateAgainstInfos(parameters, parameterInfos());
 }
 
 QString ParameterDelegate::actionDescription(const QJsonObject &parameters) const
 {
-    if (!validate(parameters)) {
+    if (!validate(parameters).isEmpty()) {
         return QString();
     }
 
     return m_actionDescriber(parameters);
 }
 
-bool ParameterDelegate::validateAgainstInfos(const QJsonObject &parameters, QList<ParameterDelegate::ParameterInfo> infos)
+QStringList ParameterDelegate::validateAgainstInfos(const QJsonObject &parameters, QList<ParameterDelegate::ParameterInfo> infos)
 {
-    if (infos.isEmpty()) {
-        return true;
-    }
+    QStringList invalidations;
 
     for (auto param : infos) {
         if (!parameters.contains(param.name)) {
             if (!param.optional) {
-                return false;
+                invalidations.append(QString("Missing required parameter '%1'.").arg(param.name));
+                continue;
             }
         }
-        else if (param.type != parameters.value(param.name).type()) {
-            return false;
+        else if (!jsonTypeCompatible(parameters.value(param.name).type(), param.type)) {
+            invalidations.append(QString("Value of provided parameter '%1' is wrong type.").arg(param.name));
+            continue;
         }
 
-        if (param.type == QJsonValue::Array) {
+        if (param.type == ParameterType::Array) {
             QJsonArray array = parameters.value(param.name).toArray();
             if (array.isEmpty() && !param.optional) {
-                return false;
+                invalidations.append(QString("Required array parameter '%1' is empty.").arg(param.name));
+                continue;
             }
             for (QJsonValueRef value: array) {
                 if (!value.isObject()) {
-                    return false;
+                    invalidations.append(QString("Array parameter '%1' has invalid value '%2'.").arg(param.name).arg(value.toString()));
                 }
-                if (!validateAgainstInfos(value.toObject(), param.subInfos)) {
-                    return false;
+                else {
+                    invalidations.append(validateAgainstInfos(value.toObject(), param.subInfos));
                 }
             }
         }
-        else if (param.type == QJsonValue::Object) {
+        else if (param.type == ParameterType::Object) {
             QJsonValue val = parameters.value(param.name);
             if (!val.isObject()) {
-                return false;
+                invalidations.append(QString("Object parameter '%1' is not an object.").arg(param.name));
             }
-            if (!validateAgainstInfos(val.toObject(), param.subInfos)) {
-                return false;
+            else {
+                invalidations.append(validateAgainstInfos(val.toObject(), param.subInfos));
             }
         }
-        else if (param.type == QJsonValue::Double && param.hasIntLimits) {
-            int value = parameters.value(param.name).toInt();
-            if (value > param.intMax || value < param.intMin) {
-                return false;
+        else if (!param.possibleValues.isEmpty()) {
+            if (!param.possibleValues.contains(parameters.value(param.name))) {
+                invalidations.append(QString("Parameter '%1' has invalid value '%2'.").arg(param.name).arg(parameters.value(param.name).toString()));
+            }
+        }
+        else if (param.type == ParameterType::Integer || param.type == ParameterType::Decimal) {
+            if (!param.ranges.isEmpty()) {
+                double value = parameters.value(param.name).toDouble();
+                bool within = false;
+                for (auto range : param.ranges) {
+                    if (value >= range.first && value <= range.second) {
+                        within = true;
+                        break;
+                    }
+                }
+                if (!within) {
+                    invalidations.append(QString("Parameter '%1' value '%2' is outside valid range.").arg(param.name).arg(value));
+                }
             }
         }
     }
 
-    return true;
+    return invalidations;
 }

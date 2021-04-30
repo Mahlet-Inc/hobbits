@@ -69,8 +69,9 @@ QSharedPointer<DisplayResult> HilbertPlot::renderDisplay(QSize viewportSize, con
 {
     Q_UNUSED(parameters)
 
-    if (!m_delegate->validate(parameters)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         return DisplayResult::nullResult();
@@ -140,9 +141,10 @@ QSharedPointer<DisplayResult> HilbertPlot::renderOverlay(QSize viewportSize, con
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());

@@ -10,9 +10,9 @@ DotPlot::DotPlot() :
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", QJsonValue::Double},
-        {"word_size", QJsonValue::Double},
-        {"window_size", QJsonValue::Double}
+        {"scale", ParameterDelegate::ParameterType::Integer},
+        {"word_size", ParameterDelegate::ParameterType::Integer},
+        {"window_size", ParameterDelegate::ParameterType::Integer}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -66,9 +66,10 @@ QSharedPointer<DisplayResult> DotPlot::renderDisplay(QSize viewportSize, const Q
 {
     Q_UNUSED(progress)
 
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());

@@ -6,8 +6,8 @@
 HttpData::HttpData()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        {"url", QJsonValue::String},
-        {"verb", QJsonValue::String}
+        {"url", ParameterDelegate::ParameterType::String},
+        {"verb", ParameterDelegate::ParameterType::String}
     };
 
     m_importDelegate = ParameterDelegate::create(
@@ -32,9 +32,9 @@ HttpData::HttpData()
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
-        {"url", QJsonValue::String},
-        {"formdataname", QJsonValue::String},
-        {"verb", QJsonValue::String}
+        {"url", ParameterDelegate::ParameterType::String},
+        {"formdataname", ParameterDelegate::ParameterType::String},
+        {"verb", ParameterDelegate::ParameterType::String}
     };
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
@@ -100,8 +100,9 @@ QSharedPointer<ParameterDelegate> HttpData::exportParameterDelegate()
 QSharedPointer<ImportResult> HttpData::importBits(QJsonObject parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_importDelegate->validate(parameters)) {
-        return ImportResult::error("Invalid parameters passed to HTTP Import");
+    QStringList invalidations = m_importDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ImportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     return HttpImportForm::importData(parameters, progress);
@@ -111,8 +112,9 @@ QSharedPointer<ExportResult> HttpData::exportBits(QSharedPointer<const BitContai
                                                   QJsonObject parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_exportDelegate->validate(parameters)) {
-        return ExportResult::error("Invalid parameters passed to HTTP Import");
+    QStringList invalidations = m_exportDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ExportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     return HttpExportForm::exportData(container->bits()->readBytes(0, 25000000), parameters, progress);

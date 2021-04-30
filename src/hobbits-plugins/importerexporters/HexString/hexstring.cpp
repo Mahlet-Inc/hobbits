@@ -8,9 +8,9 @@ HexString::HexString()
 {
 
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        {"filename", QJsonValue::String, true},
-        {"hex_string", QJsonValue::String, true},
-        {"repeats", QJsonValue::Double, true}
+        {"filename", ParameterDelegate::ParameterType::String, true},
+        {"hex_string", ParameterDelegate::ParameterType::String, true},
+        {"repeats", ParameterDelegate::ParameterType::Integer, true}
     };
     m_importDelegate = ParameterDelegate::create(
                     importInfos,
@@ -38,7 +38,7 @@ HexString::HexString()
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
-        {"filename", QJsonValue::String, false}
+        {"filename", ParameterDelegate::ParameterType::String, false}
     };
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
@@ -127,8 +127,9 @@ QSharedPointer<ExportResult> HexString::exportBits(QSharedPointer<const BitConta
                                                    QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
-    if (m_exportDelegate->validate(parameters)) {
-        ExportResult::error(QString("Invalid parameters passed to '%1'").arg(name()));
+    QStringList invalidations = m_exportDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ExportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QString fileName;

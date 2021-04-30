@@ -27,19 +27,40 @@
 class HOBBITSCORESHARED_EXPORT ParameterDelegate : public QEnableSharedFromThis<ParameterDelegate>
 {
 public:
+
+    /**
+     * @brief The ParameterType enum provides type classifications for parameters
+     *
+     * ParameterType is similar to QJsonValue, but without null or undefined, and with a
+     * decimal/integer distinction.
+     */
+    enum ParameterType
+    {
+        Boolean = 0x1,
+        Decimal = 0x2,
+        String = 0x3,
+        Array = 0x4,
+        Object = 0x5,
+        Integer = 0x10
+    };
+
+    /**
+     * @brief The ParameterInfo struct contains information for a parameter
+     *
+     * A parameter's ParameterInfo can be used to provide editors and validation for a parameter.
+     */
     struct HOBBITSCORESHARED_EXPORT ParameterInfo
     {
         QString name;
-        QJsonValue::Type type;
+        ParameterType type;
         bool optional;
         QList<ParameterInfo> subInfos;
 
-        bool hasIntLimits;
-        int intMin;
-        int intMax;
+        QList<QPair<double, double>> ranges;
+        QList<QJsonValue> possibleValues;
 
-        ParameterInfo(QString name, QJsonValue::Type type, bool optional = true, QList<ParameterInfo> subInfos = {}):
-            name{name}, type{type}, optional{optional}, subInfos{subInfos}, hasIntLimits(false), intMin(0), intMax(INT_MAX) {}
+        ParameterInfo(QString name, ParameterType type, bool optional = true, QList<ParameterInfo> subInfos = {}):
+            name{name}, type{type}, optional{optional}, subInfos{subInfos}, ranges(QList<QPair<double, double>>()), possibleValues(QList<QJsonValue>()) {}
 
         ParameterInfo() = default;
         ParameterInfo(const ParameterInfo&) = default;
@@ -56,16 +77,18 @@ public:
             std::function<QString(const QJsonObject&)> actionDescriber,
             std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
 
+    static bool jsonTypeCompatible(QJsonValue::Type jsonType, ParameterType type);
+
     virtual AbstractParameterEditor* createEditor(QSize targetBounds = QSize());
 
     QList<ParameterInfo> parameterInfos() const;
     ParameterInfo getInfo(QString name) const;
 
-    bool validate(const QJsonObject &parameters) const;
+    QStringList validate(const QJsonObject &parameters) const;
     QString actionDescription(const QJsonObject &parameters) const;
 
 protected:
-    static bool validateAgainstInfos(const QJsonObject &parameters, QList<ParameterInfo> infos);
+    static QStringList validateAgainstInfos(const QJsonObject &parameters, QList<ParameterInfo> infos);
     QMap<QString, ParameterInfo> m_parameterMap;
     std::function<QString(const QJsonObject&)> m_actionDescriber;
     std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> m_editorCreator;

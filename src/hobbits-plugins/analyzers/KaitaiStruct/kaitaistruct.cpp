@@ -13,8 +13,8 @@
 KaitaiStruct::KaitaiStruct()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {PARAM_KSY, QJsonValue::String, true},
-        {PARAM_PY, QJsonValue::String, true}
+        {PARAM_KSY, ParameterDelegate::ParameterType::String, true},
+        {PARAM_PY, ParameterDelegate::ParameterType::String, true}
     };
 
     m_delegate = QSharedPointer<ParameterDelegateUi>(
@@ -68,8 +68,9 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         const QJsonObject &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_delegate->validate(parameters)) {
-        return AnalyzerResult::error("Invalid parameters given to plugin");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     progress->setProgressPercent(2);

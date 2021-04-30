@@ -13,10 +13,10 @@ Ascii::Ascii() :
 
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"font_size", QJsonValue::Double},
-        {"column_grouping", QJsonValue::Double},
-        {"show_headers", QJsonValue::Bool},
-        {"encoding", QJsonValue::String}
+        {"font_size", ParameterDelegate::ParameterType::Integer},
+        {"column_grouping", ParameterDelegate::ParameterType::Integer},
+        {"show_headers", ParameterDelegate::ParameterType::Boolean},
+        {"encoding", ParameterDelegate::ParameterType::String}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -64,7 +64,7 @@ void Ascii::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_handle = displayHandle;
     DisplayHelper::connectHoverUpdates(this, this, m_handle, [this](QPoint& offset, QSize &symbolSize, int &grouping, int &bitsPerSymbol) {
-        if (!m_delegate->validate(m_lastParams)) {
+        if (!m_delegate->validate(m_lastParams).isEmpty()) {
             return false;
         }
         offset = headerOffset(m_lastParams);
@@ -86,8 +86,9 @@ QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const QJs
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
-    if (!m_delegate->validate(parameters)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QString encoding = parameters.value("encoding").toString();
@@ -105,7 +106,7 @@ QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const QJs
 
 QSharedPointer<DisplayResult> Ascii::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(m_lastParams)) {
+    if (!m_delegate->validate(m_lastParams).isEmpty()) {
         return DisplayResult::nullResult();
     }
     QSize fontSize = DisplayHelper::textSize(DisplayHelper::monoFont(m_lastParams.value("font_size").toInt()), "0");

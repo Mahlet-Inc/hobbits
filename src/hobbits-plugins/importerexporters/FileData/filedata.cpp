@@ -10,7 +10,7 @@
 FileData::FileData()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"filename", QJsonValue::String, false}
+        {"filename", ParameterDelegate::ParameterType::String, false}
     };
 
     m_importDelegate = ParameterDelegate::create(

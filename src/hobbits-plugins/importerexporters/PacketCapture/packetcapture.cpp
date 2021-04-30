@@ -5,15 +5,15 @@
 PacketCapture::PacketCapture()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        {"device_name", QJsonValue::String},
-        {"address", QJsonValue::Double},
-        {"max_packets", QJsonValue::Double, true},
-        {"max_size", QJsonValue::Double, true},
-        {"timeout", QJsonValue::Double},
-        {"filter", QJsonValue::String, true},
-        {"buffer_size", QJsonValue::Double, true},
-        {"packet_size_limit", QJsonValue::Double, true},
-        {"promiscuous", QJsonValue::Bool}
+        {"device_name", ParameterDelegate::ParameterType::String},
+        {"address", ParameterDelegate::ParameterType::Integer},
+        {"max_packets", ParameterDelegate::ParameterType::Integer, true},
+        {"max_size", ParameterDelegate::ParameterType::Integer, true},
+        {"timeout", ParameterDelegate::ParameterType::Integer},
+        {"filter", ParameterDelegate::ParameterType::String, true},
+        {"buffer_size", ParameterDelegate::ParameterType::Integer, true},
+        {"packet_size_limit", ParameterDelegate::ParameterType::Integer, true},
+        {"promiscuous", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_importDelegate = QSharedPointer<ParameterDelegateUi>(
@@ -74,8 +74,9 @@ QSharedPointer<ParameterDelegate> PacketCapture::exportParameterDelegate()
 QSharedPointer<ImportResult> PacketCapture::importBits(QJsonObject parameters,
                                                        QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_importDelegate->validate(parameters)) {
-        return ImportResult::error("Invalid parameters passed to Packet Capture");
+    QStringList invalidations = m_importDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ImportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     return PacketCaptureClient::capturePackets(parameters, progress);

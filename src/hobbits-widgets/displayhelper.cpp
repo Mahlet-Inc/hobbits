@@ -509,7 +509,7 @@ QImage DisplayHelper::drawTextRasterFull(QSize viewportSize,
                                          int bitsPerChar,
                                          std::function<QString (const Frame &, qint64 &)> textConverter)
 {
-    if (handle.isNull() || handle->currentContainer().isNull() || !display->parameterDelegate()->validate(parameters)) {
+    if (handle.isNull() || handle->currentContainer().isNull() || !display->parameterDelegate()->validate(parameters).isEmpty()) {
         return QImage();
     }
 

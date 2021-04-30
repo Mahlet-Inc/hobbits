@@ -7,6 +7,12 @@ PythonArg::PythonArg()
     m_stringData = QString();
     m_integerData = 0;
     m_doubleData = 0;
+    m_boolData = false;
+}
+
+bool PythonArg::boolData() const
+{
+    return m_boolData;
 }
 
 QSize PythonArg::sizeData() const
@@ -159,9 +165,9 @@ PythonArg *PythonArg::number(double n)
 PythonArg *PythonArg::boolean(bool n)
 {
     PythonArg *arg = new PythonArg();
-    arg->m_type = Type::Integer;
-    arg->m_argSymbol = "p";
-    arg->m_integerData = n ? 1 : 0;
+    arg->m_type = Type::Boolean;
+    arg->m_argSymbol = "O";
+    arg->m_boolData = n;
     return arg;
 }
 

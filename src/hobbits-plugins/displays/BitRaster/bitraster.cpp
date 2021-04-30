@@ -12,8 +12,8 @@ BitRaster::BitRaster() :
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", QJsonValue::Double},
-        {"show_headers", QJsonValue::Bool}
+        {"scale", ParameterDelegate::ParameterType::Integer},
+        {"show_headers", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -62,7 +62,7 @@ void BitRaster::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_handle = displayHandle;
     DisplayHelper::connectHoverUpdates(this, this, m_handle, [this](QPoint& offset, QSize &symbolSize, int &grouping, int &bitsPerSymbol) {
-        if (!m_delegate->validate(m_lastParams)) {
+        if (!m_delegate->validate(m_lastParams).isEmpty()) {
             return false;
         }
         int scale = m_lastParams.value("scale").toInt();
@@ -84,9 +84,10 @@ QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const
     Q_UNUSED(progress)
     m_lastParams = parameters;
 
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());
@@ -135,8 +136,9 @@ QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const
 QSharedPointer<DisplayResult> BitRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
     m_lastParams = parameters;
-    if (!m_delegate->validate(m_lastParams)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     int scale = parameters.value("scale").toInt();
 

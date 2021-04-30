@@ -6,9 +6,9 @@
 SymbolRemapper::SymbolRemapper()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        { "mappings", QJsonValue::Array, false, {
-            {"old", QJsonValue::String},
-            {"new", QJsonValue::String}
+        { "mappings", ParameterDelegate::ParameterType::Array, false, {
+            {"old", ParameterDelegate::ParameterType::String},
+            {"new", ParameterDelegate::ParameterType::String}
           }
         }
     };
@@ -71,11 +71,12 @@ QSharedPointer<const OperatorResult> SymbolRemapper::operateOnBits(
     QSharedPointer<const OperatorResult> nullResult(new OperatorResult());
 
     if (inputContainers.size() != 1) {
-        return nullResult;
+        return OperatorResult::error("Invalid input containers - expected 1.");
     }
 
-    if (!m_delegate->validate(parameters)) {
-        return nullResult;
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return OperatorResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QHash<quint64, QSharedPointer<BitArray>> bitMapping;

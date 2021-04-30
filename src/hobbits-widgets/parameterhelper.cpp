@@ -33,6 +33,16 @@ void ParameterHelper::addSpinBoxIntParameter(QString name, QSpinBox* spinBox)
     });
 }
 
+void ParameterHelper::addSpinBoxDoubleParameter(QString name, QDoubleSpinBox* spinBox)
+{
+    addParameter(name, [spinBox](QJsonValue value) {
+        spinBox->setValue(value.toDouble());
+        return true;
+    }, [spinBox]() {
+        return QJsonValue(spinBox->value());
+    });
+}
+
 void ParameterHelper::addSliderIntParameter(QString name, QAbstractSlider *slider)
 {
     addParameter(name, [slider](QJsonValue value) {
@@ -69,14 +79,17 @@ void ParameterHelper::addComboBoxParameter(QString name, QComboBox* comboBox, in
     auto type = m_delegate->getInfo(name).type;
     addParameter(name, [comboBox, type, role](QJsonValue value) {
         int index = -1;
-        if (type == QJsonValue::Bool) {
+        if (type == ParameterDelegate::ParameterType::Boolean) {
             index = comboBox->findData(value.toBool(), role);
         }
-        else if (type == QJsonValue::String) {
+        else if (type == ParameterDelegate::ParameterType::String) {
             index = comboBox->findData(value.toString(), role);
         }
-        else if (type == QJsonValue::Double) {
+        else if (type == ParameterDelegate::ParameterType::Decimal) {
             index = comboBox->findData(value.toDouble(), role);
+        }
+        else if (type == ParameterDelegate::ParameterType::Integer) {
+            index = comboBox->findData(value.toInt(), role);
         }
         if (index < 0) {
             return false;
@@ -84,14 +97,17 @@ void ParameterHelper::addComboBoxParameter(QString name, QComboBox* comboBox, in
         comboBox->setCurrentIndex(index);
         return true;
     }, [comboBox, type, role]() {
-        if (type == QJsonValue::Bool) {
+        if (type == ParameterDelegate::ParameterType::Boolean) {
             return QJsonValue(comboBox->currentData(role).toBool());
         }
-        else if (type == QJsonValue::String) {
+        else if (type == ParameterDelegate::ParameterType::String) {
             return QJsonValue(comboBox->currentData(role).toString());
         }
-        else if (type == QJsonValue::Double) {
+        else if (type == ParameterDelegate::ParameterType::Decimal) {
             return QJsonValue(comboBox->currentData(role).toDouble());
+        }
+        else if (type == ParameterDelegate::ParameterType::Integer) {
+            return QJsonValue(comboBox->currentData(role).toInt());
         }
         return QJsonValue();
     });
@@ -99,7 +115,7 @@ void ParameterHelper::addComboBoxParameter(QString name, QComboBox* comboBox, in
 
 bool ParameterHelper::applyParametersToUi(const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(parameters)) {
+    if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
     }
 

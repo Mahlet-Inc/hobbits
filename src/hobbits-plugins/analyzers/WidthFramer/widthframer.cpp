@@ -7,7 +7,7 @@
 WidthFramer::WidthFramer()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"width", QJsonValue::Double}
+        {"width", ParameterDelegate::ParameterType::Integer}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -53,8 +53,9 @@ QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         const QJsonObject &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_delegate->validate(parameters)) {
-        return AnalyzerResult::error("Invalid parameters passed to Width Framer");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     progress->setProgressPercent(10);
 

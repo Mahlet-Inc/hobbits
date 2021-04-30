@@ -12,11 +12,6 @@ class HOBBITSPYTHONSHARED_EXPORT PythonPluginConfig
 public:
     PythonPluginConfig();
 
-    enum NumberType {
-        Integer = 1,
-        Decimal = 2
-    };
-
     static QStringList loadPythonPlugins(QString path,
                                          QSharedPointer<HobbitsPluginManager> pluginManager,
                                          std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
@@ -52,7 +47,6 @@ public:
     QString type() const;
     QStringList extraPaths() const;
     QSharedPointer<DisplayRenderConfig> renderConfig() const;
-    NumberType parameterNumberType(QString paramName);
 
 private:
     QString m_name;
@@ -60,7 +54,6 @@ private:
     QStringList m_tags;
     QSharedPointer<ParameterDelegate> m_delegate;
     QList<ParameterDelegate::ParameterInfo> m_parameterInfos;
-    QMap<QString, NumberType> m_paramNumberTypes;
     QString m_script;
     QString m_type;
     QStringList m_extraPaths;

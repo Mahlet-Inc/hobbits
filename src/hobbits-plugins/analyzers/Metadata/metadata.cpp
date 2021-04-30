@@ -4,8 +4,8 @@
 Metadata::Metadata()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"label", QJsonValue::String},
-        {"contents", QJsonValue::String}
+        {"label", ParameterDelegate::ParameterType::String},
+        {"contents", ParameterDelegate::ParameterType::String}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -51,8 +51,9 @@ QSharedPointer<const AnalyzerResult> Metadata::analyzeBits(
         QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
-    if (!m_delegate->validate(parameters)) {
-        return AnalyzerResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QString label = parameters.value("label").toString();

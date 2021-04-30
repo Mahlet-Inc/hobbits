@@ -57,8 +57,9 @@ QSharedPointer<ImportResult> PythonExporter::importBits(QJsonObject parameters, 
 
 QSharedPointer<ExportResult> PythonExporter::exportBits(QSharedPointer<const BitContainer> container, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_config->delegate()->validate(parameters)) {
-        return ExportResult::error("Invalid plugin parameters");
+    QStringList invalidations = m_config->delegate()->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ExportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QTemporaryDir dir;
@@ -81,18 +82,16 @@ QSharedPointer<ExportResult> PythonExporter::exportBits(QSharedPointer<const Bit
     }
     pyRequest->addArg(PythonArg::constBitContainer(container));
     for (auto param : m_config->parameterInfos()) {
-        if (param.type == QJsonValue::String) {
+        if (param.type == ParameterDelegate::ParameterType::String) {
             pyRequest->addArg(PythonArg::qString(parameters.value(param.name).toString()));
         }
-        else if (param.type == QJsonValue::Double) {
-            if (m_config->parameterNumberType(param.name) == PythonPluginConfig::Integer) {
-                pyRequest->addArg(PythonArg::integer(parameters.value(param.name).toInt()));
-            }
-            else {
-                pyRequest->addArg(PythonArg::number(parameters.value(param.name).toDouble()));
-            }
+        else if (param.type == ParameterDelegate::ParameterType::Integer) {
+            pyRequest->addArg(PythonArg::integer(parameters.value(param.name).toInt()));
         }
-        else if (param.type == QJsonValue::Bool) {
+        else if (param.type == ParameterDelegate::ParameterType::Decimal) {
+            pyRequest->addArg(PythonArg::number(parameters.value(param.name).toDouble()));
+        }
+        else if (param.type == ParameterDelegate::ParameterType::Boolean) {
             pyRequest->addArg(PythonArg::boolean(parameters.value(param.name).toBool()));
         }
     }

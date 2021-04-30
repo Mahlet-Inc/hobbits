@@ -11,9 +11,9 @@
 Lfsr::Lfsr()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        {"polynomial", QJsonValue::String},
-        {"taps", QJsonValue::String},
-        {"bits_wanted", QJsonValue::Double}
+        {"polynomial", ParameterDelegate::ParameterType::String},
+        {"taps", ParameterDelegate::ParameterType::String},
+        {"bits_wanted", ParameterDelegate::ParameterType::Integer}
     };
     m_importDelegate = ParameterDelegate::create(
                     importInfos,

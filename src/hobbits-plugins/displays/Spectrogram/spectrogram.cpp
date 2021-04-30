@@ -17,15 +17,15 @@ Spectrogram::Spectrogram():
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewMouseHover);
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"sample_format", QJsonValue::String},
-        {"fft_overlap", QJsonValue::Double},
-        {"fft_size", QJsonValue::Double},
-        {"data_type", QJsonValue::Double},
-        {"sensitivity", QJsonValue::Double},
-        {"sample_rate", QJsonValue::Double},
-        {"show_headers", QJsonValue::Bool},
-        {"show_slices", QJsonValue::Bool},
-        {"logarithmic_scaling", QJsonValue::Bool}
+        {"sample_format", ParameterDelegate::ParameterType::String},
+        {"fft_overlap", ParameterDelegate::ParameterType::Integer},
+        {"fft_size", ParameterDelegate::ParameterType::Integer},
+        {"data_type", ParameterDelegate::ParameterType::Integer},
+        {"sensitivity", ParameterDelegate::ParameterType::Decimal},
+        {"sample_rate", ParameterDelegate::ParameterType::Integer},
+        {"show_headers", ParameterDelegate::ParameterType::Boolean},
+        {"show_slices", ParameterDelegate::ParameterType::Boolean},
+        {"logarithmic_scaling", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -78,8 +78,9 @@ QSharedPointer<ParameterDelegate> Spectrogram::parameterDelegate()
 
 QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_delegate->validate(parameters)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QRect spectRect = spectrogramRectangle(viewportSize, m_handle, parameters);
@@ -202,9 +203,10 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
 
 QSharedPointer<DisplayResult> Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QRect spectRect = spectrogramRectangle(viewportSize, m_handle, parameters);

@@ -7,11 +7,11 @@
 DisplayPrint::DisplayPrint()
 {
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
-        {"plugin_name", QJsonValue::String},
-        {"image_width", QJsonValue::Double},
-        {"image_height", QJsonValue::Double},
-        {"image_filename", QJsonValue::String},
-        {"display_params", QJsonValue::Object}
+        {"plugin_name", ParameterDelegate::ParameterType::String},
+        {"image_width", ParameterDelegate::ParameterType::Integer},
+        {"image_height", ParameterDelegate::ParameterType::Integer},
+        {"image_filename", ParameterDelegate::ParameterType::String},
+        {"display_params", ParameterDelegate::ParameterType::Object}
     };
 
     m_exportDelegate = ParameterDelegate::create(
@@ -78,8 +78,9 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
                                                       QJsonObject parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_exportDelegate->validate(parameters)) {
-        return ExportResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    QStringList invalidations = m_exportDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ExportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     int imageWidth = parameters.value("image_width").toInt();
