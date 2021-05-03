@@ -1,9 +1,10 @@
 macro(pluginInDir pluginType modName modDir)
 	file(GLOB_RECURSE SRCFILES "${modDir}/*.c" "${modDir}/*.cpp")
         file(GLOB RCFILES "${modDir}/*.qrc" "${modDir}/*.ui")
+        file(GLOB_RECURSE HDRFILES "${modDir}/*.h" "${modDir}/*.hpp") # this is not necessary for building, but groups the files beter in IDEs
 
 	set(pluginName "hobbits-plugin-${pluginType}-${modName}")
-        add_library("${pluginName}" "${SRCFILES}" "${RCFILES}")
+        add_library("${pluginName}" "${SRCFILES}" "${RCFILES}" "${HDRFILES}")
 
         target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
         #harden("${pluginName}")
