@@ -36,7 +36,10 @@ The JSON file should provide the following fields:
  files/libraries can be found (array of strings)
  - `parameters` - the parameters that are required by the plugin. It is an
  array of parameter objects, each of which contains a `name` field (string)
- and a `type` field (`"string"`, `"integer"`, `"decimal"`, or `"boolean"`)
+ and a `type` field (`"string"`, `"integer"`, `"decimal"`, or `"boolean"`).
+ Optionally, a parameter object can list all valid values in an array in a
+ `possible_values` field, or, in the case of `"integer"` and `"decimal"` types,
+ specify minimum and maximum values in the `min` and `max` fields. 
 
 Here's an example JSON file:
 ```
@@ -54,6 +57,29 @@ Here's an example JSON file:
         }
     ]
 }
+```
+
+Here's a more complicated parameter list:
+```
+"parameters": [
+    {
+        "name": "hero",
+        "type": "string",
+        "possible_values": [
+            "Sam",
+            "Frodo",
+            "Merry",
+            "Pippin",
+            "Bilbo
+        ]
+    },
+    {
+        "name": "breakfast_count",
+        "type": "integer",
+        "min": 2,
+        "max": 10
+    }
+]
 ```
 
 Display plugins can optionally set their `render_config` (default values shown):

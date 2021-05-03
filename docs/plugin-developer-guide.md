@@ -74,7 +74,7 @@ implementation of `AbstractParameterEditor` for editing the parameters in a GUI.
 For most plugins, it is best to follow the pattern used in the Qt Creator plugin
 templates that does the following:
 
- - Create Qt Designed Form class that implementes `AbstractParameterEditor`
+ - Create Qt Designer Form class that implementes `AbstractParameterEditor`
  - Use a `ParameterHelper` to wrap each of the UI elements for easy
    `QJsonObject` getting and setting.
  - Emit `AbstractParameterEditor`'s `changed` signal whenever the UI changes.
