@@ -1,6 +1,6 @@
 steps:
   - bash: |
-      git config core.protectNTFS false
+      git config --global core.protectNTFS false
     displayName: 'Configure Git'
 
   - checkout: self
