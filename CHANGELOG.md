@@ -1,3 +1,10 @@
+# [0.47.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.8...v0.47.0) (2021-05-04)
+
+
+### Features
+
+* improve plugin parameter specification (helps [#84](https://github.com/Mahlet-Inc/hobbits/issues/84)) ([cef1055](https://github.com/Mahlet-Inc/hobbits/commit/cef1055d2119e1892c13d2baf3da38062b1d7ff1))
+
 ## [0.46.8](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.7...v0.46.8) (2021-04-25)
 
 
