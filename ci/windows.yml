@@ -1,4 +1,8 @@
 steps:
+  - bash: |
+      git config core.protectNTFS false
+    displayName: 'Configure Git'
+
   - checkout: self
     persistCredentials: true
     submodules: true
