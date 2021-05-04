@@ -13,10 +13,10 @@ struct OutputHandle {
 TakeSkip::TakeSkip()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"take_skip_string", QJsonValue::String, false},
-        {"interleaved", QJsonValue::Bool, true},
-        {"frame_based", QJsonValue::Bool, true},
-        {"deinterleave_channels", QJsonValue::Double, true}
+        {"take_skip_string", ParameterDelegate::ParameterType::String, false},
+        {"interleaved", ParameterDelegate::ParameterType::Boolean, true},
+        {"frame_based", ParameterDelegate::ParameterType::Boolean, true},
+        {"deinterleave_channels", ParameterDelegate::ParameterType::Integer, true}
     };
 
     m_delegate = QSharedPointer<ParameterDelegateUi>(

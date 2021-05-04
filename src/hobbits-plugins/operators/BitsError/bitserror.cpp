@@ -12,9 +12,9 @@
 BitsError::BitsError()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"error_coeff", QJsonValue::Double},
-        {"error_exp", QJsonValue::Double},
-        {"error_type", QJsonValue::String}
+        {"error_coeff", ParameterDelegate::ParameterType::Decimal},
+        {"error_exp", ParameterDelegate::ParameterType::Decimal},
+        {"error_type", ParameterDelegate::ParameterType::String}
     };
 
     m_delegate = QSharedPointer<ParameterDelegateUi>(

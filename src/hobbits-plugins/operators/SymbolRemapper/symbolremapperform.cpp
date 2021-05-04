@@ -28,7 +28,7 @@ QString SymbolRemapperForm::title()
 
 bool SymbolRemapperForm::setParameters(QJsonObject parameters)
 {
-    if (!m_delegate->validate((parameters))) {
+    if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
     }
 

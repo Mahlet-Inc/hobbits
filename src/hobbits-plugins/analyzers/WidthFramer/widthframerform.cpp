@@ -52,7 +52,7 @@ QString WidthFramerForm::title()
 
 bool WidthFramerForm::setParameters(QJsonObject parameters)
 {
-    if (!m_delegate->validate(parameters)) {
+    if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
     }
 

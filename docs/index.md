@@ -235,7 +235,8 @@ boilerplate code required when making a plugin. This boilerplate code can be
 annoying to experienced developers, and it can be intimidating to developers
 that are unfamiliar with the program.
 
-Templates, in the form of Qt Creator wizards, are available to set up all of the
-boilerplate code required to make a functioning plugin. This dramatically speeds
-up the development of new plugins, especially simple plugins, and plugins that
-just wrap existing C/C++ processing capabilities.
+[Cookiecutter](https://cookiecutter.readthedocs.io/en/latest/)
+templates are available to set up all of
+the boilerplate code required to make a functioning plugin. This dramatically
+speeds up the development of new plugins, especially simple plugins, and plugins
+that just wrap existing C/C++ processing capabilities.

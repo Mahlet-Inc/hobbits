@@ -17,7 +17,8 @@ public:
         Integer = 0x3,
         Double = 0x4,
         ByteBuffer = 0x5,
-        ImageBuffer = 0x6
+        ImageBuffer = 0x6,
+        Boolean = 0x7
     };
 
     static PythonArg* bitArray(QSharedPointer<BitArray> bitArray);
@@ -43,6 +44,7 @@ public:
     int integerData() const;
     double doubleData() const;
     QSize sizeData() const;
+    bool boolData() const;
 
 private:
     PythonArg();
@@ -55,6 +57,7 @@ private:
     int m_integerData;
     double m_doubleData;
     QSize m_sizeData;
+    bool m_boolData;
 };
 
 #endif // PYTHONARG_H

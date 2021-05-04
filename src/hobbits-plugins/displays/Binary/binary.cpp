@@ -12,9 +12,9 @@ Binary::Binary() :
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"font_size", QJsonValue::Double},
-        {"column_grouping", QJsonValue::Double},
-        {"show_headers", QJsonValue::Bool}
+        {"font_size", ParameterDelegate::ParameterType::Integer},
+        {"column_grouping", ParameterDelegate::ParameterType::Integer},
+        {"show_headers", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -62,7 +62,7 @@ void Binary::setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle)
 {
     m_handle = displayHandle;
     DisplayHelper::connectHoverUpdates(this, this, m_handle, [this](QPoint& offset, QSize &symbolSize, int &grouping, int &bitsPerSymbol) {
-        if (!m_delegate->validate(m_lastParams)) {
+        if (!m_delegate->validate(m_lastParams).isEmpty()) {
             return false;
         }
         offset = headerOffset(m_lastParams);
@@ -84,9 +84,10 @@ QSharedPointer<DisplayResult> Binary::renderDisplay(QSize viewportSize, const QJ
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     auto image = DisplayHelper::drawTextRasterFull(viewportSize, headerOffset(parameters), this, m_handle, parameters, 1,
@@ -106,8 +107,9 @@ QSharedPointer<DisplayResult> Binary::renderDisplay(QSize viewportSize, const QJ
 
 QSharedPointer<DisplayResult> Binary::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(m_lastParams)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     QSize fontSize = DisplayHelper::textSize(DisplayHelper::monoFont(m_lastParams.value("font_size").toInt()), "0");
     int columnGrouping = m_lastParams.value("column_grouping").toInt();

@@ -11,9 +11,9 @@ FrequencyPlot::FrequencyPlot() :
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewMouseHover);
 
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", QJsonValue::Double},
-        {"word_size", QJsonValue::Double},
-        {"window_size", QJsonValue::Double}
+        {"scale", ParameterDelegate::ParameterType::Integer},
+        {"word_size", ParameterDelegate::ParameterType::Integer},
+        {"window_size", ParameterDelegate::ParameterType::Integer}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -69,9 +69,10 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
     m_barMax.clear();
     m_barFrequencies.clear();
 
-    if (!m_delegate->validate(parameters)) {
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());
@@ -161,13 +162,14 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
 
 QSharedPointer<DisplayResult> FrequencyPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
 {
-    if (!m_delegate->validate(parameters)) {
-        return DisplayResult::error("Invalid parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     QPoint hover = m_handle->mouseHover(this);
     if (m_handle.isNull()
             || m_handle->currentContainer().isNull()
-            || !m_delegate->validate(parameters)
+            || !m_delegate->validate(parameters).isEmpty()
             || hover.isNull()
             || hover.x() < 0
             || hover.y() < 0) {

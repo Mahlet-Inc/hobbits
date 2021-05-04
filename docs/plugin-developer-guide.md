@@ -74,7 +74,7 @@ implementation of `AbstractParameterEditor` for editing the parameters in a GUI.
 For most plugins, it is best to follow the pattern used in the Qt Creator plugin
 templates that does the following:
 
- - Create Qt Designed Form class that implementes `AbstractParameterEditor`
+ - Create Qt Designer Form class that implementes `AbstractParameterEditor`
  - Use a `ParameterHelper` to wrap each of the UI elements for easy
    `QJsonObject` getting and setting.
  - Emit `AbstractParameterEditor`'s `changed` signal whenever the UI changes.
@@ -203,10 +203,13 @@ successful at importing data along with the `QJsonObject` parameters.
 
 ## Helpful Tools
 
-In order to simplify the process of developing plugins, there are Qt Creator
-wizards that take care of most of the boilerplate code.
+In order to simplify the process of developing plugins, there are
+[cookiecutter](https://cookiecutter.readthedocs.io/en/latest/)
+that take care of most of the boilerplate code.
 
-The wizards can be installed using the wizard_installer.sh script.
+You can install cookiecutter in your development machine's python environment
+with `pip install cookiecutter` and then create the boilerplate code with
+`cookiecutter <path to cookiecutter>`
 
 ## Get in touch
 

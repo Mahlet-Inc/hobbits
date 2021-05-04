@@ -1,0 +1,6 @@
+{
+    "class" : "MyAnalyzer",
+    "editor_class" : "{{ cookiecutter.class }}Editor",
+    "class_file" : "{{ cookiecutter.class|lower }}",
+    "editor_class_file" : "{{ cookiecutter.editor_class|lower }}"
+}

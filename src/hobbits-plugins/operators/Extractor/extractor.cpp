@@ -5,11 +5,11 @@
 Extractor::Extractor()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"highlight_category", QJsonValue::String, false},
-        {"highlight_label", QJsonValue::String, false},
-        {"extract_before", QJsonValue::Bool, true},
-        {"extract_highlight", QJsonValue::Bool, true},
-        {"extract_after", QJsonValue::Bool, true}
+        {"highlight_category", ParameterDelegate::ParameterType::String, false},
+        {"highlight_label", ParameterDelegate::ParameterType::String, false},
+        {"extract_before", ParameterDelegate::ParameterType::Boolean, true},
+        {"extract_highlight", ParameterDelegate::ParameterType::Boolean, true},
+        {"extract_after", ParameterDelegate::ParameterType::Boolean, true}
     };
 
     m_delegate = ParameterDelegateUi::create(
@@ -87,8 +87,9 @@ QSharedPointer<const OperatorResult> Extractor::operateOnBits(
         const QJsonObject &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
-    if (!m_delegate->validate(parameters)) {
-        return OperatorResult::error("Invalid input parameters");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return OperatorResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     if (inputContainers.size() != 1) {

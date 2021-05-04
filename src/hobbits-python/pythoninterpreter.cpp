@@ -222,6 +222,9 @@ PyObject* parseArg(PyObject *hobbitsModule, PythonArg *arg)
     else if (arg->type() == PythonArg::Double) {
         return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->doubleData());
     }
+    else if (arg->type() == PythonArg::Boolean) {
+        return Py_BuildValue(arg->argSymbol().toStdString().c_str(), arg->boolData() ? Py_True : Py_False);
+    }
     else if (arg->type() == PythonArg::ByteBuffer) {
         return PyMemoryView_FromMemory(reinterpret_cast<char*>(arg->pointer()), arg->integerData(), PyBUF_WRITE);
     }

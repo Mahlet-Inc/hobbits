@@ -5,9 +5,9 @@
 Highlight::Highlight()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"start", QJsonValue::Double},
-        {"length", QJsonValue::Double},
-        {"color", QJsonValue::Double, true}
+        {"start", ParameterDelegate::ParameterType::Integer},
+        {"length", ParameterDelegate::ParameterType::Integer},
+        {"color", ParameterDelegate::ParameterType::Integer, true}
     };
 
     m_delegate = QSharedPointer<ParameterDelegateUi>(
@@ -55,8 +55,9 @@ QSharedPointer<const AnalyzerResult> Highlight::analyzeBits(
         QSharedPointer<PluginActionProgress> progress)
 {
     progress->setProgressPercent(5);
-    if (!m_delegate->validate(parameters)) {
-        return AnalyzerResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     qint64 start = parameters.value("start").toInt();

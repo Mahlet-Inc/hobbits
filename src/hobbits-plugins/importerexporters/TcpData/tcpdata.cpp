@@ -5,9 +5,9 @@
 TcpData::TcpData()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        {"port", QJsonValue::Double},
-        {"max_kb", QJsonValue::Double},
-        {"timeout", QJsonValue::Double}
+        {"port", ParameterDelegate::ParameterType::Integer},
+        {"max_kb", ParameterDelegate::ParameterType::Integer},
+        {"timeout", ParameterDelegate::ParameterType::Integer}
     };
 
     m_importDelegate = QSharedPointer<ParameterDelegateUi>(
@@ -23,9 +23,9 @@ TcpData::TcpData()
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
-        {"host", QJsonValue::String},
-        {"port", QJsonValue::Double},
-        {"timeout", QJsonValue::Double}
+        {"host", ParameterDelegate::ParameterType::String},
+        {"port", ParameterDelegate::ParameterType::Integer},
+        {"timeout", ParameterDelegate::ParameterType::Integer}
     };
     m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
                 new ParameterDelegateUi(
@@ -84,8 +84,9 @@ QSharedPointer<ParameterDelegate> TcpData::exportParameterDelegate()
 QSharedPointer<ImportResult> TcpData::importBits(QJsonObject parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_importDelegate->validate(parameters)) {
-        return ImportResult::error("Invalid parameters passed to TCP Import");
+    QStringList invalidations = m_importDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ImportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     return TcpReceiver::importData(parameters, progress);
@@ -95,8 +96,9 @@ QSharedPointer<ExportResult> TcpData::exportBits(QSharedPointer<const BitContain
                                                  QJsonObject parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_exportDelegate->validate(parameters)) {
-        return ExportResult::error("Invalid parameters passed to TCP Export");
+    QStringList invalidations = m_exportDelegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return ExportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     return TcpSender::exportData(container->bits(), parameters, progress);

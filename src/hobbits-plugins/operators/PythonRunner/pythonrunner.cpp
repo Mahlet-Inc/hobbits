@@ -14,7 +14,7 @@
 PythonRunner::PythonRunner()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        { "script", QJsonValue::String }
+        { "script", ParameterDelegate::ParameterType::String }
     };
 
     m_delegate = ParameterDelegateUi::create(
@@ -75,8 +75,9 @@ QSharedPointer<const OperatorResult> PythonRunner::operateOnBits(
     if (inputContainers.length() != 1) {
         return OperatorResult::error("Requires a single input bit container");
     }
-    if (!m_delegate->validate(parameters)) {
-        return OperatorResult::error("Invalid plugin state");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return OperatorResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     QTemporaryDir dir;

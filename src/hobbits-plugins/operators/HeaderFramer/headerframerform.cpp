@@ -41,7 +41,7 @@ QString HeaderFramerForm::title()
 
 bool HeaderFramerForm::setParameters(QJsonObject parameters)
 {
-    if (!m_delegate->validate(parameters)) {
+    if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
     }
 

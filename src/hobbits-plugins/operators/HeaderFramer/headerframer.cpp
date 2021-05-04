@@ -7,11 +7,11 @@
 HeaderFramer::HeaderFramer()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        { "headers", QJsonValue::Array, false, {
-            {"header", QJsonValue::String},
-            {"length", QJsonValue::String},
-            {"pre-pad", QJsonValue::Double, true},
-            {"byte-aligned", QJsonValue::Bool, true}
+        { "headers", ParameterDelegate::ParameterType::Array, false, {
+            {"header", ParameterDelegate::ParameterType::String},
+            {"length", ParameterDelegate::ParameterType::String},
+            {"pre-pad", ParameterDelegate::ParameterType::Integer, true},
+            {"byte-aligned", ParameterDelegate::ParameterType::Boolean, true}
           }
         }
     };
@@ -78,8 +78,9 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnBits(
 
     QSharedPointer<OperatorResult> result(new OperatorResult());
 
-    if (!m_delegate->validate(parameters)) {
-        return OperatorResult::error("Invalid parameters given to Header Framer");
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return OperatorResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
     if (inputContainers.size() != 1) {

@@ -5,7 +5,7 @@
 Find::Find()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"search_string", QJsonValue::String}
+        {"search_string", ParameterDelegate::ParameterType::String}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -49,9 +49,11 @@ QSharedPointer<const AnalyzerResult> Find::analyzeBits(
         const QJsonObject &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
-    if (!m_delegate->validate(parameters)) {
-        return AnalyzerResult::error(QString("Invalid parameters passed to %1").arg(name()));
+    QStringList invalidations = m_delegate->validate(parameters);
+    if (!invalidations.isEmpty()) {
+        return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
+
     auto findBits = BitArray::fromString(parameters.value("search_string").toString());
     auto bits = container->bits();
 

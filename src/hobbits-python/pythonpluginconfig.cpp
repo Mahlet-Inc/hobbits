@@ -198,32 +198,49 @@ QStringList PythonPluginConfig::configure(QString configFolder,
         auto param = value.toObject();
         QString name = param.value("name").toString();
         QString type = param.value("type").toString();
+
+        ParameterDelegate::ParameterInfo info;
         if (type == "string") {
-            m_parameterInfos.append({name, QJsonValue::String});
+            info = {name, ParameterDelegate::ParameterType::String};
         }
         else if (type == "integer") {
-            ParameterDelegate::ParameterInfo info = {name, QJsonValue::Double};
+            info = {name, ParameterDelegate::ParameterType::Integer};
             if (param.contains("min") || param.contains("max")) {
-                info.hasIntLimits = true;
-                info.intMax = INT_MAX;
-                info.intMin = INT_MIN;
+                QPair<double, double> range = {INT_MIN, INT_MAX};
+                if (param.contains("min")) {
+                    range.first = param.value("min").toDouble();
+                }
+                if (param.contains("max")) {
+                    range.second = param.value("max").toDouble();
+                }
+                info.ranges.append(range);
             }
-            if (param.contains("min")) {
-                info.intMin = param.value("min").toInt();
-            }
-            if (param.contains("max")) {
-                info.intMax = param.value("max").toInt();
-            }
-            m_parameterInfos.append(info);
-            m_paramNumberTypes.insert(name, NumberType::Integer);
         }
         else if (type == "decimal") {
-            m_parameterInfos.append({name, QJsonValue::Double});
-            m_paramNumberTypes.insert(name, NumberType::Decimal);
+            info =  {name, ParameterDelegate::ParameterType::Decimal};
+            if (param.contains("min") || param.contains("max")) {
+                QPair<double, double> range = {INT_MIN, INT_MAX};
+                if (param.contains("min")) {
+                    range.first = param.value("min").toDouble();
+                }
+                if (param.contains("max")) {
+                    range.second = param.value("max").toDouble();
+                }
+                info.ranges.append(range);
+            }
         }
         else if (type == "boolean") {
-            m_parameterInfos.append({name, QJsonValue::Bool});
+            info = {name, ParameterDelegate::ParameterType::Boolean};
         }
+
+        if (param.contains("possible_values") && param.value("possible_values").isArray()) {
+            auto values = param.value("possible_values").toArray();
+            for (auto value : values) {
+                info.possibleValues.append(value);
+            }
+        }
+
+        m_parameterInfos.append(info);
     }
 
     if (!config.contains("script")) {
@@ -323,9 +340,4 @@ QStringList PythonPluginConfig::extraPaths() const
 QSharedPointer<DisplayRenderConfig> PythonPluginConfig::renderConfig() const
 {
     return m_renderConfig;
-}
-
-PythonPluginConfig::NumberType PythonPluginConfig::parameterNumberType(QString paramName)
-{
-    return m_paramNumberTypes.value(paramName, NumberType::Decimal);
 }

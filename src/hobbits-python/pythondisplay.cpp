@@ -49,10 +49,10 @@ QSharedPointer<ParameterDelegate> PythonDisplay::parameterDelegate()
 
 QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
 {
-
-    if (!m_config->delegate()->validate(parameters)) {
+    QStringList invalidations = m_config->delegate()->validate(parameters);
+    if (!invalidations.isEmpty()) {
         m_handle->setRenderedRange(this, Range());
-        return DisplayResult::error("Invalid parameters");
+        return DisplayResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
     if (m_handle.isNull() || m_handle->currentContainer().isNull()) {
         m_handle->setRenderedRange(this, Range());
@@ -80,18 +80,16 @@ QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, c
     pyRequest->addArg(PythonArg::displayHandle(m_handle));
     pyRequest->addArg(PythonArg::imageBuffer(byteBuffer, viewportSize));
     for (auto param : m_config->parameterInfos()) {
-        if (param.type == QJsonValue::String) {
+        if (param.type == ParameterDelegate::ParameterType::String) {
             pyRequest->addArg(PythonArg::qString(parameters.value(param.name).toString()));
         }
-        else if (param.type == QJsonValue::Double) {
-            if (m_config->parameterNumberType(param.name) == PythonPluginConfig::Integer) {
-                pyRequest->addArg(PythonArg::integer(parameters.value(param.name).toInt()));
-            }
-            else {
-                pyRequest->addArg(PythonArg::number(parameters.value(param.name).toDouble()));
-            }
+        else if (param.type == ParameterDelegate::ParameterType::Integer) {
+            pyRequest->addArg(PythonArg::integer(parameters.value(param.name).toInt()));
         }
-        else if (param.type == QJsonValue::Bool) {
+        else if (param.type == ParameterDelegate::ParameterType::Decimal) {
+            pyRequest->addArg(PythonArg::number(parameters.value(param.name).toDouble()));
+        }
+        else if (param.type == ParameterDelegate::ParameterType::Boolean) {
             pyRequest->addArg(PythonArg::boolean(parameters.value(param.name).toBool()));
         }
     }
