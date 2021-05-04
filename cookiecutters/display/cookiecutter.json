@@ -1,0 +1,4 @@
+{
+    "class" : "MyDisplay",
+    "editor_class" : "{{cookiecutter.class}}Editor"
+}

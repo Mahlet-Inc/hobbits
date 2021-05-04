@@ -211,7 +211,6 @@ set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 #
 
 add_subdirectory(src)
-add_subdirectory(wizards)
 
 
 #

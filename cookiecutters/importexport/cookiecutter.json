@@ -1,0 +1,5 @@
+{
+    "class" : "MyImportExport",
+    "import_editor" : "{{cookiecutter.class}}ImportEditor",
+    "export_editor" : "{{cookiecutter.class}}ExportEditor"
+}
