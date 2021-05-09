@@ -1,6 +1,3 @@
 
-if (FFTW_FOUND)
-    pluginInDir("${pluginType}" "Spectrogram" "${CMAKE_CURRENT_SOURCE_DIR}")
-    target_link_libraries("hobbits-plugin-displays-Spectrogram" PRIVATE FFTW::Double)
-    target_include_directories("hobbits-plugin-displays-Spectrogram" PRIVATE "${FFTW_INCLUDE_DIRS}")
-endif()
+pluginInDir("${pluginType}" "Spectrogram" "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries("hobbits-plugin-displays-Spectrogram" PRIVATE CONAN_PKG::fftw)

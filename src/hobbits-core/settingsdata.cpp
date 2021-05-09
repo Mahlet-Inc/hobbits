@@ -136,13 +136,13 @@ void SettingsData::initialize()
     }
 #ifdef Q_OS_LINUX
     #if SELF_CONTAINED_APP
-    pythonHome = appDirPath + "../python";
+    pythonHome = appDirPath + "../hobbits-cpython";
     #else
     pythonHome = "";
     #endif
 #endif
 #ifdef Q_OS_MACOS
-    pythonHome = appDirPath + "../Frameworks/python";
+    pythonHome = appDirPath + "../Frameworks/hobbits-cpython";
 #endif
 #ifdef Q_OS_WIN
     pythonHome = appDirPath;
