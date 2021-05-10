@@ -86,7 +86,9 @@ class HobbitsConan(ConanFile):
         
         self.copy("*", dst="bin/platforms", src="bin/archdatadir/plugins/platforms", root_package="qt")
         
-        self.copy("*", "", folder=True, root_package="hobbits-cpython")
+        self.copy("*", dst="hobbits-cpython/bin", src="bin", root_package="hobbits-cpython")
+        self.copy("*", dst="hobbits-cpython/include", src="include", root_package="hobbits-cpython")
+        self.copy("*", dst="hobbits-cpython/lib", src="lib", root_package="hobbits-cpython")
 
         if self.settings.os == "Linux":
             for platform_plugin in glob.glob("bin/platforms/*.so*"):

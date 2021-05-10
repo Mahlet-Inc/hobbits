@@ -19,25 +19,27 @@ steps:
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
-  - script: conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
-    displayName: 'Add conan remote with hobbits-cpython'
+  - bash: |
+      conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
+      conan config set general.keep_python_files=True
+    displayName: 'Some conan config'
 
-  - script: | 
+  - bash: | 
       mkdir build
       cd build
       conan install .. --build=fftw
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
 
-  - script: |
+  - bash: |
       conan build ..
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan build'
 
-  - script: |
+  - bash: |
       conan package ..
       cp -R package/* $(Build.ArtifactStagingDirectory)
-    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan package'
 
   - bash: |
