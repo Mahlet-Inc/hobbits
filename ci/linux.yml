@@ -19,6 +19,16 @@ steps:
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
+  - script: conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
+    displayName: 'Add conan remote with hobbits-cpython'
+
+  - script: | 
+      mkdir build
+      cd build
+      conan install ..
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: 'Run conan install'
+
   - script: | 
       mkdir build
       cd build
