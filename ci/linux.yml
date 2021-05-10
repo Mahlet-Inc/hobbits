@@ -32,7 +32,7 @@ steps:
   - script: | 
       mkdir build
       cd build
-      conan install .. --build=missing
+      conan install .. --build=fftw
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
 
