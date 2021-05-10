@@ -19,7 +19,9 @@ set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONA
 add_executable(hobbits MACOSX_BUNDLE "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
 add_definitions(-DFFTW_AVAILABLE)
 target_link_libraries(hobbits ${ALL_LINK_LIBS})
-target_compile_options(hobbits PRIVATE -fPIC)
+if (UNIX)
+	target_compile_options(hobbits PRIVATE -fPIC)
+endif()
 #harden("hobbits")
 
 set_target_properties(hobbits
