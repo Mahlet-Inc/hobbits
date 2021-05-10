@@ -25,13 +25,6 @@ steps:
   - script: | 
       mkdir build
       cd build
-      conan install ..
-    workingDirectory: $(Build.SourcesDirectory)
-    displayName: 'Run conan install'
-
-  - script: | 
-      mkdir build
-      cd build
       conan install .. --build=fftw
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
