@@ -17,15 +17,15 @@ jobs:
       parameters:
         artifactName: ubuntu18_gcc7_release
         pythonArtifact: python_ubuntu_1804
-- job: CentOS74LinuxGCC48
-  pool:
-    vmImage: 'ubuntu-18.04'
-  container: helloadam/hobbitscentosbuilder:latest
-  steps:
-    - template: ci/linux.yml
-      parameters:
-        artifactName: centos7_gcc48_release
-        pythonArtifact: python_centos_74
+# - job: CentOS74LinuxGCC48
+#   pool:
+#     vmImage: 'ubuntu-18.04'
+#   container: helloadam/hobbitscentosbuilder:latest
+#   steps:
+#     - template: ci/linux.yml
+#       parameters:
+#         artifactName: centos7_gcc48_release
+#         pythonArtifact: python_centos_74
 - job: Windows
   pool:
     vmImage: 'vs2017-win2016'
