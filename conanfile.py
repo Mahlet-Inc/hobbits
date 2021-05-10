@@ -18,6 +18,7 @@ class HobbitsConan(ConanFile):
         "fftw:shared": True,
         "libpcap:shared": True,
         "fftw:threads": True,
+        "fftw:combinedthreads": True,
         "icu:shared":True
         }
     generators = "cmake"
@@ -61,9 +62,17 @@ class HobbitsConan(ConanFile):
             self.copy("*", dst="lib", src="lib", symlinks=True)
             self.copy("*", dst="hobbits-cpython", src="hobbits-cpython", symlinks=True)
         elif self.settings.os == "Windows":
-            self.copy("*", dst=".", src="bin/platforms")
-            self.copy("*", dst=".", src="lib", symlinks=True)
-            self.copy("*", dst=".", src="hobbits-cpython", symlinks=True)
+            self.copy("*", dst=".", src="bin")
+            self.copy("*.dll", dst=".", src="hobbits-core", symlinks=True)
+            self.copy("*.lib", dst=".", src="hobbits-core", symlinks=True)
+            self.copy("*.exp", dst=".", src="hobbits-core", symlinks=True)
+            self.copy("*.dll", dst=".", src="hobbits-widgets", symlinks=True)
+            self.copy("*.lib", dst=".", src="hobbits-widgets", symlinks=True)
+            self.copy("*.exp", dst=".", src="hobbits-widgets", symlinks=True)
+            self.copy("*.dll", dst=".", src="hobbits-python", symlinks=True)
+            self.copy("*.lib", dst=".", src="hobbits-python", symlinks=True)
+            self.copy("*.exp", dst=".", src="hobbits-python", symlinks=True)
+            self.copy("*", dst=".", src="hobbits-cpython/bin", symlinks=True)
 
 
     def package_info(self):
@@ -75,9 +84,11 @@ class HobbitsConan(ConanFile):
             self.copy("*.dylib*", "lib", "lib", root_package=pkg)
             self.copy("*.so*", "lib", "lib", root_package=pkg)
         
-        self.copy("*.so*", "bin/platforms", "bin/archdatadir/plugins/platforms", root_package="qt")
+        self.copy("*", dst="bin/platforms", src="bin/archdatadir/plugins/platforms", root_package="qt")
+        
         self.copy("*", "", folder=True, root_package="hobbits-cpython")
 
-        for platform_plugin in glob.glob("bin/platforms/*.so*"):
-            self.run(f"patchelf --remove-rpath {platform_plugin}")
-            self.run(f"patchelf --force-rpath --set-rpath \\$ORIGIN/../../lib64:\\$ORIGIN/../../lib {platform_plugin}")
+        if self.settings.os == "Linux":
+            for platform_plugin in glob.glob("bin/platforms/*.so*"):
+                self.run(f"patchelf --remove-rpath {platform_plugin}")
+                self.run(f"patchelf --force-rpath --set-rpath \\$ORIGIN/../../lib64:\\$ORIGIN/../../lib {platform_plugin}")
