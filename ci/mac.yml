@@ -38,12 +38,12 @@ steps:
   - bash: |
       conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
       conan config set general.keep_python_files=True
-    displayName: 'Some conan config'
+    displayName: 'Configure Conan'
 
   - bash: | 
       mkdir build
       cd build
-      conan install .. --build=fftw
+      conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
 
