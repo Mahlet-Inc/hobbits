@@ -1,8 +1,4 @@
 steps:
-  - bash: |
-      git config --global core.protectNTFS false
-    displayName: 'Configure Git'
-
   - checkout: self
     persistCredentials: true
     submodules: true
@@ -16,67 +12,44 @@ steps:
       versionSpec: '12.x'
 
   - bash: |
-      BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python.exe -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
-      echo "Build ID: ${BUILD_ID}"
-      curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
-      unzip hobbits_python.zip
-      rm -fv hobbits_python.zip
-      mv ${PYTHON_ARTIFACT} hobbits_python
-    env:
-      PYTHON_ARTIFACT: python_windows_2019
-    displayName: 'Get hobbits python artifact'
-  
-  - script: |
-      dir $(Build.SourcesDirectory)\hobbits_python
-    displayName: 'Show hobbits python directory'
-
-  - bash: |
       rm .releaserc.json
       cp ci/justversion.releaserc.json .releaserc.json
       npm ci
       npx semantic-release
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-      
-  - script: |
-      cd $(Build.SourcesDirectory)
-      python -m pip install aqtinstall==1.1.3
-    displayName: 'Install aqtinstall'
 
-  - script: | 
-      python -m aqt install --outputdir $(Build.BinariesDirectory)\Qt 5.14.1 windows desktop win64_msvc2017_64 -m qtcore qtgui qtnetwork qtwidgets
-    displayName: 'Install Qt 5.14.1'
+  - bash: |
+      python -m pip install conan
+    displayName: 'Install Conan'
 
-  - script: | 
-      python -m aqt tool --outputdir $(Build.BinariesDirectory)\Qt windows tools_openssl_x64 1.1.1-4 qt.tools.openssl.win_x64
-    displayName: 'Install OpenSSL for QtNetwork'
+  - bash: |
+      conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
+      conan config set general.keep_python_files=True
+    displayName: 'Some conan config'
 
-  - script: |
-      cd $(Build.SourcesDirectory)\windows
-      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      lib.exe /def:libfftw3-3.def
-      dir
-    displayName: 'Create FFTW .lib'
-
-  - script: | 
-      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      md build
+  - bash: | 
+      mkdir build
       cd build
-      cmake "-GNMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$(Build.BinariesDirectory)\Qt\5.14.1\msvc2017_64\lib\cmake -DFFTW_ROOT=$(Build.SourcesDirectory)\windows -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)\hobbits_python ..
-    displayName: 'Run cmake'
+      conan install .. --build=fftw
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: 'Run conan install'
 
-  - script: |
-      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      nmake
+  - bash: |
+      conan build ..
     workingDirectory: $(Build.SourcesDirectory)/build
-    displayName: 'Build hobbits'
+    displayName: 'Run conan build'
 
-  - script: |
-      call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      nmake package
-      move .\*.zip $(Build.ArtifactStagingDirectory)\
+  - bash: |
+      conan package ..
     workingDirectory: $(Build.SourcesDirectory)/build
-    displayName: 'Package binaries'
+    displayName: 'Run conan package'
+
+  - bash: |
+      tar -czf ../windows_release.tar.gz .
+      cp ../windows_release.tar.gz $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/build/package
+    displayName: 'Collect and zip package files'
 
   - task: PublishBuildArtifacts@1
     inputs:
