@@ -39,6 +39,7 @@ class HobbitsConan(ConanFile):
             del self.options.fPIC
         elif self.settings.os == "Macos":
             self.options['libpcap'].shared = False
+            self.options['fftw'].shared = False
 
     def _configure_cmake(self):
         cmake = CMake(self, generator="Ninja")

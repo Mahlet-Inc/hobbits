@@ -19,28 +19,28 @@ steps:
     displayName: 'Update the version number for the build'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
-  - bash: |
+  - script: |
       python -m pip install conan
     displayName: 'Install Conan'
 
-  - bash: |
+  - script: |
       conan remote add myconan https://helloadam.jfrog.io/artifactory/api/conan/conan
       conan config set general.keep_python_files=True
     displayName: 'Configure Conan'
 
-  - bash: | 
+  - script: | 
       mkdir build
       cd build
       conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
 
-  - bash: |
+  - script: |
       conan build ..
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan build'
 
-  - bash: |
+  - script: |
       conan package ..
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan package'
