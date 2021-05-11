@@ -2,7 +2,7 @@
 # CMake Setup
 #
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -65,6 +65,7 @@ if (UNIX)
     SET(CMAKE_INSTALL_RPATH "")
     set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 	if (APPLE)
+		set(MACOSX_RPATH TRUE)
 		set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/hobbits-cpython/lib")
 	elseif(LINUX)
 		set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../hobbits-cpython/lib;$ORIGIN/../hobbits-cpython/lib64")

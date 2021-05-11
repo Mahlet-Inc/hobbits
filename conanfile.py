@@ -61,8 +61,8 @@ class HobbitsConan(ConanFile):
             self.copy("*", dst="hobbits-cpython", src="hobbits-cpython", symlinks=True)
         elif self.settings.os == "Macos":
             self.copy("*", dst="hobbits.app/Contents/PlugIns/platforms", src="bin/platforms")
-            self.copy("*", dst="lib", src="lib", symlinks=True)
-            self.copy("*", dst="hobbits-cpython", src="hobbits-cpython", symlinks=True)
+            self.copy("*", dst="hobbits.app/Contents/Frameworks", src="lib", symlinks=True)
+            self.copy("*", dst="hobbits.app/Contents/Frameworks/hobbits-cpython", src="hobbits-cpython", symlinks=True)
         elif self.settings.os == "Windows":
             self.copy("*", dst=".", src="bin")
             self.copy("*.dll", dst=".", src="hobbits-core", symlinks=True, keep_path=False)
