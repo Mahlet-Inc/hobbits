@@ -42,7 +42,10 @@ class HobbitsConan(ConanFile):
             self.options['fftw'].shared = False
 
     def _configure_cmake(self):
-        cmake = CMake(self, generator="Ninja")
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+        else:
+            cmake = CMake(self, generator="Ninja")
         cmake.configure(source_folder="src", defs={ "SELF_CONTAINED_APP" : 1 })
         return cmake
 
