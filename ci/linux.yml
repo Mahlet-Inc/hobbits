@@ -38,9 +38,14 @@ steps:
 
   - bash: |
       conan package ..
-      cp -R package/* $(Build.ArtifactStagingDirectory)
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan package'
+
+  - bash: |
+      tar -czf ../${{ parameters.artifactName }}.tar.gz .
+      cp ${{ parameters.artifactName }}.tar.gz $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/build/package
+    displayName: 'Collect and zip package files'
 
   - bash: |
       npm ci
