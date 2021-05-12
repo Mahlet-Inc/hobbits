@@ -46,7 +46,10 @@ class HobbitsConan(ConanFile):
             cmake = CMake(self)
         else:
             cmake = CMake(self, generator="Ninja")
-        cmake.configure(source_folder="src", defs={ "SELF_CONTAINED_APP" : 1 })
+        defs = { "SELF_CONTAINED_APP" : 1 }
+        if self.settings.build_type == "Release":
+            defs["QT_NO_DEBUG"] = 1
+        cmake.configure(source_folder="src", defs=defs)
         return cmake
 
     def build(self):

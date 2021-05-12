@@ -51,6 +51,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(BUILD_SHARED_LIBS ON)
 
+if (QT_NO_DEBUG)
+    add_compile_definitions(QT_NO_DEBUG=1)
+endif()
 
 if (LINUX)
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5)
