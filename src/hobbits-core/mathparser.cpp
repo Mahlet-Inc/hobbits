@@ -47,7 +47,7 @@ QChar MathParser::op()
 QChar MathParser::bin()
 {
 
-    if (this->tok() == "0" || this->tok() == "1") {
+    if (this->tok() == '0' || this->tok() == '1') {
         return this->tok();
     }
     return '\0';
@@ -93,9 +93,9 @@ MathParser::ParseResult MathParser::wholebin(bool move_back = true)
 {
     QString binaryString = "";
     bool ok;
-    if (this->tok() == "0") {
+    if (this->tok() == '0') {
         this->next();
-        if (this->tok() == "b") {
+        if (this->tok() == 'b') {
             this->next();
             if (!bin().isNull()) {
                 binaryString += this->tok();
@@ -131,9 +131,9 @@ MathParser::ParseResult MathParser::wholehex(bool move_back = true)
 {
     QString hexString = "";
     bool ok;
-    if (this->tok() == "0") {
+    if (this->tok() == '0') {
         this->next();
-        if (this->tok() == "x") {
+        if (this->tok() == 'x') {
             this->next();
             if (!hex().isNull()) {
                 hexString += this->tok();
@@ -169,9 +169,9 @@ MathParser::ParseResult MathParser::wholeoct(bool move_back = true)
 {
     QString octString = "";
     bool ok;
-    if (this->tok() == "0") {
+    if (this->tok() == '0') {
         this->next();
-        if (this->tok() == "o") {
+        if (this->tok() == 'o') {
             this->next();
             if (!oct().isNull()) {
                 octString += this->tok();
@@ -303,7 +303,7 @@ MathParser::ParseResult MathParser::factors()
         qlonglong result = nums[0];
         if (allOps.size() != 0) {
             for (int i = 0; i < allOps.size(); i++) {
-                if (allOps[i] == "*" || allOps[i] == "/") {
+                if (allOps[i] == '*' || allOps[i] == '/') {
                     result = applyOp(nums[i], nums[i + 1], allOps[i]);
                     nums.erase(nums.begin() + i);
                     nums.erase(nums.begin() + i);
@@ -313,7 +313,7 @@ MathParser::ParseResult MathParser::factors()
                 }
             }
             for (int i = 0; i < allOps.size(); i++) {
-                if (allOps[i] == "+" || allOps[i] == "-") {
+                if (allOps[i] == '+' || allOps[i] == '-') {
                     result = applyOp(nums[i], nums[i + 1], allOps[i]);
                     nums.erase(nums.begin() + i);
                     nums.erase(nums.begin() + i);
@@ -333,13 +333,13 @@ MathParser::ParseResult MathParser::factors()
 int MathParser::unit()
 {
     // Bits
-    if (this->tok() == "B") {
+    if (this->tok() == 'B') {
         this->next();
-        if (this->tok() == "i") {
+        if (this->tok() == 'i') {
             this->next();
-            if (this->tok() == "t") {
+            if (this->tok() == 't') {
                 this->next();
-                if (this->tok() == "s") {
+                if (this->tok() == 's') {
                     return 1;
                 }
                 else {
@@ -359,15 +359,15 @@ int MathParser::unit()
     }
 
     // Bytes
-    if (this->tok() == "B") {
+    if (this->tok() == 'B') {
         this->next();
-        if (this->tok() == "y") {
+        if (this->tok() == 'y') {
             this->next();
-            if (this->tok() == "t") {
+            if (this->tok() == 't') {
                 this->next();
-                if (this->tok() == "e") {
+                if (this->tok() == 'e') {
                     this->next();
-                    if (this->tok() == "s") {
+                    if (this->tok() == 's') {
                         return 8;
                     }
                     else {

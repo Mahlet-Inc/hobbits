@@ -11,28 +11,14 @@ steps:
   - script: sudo apt-get -y install ninja-build
     displayName: 'Install Ninja'
 
-  - script: sudo apt-get -y install fftw3-dev
-    displayName: 'Install FFTW3'
-
-  - script: sudo apt-get install libpcap-dev
-    displayName: 'Install libpcap'
-
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.7'
       
-  - script: |
-      cd $(Build.SourcesDirectory)
-      python3 -m pip install aqtinstall==1.1.3
-    displayName: 'Install aqtinstall'
+  - script: python3 -m pip install conan
+    displayName: 'Install conan'
 
   - task: NodeTool@0
     inputs:
       versionSpec: '12.x'
   
-  - script: | 
-      python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.15.1 linux desktop -m qtcore qtgui qtnetwork qtwidgets || python3 -m aqt install --outputdir $(Build.BinariesDirectory)/Qt 5.15.1 linux desktop -m qtcore qtgui qtnetwork qtwidgets
-      echo '##vso[task.setvariable variable=QMAKE_BIN]$(Build.BinariesDirectory)/Qt/5.15.1/gcc_64/bin/qmake'
-      echo '##vso[task.setvariable variable=QT_LIB_DIR]$(Build.BinariesDirectory)/Qt/5.15.1/gcc_64/lib'
-      echo '##vso[task.setvariable variable=QT_PLATFORMS_DIR]$(Build.BinariesDirectory)/Qt/5.15.1/gcc_64/plugins/platforms'
-    displayName: 'Install Qt 5.15.1'
