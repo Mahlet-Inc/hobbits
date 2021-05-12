@@ -45,11 +45,12 @@ steps:
     workingDirectory: $(Build.SourcesDirectory)/build
     displayName: 'Run conan package'
 
-  - bash: |
-      tar -czf ../windows_release.tar.gz .
-      cp ../windows_release.tar.gz $(Build.ArtifactStagingDirectory)
-    workingDirectory: $(Build.SourcesDirectory)/build/package
-    displayName: 'Collect and zip package files'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: $(Build.SourcesDirectory)/build/package
+      includeRootFolder: false
+      archiveFile: $(Build.ArtifactStagingDirectory)/windows_release.zip
+      verbose: true
 
   - task: PublishBuildArtifacts@1
     inputs:
