@@ -2,7 +2,7 @@
 #include "ui_batchedititemwidget.h"
 #include "parametereditordialog.h"
 
-BatchEditItemWidget::BatchEditItemWidget(QString title, QSharedPointer<ParameterDelegate> delegate, QJsonObject parameters):
+BatchEditItemWidget::BatchEditItemWidget(QString title, QSharedPointer<ParameterDelegate> delegate, Parameters parameters):
     ui(new Ui::BatchEditItemWidget),
     m_delegate(delegate)
 {
@@ -24,7 +24,7 @@ BatchEditItemWidget::~BatchEditItemWidget()
     delete ui;
 }
 
-QJsonObject BatchEditItemWidget::parameters() const
+Parameters BatchEditItemWidget::parameters() const
 {
     return m_parameters;
 }
@@ -60,14 +60,14 @@ void BatchEditItemWidget::on_pb_outputs_clicked()
 
 void BatchEditItemWidget::on_pb_config_clicked()
 {
-    QJsonObject parameters = ParameterEditorDialog::promptForParameters(m_delegate, m_parameters);
-    if (parameters.isEmpty()) {
+    Parameters parameters = ParameterEditorDialog::promptForParameters(m_delegate, m_parameters);
+    if (parameters.isNull()) {
         return;
     }
     setParameters(parameters);
 }
 
-void BatchEditItemWidget::setParameters(QJsonObject parameters)
+void BatchEditItemWidget::setParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     QString description = m_delegate->actionDescription(m_parameters);
@@ -77,5 +77,5 @@ void BatchEditItemWidget::setParameters(QJsonObject parameters)
 
 void BatchEditItemWidget::on_pb_clear_clicked()
 {
-    setParameters(QJsonObject());
+    setParameters(Parameters::nullParameters());
 }

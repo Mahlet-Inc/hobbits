@@ -26,7 +26,7 @@ QString SymbolRemapperForm::title()
     return "Configure Symbol Remapping";
 }
 
-bool SymbolRemapperForm::setParameters(QJsonObject parameters)
+bool SymbolRemapperForm::setParameters(const Parameters &parameters)
 {
     if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
@@ -45,11 +45,11 @@ bool SymbolRemapperForm::setParameters(QJsonObject parameters)
     return true;
 }
 
-QJsonObject SymbolRemapperForm::parameters()
+Parameters SymbolRemapperForm::parameters()
 {
-    QJsonObject params;
+    Parameters params;
 
-    // Pull data from the input fields and input them into pluginState
+    // Pull data from the input fields and input them into parameters
     QJsonArray mappingsArray;
     for (QPair<QString, QString> pair : m_remapModel->getMappings()) {
         QJsonObject pairValue;

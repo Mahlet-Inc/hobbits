@@ -74,7 +74,7 @@ AbstractParameterEditor* MultiDisplayWidget::createEditorForActiveDisplay()
         return nullptr;
     }
 
-    if (parts->display->displayParameters().isEmpty()) {
+    if (parts->display->displayParameters().isNull()) {
         parts->display->setDisplayParameters(editor->parameters());
     }
     else {

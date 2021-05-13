@@ -17,7 +17,7 @@ DigraphPlot::DigraphPlot() :
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     int wordSize = parameters.value("word_size").toInt();
                     return QString("%1-bit Digraph Plot").arg(wordSize);
                 },
@@ -62,7 +62,7 @@ QSharedPointer<ParameterDelegate> DigraphPlot::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
 
@@ -127,7 +127,7 @@ QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, con
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> DigraphPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> DigraphPlot::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)

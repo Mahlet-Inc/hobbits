@@ -10,6 +10,7 @@
 #include "pluginactionprogress.h"
 #include "displayhandle.h"
 #include "hobbits-widgets_global.h"
+#include "parameters.h"
 
 class HOBBITSWIDGETSSHARED_EXPORT AbstractParameterEditor : public QWidget
 {
@@ -20,8 +21,8 @@ public:
 
     virtual QString title() = 0;
 
-    virtual bool setParameters(QJsonObject parameters) = 0;
-    virtual QJsonObject parameters() = 0;
+    virtual bool setParameters(const Parameters &parameters) = 0;
+    virtual Parameters parameters() = 0;
 
     /// If true, this editor does not require additional accept and reject buttons to behave like a dialog
     virtual bool isStandaloneDialog() { return false; }

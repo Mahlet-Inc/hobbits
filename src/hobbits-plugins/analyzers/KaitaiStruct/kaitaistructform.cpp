@@ -118,12 +118,12 @@ QString KaitaiStructForm::title()
     return "Configure Kaitai Struct Parser";
 }
 
-bool KaitaiStructForm::setParameters(QJsonObject parameters)
+bool KaitaiStructForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject KaitaiStructForm::parameters()
+Parameters KaitaiStructForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }

@@ -26,11 +26,11 @@ public:
 
     static QSharedPointer<DisplayResult> render(QSharedPointer<DisplayInterface> display,
                          QSize viewportSize,
-                         const QJsonObject &parameters,
+                         const Parameters &parameters,
                          QSharedPointer<PluginActionProgress> progress);
 
-    QJsonObject displayParameters() const;
-    void setDisplayParameters(const QJsonObject &displayParameters);
+    Parameters displayParameters() const;
+    void setDisplayParameters(const Parameters &displayParameters);
 
     QSharedPointer<DisplayInterface> display() const;
 
@@ -60,7 +60,7 @@ private slots:
 private:
     QSharedPointer<DisplayInterface> m_display;
     QSharedPointer<DisplayHandle> m_handle;
-    QJsonObject m_displayParameters;
+    Parameters m_displayParameters;
     QSharedPointer<DisplayResult> m_displayResult;
     bool m_repaintScheduled;
     QMutex m_mutex;

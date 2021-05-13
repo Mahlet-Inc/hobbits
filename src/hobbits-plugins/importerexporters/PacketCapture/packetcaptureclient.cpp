@@ -22,7 +22,7 @@ PacketCaptureClient::~PacketCaptureClient()
     }
 }
 
-QSharedPointer<ImportResult> PacketCaptureClient::capturePackets(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress) {
+QSharedPointer<ImportResult> PacketCaptureClient::capturePackets(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress) {
     QScopedPointer<PacketCaptureClient> client(new PacketCaptureClient());
     return client->capturePacketsImpl(parameters, progress);
 }
@@ -89,7 +89,7 @@ QSharedPointer<ImportResult> PacketCaptureClient::configureResult(PacketCaptureC
     }
 }
 
-void PacketCaptureClient::extractParameters(QJsonObject parameters)
+void PacketCaptureClient::extractParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     m_deviceName = parameters.value("device_name").toString();
@@ -119,7 +119,7 @@ void PacketCaptureClient::extractParameters(QJsonObject parameters)
     m_promiscuous = parameters.value("promiscuous").toBool() ? 1 : 0;
 }
 
-QSharedPointer<ImportResult> PacketCaptureClient::capturePacketsImpl(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> PacketCaptureClient::capturePacketsImpl(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     m_progress = progress;
     extractParameters(parameters);

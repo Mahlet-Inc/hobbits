@@ -34,19 +34,19 @@ QSharedPointer<ParameterDelegate> PythonOperator::parameterDelegate()
     return m_config->delegate();
 }
 
-int PythonOperator::getMinInputContainers(const QJsonObject &pluginState)
+int PythonOperator::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int PythonOperator::getMaxInputContainers(const QJsonObject &pluginState)
+int PythonOperator::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-QSharedPointer<const OperatorResult> PythonOperator::operateOnBits(QList<QSharedPointer<const BitContainer> > inputContainers, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<const OperatorResult> PythonOperator::operateOnBits(QList<QSharedPointer<const BitContainer> > inputContainers, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
 
     if (inputContainers.length() != 1) {

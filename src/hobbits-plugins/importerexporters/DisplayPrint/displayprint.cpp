@@ -16,7 +16,7 @@ DisplayPrint::DisplayPrint()
 
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [this](const QJsonObject &parameters) {
+                    [this](const Parameters &parameters) {
                         QString pluginName = parameters.value("plugin_name").toString();
                         return QString("Export %1 Image").arg(pluginName);
                     },
@@ -66,7 +66,7 @@ QSharedPointer<ParameterDelegate>  DisplayPrint::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> DisplayPrint::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> DisplayPrint::importBits(const Parameters &parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(parameters)
@@ -75,7 +75,7 @@ QSharedPointer<ImportResult> DisplayPrint::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitContainer> container,
-                                                      QJsonObject parameters,
+                                                      const Parameters &parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_exportDelegate->validate(parameters);
@@ -100,7 +100,7 @@ QSharedPointer<ExportResult> DisplayPrint::exportBits(QSharedPointer<const BitCo
     containerManager->addContainer(noConstContainer);
     containerManager->selectContainer(noConstContainer);
 
-    QJsonObject displayParams = parameters.value("display_params").toObject();
+    Parameters displayParams(parameters.value("display_params").toObject());
 
     auto display = displayPlugin->renderDisplay(QSize(imageWidth, imageHeight), displayParams, progress);
     auto overlay = displayPlugin->renderOverlay(QSize(imageWidth, imageHeight), displayParams);

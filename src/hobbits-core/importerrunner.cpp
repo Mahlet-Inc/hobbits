@@ -75,7 +75,7 @@ void ImporterRunner::postProcess()
     emit finished(m_id);
 }
 
-QSharedPointer<ImportResult> ImporterRunner::importerCall(QSharedPointer<ImporterExporterInterface> importer, QJsonObject parameters, QSharedPointer<PluginActionProgress> progressTracker)
+QSharedPointer<ImportResult> ImporterRunner::importerCall(QSharedPointer<ImporterExporterInterface> importer, const Parameters &parameters, QSharedPointer<PluginActionProgress> progressTracker)
 {
     try {
         return importer->importBits(parameters, progressTracker);

@@ -9,7 +9,7 @@
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [this](const QJsonObject &parameters) {
+                    [this](const Parameters &parameters) {
                         // TODO: use parameters to describe action better
                         return QString("Apply %1").arg(this->name());
                     },
@@ -46,21 +46,21 @@ QSharedPointer<ParameterDelegate>  {{cookiecutter.class}}::parameterDelegate()
     return m_delegate;
 }
 
-int {{cookiecutter.class}}::getMinInputContainers(const QJsonObject &pluginState)
+int {{cookiecutter.class}}::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int {{cookiecutter.class}}::getMaxInputContainers(const QJsonObject &pluginState)
+int {{cookiecutter.class}}::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
 QSharedPointer<const OperatorResult> {{cookiecutter.class}}::operateOnBits(
     QList<QSharedPointer<const BitContainer> > inputContainers,
-    const QJsonObject &parameters,
+    const Parameters &parameters,
     QSharedPointer<PluginActionProgress> progress)
 {     
     QStringList invalidations = m_delegate->validate(parameters);

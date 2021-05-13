@@ -18,7 +18,7 @@ FrequencyPlot::FrequencyPlot() :
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     int wordSize = parameters.value("word_size").toInt();
                     return QString("%1-bit Frequency Plot").arg(wordSize);
     },
@@ -63,7 +63,7 @@ QSharedPointer<ParameterDelegate> FrequencyPlot::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_barMax.clear();
@@ -160,7 +160,7 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> FrequencyPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> FrequencyPlot::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {

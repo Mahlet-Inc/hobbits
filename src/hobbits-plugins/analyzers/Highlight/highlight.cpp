@@ -10,10 +10,9 @@ Highlight::Highlight()
         {"color", ParameterDelegate::ParameterType::Integer, true}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         return QString("Highlight %2 bits at %1")
                                 .arg(parameters.value("length").toInt())
                                 .arg(parameters.value("start").toInt());
@@ -21,7 +20,7 @@ Highlight::Highlight()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new HighlightForm(delegate);
-                    }));
+                    });
 }
 
 AnalyzerInterface* Highlight::createDefaultAnalyzer()
@@ -51,7 +50,7 @@ QSharedPointer<ParameterDelegate>  Highlight::parameterDelegate()
 
 QSharedPointer<const AnalyzerResult> Highlight::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     progress->setProgressPercent(5);

@@ -8,6 +8,7 @@
 #include "parameterdelegate.h"
 #include <QSharedPointer>
 #include "hobbitsplugin.h"
+#include "parameters.h"
 
 /**
   * @brief Implementations of the OperatorInterface plugin interface process bit data into new bit data
@@ -25,12 +26,12 @@ public:
 
     virtual QSharedPointer<ParameterDelegate> parameterDelegate() = 0;
 
-    virtual int getMinInputContainers(const QJsonObject &parameters) = 0;
-    virtual int getMaxInputContainers(const QJsonObject &parameters) = 0;
+    virtual int getMinInputContainers(const Parameters &parameters) = 0;
+    virtual int getMaxInputContainers(const Parameters &parameters) = 0;
 
     virtual QSharedPointer<const OperatorResult> operateOnBits(
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) = 0;
 };
 

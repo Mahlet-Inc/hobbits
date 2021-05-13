@@ -10,7 +10,7 @@ Metadata::Metadata()
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
         QString label = parameters.value("label").toString();
         return QString("Set Metadata Field '%1'").arg(label);
     },
@@ -47,7 +47,7 @@ QSharedPointer<ParameterDelegate>  Metadata::parameterDelegate()
 
 QSharedPointer<const AnalyzerResult> Metadata::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)

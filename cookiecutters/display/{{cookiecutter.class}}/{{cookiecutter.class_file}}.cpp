@@ -15,7 +15,7 @@
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [this](const QJsonObject &parameters) {
+                    [this](const Parameters &parameters) {
                         // TODO: use parameters to describe action better
                         return QString("Apply %1").arg(this->name());
                     },
@@ -62,7 +62,7 @@ QSharedPointer<ParameterDelegate> {{cookiecutter.class}}::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> {{cookiecutter.class}}::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> {{cookiecutter.class}}::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -76,7 +76,7 @@ QSharedPointer<DisplayResult> {{cookiecutter.class}}::renderDisplay(QSize viewpo
     return DisplayResult::nullResult();
 }
 
-QSharedPointer<DisplayResult> {{cookiecutter.class}}::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> {{cookiecutter.class}}::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {

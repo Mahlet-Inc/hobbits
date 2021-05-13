@@ -18,7 +18,7 @@ BitRaster::BitRaster() :
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         int scale = parameters.value("scale").toInt();
                         if (parameters.value("show_headers").toBool()) {
                             return QString("Bit Raster %1x with headers").arg(scale);
@@ -79,7 +79,7 @@ QSharedPointer<ParameterDelegate> BitRaster::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -133,7 +133,7 @@ QSharedPointer<DisplayResult> BitRaster::renderDisplay(QSize viewportSize, const
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> BitRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> BitRaster::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     m_lastParams = parameters;
     QStringList invalidations = m_delegate->validate(parameters);
@@ -151,7 +151,7 @@ QSharedPointer<DisplayResult> BitRaster::renderOverlay(QSize viewportSize, const
     return DisplayResult::result(overlay, parameters);
 }
 
-QPoint BitRaster::headerOffset(const QJsonObject &parameters)
+QPoint BitRaster::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);

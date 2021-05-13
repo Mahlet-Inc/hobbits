@@ -14,7 +14,7 @@ HexString::HexString()
     };
     m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("filename")) {
                             return QString("Import Hex String from %1").arg(parameters.value("filename").toString());
                         }
@@ -42,7 +42,7 @@ HexString::HexString()
     };
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("filename")) {
                             return QString("Export Hex String to %1").arg(parameters.value("filename").toString());
                         }
@@ -97,7 +97,7 @@ QSharedPointer<ParameterDelegate> HexString::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> HexString::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> HexString::importBits(const Parameters &parameters,
                                                    QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
@@ -123,7 +123,7 @@ QSharedPointer<ImportResult> HexString::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> HexString::exportBits(QSharedPointer<const BitContainer> container,
-                                                   QJsonObject parameters,
+                                                   const Parameters &parameters,
                                                    QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)

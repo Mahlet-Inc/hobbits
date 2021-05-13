@@ -23,12 +23,12 @@ public:
 
     QSharedPointer<DisplayResult> renderDisplay(
             QSize viewportSize,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
     QSharedPointer<DisplayResult> renderOverlay(
             QSize viewportSize,
-            const QJsonObject &parameters) override;
+            const Parameters &parameters) override;
 
 private:
     QSharedPointer<PythonPluginConfig> m_config;

@@ -44,12 +44,12 @@ QString BitsErrorForm::title()
     return "Configure Take Skip";
 }
 
-QJsonObject BitsErrorForm::parameters()
+Parameters BitsErrorForm::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }
 
-bool BitsErrorForm::setParameters(QJsonObject parameters)
+bool BitsErrorForm::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }

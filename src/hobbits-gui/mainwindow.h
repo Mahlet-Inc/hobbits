@@ -63,10 +63,10 @@ public slots:
 
     void setStatus(QString status);
 
-    void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
-    void requestOperatorRun(QString pluginName, QJsonObject pluginState);
-    void requestImportRun(QString pluginName, QJsonObject pluginState);
-    void requestExportRun(QString pluginName, QJsonObject pluginState);
+    void requestAnalyzerRun(QString pluginName, const Parameters &parameters);
+    void requestOperatorRun(QString pluginName, const Parameters &parameters);
+    void requestImportRun(QString pluginName, const Parameters &parameters);
+    void requestExportRun(QString pluginName, const Parameters &parameters);
 
     QSharedPointer<BitContainer> currContainer();
 
@@ -89,13 +89,13 @@ private slots:
     void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
-    void populateRecentExportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
-    void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
+    void populateRecentExportsMenu(QPair<QString, Parameters> addition = QPair<QString, Parameters>(), QPair<QString, Parameters> removal = QPair<QString, Parameters>());
+    void populateRecentImportsMenu(QPair<QString, Parameters> addition = QPair<QString, Parameters>(), QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populatePluginActionMenu(QString key, QMenu* menu,
-                                  const std::function<QString(QString, QJsonObject)> getLabel,
-                                  const std::function<void(QString, QJsonObject)> triggerAction,
-                                  QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(),
-                                  QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
+                                  const std::function<QString(QString, Parameters)> getLabel,
+                                  const std::function<void(QString, Parameters)> triggerAction,
+                                  QPair<QString, Parameters> addition = QPair<QString, Parameters>(),
+                                  QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populateRecentBatchesMenu(QString addition = QString(), QString removal = QString());
 
     void setupSplitViewMenu();

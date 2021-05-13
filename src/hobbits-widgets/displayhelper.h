@@ -5,6 +5,7 @@
 #include "bitcontainer.h"
 #include "hobbits-widgets_global.h"
 #include "displayhandle.h"
+#include "parameters.h"
 
 namespace DisplayHelper
 {
@@ -82,7 +83,7 @@ namespace DisplayHelper
                                                           QPoint offset,
                                                           DisplayInterface * display,
                                                        QSharedPointer<DisplayHandle> displayHandle,
-                                                       const QJsonObject &parameters,
+                                                       const Parameters &parameters,
                                                        int bitsPerChar,
                                                        std::function<QString(const Frame&, qint64&)> textConverter);
 

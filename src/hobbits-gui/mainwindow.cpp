@@ -324,8 +324,8 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Import_Bits_From->addAction(
                     plugin->name(),
                     [this, plugin]() {
-                QJsonObject parameters = ParameterEditorDialog::promptForParameters(plugin->importParameterDelegate());
-                if (!parameters.isEmpty()) {
+                Parameters parameters = ParameterEditorDialog::promptForParameters(plugin->importParameterDelegate());
+                if (!parameters.isNull()) {
                     this->requestImportRun(plugin->name(), parameters);
                 }
             });
@@ -335,8 +335,8 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Export_Bits_To->addAction(
                     plugin->name(),
                     [this, plugin]() {
-                QJsonObject parameters = ParameterEditorDialog::promptForParameters(plugin->exportParameterDelegate());
-                if (!parameters.isEmpty()) {
+                Parameters parameters = ParameterEditorDialog::promptForParameters(plugin->exportParameterDelegate());
+                if (!parameters.isNull()) {
                     this->requestExportRun(plugin->name(), parameters);
                 }
             });
@@ -391,9 +391,9 @@ void MainWindow::importBitfile(QString file)
         warningMessage("Could not import bit file without 'File Data' plugin");
         return;
     }
-    QJsonObject pluginState;
-    pluginState.insert("filename", file);
-    requestImportRun("File Data", pluginState);
+    Parameters parameters;
+    parameters.insert("filename", file);
+    requestImportRun("File Data", parameters);
 }
 
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
@@ -419,7 +419,7 @@ void MainWindow::on_pb_operate_clicked()
         warningMessage("No editor initialized for plugin " + op->name());
         return;
     }
-    QJsonObject parameters = editor->parameters();
+    Parameters parameters = editor->parameters();
     this->requestOperatorRun(op->name(), parameters);
 }
 
@@ -663,7 +663,7 @@ void MainWindow::setCurrentBitContainer()
                 if (!op.isNull()) {
                     AbstractParameterEditor* editor = m_operatorUiMap.value(op);
                     if (editor != nullptr) {
-                        QJsonObject parameters = output->parameters();
+                        Parameters parameters = output->parameters();
                         editor->setParameters(parameters);
                         alreadySet.insert(output->pluginName());
                     }
@@ -712,29 +712,16 @@ void MainWindow::setStatus(QString status)
     ui->statusBar->showMessage(status);
 }
 
-void MainWindow::requestAnalyzerRun(QString pluginName, QJsonObject parameters)
+void MainWindow::requestAnalyzerRun(QString pluginName, const Parameters &parameters)
 {
     if (!currContainer().isNull()) {
-        if (parameters.isEmpty()) {
-            warningMessage(
-                    "The plugin is unable to act due to a bad input value",
-                    "Bad Plugin Input");
-            return;
-        }
         m_pluginActionManager->runAnalyzer(PluginAction::analyzerAction(pluginName, parameters), currContainer());
     }
 }
 
-void MainWindow::requestOperatorRun(QString pluginName, QJsonObject parameters)
+void MainWindow::requestOperatorRun(QString pluginName, const Parameters &parameters)
 {
     if (!currContainer().isNull()) {
-        if (parameters.isEmpty()) {
-            warningMessage(
-                    "The plugin is unable to act due to empty parameters",
-                    "Bad Plugin Input");
-            return;
-        }
-
         QSharedPointer<OperatorInterface> plugin = m_pluginManager->getOperator(pluginName);
         if (!plugin.isNull()) {
 
@@ -765,9 +752,9 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject parameters)
     }
 }
 
-void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
+void MainWindow::requestImportRun(QString pluginName, const Parameters &parameters)
 {
-    auto runner = m_pluginActionManager->runImporter(PluginAction::importerAction(pluginName, pluginState));
+    auto runner = m_pluginActionManager->runImporter(PluginAction::importerAction(pluginName, parameters));
     if (runner.isNull()) {
         warningMessage(QString("Failed to initialize importer '%1'").arg(pluginName));
         return;
@@ -775,13 +762,13 @@ void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
     m_pendingImports.insert(runner->id(), runner);
 }
 
-void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
+void MainWindow::requestExportRun(QString pluginName, const Parameters &parameters)
 {
     if (currContainer().isNull()) {
         warningMessage(QString("No container selected for export"));
         return;
     }
-    auto runner = m_pluginActionManager->runExporter(PluginAction::exporterAction(pluginName, pluginState), currContainer());
+    auto runner = m_pluginActionManager->runExporter(PluginAction::exporterAction(pluginName, parameters), currContainer());
     if (runner.isNull()) {
         warningMessage(QString("Failed to initialize exporter '%1'").arg(pluginName));
         return;
@@ -796,7 +783,7 @@ void MainWindow::on_pb_analyze_clicked()
         warningMessage("Current Analyzer plugin cannot be determined");
         return;
     }
-    QJsonObject parameters;
+    Parameters parameters = Parameters::nullParameters();
     AbstractParameterEditor *editor = m_analyzerUiMap.value(plugin);
     if (editor != nullptr) {
         parameters = editor->parameters();
@@ -915,7 +902,7 @@ void MainWindow::pluginActionFinished(QUuid id)
         auto runner = m_pendingImports.take(id);
         auto result = runner->result();
         if (!result.isNull()
-                && !result->hasEmptyParameters()
+                && !result->hasNullParameters()
                 && result->errorString().isEmpty()) {
             this->populateRecentImportsMenu({runner->pluginName(), result->parameters()});
         }
@@ -924,7 +911,7 @@ void MainWindow::pluginActionFinished(QUuid id)
         auto runner = m_pendingExports.take(id);
         auto result = runner->result();
         if (!result.isNull()
-                && !result->hasEmptyParameters()
+                && !result->hasNullParameters()
                 && result->errorString().isEmpty()) {
             this->populateRecentExportsMenu({runner->pluginName(), result->parameters()});
         }
@@ -1008,55 +995,55 @@ void MainWindow::populateRecentBatchesMenu(QString addition, QString removal)
 }
 
 
-void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+void MainWindow::populateRecentImportsMenu(QPair<QString, Parameters> addition, QPair<QString, Parameters> removal)
 {
     populatePluginActionMenu("recently_imported", ui->menuImport_Recent,
-                             [this](QString pluginName, QJsonObject pluginState){
+                             [this](QString pluginName, const Parameters &parameters){
         QSharedPointer<ImporterExporterInterface> plugin = this->m_pluginManager->getImporterExporter(pluginName);
         if (plugin.isNull()) {
             return QString();
         }
-        return plugin->importParameterDelegate()->actionDescription(pluginState);
+        return plugin->importParameterDelegate()->actionDescription(parameters);
     },
-    [this](QString pluginName, QJsonObject pluginState){
-        this->requestImportRun(pluginName, pluginState);
+    [this](QString pluginName, const Parameters &parameters){
+        this->requestImportRun(pluginName, parameters);
     },
     addition, removal);
 }
 
-void MainWindow::populateRecentExportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+void MainWindow::populateRecentExportsMenu(QPair<QString, Parameters> addition, QPair<QString, Parameters> removal)
 {
     populatePluginActionMenu("recently_exported", ui->menuExport_Recent,
-                             [this](QString pluginName, QJsonObject pluginState){
+                             [this](QString pluginName, const Parameters &parameters){
         QSharedPointer<ImporterExporterInterface> plugin = this->m_pluginManager->getImporterExporter(pluginName);
         if (plugin.isNull()) {
             return QString();
         }
-        return plugin->exportParameterDelegate()->actionDescription(pluginState);
+        return plugin->exportParameterDelegate()->actionDescription(parameters);
     },
-    [this](QString pluginName, QJsonObject pluginState){
-        this->requestExportRun(pluginName, pluginState);
+    [this](QString pluginName, const Parameters &parameters){
+        this->requestExportRun(pluginName, parameters);
     },
     addition, removal);
 }
 
 void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
-                              const std::function<QString(QString, QJsonObject)> getLabel,
-                              const std::function<void(QString, QJsonObject)> triggerAction,
-                              QPair<QString, QJsonObject> addition,
-                              QPair<QString, QJsonObject> removal)
+                              const std::function<QString(QString, Parameters)> getLabel,
+                              const std::function<void(QString, Parameters)> triggerAction,
+                              QPair<QString, Parameters> addition,
+                              QPair<QString, Parameters> removal)
 {
     QString separator = "/[]\"[]/";
 
     QString additionString;
-    if (!addition.first.isEmpty() && !addition.second.isEmpty()) {
-        QJsonDocument doc(addition.second);
+    if (!addition.first.isEmpty() && !addition.second.isNull()) {
+        QJsonDocument doc(addition.second.values());
         QString additionJson(doc.toJson(QJsonDocument::Compact));
         additionString = QString("%1%2%3").arg(addition.first).arg(separator).arg(additionJson);
     }
     QString removalString;
-    if (!removal.first.isEmpty() && !removal.second.isEmpty()) {
-        QJsonDocument doc(removal.second);
+    if (!removal.first.isEmpty() && !removal.second.isNull()) {
+        QJsonDocument doc(removal.second.values());
         QString removalJson(doc.toJson(QJsonDocument::Compact));
         removalString = QString("%1%2%3").arg(removal.first).arg(separator).arg(removalJson);
     }
@@ -1089,18 +1076,18 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
             continue;
         }
         QString pluginName = importParts.at(0);
-        QByteArray pluginStateString = importParts.at(1).toUtf8();
-        QJsonObject pluginState = QJsonDocument::fromJson(pluginStateString).object();
+        QByteArray parametersString = importParts.at(1).toUtf8();
+        Parameters parameters(QJsonDocument::fromJson(parametersString).object());
 
-        QString menuLabel = getLabel(pluginName, pluginState);
+        QString menuLabel = getLabel(pluginName, parameters);
         if (menuLabel.isEmpty()) {
             invalidStateCount++;
             continue;
         }
         menu->addAction(
                 menuLabel,
-                [pluginName, pluginState, triggerAction]() {
-            triggerAction(pluginName, pluginState);
+                [pluginName, parameters, triggerAction]() {
+            triggerAction(pluginName, parameters);
         });
     }
 

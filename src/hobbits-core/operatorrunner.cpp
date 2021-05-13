@@ -67,7 +67,7 @@ void OperatorRunner::postProcess()
     }
 
     // Apply action lineage
-    if (!m_result->hasEmptyParameters()) {
+    if (!m_result->hasNullParameters()) {
         QSharedPointer<PluginAction> action =
             QSharedPointer<PluginAction>(
                     new PluginAction(
@@ -121,7 +121,7 @@ void OperatorRunner::postProcess()
 QSharedPointer<const OperatorResult> OperatorRunner::operatorCall(
         QSharedPointer<OperatorInterface> op,
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        QJsonObject parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     try {

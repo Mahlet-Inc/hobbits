@@ -26,12 +26,12 @@ QString DotPlotForm::title()
     return "Configure Dot Plot";
 }
 
-QJsonObject DotPlotForm::parameters()
+Parameters DotPlotForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool DotPlotForm::setParameters(QJsonObject parameters)
+bool DotPlotForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

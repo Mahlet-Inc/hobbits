@@ -4,7 +4,7 @@
 #include "pluginactionwatcher.h"
 #include "bitcontainermanager.h"
 #include "hobbitspluginmanager.h"
-#include <QJsonObject>
+#include "parameters.h"
 #include <QMap>
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
@@ -37,7 +37,7 @@ private:
     static QSharedPointer<const OperatorResult> operatorCall(
             QSharedPointer<OperatorInterface> op,
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            QJsonObject pluginState,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progressTracker);
 
     QSharedPointer<const PluginAction> m_action;

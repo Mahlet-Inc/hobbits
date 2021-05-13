@@ -24,12 +24,12 @@ QString UdpReceiver::title()
     return "Configure UDP Receiver";
 }
 
-bool UdpReceiver::setParameters(QJsonObject parameters)
+bool UdpReceiver::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject UdpReceiver::parameters()
+Parameters UdpReceiver::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -39,7 +39,7 @@ bool UdpReceiver::isStandaloneDialog()
     return true;
 }
 
-QSharedPointer<ImportResult> UdpReceiver::importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> UdpReceiver::importData(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     int port = parameters.value("port").toInt();
     qint64 maxBytes = qint64(parameters.value("max_kb").toInt()) * 1000ll;

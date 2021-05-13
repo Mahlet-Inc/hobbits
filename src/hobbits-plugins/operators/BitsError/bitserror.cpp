@@ -17,10 +17,9 @@ BitsError::BitsError()
         {"error_type", ParameterDelegate::ParameterType::String}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         double coeff = parameters.value("error_coeff").toDouble();
                         double exp = parameters.value("error_exp").toDouble();
                         double ber = ((coeff * (pow(10, exp))));
@@ -30,7 +29,7 @@ BitsError::BitsError()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new BitsErrorForm(delegate);
-                    }));
+                    });
 }
 
 OperatorInterface* BitsError::createDefaultOperator()
@@ -60,7 +59,7 @@ QSharedPointer<ParameterDelegate> BitsError::parameterDelegate()
 
 QSharedPointer<const OperatorResult> BitsError::getGaussianErrorBits(QSharedPointer<const BitContainer> input,
                                                                      double ber,
-                                                                     const QJsonObject &recallablePluginState,
+                                                                     const Parameters &parameters,
                                                   QSharedPointer<PluginActionProgress> progressTracker) {
     qint64 bitLength = input->bits()->sizeInBits();
 
@@ -101,12 +100,12 @@ QSharedPointer<const OperatorResult> BitsError::getGaussianErrorBits(QSharedPoin
     QSharedPointer<BitContainer> bitContainer = BitContainer::create(outputBits);
     bitContainer->setName(QString("%1 BER <- %2").arg(ber, 0, 'e', 2).arg(input->name()));
 
-    return OperatorResult::result({bitContainer}, recallablePluginState);
+    return OperatorResult::result({bitContainer}, parameters);
 }
 
 QSharedPointer<const OperatorResult> BitsError::getPeriodicErrorBits(QSharedPointer<const BitContainer> input,
                                                                      double ber,
-                                                                     const QJsonObject &recallablePluginState,
+                                                                     const Parameters &parameters,
                                                     QSharedPointer<PluginActionProgress> progressTracker) {
     qint64 bitLength = input->bits()->sizeInBits();
     QSharedPointer<BitArray> outputBits = QSharedPointer<BitArray>(new BitArray(input->bits().data()));
@@ -133,32 +132,32 @@ QSharedPointer<const OperatorResult> BitsError::getPeriodicErrorBits(QSharedPoin
     QSharedPointer<BitContainer> bitContainer = BitContainer::create(outputBits);
     bitContainer->setName(QString("%1 BER <- %2").arg(ber, 0, 'e', 2).arg(input->name()));
 
-    return OperatorResult::result({ bitContainer }, recallablePluginState);
+    return OperatorResult::result({ bitContainer }, parameters);
 }
 
-int BitsError::getMinInputContainers(const QJsonObject &pluginState)
+int BitsError::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int BitsError::getMaxInputContainers(const QJsonObject &pluginState)
+int BitsError::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
 QSharedPointer<const OperatorResult> BitsError::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &recallablePluginState,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     if (inputContainers.size() != 1) {
         return OperatorResult::error("Requires a single bit container as input");
     }
 
-    double coeff = recallablePluginState.value("error_coeff").toDouble();
-    double exp = recallablePluginState.value("error_exp").toDouble();
+    double coeff = parameters.value("error_coeff").toDouble();
+    double exp = parameters.value("error_exp").toDouble();
     double ber = ((coeff * (pow(10, exp))));
 
     if (ber > 1.0) {
@@ -169,10 +168,10 @@ QSharedPointer<const OperatorResult> BitsError::operateOnBits(
     }
 
 
-    if (recallablePluginState.value("error_type").toString() == "gaussian") {
-        return getGaussianErrorBits(inputContainers.at(0), ber, recallablePluginState, progressTracker);
+    if (parameters.value("error_type").toString() == "gaussian") {
+        return getGaussianErrorBits(inputContainers.at(0), ber, parameters, progressTracker);
     }
     else {
-        return getPeriodicErrorBits(inputContainers.at(0), ber, recallablePluginState, progressTracker);
+        return getPeriodicErrorBits(inputContainers.at(0), ber, parameters, progressTracker);
     }
 }

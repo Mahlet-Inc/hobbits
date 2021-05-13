@@ -50,7 +50,7 @@ QString WidthFramerForm::title()
     return "Configure Bit Width";
 }
 
-bool WidthFramerForm::setParameters(QJsonObject parameters)
+bool WidthFramerForm::setParameters(const Parameters &parameters)
 {
     if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
@@ -61,9 +61,9 @@ bool WidthFramerForm::setParameters(QJsonObject parameters)
     return true;
 }
 
-QJsonObject WidthFramerForm::parameters()
+Parameters WidthFramerForm::parameters()
 {
-    QJsonObject parameters;
+    Parameters parameters = Parameters::nullParameters();
     MathParser mp;
     MathParser::ParseResult a = mp.parseInput(ui->sb_width->text());
     int frameWidth;

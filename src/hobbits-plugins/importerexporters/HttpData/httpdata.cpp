@@ -12,7 +12,7 @@ HttpData::HttpData()
 
     m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("url")) {
                             QString url = parameters.value("url").toString();
                             if (url.size() > 16) {
@@ -38,7 +38,7 @@ HttpData::HttpData()
     };
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("url")) {
                             QString url = parameters.value("url").toString();
                             if (url.size() > 16) {
@@ -97,7 +97,7 @@ QSharedPointer<ParameterDelegate> HttpData::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> HttpData::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> HttpData::importBits(const Parameters &parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_importDelegate->validate(parameters);
@@ -109,7 +109,7 @@ QSharedPointer<ImportResult> HttpData::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> HttpData::exportBits(QSharedPointer<const BitContainer> container,
-                                                  QJsonObject parameters,
+                                                  const Parameters &parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_exportDelegate->validate(parameters);

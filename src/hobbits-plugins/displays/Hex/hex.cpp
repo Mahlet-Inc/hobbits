@@ -17,7 +17,7 @@ Hex::Hex() :
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     if (parameters.value("show_headers").toBool()) {
                         return QString("Hex with headers");
                     }
@@ -78,7 +78,7 @@ QSharedPointer<ParameterDelegate> Hex::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> Hex::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Hex::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -118,7 +118,7 @@ QSharedPointer<DisplayResult> Hex::renderDisplay(QSize viewportSize, const QJson
     return DisplayResult::result(image, parameters);
 }
 
-QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -143,7 +143,7 @@ QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const QJson
 }
 
 
-QPoint Hex::headerOffset(const QJsonObject &parameters)
+QPoint Hex::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);

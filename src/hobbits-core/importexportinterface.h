@@ -8,6 +8,7 @@
 #include <QSharedPointer>
 #include "pluginactionprogress.h"
 #include "hobbitsplugin.h"
+#include "parameters.h"
 
 /**
   * @brief Implementations of the ImportExportInterface plugin interface import and/or export BitContainers
@@ -31,10 +32,10 @@ public:
     virtual QSharedPointer<ParameterDelegate> importParameterDelegate() = 0;
     virtual QSharedPointer<ParameterDelegate> exportParameterDelegate() = 0;
 
-    virtual QSharedPointer<ImportResult> importBits(QJsonObject parameters,
+    virtual QSharedPointer<ImportResult> importBits(const Parameters &parameters,
                                                     QSharedPointer<PluginActionProgress> progress) = 0;
     virtual QSharedPointer<ExportResult> exportBits(QSharedPointer<const BitContainer> container,
-                                                    QJsonObject parameters,
+                                                    const Parameters &parameters,
                                                     QSharedPointer<PluginActionProgress> progress) = 0;
 };
 

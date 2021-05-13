@@ -33,12 +33,12 @@ QString HttpExportForm::title()
     return "Configure HTTP Request";
 }
 
-bool HttpExportForm::setParameters(QJsonObject parameters)
+bool HttpExportForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject HttpExportForm::parameters()
+Parameters HttpExportForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -49,7 +49,7 @@ bool HttpExportForm::isStandaloneDialog()
 }
 
 QSharedPointer<ExportResult> HttpExportForm::exportData(QByteArray data,
-                                                        QJsonObject parameters,
+                                                        const Parameters &parameters,
                                                         QSharedPointer<PluginActionProgress> progress)
 {
     QString url = parameters.value("url").toString();

@@ -14,7 +14,7 @@ class PacketCaptureClient : public QObject
 
 public:
     ~PacketCaptureClient();
-    static QSharedPointer<ImportResult> capturePackets(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
+    static QSharedPointer<ImportResult> capturePackets(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress);
 
 private:
     explicit PacketCaptureClient();
@@ -25,15 +25,15 @@ private:
 
     QSharedPointer<BitContainer> container() const;
 
-    QSharedPointer<ImportResult> capturePacketsImpl(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
+    QSharedPointer<ImportResult> capturePacketsImpl(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress);
 
 private slots:
-    void extractParameters(QJsonObject parameters);
 
 signals:
     void finishedWithCapture();
 
 private:
+    void extractParameters(const Parameters &parameters);
     pcap_t *m_handle;
     QTemporaryFile m_file;
     QSharedPointer<RangeSequence> m_packetSizes;
@@ -42,7 +42,7 @@ private:
     QSharedPointer<PluginActionProgress> m_progress;
     QAtomicInt m_aborting;
 
-    QJsonObject m_parameters;
+    Parameters m_parameters;
     QString m_deviceName;
     bpf_u_int32 m_address;
     int m_maxPackets;

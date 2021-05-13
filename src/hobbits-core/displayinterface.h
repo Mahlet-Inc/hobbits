@@ -6,6 +6,7 @@
 #include "parameterdelegate.h"
 #include "pluginactionprogress.h"
 #include "displayrenderconfig.h"
+#include "parameters.h"
 
 class QWidget;
 class DisplayHandle;
@@ -29,12 +30,12 @@ public:
 
     virtual QSharedPointer<DisplayResult> renderDisplay(
                 QSize viewportSize,
-                const QJsonObject &parameters,
+                const Parameters &parameters,
                 QSharedPointer<PluginActionProgress> progress) = 0;
 
     virtual QSharedPointer<DisplayResult> renderOverlay(
                 QSize viewportSize,
-                const QJsonObject &parameters) = 0;
+                const Parameters &parameters) = 0;
 };
 
 Q_DECLARE_INTERFACE(DisplayInterface, "hobbits.DisplayInterface")

@@ -48,7 +48,7 @@ QSharedPointer<ParameterDelegate> PythonImporter::exportParameterDelegate()
     return nullptr;
 }
 
-QSharedPointer<ImportResult> PythonImporter::importBits(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> PythonImporter::importBits(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_config->delegate()->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -120,7 +120,7 @@ QSharedPointer<ImportResult> PythonImporter::importBits(QJsonObject parameters, 
     return ImportResult::result(importerContainer, parameters);
 }
 
-QSharedPointer<ExportResult> PythonImporter::exportBits(QSharedPointer<const BitContainer> container, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ExportResult> PythonImporter::exportBits(QSharedPointer<const BitContainer> container, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(container)
     Q_UNUSED(parameters)

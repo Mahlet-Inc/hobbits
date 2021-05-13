@@ -23,11 +23,11 @@ public:
     ~HttpImportForm() override;
 
     QString title() override;
-    bool setParameters(QJsonObject parameters) override;
-    QJsonObject parameters() override;
+    bool setParameters(const Parameters &parameters) override;
+    Parameters parameters() override;
     bool isStandaloneDialog() override;
 
-    static QSharedPointer<ImportResult> importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress);
+    static QSharedPointer<ImportResult> importData(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress);
 
 private slots:
     void on_pb_send_clicked();

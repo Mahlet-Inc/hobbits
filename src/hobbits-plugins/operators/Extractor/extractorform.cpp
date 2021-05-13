@@ -48,19 +48,19 @@ QString ExtractorForm::title()
     return "Select Section to Extract";
 }
 
-bool ExtractorForm::setParameters(QJsonObject parameters)
+bool ExtractorForm::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject ExtractorForm::parameters()
+Parameters ExtractorForm::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }
 
 void ExtractorForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
-    QJsonObject uiState = parameters();
+    Parameters uiState = parameters();
     m_previewContainer = container;
     m_highlightNav->setContainer(m_previewContainer);
     if (m_previewContainer.isNull()) {

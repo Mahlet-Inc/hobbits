@@ -20,12 +20,12 @@ QString BitRasterControls::title()
     return "Configure Bit Raster";
 }
 
-bool BitRasterControls::setParameters(QJsonObject parameters)
+bool BitRasterControls::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject BitRasterControls::parameters()
+Parameters BitRasterControls::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

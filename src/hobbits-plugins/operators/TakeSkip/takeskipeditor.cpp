@@ -32,12 +32,12 @@ QString TakeSkipEditor::title()
     return "Configure Take Skip";
 }
 
-QJsonObject TakeSkipEditor::parameters()
+Parameters TakeSkipEditor::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }
 
-bool TakeSkipEditor::setParameters(QJsonObject parameters)
+bool TakeSkipEditor::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }

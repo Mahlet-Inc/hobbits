@@ -17,9 +17,9 @@ PythonRunner::PythonRunner()
         { "script", ParameterDelegate::ParameterType::String }
     };
 
-    m_delegate = ParameterDelegateUi::create(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         Q_UNUSED(parameters)
                         return QString("Python Run");
                     },
@@ -55,21 +55,21 @@ QSharedPointer<ParameterDelegate> PythonRunner::parameterDelegate()
     return m_delegate;
 }
 
-int PythonRunner::getMinInputContainers(const QJsonObject &pluginState)
+int PythonRunner::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int PythonRunner::getMaxInputContainers(const QJsonObject &pluginState)
+int PythonRunner::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
 QSharedPointer<const OperatorResult> PythonRunner::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     if (inputContainers.length() != 1) {

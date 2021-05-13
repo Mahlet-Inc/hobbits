@@ -26,12 +26,12 @@ QString DigraphPlotForm::title()
     return "Configure Digraph Plot";
 }
 
-QJsonObject DigraphPlotForm::parameters()
+Parameters DigraphPlotForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool DigraphPlotForm::setParameters(QJsonObject parameters)
+bool DigraphPlotForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

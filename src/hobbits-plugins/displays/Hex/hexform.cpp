@@ -26,12 +26,12 @@ QString HexForm::title()
     return "Configure Hex Display";
 }
 
-QJsonObject HexForm::parameters()
+Parameters HexForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool HexForm::setParameters(QJsonObject parameters)
+bool HexForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

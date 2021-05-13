@@ -130,18 +130,18 @@ void DisplayWidget::resizeEvent(QResizeEvent *event)
 
 QSharedPointer<DisplayResult> DisplayWidget::render(QSharedPointer<DisplayInterface> display,
                              QSize viewportSize,
-                             const QJsonObject &parameters,
+                             const Parameters &parameters,
                              QSharedPointer<PluginActionProgress> progress)
 {
     return display->renderDisplay(viewportSize, parameters, progress);
 }
 
-QJsonObject DisplayWidget::displayParameters() const
+Parameters DisplayWidget::displayParameters() const
 {
     return m_displayParameters;
 }
 
-void DisplayWidget::setDisplayParameters(const QJsonObject &displayParameters)
+void DisplayWidget::setDisplayParameters(const Parameters &displayParameters)
 {
     m_displayParameters = displayParameters;
     fullRedraw();

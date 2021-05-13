@@ -26,12 +26,12 @@ QString FrequencyPlotForm::title()
     return "Configure Frequency Plot";
 }
 
-QJsonObject FrequencyPlotForm::parameters()
+Parameters FrequencyPlotForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool FrequencyPlotForm::setParameters(QJsonObject parameters)
+bool FrequencyPlotForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

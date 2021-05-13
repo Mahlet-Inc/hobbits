@@ -17,10 +17,9 @@ KaitaiStruct::KaitaiStruct()
         {PARAM_PY, ParameterDelegate::ParameterType::String, true}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("kaitai_struct_yaml")
                                 && !parameters.value("kaitai_struct_yaml").toString().isEmpty()) {
                             return QString("Custom Kaitai Parse");
@@ -35,7 +34,7 @@ KaitaiStruct::KaitaiStruct()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new KaitaiStructForm(delegate);
-                    }));
+                    });
 }
 
 AnalyzerInterface* KaitaiStruct::createDefaultAnalyzer()
@@ -65,7 +64,7 @@ QSharedPointer<ParameterDelegate> KaitaiStruct::parameterDelegate()
 
 QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_delegate->validate(parameters);

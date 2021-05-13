@@ -17,7 +17,7 @@ Lfsr::Lfsr()
     };
     m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         QString seed = parameters.value("polynomial").toString();
                         QString taps = parameters.value("taps").toString();
                         return QString("LFSR %1 %2").arg(seed).arg(taps);
@@ -162,7 +162,7 @@ int applyOp(int a, int b, QChar op)
 /*
  * Returns the LFSR stream
  */
-QSharedPointer<ImportResult> Lfsr::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> Lfsr::importBits(const Parameters &parameters,
                                                    QSharedPointer<PluginActionProgress> progress)
 {
     int bitsWanted = parameters.value("bits_wanted").toInt();
@@ -221,7 +221,7 @@ QSharedPointer<ImportResult> Lfsr::importBits(QJsonObject parameters,
     return ImportResult::result(BitContainer::create(outputBits), parameters);
 }
 
-QSharedPointer<ExportResult> Lfsr::exportBits(QSharedPointer<const BitContainer> container, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ExportResult> Lfsr::exportBits(QSharedPointer<const BitContainer> container, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(container)
     Q_UNUSED(parameters)

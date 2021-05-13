@@ -21,7 +21,7 @@ Ascii::Ascii() :
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     if (parameters.value("show_headers").toBool()) {
                         return QString("ASCII with headers");
                     }
@@ -82,7 +82,7 @@ QSharedPointer<ParameterDelegate> Ascii::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -104,7 +104,7 @@ QSharedPointer<DisplayResult> Ascii::renderDisplay(QSize viewportSize, const QJs
     return DisplayResult::result(image, parameters);
 }
 
-QSharedPointer<DisplayResult> Ascii::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Ascii::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     if (!m_delegate->validate(m_lastParams).isEmpty()) {
         return DisplayResult::nullResult();
@@ -123,7 +123,7 @@ QSharedPointer<DisplayResult> Ascii::renderOverlay(QSize viewportSize, const QJs
     return DisplayResult::result(image, parameters);
 }
 
-QPoint Ascii::headerOffset(const QJsonObject &parameters)
+QPoint Ascii::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);

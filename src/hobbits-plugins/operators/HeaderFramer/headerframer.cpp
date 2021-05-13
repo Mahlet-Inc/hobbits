@@ -18,7 +18,7 @@ HeaderFramer::HeaderFramer()
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         Q_UNUSED(parameters)
                         return QString("Frame by Header");
                     },
@@ -53,15 +53,15 @@ QSharedPointer<ParameterDelegate> HeaderFramer::parameterDelegate()
     return m_delegate;
 }
 
-int HeaderFramer::getMinInputContainers(const QJsonObject &pluginState)
+int HeaderFramer::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int HeaderFramer::getMaxInputContainers(const QJsonObject &pluginState)
+int HeaderFramer::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
@@ -72,7 +72,7 @@ bool headerGreaterThan(HeaderFramer::HeaderInfo a, HeaderFramer::HeaderInfo b)
 
 QSharedPointer<const OperatorResult> HeaderFramer::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
 
@@ -95,7 +95,6 @@ QSharedPointer<const OperatorResult> HeaderFramer::operateOnBits(
         QStringList parseErrors;
         headerInfo.headerBits = BitArray::fromString(headerData.value("header").toString());
         if (!parseErrors.isEmpty()) {
-            result->setParameters(QJsonObject({QPair<QString, QJsonValue>("error", parseErrors.join("\n"))}));
             return OperatorResult::error(QString("Invalid Bit Array string in header parameters: '%1'").arg(headerData.value("header").toString()));
         }
         QString lengthString = headerData.value("length").toString();

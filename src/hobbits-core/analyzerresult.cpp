@@ -16,20 +16,20 @@ QSharedPointer<BitInfo> AnalyzerResult::bitInfo() const
     return m_bitInfo;
 }
 
-AnalyzerResult* AnalyzerResult::setParameters(QJsonObject parameters)
+AnalyzerResult* AnalyzerResult::setParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     return this;
 }
 
-const QJsonObject AnalyzerResult::parameters() const
+const Parameters AnalyzerResult::parameters() const
 {
     return m_parameters;
 }
 
-bool AnalyzerResult::hasEmptyParameters() const
+bool AnalyzerResult::hasNullParameters() const
 {
-    return m_parameters.isEmpty();
+    return m_parameters.isNull();
 }
 
 QString AnalyzerResult::errorString() const
@@ -37,7 +37,7 @@ QString AnalyzerResult::errorString() const
     return m_errorString;
 }
 
-QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, QJsonObject parameters)
+QSharedPointer<const AnalyzerResult> AnalyzerResult::result(QSharedPointer<BitInfo> bitInfo, Parameters parameters)
 {
     return QSharedPointer<const AnalyzerResult>(
                 (new AnalyzerResult())->setParameters(parameters)->setBitInfo(bitInfo)

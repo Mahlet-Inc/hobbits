@@ -33,12 +33,12 @@ QString HttpImportForm::title()
     return "Configure HTTP Request";
 }
 
-bool HttpImportForm::setParameters(QJsonObject parameters)
+bool HttpImportForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject HttpImportForm::parameters()
+Parameters HttpImportForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -48,7 +48,7 @@ bool HttpImportForm::isStandaloneDialog()
     return true;
 }
 
-QSharedPointer<ImportResult> HttpImportForm::importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> HttpImportForm::importData(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QString url = parameters.value("url").toString();
     QString verb = parameters.value("verb").toString();

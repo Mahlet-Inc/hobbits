@@ -18,12 +18,12 @@ QString HilbertPlotForm::title()
     return "Configure Hilbert Plot";
 }
 
-QJsonObject HilbertPlotForm::parameters()
+Parameters HilbertPlotForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool HilbertPlotForm::setParameters(QJsonObject parameters)
+bool HilbertPlotForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

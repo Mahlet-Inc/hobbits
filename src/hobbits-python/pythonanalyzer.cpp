@@ -34,7 +34,7 @@ QSharedPointer<ParameterDelegate> PythonAnalyzer::parameterDelegate()
 }
 
 QSharedPointer<const AnalyzerResult> PythonAnalyzer::analyzeBits(QSharedPointer<const BitContainer> container,
-                                                                 const QJsonObject &parameters,
+                                                                 const Parameters &parameters,
                                                                  QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_config->delegate()->validate(parameters);

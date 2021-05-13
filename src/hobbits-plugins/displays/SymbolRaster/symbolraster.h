@@ -24,20 +24,20 @@ public:
 
     QSharedPointer<DisplayResult> renderDisplay(
             QSize viewportSize,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
     QSharedPointer<DisplayResult> renderOverlay(
             QSize viewportSize,
-            const QJsonObject &parameters) override;
+            const Parameters &parameters) override;
 
 private:
-    QPoint headerOffset(const QJsonObject &parameters);
-    QImage getSymbolMapImage(const QSize &size, const QJsonObject &parameters);
+    QPoint headerOffset(const Parameters &parameters);
+    QImage getSymbolMapImage(const QSize &size, const Parameters &parameters);
     QSharedPointer<ParameterDelegate> m_delegate;
     QSharedPointer<DisplayRenderConfig> m_renderConfig;
     QSharedPointer<DisplayHandle> m_handle;
-    QJsonObject m_lastParams;
+    Parameters m_lastParams;
     int m_symbolLength;
 };
 

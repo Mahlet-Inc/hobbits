@@ -31,12 +31,12 @@ QString AsciiForm::title()
     return "Configure Ascii Display";
 }
 
-QJsonObject AsciiForm::parameters()
+Parameters AsciiForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool AsciiForm::setParameters(QJsonObject parameters)
+bool AsciiForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
