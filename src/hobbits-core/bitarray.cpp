@@ -417,7 +417,7 @@ void BitArray::set(qint64 i, bool value)
 void BitArray::setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset, qint64 length)
 {
     if (sizeInBytes() < byteOffset + length) {
-        resize(byteOffset + length);
+        resize((byteOffset + length) * 8);
     }
 
     QMutexLocker lock(&m_mutex);
