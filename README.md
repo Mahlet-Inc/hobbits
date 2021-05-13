@@ -30,6 +30,10 @@ conan build ..
 conan package ..
 ```
 
+If you have any issues building, you can check out more detailed steps and
+environmental setup in the [continuous integration files](ci) or
+[open an issue](https://github.com/Mahlet-Inc/hobbits/issues/new).
+
 ## Using Hobbits
 Read the [user guide](https://mahlet-inc.github.io/user-guide/) in the
 documentation and/or watch
