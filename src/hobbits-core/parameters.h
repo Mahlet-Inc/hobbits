@@ -2,8 +2,9 @@
 #define PARAMETERS_H
 
 #include <QJsonObject>
+#include "hobbits-core_global.h"
 
-class Parameters
+class HOBBITSCORESHARED_EXPORT Parameters
 {
 public:
     Parameters();
