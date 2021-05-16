@@ -1,9 +1,18 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
+from conans.tools import load
 import glob
+import os
 
 class HobbitsConan(ConanFile):
     name = "hobbits"
-    version = "0.1.conan"
+    def set_version(self):
+        version_file = os.path.join(self.recipe_folder, ".version")
+        if os.path.exists(version_file):
+            self.version = load(version_file)
+        else:
+            git = tools.Git(folder=self.recipe_folder)
+            self.version = f"dev-{git.get_revision()[0:7]}"
+
     license = "MIT"
     author = "Adam Nash adam@smr.llc"
     url = "https://github.com/Mahlet-Inc/hobbits"
@@ -46,7 +55,10 @@ class HobbitsConan(ConanFile):
             cmake = CMake(self)
         else:
             cmake = CMake(self, generator="Ninja")
-        defs = { "SELF_CONTAINED_APP" : 1 }
+        defs = {
+            "SELF_CONTAINED_APP" : 1,
+            "BUILDING_WITH_CONAN" : 1
+        }
         if self.settings.build_type == "Release":
             defs["QT_NO_DEBUG"] = 1
         cmake.configure(source_folder="src", defs=defs)
@@ -72,15 +84,6 @@ class HobbitsConan(ConanFile):
             self.copy("*", dst="hobbits.app/Contents/Frameworks/hobbits-cpython", src="hobbits-cpython", symlinks=True)
         elif self.settings.os == "Windows":
             self.copy("*", dst=".", src="bin")
-            self.copy("*.dll", dst=".", src="hobbits-core", symlinks=True, keep_path=False)
-            self.copy("*.lib", dst=".", src="hobbits-core", symlinks=True, keep_path=False)
-            self.copy("*.exp", dst=".", src="hobbits-core", symlinks=True, keep_path=False)
-            self.copy("*.dll", dst=".", src="hobbits-widgets", symlinks=True, keep_path=False)
-            self.copy("*.lib", dst=".", src="hobbits-widgets", symlinks=True, keep_path=False)
-            self.copy("*.exp", dst=".", src="hobbits-widgets", symlinks=True, keep_path=False)
-            self.copy("*.dll", dst=".", src="hobbits-python", symlinks=True, keep_path=False)
-            self.copy("*.lib", dst=".", src="hobbits-python", symlinks=True, keep_path=False)
-            self.copy("*.exp", dst=".", src="hobbits-python", symlinks=True, keep_path=False)
             self.copy("*", dst=".", src="hobbits-cpython/bin", symlinks=True)
 
 

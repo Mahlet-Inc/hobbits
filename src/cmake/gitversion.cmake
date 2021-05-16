@@ -7,7 +7,7 @@ function(gitversion VAR)
         set(GIT_REV "[Mystery Build]")
     else()
         string(STRIP "${GIT_REV}" GIT_REV)
-        string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
+        string(SUBSTRING "${GIT_REV}" 0 7 GIT_REV)
         set(GIT_REV "dev-${GIT_REV}")
     endif()
 

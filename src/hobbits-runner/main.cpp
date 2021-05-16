@@ -18,16 +18,12 @@
 #include "hobbitspythonconfig.h"
 #include "pythonpluginconfig.h"
 
-#ifdef FFTW_AVAILABLE
 #include "fftw3.h"
-#endif
 
 int main(int argc, char *argv[])
 {
-#ifdef FFTW_AVAILABLE
     // See http://www.fftw.org/fftw3_doc/Thread-safety.html
     fftw_make_planner_thread_safe();
-#endif
 
     QGuiApplication a(argc, argv);
 

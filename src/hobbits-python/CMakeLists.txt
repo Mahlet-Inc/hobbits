@@ -33,3 +33,5 @@ target_compile_definitions(hobbits-python PRIVATE "-DHOBBITSPYTHON_LIBRARY")
 
 set_target_properties(hobbits-python
 			PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${HOBBITS_LIB_OUT_DIR})
+
+install_hobbits_lib(hobbits-python "${HDRFILES}")

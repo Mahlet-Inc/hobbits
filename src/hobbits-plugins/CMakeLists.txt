@@ -14,7 +14,14 @@ macro(pluginInDir pluginType modName modDir)
         add_library("${pluginName}" "${SRCFILES}" "${RCFILES}" "${HDRFILES}")
 		set_target_properties("${pluginName}"
 							PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${HOBBITS_PLUGIN_OUT_DIR}/${pluginType})
-        target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets CONAN_PKG::qt)
+
+		if (BUILDING_WITH_CONAN)
+			set(ALL_LINK_LIBS hobbits-core hobbits-widgets CONAN_PKG::qt)
+		else()
+			set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
+		endif()
+
+        target_link_libraries("${pluginName}" PRIVATE ${ALL_LINK_LIBS})
         #harden("${pluginName}")
 
         string(TOUPPER "${pluginName}" pluginNameUpper)

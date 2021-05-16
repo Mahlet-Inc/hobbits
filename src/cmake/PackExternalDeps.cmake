@@ -97,47 +97,49 @@ function(pack_python)
     get_filename_component(PYBIN_DIR "${PYBIN}" DIRECTORY)
     get_filename_component(PYROOT_DIR "${PYBIN_DIR}" DIRECTORY)
 
-    if (WIN32)
-        file(GLOB PY_DIRS "${PYROOT_DIR}/bin/*")
-        file(GLOB PY_FILES
-            LIST_DIRECTORIES false
-            "${PYROOT_DIR}/bin/*")
-        list(REMOVE_ITEM PY_DIRS ${PY_FILES})
+	if (MANUAL_PYTHON_PATH)
+		if (WIN32)
+			file(GLOB PY_DIRS "${PYROOT_DIR}/bin/*")
+			file(GLOB PY_FILES
+				LIST_DIRECTORIES false
+				"${PYROOT_DIR}/bin/*")
+			list(REMOVE_ITEM PY_DIRS ${PY_FILES})
 
-        install(FILES ${PY_FILES}
-                DESTINATION ".")
-        install(DIRECTORY ${PY_DIRS}
-                DESTINATION ".")
+			install(FILES ${PY_FILES}
+					DESTINATION ".")
+			install(DIRECTORY ${PY_DIRS}
+					DESTINATION ".")
 
-    else()
-        set(PY_DEST_DIR "python")
-        set(LIB_WILDCARD "*.so")
-        if (APPLE)
-            set(PY_DEST_DIR "hobbits.app/Contents/Frameworks/python")
-            set(LIB_WILDCARD "*.dylib")
-        endif()
+		else()
+			set(PY_DEST_DIR "hobbits-cpython")
+			set(LIB_WILDCARD "*.so")
+			if (APPLE)
+				set(PY_DEST_DIR "hobbits.app/Contents/Frameworks/hobbits-cpython")
+				set(LIB_WILDCARD "*.dylib")
+			endif()
 
-        install( DIRECTORY "${PYROOT_DIR}/bin"
-                    DESTINATION "${PY_DEST_DIR}"
-                    COMPONENT runtime
-                    PATTERN "*"
-                    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                                GROUP_READ GROUP_EXECUTE
-                                WORLD_READ WORLD_EXECUTE)
-        install( DIRECTORY "${PYROOT_DIR}/lib"
-                    DESTINATION "${PY_DEST_DIR}"
-                    COMPONENT runtime
-                    PATTERN "${LIB_WILDCARD}"
-                    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                                GROUP_READ GROUP_EXECUTE
-                                WORLD_READ WORLD_EXECUTE)
+			install( DIRECTORY "${PYROOT_DIR}/bin"
+						DESTINATION "${PY_DEST_DIR}"
+						COMPONENT runtime
+						PATTERN "*"
+						PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+									GROUP_READ GROUP_EXECUTE
+									WORLD_READ WORLD_EXECUTE)
+			install( DIRECTORY "${PYROOT_DIR}/lib"
+						DESTINATION "${PY_DEST_DIR}"
+						COMPONENT runtime
+						PATTERN "${LIB_WILDCARD}"
+						PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+									GROUP_READ GROUP_EXECUTE
+									WORLD_READ WORLD_EXECUTE)
 
-        if(APPLE)
-            file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
-            install(FILES ${INTLLIBS}
-                    DESTINATION "hobbits.app/Contents/Frameworks")
-        endif()
-    endif()
+			if(APPLE)
+				file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
+				install(FILES ${INTLLIBS}
+						DESTINATION "hobbits.app/Contents/Frameworks")
+			endif()
+		endif()
+	endif()
 endfunction(pack_python)
 
 function(pack_fftw)

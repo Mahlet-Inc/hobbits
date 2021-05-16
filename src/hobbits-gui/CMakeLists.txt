@@ -15,9 +15,19 @@ file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SO
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
-set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONAN_PKG::fftw)
+
+if (BUILDING_WITH_CONAN)
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONAN_PKG::fftw)
+else()
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
+	if(WIN32)
+        list(APPEND ALL_LINK_LIBS FFTW::Double)
+    else()
+        list(APPEND ALL_LINK_LIBS FFTW::Double FFTW::DoubleThreads)
+    endif()
+endif()
+
 add_executable(hobbits MACOSX_BUNDLE "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
-add_definitions(-DFFTW_AVAILABLE)
 target_link_libraries(hobbits ${ALL_LINK_LIBS})
 if (UNIX)
 	target_compile_options(hobbits PRIVATE -fPIC)
