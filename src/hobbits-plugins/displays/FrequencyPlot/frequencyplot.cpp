@@ -10,8 +10,11 @@ FrequencyPlot::FrequencyPlot() :
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewMouseHover);
 
+    ParameterDelegate::ParameterInfo scaleParam = {"scale", ParameterDelegate::ParameterType::Integer};
+    scaleParam.ranges.append({1, 128});
+
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", ParameterDelegate::ParameterType::Integer},
+        scaleParam,
         {"word_size", ParameterDelegate::ParameterType::Integer},
         {"window_size", ParameterDelegate::ParameterType::Integer}
     };
@@ -82,9 +85,6 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
     int wordSize = parameters.value("word_size").toInt(8);
     int windowSize = parameters.value("window_size").toInt(10000);
     int scale = parameters.value("scale").toInt(2);
-    if (scale <= 0) {
-        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
-    }
 
     auto bits = m_handle->currentContainer()->bits();
     auto frameOffset = m_handle->frameOffset();

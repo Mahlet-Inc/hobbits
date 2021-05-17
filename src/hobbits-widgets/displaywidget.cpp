@@ -13,6 +13,7 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
     QWidget(parent),
     m_display(display),
     m_handle(handle),
+    m_displayParameters(Parameters::nullParameters()),
     m_repaintScheduled(false)
 {
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
