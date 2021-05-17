@@ -35,6 +35,7 @@ MultiDisplayWidget::MultiDisplayWidget(QSharedPointer<HobbitsPluginManager> plug
     for (QSharedPointer<DisplayInterface> displayPlugin : displays) {
         auto parts = DisplayParts::create(displayPlugin, handle);
         int idx = m_tabs->addTab(parts->display, displayPlugin->name());
+        m_tabs->widget(idx)->setWhatsThis(QString("<b>%1:</b> %2").arg(displayPlugin->name()).arg(displayPlugin->description()));
         m_displayMap.insert(idx, parts);
     }
     m_tabs->setUpdatesEnabled(true);

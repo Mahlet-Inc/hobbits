@@ -9,6 +9,7 @@
 #include <QPluginLoader>
 #include <QQueue>
 #include <QSettings>
+#include <QWhatsThis>
 
 #include "displaywidget.h"
 #include "containerselectiondialog.h"
@@ -186,6 +187,10 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     m_previewScroll->setBitContainerManager(m_bitContainerManager);
     m_previewScroll->setDisplayHandle(m_displayHandle);
+
+    // populate top level "What's This" info
+    ui->action_Whats_This->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_W));
+    ui->dock_bitContainerSelect->setWhatsThis("<b>Bit Containers Dock:</b> This is where you can navigate between the various Bit Containers that you are working with and see their lineage.");
 
     // load and initialize plugins
     loadPlugins();
@@ -554,6 +559,7 @@ void MainWindow::loadPlugins()
         if (opUi == nullptr) {
             continue;
         }
+        opUi->setWhatsThis(QString("<b>%1:</b> %2").arg(op->name()).arg(op->description()));
         int idx = ui->operatorTabs->addTab(opUi, op->name());
         m_operatorMap.insert(idx, op);
         m_operatorUiMap.insert(op, opUi);
@@ -587,6 +593,7 @@ void MainWindow::loadPlugins()
         if (analysisUi == nullptr) {
             continue;
         }
+        analysisUi->setWhatsThis(QString("<b>%1:</b> %2").arg(analyzer->name()).arg(analyzer->description()));
         int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->name());
         m_analyzerMap.insert(idx, analyzer);
         m_analyzerUiMap.insert(analyzer, analysisUi);
@@ -1097,4 +1104,9 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
 void MainWindow::on_action_BatchEditor_triggered()
 {
     m_batchEditor->show();
+}
+
+void MainWindow::on_action_Whats_This_triggered()
+{
+    QWhatsThis::enterWhatsThisMode();
 }

@@ -75,6 +75,9 @@ public slots:
     void warningMessage(QString message, QString windowTitle = "Warning");
 
 private slots:
+    void on_action_Whats_This_triggered();
+
+private slots:
     void on_action_Apply_Batch_triggered();
     void on_action_Save_Batch_triggered();
     void on_action_About_triggered();
