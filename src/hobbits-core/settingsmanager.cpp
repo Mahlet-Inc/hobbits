@@ -3,6 +3,8 @@
 #include "hobbitscoreconfig.h"
 #include <QDir>
 #include <QCoreApplication>
+#include "range.h"
+#include "rangehighlight.h"
 
 const QString SettingsManager::ONE_COLOR_KEY = "1-Bit Color";
 const QString SettingsManager::ZERO_COLOR_KEY = "0-Bit Color";
@@ -30,7 +32,8 @@ const QString SettingsManager::PYTHON_HOME_KEY = "python_home_dir";
 SettingsManager::SettingsManager() :
     m_hasRead(false)
 {
-
+    qRegisterMetaType<Range>();
+    qRegisterMetaType<RangeHighlight>();
 }
 
 SettingsManager& SettingsManager::instance()
