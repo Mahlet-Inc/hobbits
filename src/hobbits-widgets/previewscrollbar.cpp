@@ -51,7 +51,7 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                                                        container, progress);
 
             auto actionWatcher = QSharedPointer<PluginActionWatcher<QImage>>(
-                    new PluginActionWatcher<QImage>(future, progress));
+                    new PluginActionWatcher<QImage>(future, progress, true));
             m_renderWatchers.insert(containerPtr, actionWatcher);
 
             auto watcherRef = QWeakPointer<PluginActionWatcher<QImage>>(actionWatcher);
@@ -92,6 +92,9 @@ void PreviewScrollBar::paintEvent(QPaintEvent *event)
                 }
                 this->update();
             });
+
+            // set the future in the watcher now that the connections are done
+            actionWatcher->setFutureInWatcher();
 
             // clean out any deleted containers
             m_weakRefMap.insert(containerPtr, QWeakPointer<BitContainer>(container));

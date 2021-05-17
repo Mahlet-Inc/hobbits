@@ -161,13 +161,16 @@ void DisplayWidget::performDisplayRender()
                                         this->size(),
                                         m_displayParameters,
                                         m_displayRenderProgress);
-        connect(&m_displayRenderWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
-            if (this->m_displayRenderWatcher.isFinished()) {
-                this->setDisplayResult(this->m_displayRenderWatcher.result());
+        
+        m_displayRenderWatcher = QSharedPointer<QFutureWatcher<QSharedPointer<DisplayResult>>>(new QFutureWatcher<QSharedPointer<DisplayResult>>());
+
+        connect(m_displayRenderWatcher.data(), &QFutureWatcher<QImage>::finished, this, [this]() {
+            if (this->m_displayRenderWatcher->isFinished()) {
+                this->setDisplayResult(this->m_displayRenderWatcher->result());
             }
         });
 
-        m_displayRenderWatcher.setFuture(future);
+        m_displayRenderWatcher->setFuture(future);
     }
     else {
         m_displayResult = m_display->renderDisplay(this->size(), m_displayParameters, QSharedPointer<PluginActionProgress>());
@@ -196,8 +199,8 @@ void DisplayWidget::resetRendering()
         m_displayRenderProgress->setCancelled(true);
         disconnect(m_displayRenderProgress.data(), SIGNAL(progressUpdate(QString, QVariant)), this, SLOT(handleDisplayRenderPreview(QString, QVariant)));
     }
-    if (m_displayRenderWatcher.isRunning()) {
-        m_displayRenderWatcher.cancel();
+    if (!m_displayRenderWatcher.isNull() && m_displayRenderWatcher->isRunning()) {
+        m_displayRenderWatcher->cancel();
     }
 }
 

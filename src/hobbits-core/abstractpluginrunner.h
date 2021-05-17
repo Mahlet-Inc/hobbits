@@ -80,12 +80,15 @@ protected:
         m_actionWatcher = QSharedPointer<PluginActionWatcher<QSharedPointer<T>>>(
                 new PluginActionWatcher<QSharedPointer<T>>(
                         future,
-                        progress));
+                        progress,
+                        true));
 
         connect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
         connect(m_actionWatcher->progress().data(), &PluginActionProgress::progressPercentChanged, [this](int prog) {
             this->progress(m_id, prog);
         });
+
+        m_actionWatcher->setFutureInWatcher();
 
         return m_actionWatcher;
     }

@@ -65,7 +65,7 @@ private:
     bool m_repaintScheduled;
     QMutex m_mutex;
 
-    QFutureWatcher<QSharedPointer<DisplayResult>> m_displayRenderWatcher;
+    QSharedPointer<QFutureWatcher<QSharedPointer<DisplayResult>>> m_displayRenderWatcher;
     QSharedPointer<PluginActionProgress> m_displayRenderProgress;
 };
 
