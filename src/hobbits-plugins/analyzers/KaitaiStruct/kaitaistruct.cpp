@@ -111,9 +111,9 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         progress->setProgressPercent(20);
 
     #ifdef Q_OS_WIN
-        QStringList kscAgs = {"/C", kscPath, "--debug", "-t", "python", ksy.fileName()};
+        QStringList kscAgs = {"/C", kscPath, "--debug", "--ksc-json-output", "-t", "python", ksy.fileName()};
     #else
-        QStringList kscAgs = {"--debug", "-t", "python", ksy.fileName()};
+        QStringList kscAgs = {"--debug", "--ksc-json-output", "-t", "python", ksy.fileName()};
     #endif
         QProcess kscProcess;
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -136,17 +136,62 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         if (errorFile.open(QIODevice::ReadOnly)) {
             errorOutput = errorFile.readAll();
             errorFile.close();
-            kscOutput += QString("stderr:\n%2").arg(errorOutput);
+            kscOutput += QString("ksc stderr:\n%2").arg(errorOutput);
         }
 
         if (stdoutFile.open(QIODevice::ReadOnly)) {
             stdOutput = stdoutFile.readAll();
             stdoutFile.close();
-            kscOutput += QString("stdout:\n%2").arg(stdOutput);
+            kscOutput += QString("ksc stdout:\n%2").arg(stdOutput);
         }
 
+        // Check for unexpected stderr
         if (!errorOutput.isEmpty()) {
             return AnalyzerResult::error(QString("kaitai-struct-compiler error:\n%1").arg(kscOutput));
+        }
+        // Otherwise, parse the JSON
+        QJsonObject json = QJsonDocument::fromJson(stdOutput.toLatin1()).object();
+        for (QString key : json.keys()) {
+            if (!json.value(key).isObject()) {
+                continue;
+            }
+            QJsonObject obj = json.value(key).toObject();
+            if (!obj.contains("errors") || !obj.value("errors").isArray()) {
+                continue;
+            }
+
+            QString errorString = "KSC Error:\n";
+            QJsonArray arr = obj.value("errors").toArray();
+            for (QJsonValue val: arr) {
+                if (!val.isObject()) {
+                    continue;
+                }
+                QJsonObject valObj = val.toObject();
+
+                QString errFile = valObj.value("file").toString();
+                QString errLoc = "";
+                QString errMsg = valObj.value("message").toString();
+
+                if (valObj.contains("path") && valObj.value("path").isArray()) {
+                    QJsonArray errPathArr = valObj.value("path").toArray();
+                    QStringList errPathStrings;
+                    for (QJsonValue pathVal: errPathArr) {
+                        errPathStrings.append(pathVal.toString());
+                    }
+                    errLoc += " " + errPathStrings.join("/");
+                }
+
+                if (valObj.contains("line")) {
+                    errLoc += QString(" line:%1").arg(valObj.value("line").toInt());
+                }
+
+                if (valObj.contains("col")) {
+                    errLoc += QString(" col:%1").arg(valObj.value("col").toInt());
+                }
+                
+                errorString += QString("%1%2 - %3\n").arg(errFile).arg(errLoc).arg(errMsg);
+            }
+            return AnalyzerResult::error(errorString);
         }
 
     }
