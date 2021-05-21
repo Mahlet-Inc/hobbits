@@ -1,3 +1,20 @@
+# [0.48.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.47.0...v0.48.0) (2021-05-21)
+
+
+### Bug Fixes
+
+* [plugin] json error parsing for  kaitai compilers ([#102](https://github.com/Mahlet-Inc/hobbits/issues/102)) ([b2fafbf](https://github.com/Mahlet-Inc/hobbits/commit/b2fafbf513a286b4fe607d948168d17437da7a1f))
+* correctly load config in standalone builds ([8e5e97e](https://github.com/Mahlet-Inc/hobbits/commit/8e5e97e5d0061aa0b466538925541c94533b8ec3))
+* correctly register Range and RangeHighlight meta types ([bb90767](https://github.com/Mahlet-Inc/hobbits/commit/bb9076786b8a81398eb3013a5f8d4943d9569717))
+* correctly resize BitArrays when setBytes is called ([5611e18](https://github.com/Mahlet-Inc/hobbits/commit/5611e1840c508a917a82cf766546648268c08d01))
+* prevent potential QFutureWatcher race conditions ([d5a72d8](https://github.com/Mahlet-Inc/hobbits/commit/d5a72d8b71132e499549bc7cfd6b95e1b5b91738))
+
+
+### Features
+
+* add basic "What's This?" help for plugin widgets ([#63](https://github.com/Mahlet-Inc/hobbits/issues/63)) ([7c3bec2](https://github.com/Mahlet-Inc/hobbits/commit/7c3bec2ffa584ab2ece9483703afff5ccfa9351a))
+* arbitrary view splitting and full view persistence for [#100](https://github.com/Mahlet-Inc/hobbits/issues/100) ([6e665a6](https://github.com/Mahlet-Inc/hobbits/commit/6e665a6a41134fa7081209f56c761604a58b247f))
+
 # [0.47.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.8...v0.47.0) (2021-05-04)
 
 
