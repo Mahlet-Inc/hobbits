@@ -30,19 +30,19 @@
                     "name": "hobbits-${nextRelease.version}-gcc48.txz"
                 },
                 {
-                    "path": "hobbits/ubuntu18_gcc7_release/hobbits*.tar.xz",
+                    "path": "hobbits/ubuntu18_gcc7_release/ubuntu18_gcc7_release.tar.gz",
                     "label": "Hobbits (64-bit Ubuntu 18.04 GCC 7)",
-                    "name": "hobbits-${nextRelease.version}-gcc7.txz"
+                    "name": "hobbits-${nextRelease.version}-gcc7.tgz"
                 },
                 {
-                    "path": "hobbits/windows_release/hobbits*.zip",
+                    "path": "hobbits/windows_release/windows_release.zip",
                     "label": "Hobbits (64-bit Windows 2016 msvc2017)",
-                    "name": "hobbits-${nextRelease.version}-win.txz"
+                    "name": "hobbits-${nextRelease.version}-win.zip"
                 },
                 {
-                    "path": "hobbits/mac_release/hobbits*.tar.xz",
+                    "path": "hobbits/mac_release/mac_release.tar.gz",
                     "label": "Hobbits (64-bit Mac OSX 10.14)",
-                    "name": "hobbits-${nextRelease.version}-mac.txz"
+                    "name": "hobbits-${nextRelease.version}-mac.tgz"
                 }
                 ]
             }
