@@ -39,7 +39,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_bitContainerManager(QSharedPointer<BitContainerManagerUi>(new BitContainerManagerUi())),
     m_pluginManager(QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager())),
     m_pluginActionManager(new PluginActionManager(m_pluginManager)),
-    m_displayTabsSplitter(new QSplitter(Qt::Horizontal)),
     m_previewScroll(new PreviewScrollBar()),
     m_splitViewMenu(new QMenu("Split View"))
 {
@@ -219,7 +218,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-const QString SPLIT_DISPLAY_SIZE_KEY = "split_display_size_list";
+const QString SPLIT_DISPLAY_CONFIG_KEY = "split_display_full_config";
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     SettingsManager::setPrivateSetting(SettingsManager::WINDOW_SIZE_KEY, size());
@@ -229,69 +228,24 @@ void MainWindow::closeEvent(QCloseEvent *event)
     SettingsManager::setPrivateSetting(BATCH_EDITOR_SIZE_KEY, m_batchEditor->size());
     SettingsManager::setPrivateSetting(BATCH_EDITOR_POSITION_KEY, m_batchEditor->pos());
 
-    QStringList sizesAsStrings;
-    for (int splitSize : m_displayTabsSplitter->sizes()) {
-        sizesAsStrings.append(QString("%1").arg(splitSize));
-    }
-    SettingsManager::setPrivateSetting(SPLIT_DISPLAY_SIZE_KEY, sizesAsStrings);
+    QByteArray splitDisplayConfig = m_rootDisplay->getConfig();
+    SettingsManager::setPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY, splitDisplayConfig);
 
     event->accept();
 }
 
 void MainWindow::initializeDisplays()
 {
-    ui->displayTabsLayout->addWidget(m_displayTabsSplitter);
-    m_displayTabsSplitter->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    m_rootDisplay = new DisplaySplitter(m_pluginManager, m_displayHandle);
+    ui->displayTabsLayout->addWidget(m_rootDisplay);
+    m_rootDisplay->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    // initialize 1 no matter what
-    addDisplayGroup();
-
-    // Add others and sizes if they were saved in the config
-    QVariant savedSizes = SettingsManager::getPrivateSetting(SPLIT_DISPLAY_SIZE_KEY);
-    if (!savedSizes.isNull() && savedSizes.canConvert<QStringList>()) {
-        QList<int> splitSizes;
-        bool ok = true;
-        for (QString sizeString : savedSizes.toStringList()) {
-            int splitSize = sizeString.toInt(&ok);
-            if (!ok) {
-                break;
-            }
-            splitSizes.append(splitSize);
-        }
-        if (ok && splitSizes.size() > 1) {
-            for (int i = 1; i < splitSizes.size(); i++) {
-                addDisplayGroup();
-            }
-            m_displayTabsSplitter->setSizes(splitSizes);
-        }
-    }
-}
-
-void MainWindow::addDisplayGroup()
-{
-    auto multiDisplay = new MultiDisplayWidget(m_pluginManager, m_displayHandle, this);
-    m_displayTabsSplitter->addWidget(multiDisplay);
-
-    // Add this display group to the list of displays
-    m_displayWidgets.append(multiDisplay);
-
-    // Set up the display controls
-    checkCurrentDisplays();
-    setupSplitViewMenu();
-
-    connect(multiDisplay, SIGNAL(activeDisplayChanged(QSharedPointer<DisplayInterface>)), this, SLOT(checkCurrentDisplays()));
-}
-
-void MainWindow::removeDisplayGroup(int idx)
-{
-    if (idx <= 0 || idx >= m_displayWidgets.length()) {
-        warningMessage(QString("Cannot delete display group %1").arg(idx + 1));
-        return;
+    // Add display splits if they were saved in the config
+    QVariant savedConfig = SettingsManager::getPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY);
+    if (!savedConfig.isNull() && savedConfig.canConvert<QByteArray>()) {
+        m_rootDisplay->applyConfig(savedConfig.toByteArray());
     }
 
-    auto multiDisplay = m_displayWidgets.takeAt(idx);
-    delete multiDisplay;
-    checkCurrentDisplays();
     setupSplitViewMenu();
 }
 
@@ -299,24 +253,24 @@ void MainWindow::setupSplitViewMenu()
 {
     m_splitViewMenu->clear();
 
-    if (m_displayWidgets.size() < 5) {
-        m_splitViewMenu->addAction(
-                "Add split view",
-                [this]() {
-            this->addDisplayGroup();
-        })->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
-    }
+    // if (m_displayWidgets.size() < 5) {
+    //     m_splitViewMenu->addAction(
+    //             "Add split view",
+    //             [this]() {
+    //         this->addDisplayGroup();
+    //     })->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
+    // }
 
-    for (int i = 1; i < m_displayWidgets.size(); i++) {
-        QAction *remove = m_splitViewMenu->addAction(
-                QString("Remove split view %1").arg(i + 1),
-                [this, i]() {
-            this->removeDisplayGroup(i);
-        });
-        if (i == m_displayWidgets.size() - 1) {
-            remove->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
-        }
-    }
+    // for (int i = 1; i < m_displayWidgets.size(); i++) {
+    //     QAction *remove = m_splitViewMenu->addAction(
+    //             QString("Remove split view %1").arg(i + 1),
+    //             [this, i]() {
+    //         this->removeDisplayGroup(i);
+    //     });
+    //     if (i == m_displayWidgets.size() - 1) {
+    //         remove->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
+    //     }
+    // }
 }
 
 void MainWindow::initializeImporterExporters()
@@ -356,32 +310,6 @@ void MainWindow::warningMessage(QString message, QString windowTitle)
     msg.setText(message);
     msg.setDefaultButton(QMessageBox::Ok);
     msg.exec();
-}
-
-void MainWindow::checkCurrentDisplays()
-{
-    for (auto controls : m_currControlWidgets) {
-        ui->displayControlsLayout->removeWidget(controls);
-        controls->deleteLater();
-    }
-    m_currControlWidgets.clear();
-
-    QSet<DisplayWidget*> activeDisplays;
-    for (auto multiDisplay : m_displayWidgets) {
-        QSharedPointer<DisplayInterface> currDisplay = multiDisplay->activeDisplay();
-        if (!currDisplay.isNull()) {
-            activeDisplays.insert(multiDisplay->activeDisplayWidget());
-            auto controls = multiDisplay->createEditorForActiveDisplay();
-            if (controls) {
-                m_currControlWidgets.append(controls);
-            }
-        }
-    }
-    m_displayHandle->setActiveDisplays(activeDisplays);
-
-    for (auto controls : m_currControlWidgets) {
-        ui->displayControlsLayout->addWidget(controls);
-    }
 }
 
 QSharedPointer<BitContainer> MainWindow::currContainer()

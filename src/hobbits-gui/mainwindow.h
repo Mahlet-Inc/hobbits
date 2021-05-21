@@ -10,6 +10,7 @@
 #include "previewscrollbar.h"
 #include "batcheditor.h"
 #include "multidisplaywidget.h"
+#include "displaysplitter.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -53,7 +54,6 @@ public slots:
     void importBytes(QByteArray rawBytes, QString name);
 
     void checkOperatorInput(QString pluginName = "");
-    void checkCurrentDisplays();
 
     void activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
     void currBitContainerChanged();
@@ -88,8 +88,6 @@ private slots:
     void pluginActionProgress(QUuid, int);
 
     void initializeDisplays();
-    void addDisplayGroup();
-    void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
     void populateRecentExportsMenu(QPair<QString, Parameters> addition = QPair<QString, Parameters>(), QPair<QString, Parameters> removal = QPair<QString, Parameters>());
@@ -128,7 +126,7 @@ private:
     QMap<QSharedPointer<AnalyzerInterface>, AbstractParameterEditor*> m_analyzerUiMap;
 
     QList<MultiDisplayWidget*> m_displayWidgets;
-    QSplitter *m_displayTabsSplitter;
+    DisplaySplitter *m_rootDisplay;
     QSharedPointer<DisplayHandle> m_displayHandle;
     QList<QWidget*> m_currControlWidgets;
     PreviewScrollBar *m_previewScroll;
