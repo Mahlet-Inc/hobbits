@@ -39,8 +39,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_bitContainerManager(QSharedPointer<BitContainerManagerUi>(new BitContainerManagerUi())),
     m_pluginManager(QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager())),
     m_pluginActionManager(new PluginActionManager(m_pluginManager)),
-    m_previewScroll(new PreviewScrollBar()),
-    m_splitViewMenu(new QMenu("Split View"))
+    m_previewScroll(new PreviewScrollBar())
 {
     m_pluginActionManager->setContainerManager(m_bitContainerManager);
     ui->setupUi(this);
@@ -56,8 +55,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->menu_View->addAction(ui->dock_bitContainerSelect->toggleViewAction());
     ui->menu_View->addAction(ui->dock_operatorPlugins->toggleViewAction());
     ui->menu_View->addAction(ui->dock_findBits->toggleViewAction());
-    ui->menu_View->addSeparator();
-    ui->menu_View->addMenu(m_splitViewMenu);
 
     ui->dock_bitContainerSelect->setContentsMargins(0, 0, 0, 0);
     ui->dock_operatorPlugins->setContentsMargins(0, 0, 0, 0);
@@ -215,6 +212,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
 MainWindow::~MainWindow()
 {
+    // release the offset controls from DisplayHandle before deleting UI
+    m_displayHandle->deactivate();
+
     delete ui;
 }
 
@@ -228,7 +228,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     SettingsManager::setPrivateSetting(BATCH_EDITOR_SIZE_KEY, m_batchEditor->size());
     SettingsManager::setPrivateSetting(BATCH_EDITOR_POSITION_KEY, m_batchEditor->pos());
 
-    QByteArray splitDisplayConfig = m_rootDisplay->getConfig();
+    QByteArray splitDisplayConfig = m_rootDisplay->saveState();
     SettingsManager::setPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY, splitDisplayConfig);
 
     event->accept();
@@ -243,34 +243,19 @@ void MainWindow::initializeDisplays()
     // Add display splits if they were saved in the config
     QVariant savedConfig = SettingsManager::getPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY);
     if (!savedConfig.isNull() && savedConfig.canConvert<QByteArray>()) {
-        m_rootDisplay->applyConfig(savedConfig.toByteArray());
+        m_rootDisplay->restoreState(savedConfig.toByteArray());
     }
 
-    setupSplitViewMenu();
-}
+    ui->menu_View->addSeparator();
+    auto tabShowToggle = ui->menu_View->addAction("Display Tabs", [this](bool show) {
+        m_rootDisplay->setShowViewSelect(show);
+    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
+    tabShowToggle->setCheckable(true);
+    tabShowToggle->setChecked(true);
 
-void MainWindow::setupSplitViewMenu()
-{
-    m_splitViewMenu->clear();
-
-    // if (m_displayWidgets.size() < 5) {
-    //     m_splitViewMenu->addAction(
-    //             "Add split view",
-    //             [this]() {
-    //         this->addDisplayGroup();
-    //     })->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
-    // }
-
-    // for (int i = 1; i < m_displayWidgets.size(); i++) {
-    //     QAction *remove = m_splitViewMenu->addAction(
-    //             QString("Remove split view %1").arg(i + 1),
-    //             [this, i]() {
-    //         this->removeDisplayGroup(i);
-    //     });
-    //     if (i == m_displayWidgets.size() - 1) {
-    //         remove->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
-    //     }
-    // }
+    ui->menu_View->addAction("Collapse All Displays", [this]() {
+        m_rootDisplay->unSplit();
+    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
 }
 
 void MainWindow::initializeImporterExporters()

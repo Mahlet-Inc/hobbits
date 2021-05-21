@@ -14,15 +14,24 @@ public:
     explicit MultiDisplayWidget(QSharedPointer<HobbitsPluginManager> pluginManager,
                                 QSharedPointer<DisplayHandle> handle,
                                 QWidget *parent = nullptr);
+    
+    ~MultiDisplayWidget();
 
     bool setActiveDisplay(QString name);
-    QSharedPointer<DisplayInterface> activeDisplay();
-    DisplayWidget* activeDisplayWidget();
+    QSharedPointer<DisplayInterface> activeDisplay() const;
+    DisplayWidget* activeDisplayWidget() const;
+
+    QByteArray saveState() const;
+    bool restoreState(QByteArray config);
+
+    void setShowViewSelect(bool show);
 
 public slots:
     void activateCurrentDisplay();
 
 private:
+    static QByteArray readStreamBytes(QDataStream &stream);
+
     class DisplayParts {
     public:
         static QSharedPointer<DisplayParts> create(QSharedPointer<DisplayInterface> interface,

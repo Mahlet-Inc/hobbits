@@ -99,8 +99,6 @@ private slots:
                                   QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populateRecentBatchesMenu(QString addition = QString(), QString removal = QString());
 
-    void setupSplitViewMenu();
-
     void sendBitContainerPreview();
     static void processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor*  editor);
 
@@ -132,8 +130,6 @@ private:
     PreviewScrollBar *m_previewScroll;
 
     BatchEditor *m_batchEditor;
-
-    QMenu *m_splitViewMenu;
 };
 
 #endif // MAINWINDOW_H

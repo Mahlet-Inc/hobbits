@@ -51,8 +51,8 @@ QPair<DisplaySplitter*, DisplaySplitter*> DisplaySplitter::takeSplitWidgets()
     m_vBox->takeAt(0);
 
     QPair<DisplaySplitter*, DisplaySplitter*> pair;
-    pair.first = qobject_cast<DisplaySplitter*>(m_splitter->widget(0));
-    pair.second = qobject_cast<DisplaySplitter*>(m_splitter->widget(1));
+    pair.first = split1();
+    pair.second = split2();
 
     m_splitter->hide();
     pair.first->setParent(nullptr);
@@ -119,7 +119,7 @@ void DisplaySplitter::unSplit(bool keepSecond)
     pair.second->deleteLater();
 }
 
-QByteArray DisplaySplitter::getConfig() const
+QByteArray DisplaySplitter::saveState() const
 {
     QByteArray config;
     QDataStream stream(&config, QIODevice::WriteOnly);
@@ -128,21 +128,21 @@ QByteArray DisplaySplitter::getConfig() const
         QByteArray splitterState = m_splitter->saveState();
         stream.writeBytes(splitterState.data(), splitterState.size());
         
-        QByteArray side1 = qobject_cast<DisplaySplitter*>(m_splitter->widget(0))->getConfig();
+        QByteArray side1 = split1()->saveState();
         stream.writeBytes(side1.data(), side1.size());
 
-        QByteArray side2 = qobject_cast<DisplaySplitter*>(m_splitter->widget(1))->getConfig();
+        QByteArray side2 = split2()->saveState();
         stream.writeBytes(side2.data(), side2.size());
     }
     else {
-        QByteArray name = m_nonSplitWidget->activeDisplay()->name().toLatin1();
-        stream.writeBytes(name.data(), name.size());
+        QByteArray displayState = m_nonSplitWidget->saveState();
+        stream.writeBytes(displayState.data(), displayState.size());
     }
 
     return config;
 }
 
-QByteArray readStreamBytes(QDataStream &stream) {
+QByteArray DisplaySplitter::readStreamBytes(QDataStream &stream) {
     char *readBuf;
     uint len;
     stream.readBytes(readBuf, len);
@@ -155,7 +155,23 @@ QByteArray readStreamBytes(QDataStream &stream) {
     return bytes;
 }
 
-bool DisplaySplitter::applyConfig(QByteArray config) 
+DisplaySplitter* DisplaySplitter::split1() const
+{
+    if (!isSplit()) {
+        return nullptr;
+    }
+    return qobject_cast<DisplaySplitter*>(m_splitter->widget(0));
+}
+
+DisplaySplitter* DisplaySplitter::split2() const
+{
+    if (!isSplit()) {
+        return nullptr;
+    }
+    return qobject_cast<DisplaySplitter*>(m_splitter->widget(1));
+}
+
+bool DisplaySplitter::restoreState(QByteArray config) 
 {
     QDataStream stream(config);
     bool configSplit;
@@ -175,7 +191,7 @@ bool DisplaySplitter::applyConfig(QByteArray config)
         if (side1.isEmpty()) {
             return false;
         }
-        if (!qobject_cast<DisplaySplitter*>(m_splitter->widget(0))->applyConfig(side1)) {
+        if (!split1()->restoreState(side1)) {
             return false;
         }
 
@@ -183,21 +199,33 @@ bool DisplaySplitter::applyConfig(QByteArray config)
         if (side2.isEmpty()) {
             return false;
         }
-        if (!qobject_cast<DisplaySplitter*>(m_splitter->widget(1))->applyConfig(side2)) {
+        if (!split2()->restoreState(side2)) {
             return false;
         }
     }
     else {
         unSplit();
-        QByteArray nameBytes = readStreamBytes(stream);
-        if (nameBytes.isEmpty()) {
+        QByteArray displayConfig = readStreamBytes(stream);
+        if (displayConfig.isEmpty()) {
             return false;
         }
-        QString name = QString::fromLatin1(nameBytes);
-        m_nonSplitWidget->setActiveDisplay(name);
+        if (!m_nonSplitWidget->restoreState(displayConfig)) {
+            return false;
+        }
     }
 
     return true;
+}
+
+void DisplaySplitter::setShowViewSelect(bool show) 
+{
+    if (isSplit()) {
+        split1()->setShowViewSelect(show);
+        split2()->setShowViewSelect(show);
+    }
+    else {
+        m_nonSplitWidget->setShowViewSelect(show);
+    }
 }
 
 void DisplaySplitter::leaveEvent(QEvent *event) 

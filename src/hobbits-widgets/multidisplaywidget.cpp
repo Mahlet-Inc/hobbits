@@ -1,6 +1,7 @@
 #include "multidisplaywidget.h"
 #include "settingsmanager.h"
 #include <QVBoxLayout>
+#include <QTabBar>
 
 MultiDisplayWidget::MultiDisplayWidget(QSharedPointer<HobbitsPluginManager> pluginManager,
                                         QSharedPointer<DisplayHandle> handle,
@@ -53,6 +54,15 @@ MultiDisplayWidget::MultiDisplayWidget(QSharedPointer<HobbitsPluginManager> plug
     });
 }
 
+MultiDisplayWidget::~MultiDisplayWidget() 
+{
+    auto activeDisplays = m_handle->activeDisplays();
+    for (auto p : m_displayMap.values()) {
+        activeDisplays.remove(p->display);
+    }
+    m_handle->setActiveDisplays(activeDisplays);
+}
+
 bool MultiDisplayWidget::setActiveDisplay(QString name) 
 {
     for (int idx : m_displayMap.keys()) {
@@ -65,7 +75,7 @@ bool MultiDisplayWidget::setActiveDisplay(QString name)
     return false;
 }
 
-QSharedPointer<DisplayInterface> MultiDisplayWidget::activeDisplay()
+QSharedPointer<DisplayInterface> MultiDisplayWidget::activeDisplay() const
 {
     auto parts = m_displayMap.value(m_tabs->currentIndex());
     if (parts.isNull()) {
@@ -74,13 +84,101 @@ QSharedPointer<DisplayInterface> MultiDisplayWidget::activeDisplay()
     return parts->interface;
 }
 
-DisplayWidget* MultiDisplayWidget::activeDisplayWidget()
+DisplayWidget* MultiDisplayWidget::activeDisplayWidget() const
 {
     auto parts = m_displayMap.value(m_tabs->currentIndex());
     if (parts.isNull()) {
         return nullptr;
     }
     return parts->display;
+}
+
+QByteArray MultiDisplayWidget::saveState() const
+{
+    QByteArray config;
+    QDataStream stream(&config, QIODevice::WriteOnly);
+
+    QByteArray activeName = activeDisplay()->name().toLatin1();
+    stream.writeBytes(activeName.data(), activeName.size());
+
+    QByteArray splitterState = m_splitter->saveState();
+    stream.writeBytes(splitterState.data(), splitterState.size());
+
+    auto params = activeDisplayWidget()->displayParameters();
+    bool hasParams = !params.isNull();
+    stream << hasParams;
+    if (hasParams) {
+        QJsonDocument jsonParams(params.values());
+        stream << jsonParams.toJson(QJsonDocument::Compact);
+    }
+
+    return config;
+}
+
+QByteArray MultiDisplayWidget::readStreamBytes(QDataStream &stream) {
+    char *readBuf;
+    uint len;
+    stream.readBytes(readBuf, len);
+    if (len < 1) {
+        stream.setStatus(QDataStream::Status::ReadCorruptData);
+        return QByteArray();
+    }
+    QByteArray bytes(readBuf, len);
+    delete [] readBuf;
+    return bytes;
+}
+
+bool MultiDisplayWidget::restoreState(QByteArray config) 
+{
+    QDataStream stream(config);
+
+    QByteArray activeDisplayBytes = readStreamBytes(stream);
+    if (activeDisplayBytes.isEmpty()) {
+        return false;
+    }
+    if (!setActiveDisplay(QString::fromLatin1(activeDisplayBytes))) {
+        // failed to load this display, but stream is still ok
+        return true;
+    }
+
+    QByteArray splitterState = readStreamBytes(stream);
+    if (splitterState.isEmpty()) {
+        return false;
+    }
+    if (!m_splitter->restoreState(splitterState)) {
+        return false;
+    }
+
+    bool hasParams;
+    stream >> hasParams;
+    if (hasParams) {
+        QByteArray paramBytes = readStreamBytes(stream);
+        if (paramBytes.isEmpty()) {
+            return false;
+        }
+        auto jsonParams = QJsonDocument::fromJson(paramBytes);
+        Parameters params(jsonParams.object());
+
+        if (m_splitter->count() > 1) {
+            auto editor = qobject_cast<AbstractParameterEditor*>(m_splitter->widget(1));
+            editor->setParameters(params);
+        }
+        else {
+            activeDisplayWidget()->setDisplayParameters(params);
+        }
+    }
+
+    return true;
+}
+
+void MultiDisplayWidget::setShowViewSelect(bool show) 
+{
+    if (show) {
+        m_tabs->tabBar()->show();
+    }
+    else {
+        m_tabs->tabBar()->hide();
+    }
 }
 
 void MultiDisplayWidget::activateCurrentDisplay() 
@@ -135,6 +233,7 @@ AbstractParameterEditor* MultiDisplayWidget::DisplayParts::createEditor()
     if (editor == nullptr) {
         return nullptr;
     }
+    editor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
     if (this->display->displayParameters().isNull()) {
         this->display->setDisplayParameters(editor->parameters());

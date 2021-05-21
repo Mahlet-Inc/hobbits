@@ -25,8 +25,10 @@ public:
     void split(Qt::Orientation orientation);
     void unSplit(bool keepSecond = false);
 
-    QByteArray getConfig() const;
-    bool applyConfig(QByteArray config);
+    QByteArray saveState() const;
+    bool restoreState(QByteArray config);
+
+    void setShowViewSelect(bool show);
 
 private:
     void leaveEvent(QEvent *event) override;
@@ -34,6 +36,11 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+    static QByteArray readStreamBytes(QDataStream &stream);
+
+    DisplaySplitter* split1() const;
+    DisplaySplitter* split2() const;
 
     bool m_mousePressing;
 
