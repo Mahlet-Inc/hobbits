@@ -88,7 +88,15 @@ void SettingsManager::readSettings()
     QMutexLocker lock(&instance().m_mutex);
 
     if (instance().m_configFilePath.isEmpty()) {
+#if SELF_CONTAINED_APP
+        QString appDirPath = QCoreApplication::applicationDirPath();
+        if (!appDirPath.isEmpty()) {
+            appDirPath += "/";
+        }
+        QSettings settings(appDirPath + "config.ini", QSettings::IniFormat);
+#else
         QSettings settings("Hobbits", "Hobbits GUI");
+#endif
         instance().readFromSettings(settings);
     }
     else {
