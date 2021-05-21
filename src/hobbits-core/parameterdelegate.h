@@ -8,7 +8,7 @@
 #include <QMap>
 #include <QVector>
 #include <QSharedPointer>
-#include <QJsonObject>
+#include "parameters.h"
 #include "hobbits-core_global.h"
 #include "fwd_abstractparametereditor.h"
 
@@ -66,15 +66,15 @@ public:
         ParameterInfo(const ParameterInfo&) = default;
     };
 
-    ParameterDelegate(QList<ParameterInfo> parameterInfos, std::function<QString(const QJsonObject&)> actionDescriber);
+    ParameterDelegate(QList<ParameterInfo> parameterInfos, std::function<QString(const Parameters&)> actionDescriber);
     ParameterDelegate(QList<ParameterInfo> parameterInfos,
-                      std::function<QString(const QJsonObject&)> actionDescriber,
+                      std::function<QString(const Parameters&)> actionDescriber,
                       std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
     virtual ~ParameterDelegate() = default;
 
     static QSharedPointer<ParameterDelegate> create(
             QList<ParameterInfo> parameterInfos,
-            std::function<QString(const QJsonObject&)> actionDescriber,
+            std::function<QString(const Parameters&)> actionDescriber,
             std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> editorCreator);
 
     static bool jsonTypeCompatible(QJsonValue::Type jsonType, ParameterType type);
@@ -84,13 +84,13 @@ public:
     QList<ParameterInfo> parameterInfos() const;
     ParameterInfo getInfo(QString name) const;
 
-    QStringList validate(const QJsonObject &parameters) const;
-    QString actionDescription(const QJsonObject &parameters) const;
+    QStringList validate(const Parameters &parameters) const;
+    QString actionDescription(const Parameters &parameters) const;
 
 protected:
     static QStringList validateAgainstInfos(const QJsonObject &parameters, QList<ParameterInfo> infos);
     QMap<QString, ParameterInfo> m_parameterMap;
-    std::function<QString(const QJsonObject&)> m_actionDescriber;
+    std::function<QString(const Parameters&)> m_actionDescriber;
     std::function<AbstractParameterEditor*(QSharedPointer<ParameterDelegate>, QSize)> m_editorCreator;
 };
 

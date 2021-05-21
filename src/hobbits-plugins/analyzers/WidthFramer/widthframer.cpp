@@ -12,7 +12,7 @@ WidthFramer::WidthFramer()
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         int width = parameters.value("width").toInt();
 
                         return QString("Set Frame Width to %1").arg(width);
@@ -50,7 +50,7 @@ QSharedPointer<ParameterDelegate> WidthFramer::parameterDelegate()
 
 QSharedPointer<const AnalyzerResult> WidthFramer::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_delegate->validate(parameters);

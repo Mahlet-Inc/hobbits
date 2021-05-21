@@ -5,20 +5,20 @@ ExportResult::ExportResult()
 
 }
 
-ExportResult* ExportResult::setParameters(QJsonObject pluginState)
+ExportResult* ExportResult::setParameters(const Parameters &parameters)
 {
-    m_parameters = pluginState;
+    m_parameters = parameters;
     return this;
 }
 
-const QJsonObject ExportResult::parameters() const
+const Parameters ExportResult::parameters() const
 {
     return m_parameters;
 }
 
-bool ExportResult::hasEmptyParameters() const
+bool ExportResult::hasNullParameters() const
 {
-    return m_parameters.isEmpty();
+    return m_parameters.isNull();
 }
 
 QString ExportResult::errorString() const
@@ -38,7 +38,7 @@ QSharedPointer<ExportResult> ExportResult::error(QString errorString)
     return QSharedPointer<ExportResult>(result);
 }
 
-QSharedPointer<ExportResult> ExportResult::result(QJsonObject parameters)
+QSharedPointer<ExportResult> ExportResult::result(Parameters parameters)
 {
     return QSharedPointer<ExportResult>((new ExportResult())->setParameters(parameters));
 }

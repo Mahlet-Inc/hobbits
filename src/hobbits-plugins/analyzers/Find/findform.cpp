@@ -35,7 +35,7 @@ QString FindForm::title()
     return "Configure Find";
 }
 
-QJsonObject FindForm::parameters()
+Parameters FindForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -45,7 +45,7 @@ void FindForm::giveDisplayHandle(QSharedPointer<DisplayHandle> handle)
     m_highlightNav->giveDisplayHandle(handle);
 }
 
-bool FindForm::setParameters(QJsonObject parameters)
+bool FindForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

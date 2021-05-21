@@ -54,11 +54,15 @@ section of your data in one display, and then switch tabs to see what that
 section looks like in a different display.
 
 Displays can also be split so that you can look at more than one display at the
-same time. Split views can be added or removed via:
+same time. Split views controls are as follows:
 
- - The top menu in `View->Split View`
- - The `Ctrl-Shift-V` hotkey adds a view to the right
- - The `Ctrl-Shift-X` hotkey removes the rightmost view
+ - `Alt-Click` on a display splits it horizontally (i.e. left/right)
+ - `Alt-Ctrl-Click` on a display splits it vertically (i.e. top/bottom)
+ - `Alt-Shift-Click` on a display collapses it if it has been split
+ - The top menu `View->Display Tabs` toggles the visibility of Display select
+   tabs (hotkey: `Ctrl-Shift-V`)
+ - The top menu `View->Collapse All Displays` collapses split displays (hotkey:
+   `Ctrl-Shift-X`)
 
 ### Operators
 

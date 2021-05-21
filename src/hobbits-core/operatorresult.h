@@ -1,7 +1,7 @@
 #ifndef OPERATORRESULT_H
 #define OPERATORRESULT_H
 
-#include <QJsonObject>
+#include "parameters.h"
 #include <QList>
 #include <QSharedPointer>
 #include "bitcontainer.h"
@@ -20,18 +20,18 @@ public:
     OperatorResult* setOutputContainers(QList<QSharedPointer<BitContainer>> outputContainers);
     QList<QSharedPointer<BitContainer>> outputContainers() const;
 
-    OperatorResult* setParameters(QJsonObject parameters);
-    const QJsonObject parameters() const;
+    OperatorResult* setParameters(const Parameters &parameters);
+    const Parameters parameters() const;
 
-    bool hasEmptyParameters() const;
+    bool hasNullParameters() const;
     QString errorString() const;
 
-    static QSharedPointer<const OperatorResult> result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState);
+    static QSharedPointer<const OperatorResult> result(QList<QSharedPointer<BitContainer>> outputContainers, Parameters parameters);
     static QSharedPointer<const OperatorResult> error(QString error);
 
 private:
     QList<QSharedPointer<BitContainer>> m_outputContainers;
-    QJsonObject m_parameters;
+    Parameters m_parameters;
     QString m_errorString;
 };
 

@@ -16,20 +16,20 @@ QList<QSharedPointer<BitContainer>> OperatorResult::outputContainers() const
     return m_outputContainers;
 }
 
-OperatorResult* OperatorResult::setParameters(QJsonObject parameters)
+OperatorResult* OperatorResult::setParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     return this;
 }
 
-const QJsonObject OperatorResult::parameters() const
+const Parameters OperatorResult::parameters() const
 {
     return m_parameters;
 }
 
-bool OperatorResult::hasEmptyParameters() const
+bool OperatorResult::hasNullParameters() const
 {
-    return m_parameters.isEmpty();
+    return m_parameters.isNull();
 }
 
 QString OperatorResult::errorString() const
@@ -37,10 +37,10 @@ QString OperatorResult::errorString() const
     return m_errorString;
 }
 
-QSharedPointer<const OperatorResult> OperatorResult::result(QList<QSharedPointer<BitContainer>> outputContainers, QJsonObject pluginState)
+QSharedPointer<const OperatorResult> OperatorResult::result(QList<QSharedPointer<BitContainer>> outputContainers, Parameters parameters)
 {
     return QSharedPointer<const OperatorResult>(
-                (new OperatorResult())->setOutputContainers(outputContainers)->setParameters(pluginState)
+                (new OperatorResult())->setOutputContainers(outputContainers)->setParameters(parameters)
             );
 }
 

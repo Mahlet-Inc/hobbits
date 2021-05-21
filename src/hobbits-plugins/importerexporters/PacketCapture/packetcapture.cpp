@@ -16,10 +16,9 @@ PacketCapture::PacketCapture()
         {"promiscuous", ParameterDelegate::ParameterType::Boolean}
     };
 
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         QString device = parameters.value("device_name").toString();
                         QString filter = parameters.value("filter").toString();
 
@@ -28,7 +27,7 @@ PacketCapture::PacketCapture()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new PacketCaptureForm(delegate);
-                    }));
+                    });
 }
 
 ImporterExporterInterface* PacketCapture::createDefaultImporterExporter()
@@ -71,7 +70,7 @@ QSharedPointer<ParameterDelegate> PacketCapture::exportParameterDelegate()
     return nullptr;
 }
 
-QSharedPointer<ImportResult> PacketCapture::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> PacketCapture::importBits(const Parameters &parameters,
                                                        QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_importDelegate->validate(parameters);
@@ -83,7 +82,7 @@ QSharedPointer<ImportResult> PacketCapture::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> PacketCapture::exportBits(QSharedPointer<const BitContainer> container,
-                                                       QJsonObject parameters,
+                                                       const Parameters &parameters,
                                                        QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(container)

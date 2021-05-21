@@ -12,15 +12,18 @@ SymbolRaster::SymbolRaster() :
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
+    ParameterDelegate::ParameterInfo scaleParam = {"scale", ParameterDelegate::ParameterType::Integer};
+    scaleParam.ranges.append({1, 128});
+
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", ParameterDelegate::ParameterType::Integer},
+        scaleParam,
         {"show_headers", ParameterDelegate::ParameterType::Boolean},
         {"color_map", ParameterDelegate::ParameterType::Array}
     };
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         int scale = parameters.value("scale").toInt();
                         if (parameters.value("show_headers").toBool()) {
                             return QString("Symbol Raster %1x with headers").arg(scale);
@@ -81,7 +84,7 @@ QSharedPointer<ParameterDelegate> SymbolRaster::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -106,9 +109,6 @@ QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, co
     }
 
     int scale = parameters.value("scale").toInt();
-    if (scale <= 0) {
-        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
-    }
 
     QPoint offset = headerOffset(parameters);
     QSize rasterSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
@@ -141,7 +141,7 @@ QSharedPointer<DisplayResult> SymbolRaster::renderDisplay(QSize viewportSize, co
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> SymbolRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> SymbolRaster::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     m_lastParams = parameters;
     QStringList invalidations = m_delegate->validate(parameters);
@@ -169,7 +169,7 @@ QSharedPointer<DisplayResult> SymbolRaster::renderOverlay(QSize viewportSize, co
     return DisplayResult::result(overlay, parameters);
 }
 
-QPoint SymbolRaster::headerOffset(const QJsonObject &parameters)
+QPoint SymbolRaster::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);
@@ -183,7 +183,7 @@ QPoint SymbolRaster::headerOffset(const QJsonObject &parameters)
                 DisplayHelper::textSize(font, container->maxFrameWidth()).width() + margin);
 }
 
-QImage SymbolRaster::getSymbolMapImage(const QSize &size, const QJsonObject &parameters)
+QImage SymbolRaster::getSymbolMapImage(const QSize &size, const Parameters &parameters)
 {
     if (m_symbolLength < 1) {
         return QImage();

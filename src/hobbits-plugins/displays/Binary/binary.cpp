@@ -19,7 +19,7 @@ Binary::Binary() :
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.value("show_headers").toBool()) {
                             return QString("Binary with headers");
                         }
@@ -80,7 +80,7 @@ QSharedPointer<ParameterDelegate> Binary::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> Binary::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Binary::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -105,7 +105,7 @@ QSharedPointer<DisplayResult> Binary::renderDisplay(QSize viewportSize, const QJ
     return DisplayResult::result(image, parameters);
 }
 
-QSharedPointer<DisplayResult> Binary::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Binary::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -125,7 +125,7 @@ QSharedPointer<DisplayResult> Binary::renderOverlay(QSize viewportSize, const QJ
     return DisplayResult::result(overlay, parameters);
 }
 
-QPoint Binary::headerOffset(const QJsonObject &parameters)
+QPoint Binary::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);

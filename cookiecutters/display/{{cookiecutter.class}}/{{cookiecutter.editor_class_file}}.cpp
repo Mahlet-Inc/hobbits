@@ -31,12 +31,12 @@ QString {{cookiecutter.editor_class}}::title()
     return "Configure {{cookiecutter.class}} Display";
 }
 
-QJsonObject {{cookiecutter.editor_class}}::parameters()
+Parameters {{cookiecutter.editor_class}}::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool {{cookiecutter.editor_class}}::setParameters(QJsonObject parameters)
+bool {{cookiecutter.editor_class}}::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

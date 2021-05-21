@@ -22,12 +22,12 @@ QString TcpSender::title()
     return "Configure TCP Export Connnection";
 }
 
-bool TcpSender::setParameters(QJsonObject parameters)
+bool TcpSender::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject TcpSender::parameters()
+Parameters TcpSender::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -38,7 +38,7 @@ bool TcpSender::isStandaloneDialog()
 }
 
 #define TCPWRITEBUFFSIZE 8192
-QSharedPointer<ExportResult> TcpSender::exportData(QSharedPointer<const BitArray> bits, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ExportResult> TcpSender::exportData(QSharedPointer<const BitArray> bits, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QString host = parameters.value("host").toString();
     int port = parameters.value("port").toInt();

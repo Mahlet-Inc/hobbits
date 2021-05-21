@@ -16,14 +16,14 @@ class HOBBITSWIDGETSSHARED_EXPORT ParameterEditorDialog : public QDialog
 public:
     explicit ParameterEditorDialog(
             QSharedPointer<ParameterDelegate> delegate,
-            QJsonObject parameters = QJsonObject(),
+            Parameters parameters = Parameters(),
             QWidget *parent = nullptr);
     ~ParameterEditorDialog();
 
-    void setParameters(QJsonObject parameters);
-    QJsonObject parameters();
+    void setParameters(const Parameters &parameters);
+    Parameters parameters();
 
-    static QJsonObject promptForParameters(QSharedPointer<ParameterDelegate> delegate, QJsonObject parameters = QJsonObject());
+    static Parameters promptForParameters(QSharedPointer<ParameterDelegate> delegate, Parameters parameters = Parameters());
 
 private:
     Ui::ParameterEditorDialog *ui;

@@ -31,7 +31,7 @@ private:
     static QSharedPointer<ExportResult> exporterCall(
             QSharedPointer<ImporterExporterInterface> exporter,
             QSharedPointer<const BitContainer> container,
-            QJsonObject parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progressTracker);
 
     QSharedPointer<const PluginAction> m_action;

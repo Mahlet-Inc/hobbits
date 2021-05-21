@@ -58,12 +58,12 @@ QString SpectrogramControls::title()
     return "Configure Spectrogram";
 }
 
-bool SpectrogramControls::setParameters(QJsonObject parameters)
+bool SpectrogramControls::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject SpectrogramControls::parameters()
+Parameters SpectrogramControls::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }

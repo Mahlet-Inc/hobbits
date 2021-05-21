@@ -505,7 +505,7 @@ QImage DisplayHelper::drawTextRasterFull(QSize viewportSize,
                                          QPoint offset,
                                          DisplayInterface * display,
                                          QSharedPointer<DisplayHandle> handle,
-                                         const QJsonObject &parameters,
+                                         const Parameters &parameters,
                                          int bitsPerChar,
                                          std::function<QString (const Frame &, qint64 &)> textConverter)
 {

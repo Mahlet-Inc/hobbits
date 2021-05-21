@@ -10,7 +10,7 @@
 
     m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [this](const QJsonObject &parameters) {
+                    [this](const Parameters &parameters) {
                         // TODO: use parameters to describe action better
                         return QString("%1 Import").arg(this->name());
                     },
@@ -25,7 +25,7 @@
 
     m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [this](const QJsonObject &parameters) {
+                    [this](const Parameters &parameters) {
                         // TODO: use parameters to describe action better
                         return QString("%1 Export").arg(this->name());
                     },
@@ -77,7 +77,7 @@ QSharedPointer<ParameterDelegate>  {{cookiecutter.class}}::exportParameterDelega
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> {{cookiecutter.class}}::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> {{cookiecutter.class}}::importBits(Parameters parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_importDelegate->validate(parameters);
@@ -89,7 +89,7 @@ QSharedPointer<ImportResult> {{cookiecutter.class}}::importBits(QJsonObject para
 }
 
 QSharedPointer<ExportResult> {{cookiecutter.class}}::exportBits(QSharedPointer<const BitContainer> container,
-                                                      QJsonObject parameters,
+                                                      Parameters parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_exportDelegate->validate(parameters);

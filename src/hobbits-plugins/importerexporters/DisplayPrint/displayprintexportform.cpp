@@ -21,13 +21,13 @@ DisplayPrintExportForm::DisplayPrintExportForm(QSharedPointer<ParameterDelegate>
         if (!m_displayEditor) {
             return false;
         }
-        m_displayEditor->setParameters(params.toObject());
+        m_displayEditor->setParameters(Parameters::deserialize(params));
         return true;
     }, [this]() {
         if (!m_displayEditor) {
             return QJsonValue();
         }
-        return QJsonValue(m_displayEditor->parameters());
+        return QJsonValue(m_displayEditor->parameters().serialize());
     });
 
     m_pluginManager = loadUpPluginManager();
@@ -49,7 +49,7 @@ QString DisplayPrintExportForm::title()
     return "Configure Display Print";
 }
 
-QJsonObject DisplayPrintExportForm::parameters()
+Parameters DisplayPrintExportForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -85,7 +85,7 @@ QSharedPointer<HobbitsPluginManager> DisplayPrintExportForm::loadUpPluginManager
     return manager;
 }
 
-bool DisplayPrintExportForm::setParameters(QJsonObject parameters)
+bool DisplayPrintExportForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

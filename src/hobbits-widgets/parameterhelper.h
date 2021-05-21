@@ -43,8 +43,8 @@ public:
                               QComboBox* comboBox,
                               int role = Qt::UserRole);
 
-    bool applyParametersToUi(const QJsonObject &parameters);
-    QJsonObject getParametersFromUi();
+    bool applyParametersToUi(const Parameters &parameters);
+    Parameters getParametersFromUi();
 
 private:
     class ParameterInfoUi

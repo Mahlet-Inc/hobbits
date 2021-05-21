@@ -22,7 +22,7 @@ jobs:
     vmImage: 'ubuntu-18.04'
   container: helloadam/hobbitscentosbuilder:latest
   steps:
-    - template: ci/linux.yml
+    - template: ci/linux-cmake.yml
       parameters:
         artifactName: centos7_gcc48_release
         pythonArtifact: python_centos_74

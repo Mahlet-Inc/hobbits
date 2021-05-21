@@ -22,12 +22,12 @@ QString BinaryControls::title()
     return "Configure Binary Display";
 }
 
-bool BinaryControls::setParameters(QJsonObject parameters)
+bool BinaryControls::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject BinaryControls::parameters()
+Parameters BinaryControls::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

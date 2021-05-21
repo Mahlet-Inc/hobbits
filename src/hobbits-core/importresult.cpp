@@ -16,20 +16,20 @@ QSharedPointer<BitContainer> ImportResult::getContainer() const
     return m_container;
 }
 
-ImportResult* ImportResult::setParameters(QJsonObject parameters)
+ImportResult* ImportResult::setParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     return this;
 }
 
-const QJsonObject ImportResult::parameters() const
+const Parameters ImportResult::parameters() const
 {
     return m_parameters;
 }
 
-bool ImportResult::hasEmptyParameters() const
+bool ImportResult::hasNullParameters() const
 {
-    return m_parameters.isEmpty();
+    return m_parameters.isNull();
 }
 
 QString ImportResult::errorString() const
@@ -49,7 +49,7 @@ QSharedPointer<ImportResult> ImportResult::error(QString errorString)
     return QSharedPointer<ImportResult>(result);
 }
 
-QSharedPointer<ImportResult> ImportResult::result(QSharedPointer<BitContainer> container, QJsonObject parameters)
+QSharedPointer<ImportResult> ImportResult::result(QSharedPointer<BitContainer> container, Parameters parameters)
 {
     return QSharedPointer<ImportResult>((new ImportResult())->setContainer(container)->setParameters(parameters));
 }

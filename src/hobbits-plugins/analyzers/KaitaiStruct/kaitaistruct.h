@@ -2,7 +2,7 @@
 #define KAITAISTRUCT_H
 
 #include "analyzerinterface.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 class KaitaiStruct : public QObject, AnalyzerInterface
 {
@@ -23,14 +23,14 @@ public:
 
     QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
 
 private:
     RangeHighlight makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData, int &colorIdx);
 
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 
 };
 

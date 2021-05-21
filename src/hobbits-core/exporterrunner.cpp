@@ -3,7 +3,7 @@
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "settingsmanager.h"
-#include <QJsonObject>
+#include "parameters.h"
 
 ExporterRunner::ExporterRunner(QString pluginName, QString pluginFileLocation) :
     AbstractPluginRunner<ExportResult>(pluginName, pluginFileLocation)
@@ -63,7 +63,7 @@ void ExporterRunner::postProcess()
 QSharedPointer<ExportResult> ExporterRunner::exporterCall(
         QSharedPointer<ImporterExporterInterface> exporter,
         QSharedPointer<const BitContainer> container,
-        QJsonObject parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     try {

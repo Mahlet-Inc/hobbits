@@ -38,6 +38,8 @@ public:
 
     Range renderedRange(DisplayInterface* display) const;
 
+    void deactivate();
+
 Q_SIGNALS:
     void newBitOffset(qint64 bitOffset);
     void newFrameOffset(qint64 frameOffset);

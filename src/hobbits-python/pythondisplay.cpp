@@ -47,7 +47,7 @@ QSharedPointer<ParameterDelegate> PythonDisplay::parameterDelegate()
     return m_config->delegate();
 }
 
-QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_config->delegate()->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -135,7 +135,7 @@ QSharedPointer<DisplayResult> PythonDisplay::renderDisplay(QSize viewportSize, c
     return DisplayResult::result(image, parameters);
 }
 
-QSharedPointer<DisplayResult> PythonDisplay::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> PythonDisplay::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)

@@ -20,12 +20,12 @@ QString ByteRasterControls::title()
     return "Configure Byte Raster";
 }
 
-bool ByteRasterControls::setParameters(QJsonObject parameters)
+bool ByteRasterControls::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject ByteRasterControls::parameters()
+Parameters ByteRasterControls::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

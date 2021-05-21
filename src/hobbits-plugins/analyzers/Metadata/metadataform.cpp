@@ -21,12 +21,12 @@ QString MetadataForm::title()
     return "Configure Metadata";
 }
 
-QJsonObject MetadataForm::parameters()
+Parameters MetadataForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool MetadataForm::setParameters(QJsonObject parameters)
+bool MetadataForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

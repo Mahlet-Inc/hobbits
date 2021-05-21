@@ -15,39 +15,27 @@ file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SO
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
-add_executable("hobbits" MACOSX_BUNDLE "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
-set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
-if (FFTW_FOUND)
-    add_definitions(-DFFTW_AVAILABLE)
 
-    if(WIN32)
+if (BUILDING_WITH_CONAN)
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONAN_PKG::fftw)
+else()
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
+	if(WIN32)
         list(APPEND ALL_LINK_LIBS FFTW::Double)
     else()
         list(APPEND ALL_LINK_LIBS FFTW::Double FFTW::DoubleThreads)
     endif()
-
-    target_include_directories("hobbits" PRIVATE "${FFTW_INCLUDE_DIRS}")
 endif()
-target_link_libraries("hobbits" ${ALL_LINK_LIBS})
+
+add_executable(hobbits MACOSX_BUNDLE "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
+target_link_libraries(hobbits ${ALL_LINK_LIBS})
+if (UNIX)
+	target_compile_options(hobbits PRIVATE -fPIC)
+endif()
 #harden("hobbits")
 
-if (APPLE)
-    set_target_properties("hobbits"
-                          PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/python/lib")
-elseif (LINUX AND SELF_CONTAINED_APP)
-    set_target_properties("hobbits"
-                          PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../python/lib;$ORIGIN/../python/lib64")
-endif()
-
-# in dev mode, make sure dynamic link is to targetted python
-if(DEVELOPMENT_BUILD)
-    set_target_properties("hobbits"
-                          PROPERTIES BUILD_RPATH "${Python3_LIBRARY_DIRS}")
-endif()
-
-#
-# CPack
-#
+set_target_properties(hobbits
+			PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${HOBBITS_BIN_OUT_DIR})
 
 if(WIN32)
     install(TARGETS "hobbits"
@@ -79,5 +67,3 @@ if (LINUX)
             COMPONENT "runtime"
     )
 endif()
-
-pass_through_cpack_vars()

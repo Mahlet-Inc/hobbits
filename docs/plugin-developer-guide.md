@@ -67,16 +67,17 @@ a container's updated `BitInfo` in the
 ### Parameters, Delegates, and Editors
 
 Most plugins require customizable parameters in order to perform their function.
-Parameters are provided as `QJsonObject`s in the code so that they can be easily
-serialized. Most plugins provide a `ParameterDelegate` that provides details and
-validation capabilities for the JSON parameters, and optionally provides an
+The `Parameters` class is essentially a nullable `QJsonObject`, so it is 
+fairly generic, and it is simple
+to serialize. Most plugins provide a `ParameterDelegate` that provides details
+and validation capabilities for the JSON parameters, and optionally provides an
 implementation of `AbstractParameterEditor` for editing the parameters in a GUI.
 For most plugins, it is best to follow the pattern used in the Qt Creator plugin
 templates that does the following:
 
  - Create Qt Designer Form class that implementes `AbstractParameterEditor`
  - Use a `ParameterHelper` to wrap each of the UI elements for easy
-   `QJsonObject` getting and setting.
+   `Parameters` getting and setting.
  - Emit `AbstractParameterEditor`'s `changed` signal whenever the UI changes.
  - If the editor needs to react to or enrich `BitContainer` metadata, implement
    `previewBitsUiImpl`. `previewBitsImpl` can also be used for off-thread
@@ -89,6 +90,17 @@ templates that does the following:
    `std::function` that returns the `AbstractParameterEditor` implementation.
    This is the `ParameterDelegate` that would then get returned in, for example,
    in `AnalyzerInterface::parameterDelegate`.
+ 
+If a plugin takes no parameters the `Parameters` should be empty, but *not*
+null. Invalid/null parameters are created with `Parameters::nullParameters`
+and indicate that the parameters are not suitable for use. This null state
+can be checked with `Parameters::isNull`. This check is usually unneccessary
+within the plugin itself (a well-behaved plugin runner will not pass null
+parameters in), but a plugin can return null `Parameters` in its result if it
+wants to communicate that the action it just did can not/should not be repeated
+(i.e. it is somehow non-deterministic, or utilizes an unreliable external
+service.) A well-behaved runner will not create and run batches with plugin
+actions that return null `Parameters`.
 
 ### Action Progress
 
@@ -127,10 +139,10 @@ enables several critical operations (e.g. data generators, muxes, demuxes.)
 The output of operators will go into new containers so that the original data
 can still be easily referenced.
 
-`operateOnBits` takes a list of read-only bit containers, `QJsonObject`
-parameters, and an `ActionProgress` instance. It returns an `OperatorResult`
+`operateOnBits` takes a list of read-only bit containers, `Parameters`, and an
+`ActionProgress` instance. It returns an `OperatorResult`
 which contains any new bit containers that have been created by the operator,
-and the `QJsonObject` parameters that will enable the operation to be duplicated
+and the `Parameters` that will enable the operation to be duplicated
 exactly. This method may be executed on a secondary thread (see
 [threads guidance above](#threads))
 
@@ -144,10 +156,10 @@ of these functions.
 Analyzers digest and decorate the data in a way that facilitates follow-on
 processing and/or human evaluation.
 
-`analyzeBits` takes a read-only bit container, `QJsonObject` parameters, and an
+`analyzeBits` takes a read-only bit container, `Parameters`, and an
 `ActionProgress` instance. It returns an `AnalyzerResult` which contains new
-general metadata and range entries for the container, and the `QJsonObject`
-parameters that will enable the operation to be duplicated exactly. This method
+general metadata and range entries for the container, and the `Parameters`
+that will enable the operation to be duplicated exactly. This method
 may be executed on a secondary thread (see [threads guidance above](#threads))
 
 ### Display Interface
@@ -169,9 +181,9 @@ over by the mouse.) It also lets the display set things like the currently
 displayed range of bits with `DisplayHandle::setRenderedRange`.
 
 `renderDisplay` is the primary display rendering function that takes the a
-viewport size, `QJsonObject` parameters, and an `ActionProgress` instance. It
-returns a `DisplayResult` which contains a `QImage` and the `QJsonObject`
-parameters that will enable the operation to be duplicated exactly. This method
+viewport size, `Parameters`, and an `ActionProgress` instance. It
+returns a `DisplayResult` which contains a `QImage` and the `Parameters`
+that will enable the operation to be duplicated exactly. This method
 may be executed on a secondary thread (see [threads guidance above](#threads))
 
 `renderOverlay` is similar to `renderDisplay`, but it does not receive an
@@ -191,15 +203,15 @@ plugin is capable of importing or exporting (e.g. you might want a plugin that
 can import data but not export it.) You can return `false` in both methods, but
 that would be impolite.
 
-`importBits` and `exportBits` both receive `QJsonObject` parameters, and an
+`importBits` and `exportBits` both receive `Parameters`, and an
 `ActionProgress` instance.
 
 `exportBits` also receives a bit container that should be exported. It returns
-an `ExportResult` with the `QJsonObject` parameters that will enable the
+an `ExportResult` with the `Parameters` that will enable the
 operation to be duplicated exactly.
 
 `importBits` returns a non-empty bit container in its `ImportResult `if it was
-successful at importing data along with the `QJsonObject` parameters.
+successful at importing data along with the `Parameters`.
 
 ## Helpful Tools
 

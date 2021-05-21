@@ -1,3 +1,10 @@
+#
+# Configure RPATH of plugins
+#
+if(LINUX)
+	set(CMAKE_INSTALL_RPATH "$ORIGIN/../../lib;$ORIGIN/../../lib64;$ORIGIN/../../hobbits-cpython/lib;$ORIGIN/../../hobbits-cpython/lib64;")
+endif()
+
 macro(pluginInDir pluginType modName modDir)
 	file(GLOB_RECURSE SRCFILES "${modDir}/*.c" "${modDir}/*.cpp")
         file(GLOB RCFILES "${modDir}/*.qrc" "${modDir}/*.ui")
@@ -5,8 +12,16 @@ macro(pluginInDir pluginType modName modDir)
 
 	set(pluginName "hobbits-plugin-${pluginType}-${modName}")
         add_library("${pluginName}" "${SRCFILES}" "${RCFILES}" "${HDRFILES}")
+		set_target_properties("${pluginName}"
+							PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${HOBBITS_PLUGIN_OUT_DIR}/${pluginType})
 
-        target_link_libraries("${pluginName}" PRIVATE hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
+		if (BUILDING_WITH_CONAN)
+			set(ALL_LINK_LIBS hobbits-core hobbits-widgets CONAN_PKG::qt)
+		else()
+			set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
+		endif()
+
+        target_link_libraries("${pluginName}" PRIVATE ${ALL_LINK_LIBS})
         #harden("${pluginName}")
 
         string(TOUPPER "${pluginName}" pluginNameUpper)

@@ -20,8 +20,8 @@ public:
 public slots:
     QString title() override;
 
-    bool setParameters(QJsonObject parameters) override;
-    QJsonObject parameters() override;
+    bool setParameters(const Parameters &parameters) override;
+    Parameters parameters() override;
 
 private:
     Ui::SymbolRasterControls *ui;

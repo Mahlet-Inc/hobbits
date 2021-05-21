@@ -11,26 +11,24 @@ UdpData::UdpData()
         {"timeout", ParameterDelegate::ParameterType::Integer}
     };
 
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         return QString("UDP Listen on port %1").arg(parameters.value("port").toInt());
                     },
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new UdpReceiver(delegate);
-                    }));
+                    });
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
         {"host", ParameterDelegate::ParameterType::String},
         {"port", ParameterDelegate::ParameterType::Integer}
     };
-    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         return QString("UDP Send to %1:%2")
                                 .arg(parameters.value("host").toString())
                                 .arg(parameters.value("port").toInt());
@@ -38,7 +36,7 @@ UdpData::UdpData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new UdpSender(delegate);
-                    }));
+                    });
 }
 
 ImporterExporterInterface* UdpData::createDefaultImporterExporter()
@@ -81,7 +79,7 @@ QSharedPointer<ParameterDelegate> UdpData::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> UdpData::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> UdpData::importBits(const Parameters &parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_importDelegate->validate(parameters);
@@ -93,7 +91,7 @@ QSharedPointer<ImportResult> UdpData::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> UdpData::exportBits(QSharedPointer<const BitContainer> container,
-                                                 QJsonObject parameters,
+                                                 const Parameters &parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_exportDelegate->validate(parameters);

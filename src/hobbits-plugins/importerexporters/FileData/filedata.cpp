@@ -15,7 +15,7 @@ FileData::FileData()
 
     m_importDelegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("filename")) {
                             return QString("Import from %1").arg(parameters.value("filename").toString());
                         }
@@ -31,7 +31,7 @@ FileData::FileData()
 
     m_exportDelegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         if (parameters.contains("filename")) {
                             return QString("Export to %1").arg(parameters.value("filename").toString());
                         }
@@ -90,7 +90,7 @@ QSharedPointer<ParameterDelegate> FileData::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> FileData::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> FileData::importBits(const Parameters &parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
@@ -113,7 +113,7 @@ QSharedPointer<ImportResult> FileData::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> FileData::exportBits(QSharedPointer<const BitContainer> container,
-                                                  QJsonObject parameters,
+                                                  const Parameters &parameters,
                                                   QSharedPointer<PluginActionProgress> progress)
 {
     progress->setProgressPercent(10);

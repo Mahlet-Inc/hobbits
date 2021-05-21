@@ -1,0 +1,68 @@
+parameters:
+  - name: artifactName
+    type: string
+    default: linux_release
+  - name: pythonArtifact
+    type: string
+    default: python_linux
+
+steps:
+  - checkout: self
+    persistCredentials: true
+    submodules: true
+
+  - bash: |
+      BUILD_ID=`curl 'https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds?api-version=5.0&%24top=1&definitions=2' | python -c "import sys, json; print(json.load(sys.stdin)['value'][0]['id'])"`
+      echo "Build ID: ${BUILD_ID}"
+      curl "https://dev.azure.com/mahlet-inc/hobbits/_apis/build/builds/${BUILD_ID}/artifacts?artifactName=${PYTHON_ARTIFACT}&api-version=5.1&%24format=zip" --output hobbits_python.zip
+      unzip hobbits_python.zip
+      rm -fv hobbits_python.zip
+      mv ${PYTHON_ARTIFACT} hobbits_python
+      cd hobbits_python
+      tar xvf ${PYTHON_ARTIFACT}.tgz
+      rm -fv ${PYTHON_ARTIFACT}.tgz
+      ls -l $(Build.SourcesDirectory)/hobbits_python
+    env:
+      PYTHON_ARTIFACT: ${{ parameters.pythonArtifact }}
+    displayName: 'Get hobbits python artifact'
+  
+  - bash: |
+      rm .releaserc.json
+      cp ci/justversion.releaserc.json .releaserc.json
+      npm ci
+      npx semantic-release
+    displayName: 'Update the version number for the build'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+  
+  - script: | 
+      mkdir build_sc
+      cd build_sc
+      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DSELF_CONTAINED_APP=1 -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ../src
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: 'Configure for self-contained'
+  
+  - script: |
+      ninja
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    displayName: 'Build for self-contained'
+  
+  - script: |
+      ninja package
+      mv hobbits-*-Linux.tar.xz $(Build.ArtifactStagingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/build_sc
+    displayName: 'Package self-contained app binaries'
+
+  - bash: |
+      npm ci
+      mkdir app
+      find $(Build.ArtifactStagingDirectory) -name "hobbits-*-Linux.tar.xz" -type f -exec tar -xf {} -C app --strip-components=1 \;
+      ./prepare_tests.js
+      export QT_DEBUG_PLUGINS=1
+      ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/hobbits-cpython
+    displayName: 'Run tests'
+    workingDirectory: $(Build.SourcesDirectory)/tests
+  
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: ${{ parameters.artifactName }}

@@ -68,12 +68,12 @@ QString SimpleParameterEditor::title()
     return m_title;
 }
 
-bool SimpleParameterEditor::setParameters(QJsonObject parameters)
+bool SimpleParameterEditor::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject SimpleParameterEditor::parameters()
+Parameters SimpleParameterEditor::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

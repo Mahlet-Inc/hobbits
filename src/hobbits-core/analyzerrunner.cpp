@@ -81,7 +81,7 @@ void AnalyzerRunner::postProcess()
 QSharedPointer<const AnalyzerResult> AnalyzerRunner::analyzerCall(
         QSharedPointer<AnalyzerInterface> analyzer,
         QSharedPointer<const BitContainer> bits,
-        QJsonObject parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     try {

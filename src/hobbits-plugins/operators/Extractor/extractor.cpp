@@ -12,9 +12,9 @@ Extractor::Extractor()
         {"extract_after", ParameterDelegate::ParameterType::Boolean, true}
     };
 
-    m_delegate = ParameterDelegateUi::create(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         bool takeBefore = parameters.value("extract_before").toBool();
                         bool takeHighlight = parameters.value("extract_highlight").toBool();
                         bool takeAfter = parameters.value("extract_after").toBool();
@@ -70,21 +70,21 @@ QSharedPointer<ParameterDelegate> Extractor::parameterDelegate()
     return m_delegate;
 }
 
-int Extractor::getMinInputContainers(const QJsonObject &pluginState)
+int Extractor::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int Extractor::getMaxInputContainers(const QJsonObject &pluginState)
+int Extractor::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
 QSharedPointer<const OperatorResult> Extractor::operateOnBits(
         QList<QSharedPointer<const BitContainer> > inputContainers,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
     QStringList invalidations = m_delegate->validate(parameters);

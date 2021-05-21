@@ -10,6 +10,7 @@
 #include "previewscrollbar.h"
 #include "batcheditor.h"
 #include "multidisplaywidget.h"
+#include "displaysplitter.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -53,7 +54,6 @@ public slots:
     void importBytes(QByteArray rawBytes, QString name);
 
     void checkOperatorInput(QString pluginName = "");
-    void checkCurrentDisplays();
 
     void activateBitContainer(QSharedPointer<BitContainer> selected, QSharedPointer<BitContainer> deselected);
     void currBitContainerChanged();
@@ -63,16 +63,19 @@ public slots:
 
     void setStatus(QString status);
 
-    void requestAnalyzerRun(QString pluginName, QJsonObject pluginState);
-    void requestOperatorRun(QString pluginName, QJsonObject pluginState);
-    void requestImportRun(QString pluginName, QJsonObject pluginState);
-    void requestExportRun(QString pluginName, QJsonObject pluginState);
+    void requestAnalyzerRun(QString pluginName, const Parameters &parameters);
+    void requestOperatorRun(QString pluginName, const Parameters &parameters);
+    void requestImportRun(QString pluginName, const Parameters &parameters);
+    void requestExportRun(QString pluginName, const Parameters &parameters);
 
     QSharedPointer<BitContainer> currContainer();
 
     void applyBatchFile(QString fileName);
 
     void warningMessage(QString message, QString windowTitle = "Warning");
+
+private slots:
+    void on_action_Whats_This_triggered();
 
 private slots:
     void on_action_Apply_Batch_triggered();
@@ -85,20 +88,16 @@ private slots:
     void pluginActionProgress(QUuid, int);
 
     void initializeDisplays();
-    void addDisplayGroup();
-    void removeDisplayGroup(int idx);
     void initializeImporterExporters();
 
-    void populateRecentExportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
-    void populateRecentImportsMenu(QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(), QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
+    void populateRecentExportsMenu(QPair<QString, Parameters> addition = QPair<QString, Parameters>(), QPair<QString, Parameters> removal = QPair<QString, Parameters>());
+    void populateRecentImportsMenu(QPair<QString, Parameters> addition = QPair<QString, Parameters>(), QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populatePluginActionMenu(QString key, QMenu* menu,
-                                  const std::function<QString(QString, QJsonObject)> getLabel,
-                                  const std::function<void(QString, QJsonObject)> triggerAction,
-                                  QPair<QString, QJsonObject> addition = QPair<QString, QJsonObject>(),
-                                  QPair<QString, QJsonObject> removal = QPair<QString, QJsonObject>());
+                                  const std::function<QString(QString, Parameters)> getLabel,
+                                  const std::function<void(QString, Parameters)> triggerAction,
+                                  QPair<QString, Parameters> addition = QPair<QString, Parameters>(),
+                                  QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populateRecentBatchesMenu(QString addition = QString(), QString removal = QString());
-
-    void setupSplitViewMenu();
 
     void sendBitContainerPreview();
     static void processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor*  editor);
@@ -125,14 +124,12 @@ private:
     QMap<QSharedPointer<AnalyzerInterface>, AbstractParameterEditor*> m_analyzerUiMap;
 
     QList<MultiDisplayWidget*> m_displayWidgets;
-    QSplitter *m_displayTabsSplitter;
+    DisplaySplitter *m_rootDisplay;
     QSharedPointer<DisplayHandle> m_displayHandle;
     QList<QWidget*> m_currControlWidgets;
     PreviewScrollBar *m_previewScroll;
 
     BatchEditor *m_batchEditor;
-
-    QMenu *m_splitViewMenu;
 };
 
 #endif // MAINWINDOW_H

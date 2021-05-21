@@ -13,10 +13,11 @@ RemapModel::RemapModel(QObject *parent) :
 
 void RemapModel::initializeMappings()
 {
-
-    beginRemoveRows(QModelIndex(), 0, m_mappings.length() - 1);
-    m_mappings.clear();
-    endRemoveRows();
+    if (m_mappings.length() > 0) {
+        beginRemoveRows(QModelIndex(), 0, m_mappings.length() - 1);
+        m_mappings.clear();
+        endRemoveRows();
+    }
 
     int symbolsToMap = (1 << m_remapLength);
 

@@ -3,7 +3,7 @@
 
 #include "operatorinterface.h"
 #include "highlightnavigator.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 namespace Ui
 {
@@ -28,17 +28,17 @@ public:
 
     QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
-    int getMinInputContainers(const QJsonObject &pluginState) override;
-    int getMaxInputContainers(const QJsonObject &pluginState) override;
+    int getMinInputContainers(const Parameters &parameters) override;
+    int getMaxInputContainers(const Parameters &parameters) override;
 
     QSharedPointer<const OperatorResult> operateOnBits(
             QList<QSharedPointer<const BitContainer>> inputContainers,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 };
 
 #endif // EXTRACTOR_H

@@ -405,7 +405,7 @@
      <x>0</x>
      <y>0</y>
      <width>1604</width>
-     <height>29</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -466,6 +466,7 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="action_About"/>
+    <addaction name="action_Whats_This"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
     <property name="title">
@@ -511,6 +512,11 @@
   <action name="action_BatchEditor">
    <property name="text">
     <string>Open Batch Editor...</string>
+   </property>
+  </action>
+  <action name="action_Whats_This">
+   <property name="text">
+    <string>&amp;What's This?</string>
    </property>
   </action>
  </widget>

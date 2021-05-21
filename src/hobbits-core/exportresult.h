@@ -2,7 +2,7 @@
 #define EXPORTRESULT_H
 
 #include "bitcontainer.h"
-#include <QJsonObject>
+#include "parameters.h"
 
 /**
   * @brief The ExportResult class contains the result of an ImportExportInterface::exportBits() run
@@ -14,18 +14,18 @@ class HOBBITSCORESHARED_EXPORT ExportResult
 public:
     ExportResult();
 
-    ExportResult* setParameters(QJsonObject parameters);
-    const QJsonObject parameters() const;
+    ExportResult* setParameters(const Parameters &parameters);
+    const Parameters parameters() const;
 
-    bool hasEmptyParameters() const;
+    bool hasNullParameters() const;
     QString errorString() const;
 
     static QSharedPointer<ExportResult> nullResult();
     static QSharedPointer<ExportResult> error(QString errorString);
-    static QSharedPointer<ExportResult> result(QJsonObject parameters);
+    static QSharedPointer<ExportResult> result(Parameters parameters);
 
 private:
-    QJsonObject m_parameters;
+    Parameters m_parameters;
     QString m_errorString;
 };
 

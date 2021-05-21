@@ -39,7 +39,7 @@ QString HeaderFramerForm::title()
     return "Configure Frame Headers";
 }
 
-bool HeaderFramerForm::setParameters(QJsonObject parameters)
+bool HeaderFramerForm::setParameters(const Parameters &parameters)
 {
     if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
@@ -72,9 +72,9 @@ bool HeaderFramerForm::setParameters(QJsonObject parameters)
     return true;
 }
 
-QJsonObject HeaderFramerForm::parameters()
+Parameters HeaderFramerForm::parameters()
 {
-    QJsonObject parameters;
+    Parameters parameters;
 
     QJsonArray headersArray;
     for (int i = 0; i < ui->tw_headers->rowCount(); i++) {

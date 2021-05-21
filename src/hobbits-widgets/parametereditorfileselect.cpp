@@ -39,7 +39,7 @@ QString ParameterEditorFileSelect::title()
     return m_editorTitle;
 }
 
-bool ParameterEditorFileSelect::setParameters(QJsonObject parameters)
+bool ParameterEditorFileSelect::setParameters(const Parameters &parameters)
 {
     if (parameters.contains(m_fileKey)) {
         m_fileDialog->selectFile(parameters.value(m_fileKey).toString());
@@ -51,13 +51,13 @@ bool ParameterEditorFileSelect::setParameters(QJsonObject parameters)
     }
 }
 
-QJsonObject ParameterEditorFileSelect::parameters()
+Parameters ParameterEditorFileSelect::parameters()
 {
     if (m_fileDialog->selectedFiles().isEmpty()) {
-        return QJsonObject();
+        return Parameters::nullParameters();
     }
     else {
-        QJsonObject params;
+        Parameters params;
         params.insert(m_fileKey, m_fileDialog->selectedFiles().at(0));
         return params;
     }

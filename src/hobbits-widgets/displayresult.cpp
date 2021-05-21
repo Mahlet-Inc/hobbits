@@ -16,20 +16,20 @@ QImage DisplayResult::getImage() const
     return m_image;
 }
 
-DisplayResult *DisplayResult::setParameters(QJsonObject parameters)
+DisplayResult *DisplayResult::setParameters(const Parameters &parameters)
 {
     m_parameters = parameters;
     return this;
 }
 
-const QJsonObject DisplayResult::parameters() const
+const Parameters DisplayResult::parameters() const
 {
     return m_parameters;
 }
 
-bool DisplayResult::hasEmptyParameters() const
+bool DisplayResult::hasNullParameters() const
 {
-    return m_parameters.isEmpty();
+    return m_parameters.isNull();
 }
 
 QString DisplayResult::errorString() const
@@ -49,7 +49,7 @@ QSharedPointer<DisplayResult> DisplayResult::error(QString errorString)
     return QSharedPointer<DisplayResult>(result);
 }
 
-QSharedPointer<DisplayResult> DisplayResult::result(const QImage& image, QJsonObject parameters)
+QSharedPointer<DisplayResult> DisplayResult::result(const QImage& image, Parameters parameters)
 {
     return QSharedPointer<DisplayResult>((new DisplayResult())->setImage(image)->setParameters(parameters));
 }

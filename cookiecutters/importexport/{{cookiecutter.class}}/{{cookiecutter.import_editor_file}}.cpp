@@ -32,12 +32,12 @@ QString {{cookiecutter.import_editor}}::title()
     return "Configure {{cookiecutter.class}}";
 }
 
-QJsonObject {{cookiecutter.import_editor}}::parameters()
+Parameter {{cookiecutter.import_editor}}::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
 
-bool {{cookiecutter.import_editor}}::setParameters(QJsonObject parameters)
+bool {{cookiecutter.import_editor}}::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }

@@ -21,12 +21,12 @@ QString UdpSender::title()
     return "Configure UDP Export Connnection";
 }
 
-bool UdpSender::setParameters(QJsonObject parameters)
+bool UdpSender::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject UdpSender::parameters()
+Parameters UdpSender::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -37,7 +37,7 @@ bool UdpSender::isStandaloneDialog()
 }
 
 #define UDPWRITEBUFFSIZE 512
-QSharedPointer<ExportResult> UdpSender::exportData(QSharedPointer<const BitArray> bits, QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ExportResult> UdpSender::exportData(QSharedPointer<const BitArray> bits, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QHostAddress host(parameters.value("host").toString());
     quint16 port = quint16(parameters.value("port").toInt());

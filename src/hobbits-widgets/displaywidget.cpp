@@ -13,6 +13,7 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
     QWidget(parent),
     m_display(display),
     m_handle(handle),
+    m_displayParameters(Parameters::nullParameters()),
     m_repaintScheduled(false)
 {
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -130,18 +131,18 @@ void DisplayWidget::resizeEvent(QResizeEvent *event)
 
 QSharedPointer<DisplayResult> DisplayWidget::render(QSharedPointer<DisplayInterface> display,
                              QSize viewportSize,
-                             const QJsonObject &parameters,
+                             const Parameters &parameters,
                              QSharedPointer<PluginActionProgress> progress)
 {
     return display->renderDisplay(viewportSize, parameters, progress);
 }
 
-QJsonObject DisplayWidget::displayParameters() const
+Parameters DisplayWidget::displayParameters() const
 {
     return m_displayParameters;
 }
 
-void DisplayWidget::setDisplayParameters(const QJsonObject &displayParameters)
+void DisplayWidget::setDisplayParameters(const Parameters &displayParameters)
 {
     m_displayParameters = displayParameters;
     fullRedraw();
@@ -160,13 +161,16 @@ void DisplayWidget::performDisplayRender()
                                         this->size(),
                                         m_displayParameters,
                                         m_displayRenderProgress);
-        connect(&m_displayRenderWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
-            if (this->m_displayRenderWatcher.isFinished()) {
-                this->setDisplayResult(this->m_displayRenderWatcher.result());
+        
+        m_displayRenderWatcher = QSharedPointer<QFutureWatcher<QSharedPointer<DisplayResult>>>(new QFutureWatcher<QSharedPointer<DisplayResult>>());
+
+        connect(m_displayRenderWatcher.data(), &QFutureWatcher<QImage>::finished, this, [this]() {
+            if (this->m_displayRenderWatcher->isFinished()) {
+                this->setDisplayResult(this->m_displayRenderWatcher->result());
             }
         });
 
-        m_displayRenderWatcher.setFuture(future);
+        m_displayRenderWatcher->setFuture(future);
     }
     else {
         m_displayResult = m_display->renderDisplay(this->size(), m_displayParameters, QSharedPointer<PluginActionProgress>());
@@ -195,8 +199,8 @@ void DisplayWidget::resetRendering()
         m_displayRenderProgress->setCancelled(true);
         disconnect(m_displayRenderProgress.data(), SIGNAL(progressUpdate(QString, QVariant)), this, SLOT(handleDisplayRenderPreview(QString, QVariant)));
     }
-    if (m_displayRenderWatcher.isRunning()) {
-        m_displayRenderWatcher.cancel();
+    if (!m_displayRenderWatcher.isNull() && m_displayRenderWatcher->isRunning()) {
+        m_displayRenderWatcher->cancel();
     }
 }
 

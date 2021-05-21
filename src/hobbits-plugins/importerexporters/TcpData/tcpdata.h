@@ -1,7 +1,7 @@
 #ifndef TCPDATA_H
 #define TCPDATA_H
 
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 #include "importexportinterface.h"
 
 class TcpData : public QObject, ImporterExporterInterface
@@ -25,15 +25,15 @@ public:
     virtual QSharedPointer<ParameterDelegate> importParameterDelegate() override;
     virtual QSharedPointer<ParameterDelegate> exportParameterDelegate() override;
 
-    QSharedPointer<ImportResult> importBits(QJsonObject parameters,
+    QSharedPointer<ImportResult> importBits(const Parameters &parameters,
                                             QSharedPointer<PluginActionProgress> progress) override;
     QSharedPointer<ExportResult> exportBits(QSharedPointer<const BitContainer> container,
-                                            QJsonObject parameters,
+                                            const Parameters &parameters,
                                             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_importDelegate;
-    QSharedPointer<ParameterDelegateUi> m_exportDelegate;
+    QSharedPointer<ParameterDelegate> m_importDelegate;
+    QSharedPointer<ParameterDelegate> m_exportDelegate;
 };
 
 #endif // TCPDATA_H

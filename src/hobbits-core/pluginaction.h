@@ -4,7 +4,7 @@
 #include "pluginactionwatcher.h"
 #include "analyzerrunner.h"
 #include "hobbitspluginmanager.h"
-#include <QJsonObject>
+#include "parameters.h"
 #include <QtConcurrent/QtConcurrentRun>
 #include "hobbits-core_global.h"
 
@@ -33,18 +33,18 @@ public:
         NoAction = 6
     };
 
-    PluginAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
+    PluginAction(PluginType pluginType, QString pluginName, Parameters parameters);
 
-    static QSharedPointer<PluginAction> createAction(PluginType pluginType, QString pluginName, QJsonObject pluginState);
-    static QSharedPointer<PluginAction> analyzerAction(QString pluginName, QJsonObject pluginState);
-    static QSharedPointer<PluginAction> operatorAction(QString pluginName, QJsonObject pluginState);
-    static QSharedPointer<PluginAction> importerAction(QString pluginName, QJsonObject pluginState = QJsonObject());
-    static QSharedPointer<PluginAction> exporterAction(QString pluginName, QJsonObject pluginState = QJsonObject());
+    static QSharedPointer<PluginAction> createAction(PluginType pluginType, QString pluginName, const Parameters &parameters);
+    static QSharedPointer<PluginAction> analyzerAction(QString pluginName, const Parameters &parameters);
+    static QSharedPointer<PluginAction> operatorAction(QString pluginName, const Parameters &parameters);
+    static QSharedPointer<PluginAction> importerAction(QString pluginName, const Parameters &parameters = Parameters::nullParameters());
+    static QSharedPointer<PluginAction> exporterAction(QString pluginName, const Parameters &parameters = Parameters::nullParameters());
     static QSharedPointer<PluginAction> noAction();
 
     PluginType pluginType() const;
     QString pluginName() const;
-    QJsonObject parameters() const;
+    Parameters parameters() const;
 
     int minPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
     int maxPossibleInputs(QSharedPointer<const HobbitsPluginManager> pluginManager) const;
@@ -57,20 +57,20 @@ public:
         return (
             m_pluginName == other.pluginName()
             && m_pluginType == other.pluginType()
-            && m_pluginState == other.parameters()
+            && m_parameters == other.parameters()
             );
     }
 
 private:
     PluginType m_pluginType;
     QString m_pluginName;
-    QJsonObject m_pluginState;
+    Parameters m_parameters;
 };
 
 
 inline uint qHash(const PluginAction &key, uint seed)
 {
-    return qHash(key.parameters(), seed) ^ uint(key.pluginType()) ^ qHash(key.pluginName(), seed);
+    return qHash(key.parameters().values(), seed) ^ uint(key.pluginType()) ^ qHash(key.pluginName(), seed);
 }
 
 #endif // PLUGINACTION_H

@@ -293,6 +293,12 @@ Range DisplayHandle::renderedRange(DisplayInterface *display) const
     return m_renderedRangeMap.value(display);
 }
 
+void DisplayHandle::deactivate() 
+{
+    m_bitOffsetControl = nullptr;
+    m_frameOffsetControl = nullptr;
+}
+
 qint64 DisplayHandle::bitOffsetHover() const
 {
     return m_bitOffsetHover;

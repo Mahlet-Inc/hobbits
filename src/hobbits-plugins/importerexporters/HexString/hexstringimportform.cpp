@@ -20,9 +20,9 @@ QString HexStringImportForm::title()
     return "Import Hex String";
 }
 
-bool HexStringImportForm::setParameters(QJsonObject parameters)
+bool HexStringImportForm::setParameters(const Parameters &parameters)
 {
-    if (parameters.isEmpty()) {
+    if (parameters.isNull()) {
         return false;
     }
 
@@ -41,9 +41,9 @@ bool HexStringImportForm::setParameters(QJsonObject parameters)
     return true;
 }
 
-QJsonObject HexStringImportForm::parameters()
+Parameters HexStringImportForm::parameters()
 {
-    QJsonObject params;
+    Parameters params;
     if (!m_fileName.isEmpty()) {
         params.insert("filename", m_fileName);
     }
@@ -96,7 +96,7 @@ QSharedPointer<ImportResult> HexStringImportForm::importFromFile(QString fileNam
     auto container = BitContainer::create(&bufferFile);
     container->setName(QString("hex decode < %1").arg(QFileInfo(file).baseName()));
 
-    QJsonObject params;
+    Parameters params;
     params.insert("filename", fileName);
     return ImportResult::result(container, params);
 }
@@ -126,7 +126,7 @@ QSharedPointer<ImportResult> HexStringImportForm::importFromHexString(QString he
     auto container = BitContainer::create(&bufferFile);
     container->setName("hex input");
 
-    QJsonObject params;
+    Parameters params;
     params.insert("hex_string", hexString);
     params.insert("repeats", repeats);
     return ImportResult::result(container, params);

@@ -19,8 +19,8 @@ public:
 
     QString title() override;
 
-    virtual bool setParameters(QJsonObject parameters) override;
-    virtual QJsonObject parameters() override;
+    virtual bool setParameters(const Parameters &parameters) override;
+    virtual Parameters parameters() override;
 
 private:
     Ui::SimpleParameterEditor *ui;

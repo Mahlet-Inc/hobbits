@@ -36,7 +36,7 @@ QString PacketCaptureForm::title()
     return "Configure Packet Capture";
 }
 
-bool PacketCaptureForm::setParameters(QJsonObject parameters)
+bool PacketCaptureForm::setParameters(const Parameters &parameters)
 {
     bool ret = m_paramHelper->applyParametersToUi(parameters);
     if (parameters.contains("max_packets")) {
@@ -54,9 +54,9 @@ bool PacketCaptureForm::setParameters(QJsonObject parameters)
     }
 }
 
-QJsonObject PacketCaptureForm::parameters()
+Parameters PacketCaptureForm::parameters()
 {
-    QJsonObject params = m_paramHelper->getParametersFromUi();
+    Parameters params = m_paramHelper->getParametersFromUi();
     if (ui->cb_limitType->currentText() == "Packets") {
         params.insert("max_packets", ui->sb_limit->value());
     }

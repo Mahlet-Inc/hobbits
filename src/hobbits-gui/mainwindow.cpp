@@ -9,6 +9,7 @@
 #include <QPluginLoader>
 #include <QQueue>
 #include <QSettings>
+#include <QWhatsThis>
 
 #include "displaywidget.h"
 #include "containerselectiondialog.h"
@@ -38,9 +39,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_bitContainerManager(QSharedPointer<BitContainerManagerUi>(new BitContainerManagerUi())),
     m_pluginManager(QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager())),
     m_pluginActionManager(new PluginActionManager(m_pluginManager)),
-    m_displayTabsSplitter(new QSplitter(Qt::Horizontal)),
-    m_previewScroll(new PreviewScrollBar()),
-    m_splitViewMenu(new QMenu("Split View"))
+    m_previewScroll(new PreviewScrollBar())
 {
     m_pluginActionManager->setContainerManager(m_bitContainerManager);
     ui->setupUi(this);
@@ -56,8 +55,6 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->menu_View->addAction(ui->dock_bitContainerSelect->toggleViewAction());
     ui->menu_View->addAction(ui->dock_operatorPlugins->toggleViewAction());
     ui->menu_View->addAction(ui->dock_findBits->toggleViewAction());
-    ui->menu_View->addSeparator();
-    ui->menu_View->addMenu(m_splitViewMenu);
 
     ui->dock_bitContainerSelect->setContentsMargins(0, 0, 0, 0);
     ui->dock_operatorPlugins->setContentsMargins(0, 0, 0, 0);
@@ -187,6 +184,10 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_previewScroll->setBitContainerManager(m_bitContainerManager);
     m_previewScroll->setDisplayHandle(m_displayHandle);
 
+    // populate top level "What's This" info
+    ui->action_Whats_This->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_W));
+    ui->dock_bitContainerSelect->setWhatsThis("<b>Bit Containers Dock:</b> This is where you can navigate between the various Bit Containers that you are working with and see their lineage.");
+
     // load and initialize plugins
     loadPlugins();
     initializeImporterExporters();
@@ -211,10 +212,13 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
 MainWindow::~MainWindow()
 {
+    // release the offset controls from DisplayHandle before deleting UI
+    m_displayHandle->deactivate();
+
     delete ui;
 }
 
-const QString SPLIT_DISPLAY_SIZE_KEY = "split_display_size_list";
+const QString SPLIT_DISPLAY_CONFIG_KEY = "split_display_full_config";
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     SettingsManager::setPrivateSetting(SettingsManager::WINDOW_SIZE_KEY, size());
@@ -224,94 +228,34 @@ void MainWindow::closeEvent(QCloseEvent *event)
     SettingsManager::setPrivateSetting(BATCH_EDITOR_SIZE_KEY, m_batchEditor->size());
     SettingsManager::setPrivateSetting(BATCH_EDITOR_POSITION_KEY, m_batchEditor->pos());
 
-    QStringList sizesAsStrings;
-    for (int splitSize : m_displayTabsSplitter->sizes()) {
-        sizesAsStrings.append(QString("%1").arg(splitSize));
-    }
-    SettingsManager::setPrivateSetting(SPLIT_DISPLAY_SIZE_KEY, sizesAsStrings);
+    QByteArray splitDisplayConfig = m_rootDisplay->saveState();
+    SettingsManager::setPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY, splitDisplayConfig);
 
     event->accept();
 }
 
 void MainWindow::initializeDisplays()
 {
-    ui->displayTabsLayout->addWidget(m_displayTabsSplitter);
-    m_displayTabsSplitter->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    m_rootDisplay = new DisplaySplitter(m_pluginManager, m_displayHandle);
+    ui->displayTabsLayout->addWidget(m_rootDisplay);
+    m_rootDisplay->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    // initialize 1 no matter what
-    addDisplayGroup();
-
-    // Add others and sizes if they were saved in the config
-    QVariant savedSizes = SettingsManager::getPrivateSetting(SPLIT_DISPLAY_SIZE_KEY);
-    if (!savedSizes.isNull() && savedSizes.canConvert<QStringList>()) {
-        QList<int> splitSizes;
-        bool ok = true;
-        for (QString sizeString : savedSizes.toStringList()) {
-            int splitSize = sizeString.toInt(&ok);
-            if (!ok) {
-                break;
-            }
-            splitSizes.append(splitSize);
-        }
-        if (ok && splitSizes.size() > 1) {
-            for (int i = 1; i < splitSizes.size(); i++) {
-                addDisplayGroup();
-            }
-            m_displayTabsSplitter->setSizes(splitSizes);
-        }
-    }
-}
-
-void MainWindow::addDisplayGroup()
-{
-    auto multiDisplay = new MultiDisplayWidget(m_pluginManager, m_displayHandle, this);
-    m_displayTabsSplitter->addWidget(multiDisplay);
-
-    // Add this display group to the list of displays
-    m_displayWidgets.append(multiDisplay);
-
-    // Set up the display controls
-    checkCurrentDisplays();
-    setupSplitViewMenu();
-
-    connect(multiDisplay, SIGNAL(activeDisplayChanged(QSharedPointer<DisplayInterface>)), this, SLOT(checkCurrentDisplays()));
-}
-
-void MainWindow::removeDisplayGroup(int idx)
-{
-    if (idx <= 0 || idx >= m_displayWidgets.length()) {
-        warningMessage(QString("Cannot delete display group %1").arg(idx + 1));
-        return;
+    // Add display splits if they were saved in the config
+    QVariant savedConfig = SettingsManager::getPrivateSetting(SPLIT_DISPLAY_CONFIG_KEY);
+    if (!savedConfig.isNull() && savedConfig.canConvert<QByteArray>()) {
+        m_rootDisplay->restoreState(savedConfig.toByteArray());
     }
 
-    auto multiDisplay = m_displayWidgets.takeAt(idx);
-    delete multiDisplay;
-    checkCurrentDisplays();
-    setupSplitViewMenu();
-}
+    ui->menu_View->addSeparator();
+    auto tabShowToggle = ui->menu_View->addAction("Display Tabs", [this](bool show) {
+        m_rootDisplay->setShowViewSelect(show);
+    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
+    tabShowToggle->setCheckable(true);
+    tabShowToggle->setChecked(true);
 
-void MainWindow::setupSplitViewMenu()
-{
-    m_splitViewMenu->clear();
-
-    if (m_displayWidgets.size() < 5) {
-        m_splitViewMenu->addAction(
-                "Add split view",
-                [this]() {
-            this->addDisplayGroup();
-        })->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
-    }
-
-    for (int i = 1; i < m_displayWidgets.size(); i++) {
-        QAction *remove = m_splitViewMenu->addAction(
-                QString("Remove split view %1").arg(i + 1),
-                [this, i]() {
-            this->removeDisplayGroup(i);
-        });
-        if (i == m_displayWidgets.size() - 1) {
-            remove->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
-        }
-    }
+    ui->menu_View->addAction("Collapse All Displays", [this]() {
+        m_rootDisplay->unSplit();
+    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
 }
 
 void MainWindow::initializeImporterExporters()
@@ -324,8 +268,8 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Import_Bits_From->addAction(
                     plugin->name(),
                     [this, plugin]() {
-                QJsonObject parameters = ParameterEditorDialog::promptForParameters(plugin->importParameterDelegate());
-                if (!parameters.isEmpty()) {
+                Parameters parameters = ParameterEditorDialog::promptForParameters(plugin->importParameterDelegate());
+                if (!parameters.isNull()) {
                     this->requestImportRun(plugin->name(), parameters);
                 }
             });
@@ -335,8 +279,8 @@ void MainWindow::initializeImporterExporters()
             ui->menu_Export_Bits_To->addAction(
                     plugin->name(),
                     [this, plugin]() {
-                QJsonObject parameters = ParameterEditorDialog::promptForParameters(plugin->exportParameterDelegate());
-                if (!parameters.isEmpty()) {
+                Parameters parameters = ParameterEditorDialog::promptForParameters(plugin->exportParameterDelegate());
+                if (!parameters.isNull()) {
                     this->requestExportRun(plugin->name(), parameters);
                 }
             });
@@ -353,32 +297,6 @@ void MainWindow::warningMessage(QString message, QString windowTitle)
     msg.exec();
 }
 
-void MainWindow::checkCurrentDisplays()
-{
-    for (auto controls : m_currControlWidgets) {
-        ui->displayControlsLayout->removeWidget(controls);
-        controls->deleteLater();
-    }
-    m_currControlWidgets.clear();
-
-    QSet<DisplayWidget*> activeDisplays;
-    for (auto multiDisplay : m_displayWidgets) {
-        QSharedPointer<DisplayInterface> currDisplay = multiDisplay->activeDisplay();
-        if (!currDisplay.isNull()) {
-            activeDisplays.insert(multiDisplay->activeDisplayWidget());
-            auto controls = multiDisplay->createEditorForActiveDisplay();
-            if (controls) {
-                m_currControlWidgets.append(controls);
-            }
-        }
-    }
-    m_displayHandle->setActiveDisplays(activeDisplays);
-
-    for (auto controls : m_currControlWidgets) {
-        ui->displayControlsLayout->addWidget(controls);
-    }
-}
-
 QSharedPointer<BitContainer> MainWindow::currContainer()
 {
     return m_bitContainerManager->currentContainer();
@@ -391,9 +309,9 @@ void MainWindow::importBitfile(QString file)
         warningMessage("Could not import bit file without 'File Data' plugin");
         return;
     }
-    QJsonObject pluginState;
-    pluginState.insert("filename", file);
-    requestImportRun("File Data", pluginState);
+    Parameters parameters;
+    parameters.insert("filename", file);
+    requestImportRun("File Data", parameters);
 }
 
 void MainWindow::importBytes(QByteArray rawBytes, QString name)
@@ -419,7 +337,7 @@ void MainWindow::on_pb_operate_clicked()
         warningMessage("No editor initialized for plugin " + op->name());
         return;
     }
-    QJsonObject parameters = editor->parameters();
+    Parameters parameters = editor->parameters();
     this->requestOperatorRun(op->name(), parameters);
 }
 
@@ -554,6 +472,7 @@ void MainWindow::loadPlugins()
         if (opUi == nullptr) {
             continue;
         }
+        opUi->setWhatsThis(QString("<b>%1:</b> %2").arg(op->name()).arg(op->description()));
         int idx = ui->operatorTabs->addTab(opUi, op->name());
         m_operatorMap.insert(idx, op);
         m_operatorUiMap.insert(op, opUi);
@@ -587,6 +506,7 @@ void MainWindow::loadPlugins()
         if (analysisUi == nullptr) {
             continue;
         }
+        analysisUi->setWhatsThis(QString("<b>%1:</b> %2").arg(analyzer->name()).arg(analyzer->description()));
         int idx = ui->analyzerTabs->addTab(analysisUi, analyzer->name());
         m_analyzerMap.insert(idx, analyzer);
         m_analyzerUiMap.insert(analyzer, analysisUi);
@@ -663,7 +583,7 @@ void MainWindow::setCurrentBitContainer()
                 if (!op.isNull()) {
                     AbstractParameterEditor* editor = m_operatorUiMap.value(op);
                     if (editor != nullptr) {
-                        QJsonObject parameters = output->parameters();
+                        Parameters parameters = output->parameters();
                         editor->setParameters(parameters);
                         alreadySet.insert(output->pluginName());
                     }
@@ -712,29 +632,16 @@ void MainWindow::setStatus(QString status)
     ui->statusBar->showMessage(status);
 }
 
-void MainWindow::requestAnalyzerRun(QString pluginName, QJsonObject parameters)
+void MainWindow::requestAnalyzerRun(QString pluginName, const Parameters &parameters)
 {
     if (!currContainer().isNull()) {
-        if (parameters.isEmpty()) {
-            warningMessage(
-                    "The plugin is unable to act due to a bad input value",
-                    "Bad Plugin Input");
-            return;
-        }
         m_pluginActionManager->runAnalyzer(PluginAction::analyzerAction(pluginName, parameters), currContainer());
     }
 }
 
-void MainWindow::requestOperatorRun(QString pluginName, QJsonObject parameters)
+void MainWindow::requestOperatorRun(QString pluginName, const Parameters &parameters)
 {
     if (!currContainer().isNull()) {
-        if (parameters.isEmpty()) {
-            warningMessage(
-                    "The plugin is unable to act due to empty parameters",
-                    "Bad Plugin Input");
-            return;
-        }
-
         QSharedPointer<OperatorInterface> plugin = m_pluginManager->getOperator(pluginName);
         if (!plugin.isNull()) {
 
@@ -765,9 +672,9 @@ void MainWindow::requestOperatorRun(QString pluginName, QJsonObject parameters)
     }
 }
 
-void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
+void MainWindow::requestImportRun(QString pluginName, const Parameters &parameters)
 {
-    auto runner = m_pluginActionManager->runImporter(PluginAction::importerAction(pluginName, pluginState));
+    auto runner = m_pluginActionManager->runImporter(PluginAction::importerAction(pluginName, parameters));
     if (runner.isNull()) {
         warningMessage(QString("Failed to initialize importer '%1'").arg(pluginName));
         return;
@@ -775,13 +682,13 @@ void MainWindow::requestImportRun(QString pluginName, QJsonObject pluginState)
     m_pendingImports.insert(runner->id(), runner);
 }
 
-void MainWindow::requestExportRun(QString pluginName, QJsonObject pluginState)
+void MainWindow::requestExportRun(QString pluginName, const Parameters &parameters)
 {
     if (currContainer().isNull()) {
         warningMessage(QString("No container selected for export"));
         return;
     }
-    auto runner = m_pluginActionManager->runExporter(PluginAction::exporterAction(pluginName, pluginState), currContainer());
+    auto runner = m_pluginActionManager->runExporter(PluginAction::exporterAction(pluginName, parameters), currContainer());
     if (runner.isNull()) {
         warningMessage(QString("Failed to initialize exporter '%1'").arg(pluginName));
         return;
@@ -796,7 +703,7 @@ void MainWindow::on_pb_analyze_clicked()
         warningMessage("Current Analyzer plugin cannot be determined");
         return;
     }
-    QJsonObject parameters;
+    Parameters parameters = Parameters::nullParameters();
     AbstractParameterEditor *editor = m_analyzerUiMap.value(plugin);
     if (editor != nullptr) {
         parameters = editor->parameters();
@@ -915,7 +822,7 @@ void MainWindow::pluginActionFinished(QUuid id)
         auto runner = m_pendingImports.take(id);
         auto result = runner->result();
         if (!result.isNull()
-                && !result->hasEmptyParameters()
+                && !result->hasNullParameters()
                 && result->errorString().isEmpty()) {
             this->populateRecentImportsMenu({runner->pluginName(), result->parameters()});
         }
@@ -924,7 +831,7 @@ void MainWindow::pluginActionFinished(QUuid id)
         auto runner = m_pendingExports.take(id);
         auto result = runner->result();
         if (!result.isNull()
-                && !result->hasEmptyParameters()
+                && !result->hasNullParameters()
                 && result->errorString().isEmpty()) {
             this->populateRecentExportsMenu({runner->pluginName(), result->parameters()});
         }
@@ -1008,55 +915,55 @@ void MainWindow::populateRecentBatchesMenu(QString addition, QString removal)
 }
 
 
-void MainWindow::populateRecentImportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+void MainWindow::populateRecentImportsMenu(QPair<QString, Parameters> addition, QPair<QString, Parameters> removal)
 {
     populatePluginActionMenu("recently_imported", ui->menuImport_Recent,
-                             [this](QString pluginName, QJsonObject pluginState){
+                             [this](QString pluginName, const Parameters &parameters){
         QSharedPointer<ImporterExporterInterface> plugin = this->m_pluginManager->getImporterExporter(pluginName);
         if (plugin.isNull()) {
             return QString();
         }
-        return plugin->importParameterDelegate()->actionDescription(pluginState);
+        return plugin->importParameterDelegate()->actionDescription(parameters);
     },
-    [this](QString pluginName, QJsonObject pluginState){
-        this->requestImportRun(pluginName, pluginState);
+    [this](QString pluginName, const Parameters &parameters){
+        this->requestImportRun(pluginName, parameters);
     },
     addition, removal);
 }
 
-void MainWindow::populateRecentExportsMenu(QPair<QString, QJsonObject> addition, QPair<QString, QJsonObject> removal)
+void MainWindow::populateRecentExportsMenu(QPair<QString, Parameters> addition, QPair<QString, Parameters> removal)
 {
     populatePluginActionMenu("recently_exported", ui->menuExport_Recent,
-                             [this](QString pluginName, QJsonObject pluginState){
+                             [this](QString pluginName, const Parameters &parameters){
         QSharedPointer<ImporterExporterInterface> plugin = this->m_pluginManager->getImporterExporter(pluginName);
         if (plugin.isNull()) {
             return QString();
         }
-        return plugin->exportParameterDelegate()->actionDescription(pluginState);
+        return plugin->exportParameterDelegate()->actionDescription(parameters);
     },
-    [this](QString pluginName, QJsonObject pluginState){
-        this->requestExportRun(pluginName, pluginState);
+    [this](QString pluginName, const Parameters &parameters){
+        this->requestExportRun(pluginName, parameters);
     },
     addition, removal);
 }
 
 void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
-                              const std::function<QString(QString, QJsonObject)> getLabel,
-                              const std::function<void(QString, QJsonObject)> triggerAction,
-                              QPair<QString, QJsonObject> addition,
-                              QPair<QString, QJsonObject> removal)
+                              const std::function<QString(QString, Parameters)> getLabel,
+                              const std::function<void(QString, Parameters)> triggerAction,
+                              QPair<QString, Parameters> addition,
+                              QPair<QString, Parameters> removal)
 {
     QString separator = "/[]\"[]/";
 
     QString additionString;
-    if (!addition.first.isEmpty() && !addition.second.isEmpty()) {
-        QJsonDocument doc(addition.second);
+    if (!addition.first.isEmpty() && !addition.second.isNull()) {
+        QJsonDocument doc(addition.second.values());
         QString additionJson(doc.toJson(QJsonDocument::Compact));
         additionString = QString("%1%2%3").arg(addition.first).arg(separator).arg(additionJson);
     }
     QString removalString;
-    if (!removal.first.isEmpty() && !removal.second.isEmpty()) {
-        QJsonDocument doc(removal.second);
+    if (!removal.first.isEmpty() && !removal.second.isNull()) {
+        QJsonDocument doc(removal.second.values());
         QString removalJson(doc.toJson(QJsonDocument::Compact));
         removalString = QString("%1%2%3").arg(removal.first).arg(separator).arg(removalJson);
     }
@@ -1089,18 +996,18 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
             continue;
         }
         QString pluginName = importParts.at(0);
-        QByteArray pluginStateString = importParts.at(1).toUtf8();
-        QJsonObject pluginState = QJsonDocument::fromJson(pluginStateString).object();
+        QByteArray parametersString = importParts.at(1).toUtf8();
+        Parameters parameters(QJsonDocument::fromJson(parametersString).object());
 
-        QString menuLabel = getLabel(pluginName, pluginState);
+        QString menuLabel = getLabel(pluginName, parameters);
         if (menuLabel.isEmpty()) {
             invalidStateCount++;
             continue;
         }
         menu->addAction(
                 menuLabel,
-                [pluginName, pluginState, triggerAction]() {
-            triggerAction(pluginName, pluginState);
+                [pluginName, parameters, triggerAction]() {
+            triggerAction(pluginName, parameters);
         });
     }
 
@@ -1110,4 +1017,9 @@ void MainWindow::populatePluginActionMenu(QString key, QMenu* menu,
 void MainWindow::on_action_BatchEditor_triggered()
 {
     m_batchEditor->show();
+}
+
+void MainWindow::on_action_Whats_This_triggered()
+{
+    QWhatsThis::enterWhatsThisMode();
 }

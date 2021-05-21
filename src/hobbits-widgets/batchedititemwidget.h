@@ -14,10 +14,10 @@ class HOBBITSWIDGETSSHARED_EXPORT BatchEditItemWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BatchEditItemWidget(QString title, QSharedPointer<ParameterDelegate> delegate, QJsonObject parameters);
+    explicit BatchEditItemWidget(QString title, QSharedPointer<ParameterDelegate> delegate, Parameters parameters);
     ~BatchEditItemWidget();
 
-    QJsonObject parameters() const;
+    Parameters parameters() const;
     QString displayString() const;
 
 public slots:
@@ -27,7 +27,7 @@ public slots:
 signals:
     void inputPressed();
     void outputPressed();
-    void parametersChanged(QJsonObject);
+    void parametersChanged(Parameters);
 
 private slots:
     void on_pb_inputs_clicked();
@@ -35,12 +35,12 @@ private slots:
     void on_pb_config_clicked();
     void on_pb_clear_clicked();
 
-    void setParameters(QJsonObject parameters);
+    void setParameters(const Parameters &parameters);
 
 private:
     Ui::BatchEditItemWidget *ui;
     QSharedPointer<ParameterDelegate> m_delegate;
-    QJsonObject m_parameters;
+    Parameters m_parameters;
 };
 
 #endif // BATCHEDITITEMWIDGET_H

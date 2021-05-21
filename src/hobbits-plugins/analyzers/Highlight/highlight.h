@@ -3,7 +3,7 @@
 
 
 #include "analyzerinterface.h"
-#include "parameterdelegateui.h"
+#include "parameterdelegate.h"
 
 class Highlight : public QObject, AnalyzerInterface
 {
@@ -24,11 +24,11 @@ public:
 
     QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
-    QSharedPointer<ParameterDelegateUi> m_delegate;
+    QSharedPointer<ParameterDelegate> m_delegate;
 };
 
 #endif // HIGHLIGHT_H

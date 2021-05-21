@@ -10,7 +10,7 @@ Find::Find()
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
         return QString("Find %1").arg(parameters.value("search_string").toString());
     },
     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
@@ -46,7 +46,7 @@ QSharedPointer<ParameterDelegate>  Find::parameterDelegate()
 
 QSharedPointer<const AnalyzerResult> Find::analyzeBits(
         QSharedPointer<const BitContainer> container,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_delegate->validate(parameters);

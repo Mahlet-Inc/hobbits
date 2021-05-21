@@ -21,12 +21,12 @@ QString HighlightForm::title()
     return "Configure Plugin";
 }
 
-QJsonObject HighlightForm::parameters()
+Parameters HighlightForm::parameters()
 {
     return m_helper->getParametersFromUi();
 }
 
-bool HighlightForm::setParameters(QJsonObject parameters)
+bool HighlightForm::setParameters(const Parameters &parameters)
 {
     return m_helper->applyParametersToUi(parameters);
 }

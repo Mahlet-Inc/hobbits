@@ -4,7 +4,7 @@
 
 ParameterEditorDialog::ParameterEditorDialog(
         QSharedPointer<ParameterDelegate> delegate,
-        QJsonObject parameters,
+        Parameters parameters,
         QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ParameterEditorDialog)
@@ -15,7 +15,7 @@ ParameterEditorDialog::ParameterEditorDialog(
     if (m_editor == nullptr) {
         return;
     }
-    if (!parameters.isEmpty()) {
+    if (!parameters.isNull()) {
         m_editor->setParameters(parameters);
     }
 
@@ -37,7 +37,7 @@ ParameterEditorDialog::~ParameterEditorDialog()
     delete ui;
 }
 
-void ParameterEditorDialog::setParameters(QJsonObject parameters)
+void ParameterEditorDialog::setParameters(const Parameters &parameters)
 {
     if (!m_editor) {
         return;
@@ -45,20 +45,20 @@ void ParameterEditorDialog::setParameters(QJsonObject parameters)
     m_editor->setParameters(parameters);
 }
 
-QJsonObject ParameterEditorDialog::parameters()
+Parameters ParameterEditorDialog::parameters()
 {
     if (!m_editor) {
-        return QJsonObject();
+        return Parameters::nullParameters();
     }
     return m_editor->parameters();
 }
 
-QJsonObject ParameterEditorDialog::promptForParameters(QSharedPointer<ParameterDelegate> delegate, QJsonObject parameters)
+Parameters ParameterEditorDialog::promptForParameters(QSharedPointer<ParameterDelegate> delegate, Parameters parameters)
 {
     QScopedPointer<ParameterEditorDialog> dialog(new ParameterEditorDialog(delegate, parameters));
 
     if (!dialog->exec()) {
-        return QJsonObject();
+        return Parameters::nullParameters();
     }
 
     return dialog->parameters();

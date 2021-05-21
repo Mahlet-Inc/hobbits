@@ -9,15 +9,18 @@ DigraphPlot::DigraphPlot() :
 {
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
 
+    ParameterDelegate::ParameterInfo scaleParam = {"scale", ParameterDelegate::ParameterType::Integer};
+    scaleParam.ranges.append({1, 128});
+
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", ParameterDelegate::ParameterType::Integer},
+        scaleParam,
         {"word_size", ParameterDelegate::ParameterType::Integer},
         {"window_size", ParameterDelegate::ParameterType::Integer}
     };
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     int wordSize = parameters.value("word_size").toInt();
                     return QString("%1-bit Digraph Plot").arg(wordSize);
                 },
@@ -62,7 +65,7 @@ QSharedPointer<ParameterDelegate> DigraphPlot::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
 
@@ -79,9 +82,6 @@ QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, con
     int wordSize = parameters.value("word_size").toInt(8);
     int windowSize = parameters.value("window_size").toInt(10000);
     int scale = parameters.value("scale").toInt(2);
-    if (scale <= 0) {
-        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
-    }
 
     auto bits = m_handle->currentContainer()->bits();
     auto frameOffset = m_handle->frameOffset();
@@ -127,7 +127,7 @@ QSharedPointer<DisplayResult> DigraphPlot::renderDisplay(QSize viewportSize, con
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> DigraphPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> DigraphPlot::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)

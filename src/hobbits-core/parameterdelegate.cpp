@@ -1,9 +1,9 @@
 #include "parameterdelegate.h"
-#include <QJsonObject>
+#include "parameters.h"
 #include <QJsonArray>
 
 ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> parameters,
-                                     std::function<QString(const QJsonObject&)> actionDescriber) :
+                                     std::function<QString(const Parameters&)> actionDescriber) :
     ParameterDelegate(parameters,
                       actionDescriber,
                       [](QSharedPointer<ParameterDelegate> delegate, QSize targetBounds){
@@ -15,7 +15,7 @@ ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> par
 }
 
 ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> parameters,
-                                     std::function<QString (const QJsonObject &)> actionDescriber,
+                                     std::function<QString (const Parameters&)> actionDescriber,
                                      std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator) :
     m_actionDescriber(actionDescriber),
     m_editorCreator(editorCreator)
@@ -27,7 +27,7 @@ ParameterDelegate::ParameterDelegate(QList<ParameterDelegate::ParameterInfo> par
 
 QSharedPointer<ParameterDelegate> ParameterDelegate::create(
         QList<ParameterDelegate::ParameterInfo> parameterInfos,
-        std::function<QString (const QJsonObject &)> actionDescriber,
+        std::function<QString (const Parameters&)> actionDescriber,
         std::function<AbstractParameterEditor *(QSharedPointer<ParameterDelegate>, QSize)> editorCreator)
 {
     return QSharedPointer<ParameterDelegate>(new ParameterDelegate(parameterInfos, actionDescriber, editorCreator));
@@ -67,12 +67,15 @@ ParameterDelegate::ParameterInfo ParameterDelegate::getInfo(QString name) const
     return m_parameterMap.value(name);
 }
 
-QStringList ParameterDelegate::validate(const QJsonObject &parameters) const
+QStringList ParameterDelegate::validate(const Parameters &parameters) const
 {
-    return validateAgainstInfos(parameters, parameterInfos());
+    if (parameters.isNull()) {
+        return QStringList("Parameters are uninitialized");
+    }
+    return validateAgainstInfos(parameters.values(), parameterInfos());
 }
 
-QString ParameterDelegate::actionDescription(const QJsonObject &parameters) const
+QString ParameterDelegate::actionDescription(const Parameters &parameters) const
 {
     if (!validate(parameters).isEmpty()) {
         return QString();

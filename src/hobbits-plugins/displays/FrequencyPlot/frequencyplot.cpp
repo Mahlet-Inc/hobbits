@@ -10,15 +10,18 @@ FrequencyPlot::FrequencyPlot() :
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewMouseHover);
 
+    ParameterDelegate::ParameterInfo scaleParam = {"scale", ParameterDelegate::ParameterType::Integer};
+    scaleParam.ranges.append({1, 128});
+
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", ParameterDelegate::ParameterType::Integer},
+        scaleParam,
         {"word_size", ParameterDelegate::ParameterType::Integer},
         {"window_size", ParameterDelegate::ParameterType::Integer}
     };
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     int wordSize = parameters.value("word_size").toInt();
                     return QString("%1-bit Frequency Plot").arg(wordSize);
     },
@@ -63,7 +66,7 @@ QSharedPointer<ParameterDelegate> FrequencyPlot::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_barMax.clear();
@@ -82,9 +85,6 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
     int wordSize = parameters.value("word_size").toInt(8);
     int windowSize = parameters.value("window_size").toInt(10000);
     int scale = parameters.value("scale").toInt(2);
-    if (scale <= 0) {
-        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
-    }
 
     auto bits = m_handle->currentContainer()->bits();
     auto frameOffset = m_handle->frameOffset();
@@ -160,7 +160,7 @@ QSharedPointer<DisplayResult> FrequencyPlot::renderDisplay(QSize viewportSize, c
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> FrequencyPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> FrequencyPlot::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {

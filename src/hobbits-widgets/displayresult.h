@@ -1,7 +1,7 @@
 #ifndef DISPLAYRESULT_H
 #define DISPLAYRESULT_H
 
-#include <QJsonObject>
+#include <parameters.h>
 #include <QImage>
 #include <QSharedPointer>
 #include "hobbits-widgets_global.h"
@@ -19,19 +19,19 @@ public:
     DisplayResult* setImage(const QImage& image);
     QImage getImage() const;
 
-    DisplayResult* setParameters(QJsonObject parameters);
-    const QJsonObject parameters() const;
+    DisplayResult* setParameters(const Parameters &parameters);
+    const Parameters parameters() const;
 
-    bool hasEmptyParameters() const;
+    bool hasNullParameters() const;
     QString errorString() const;
 
     static QSharedPointer<DisplayResult> nullResult();
     static QSharedPointer<DisplayResult> error(QString error);
-    static QSharedPointer<DisplayResult> result(const QImage& image, QJsonObject parameters);
+    static QSharedPointer<DisplayResult> result(const QImage& image, Parameters parameters);
 
 private:
     QImage m_image;
-    QJsonObject m_parameters;
+    Parameters m_parameters;
     QString m_errorString;
 
 };

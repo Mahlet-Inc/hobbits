@@ -256,7 +256,7 @@ QStringList PythonPluginConfig::configure(QString configFolder,
     m_script = scriptFile.readAll();
 
     m_delegate = ParameterDelegate::create(m_parameterInfos,
-                                           [this](QJsonObject parameters) {
+                                           [this](Parameters parameters) {
                                                        Q_UNUSED(parameters)
                                                        return QString("Run %1").arg(m_name);
                                            }, editorCreator);

@@ -39,12 +39,12 @@ QString LfsrForm::title()
     return "Configure LFSR";
 }
 
-bool LfsrForm::setParameters(QJsonObject parameters)
+bool LfsrForm::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject LfsrForm::parameters()
+Parameters LfsrForm::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

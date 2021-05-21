@@ -26,12 +26,12 @@ QString PythonRunnerForm::title()
     return "Write Python Script";
 }
 
-bool PythonRunnerForm::setParameters(QJsonObject parameters)
+bool PythonRunnerForm::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject PythonRunnerForm::parameters()
+Parameters PythonRunnerForm::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }

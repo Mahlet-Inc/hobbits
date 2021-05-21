@@ -13,9 +13,9 @@ SymbolRemapper::SymbolRemapper()
         }
     };
 
-    m_delegate = ParameterDelegateUi::create(
+    m_delegate = ParameterDelegate::create(
                 infos,
-                [](const QJsonObject &parameters) {
+                [](const Parameters &parameters) {
                     Q_UNUSED(parameters)
                     return QString("Symbol Remap");
                 },
@@ -50,21 +50,21 @@ QSharedPointer<ParameterDelegate> SymbolRemapper::parameterDelegate()
     return m_delegate;
 }
 
-int SymbolRemapper::getMinInputContainers(const QJsonObject &pluginState)
+int SymbolRemapper::getMinInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
-int SymbolRemapper::getMaxInputContainers(const QJsonObject &pluginState)
+int SymbolRemapper::getMaxInputContainers(const Parameters &parameters)
 {
-    Q_UNUSED(pluginState)
+    Q_UNUSED(parameters)
     return 1;
 }
 
 QSharedPointer<const OperatorResult> SymbolRemapper::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progressTracker)
 {
 
@@ -110,8 +110,6 @@ QSharedPointer<const OperatorResult> SymbolRemapper::operateOnBits(
 
     QSharedPointer<BitArray> outputArray = QSharedPointer<BitArray>(new BitArray(inputBitsLength));
 
-    QJsonObject pluginState = parameters;
-
     for (qint64 i = 0; i < outputArray->sizeInBits() && i + bitChunkLength <= inputBits->sizeInBits(); i += bitChunkLength) {
         quint64 key = inputBits->parseUIntValue(i, bitChunkLength);
         if (bitMapping.contains(key)) {
@@ -129,5 +127,5 @@ QSharedPointer<const OperatorResult> SymbolRemapper::operateOnBits(
 
     QSharedPointer<BitContainer> container = BitContainer::create(outputArray, inputContainers.at(0)->info());
 
-    return OperatorResult::result({container}, pluginState);
+    return OperatorResult::result({container}, parameters);
 }

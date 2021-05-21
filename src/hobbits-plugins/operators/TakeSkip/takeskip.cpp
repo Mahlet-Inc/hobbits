@@ -19,10 +19,9 @@ TakeSkip::TakeSkip()
         {"deinterleave_channels", ParameterDelegate::ParameterType::Integer, true}
     };
 
-    m_delegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         QString base = parameters.value("take_skip_string").toString();
 
                         if (parameters.contains("interleaved") && parameters.value("interleaved").toBool()) {
@@ -38,7 +37,7 @@ TakeSkip::TakeSkip()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new TakeSkipEditor(delegate);
-                    }));
+                    });
 }
 
 OperatorInterface* TakeSkip::createDefaultOperator()
@@ -66,17 +65,17 @@ QSharedPointer<ParameterDelegate> TakeSkip::parameterDelegate()
     return m_delegate;
 }
 
-int TakeSkip::getMinInputContainers(const QJsonObject &pluginState)
+int TakeSkip::getMinInputContainers(const Parameters &parameters)
 {
-    if (pluginState.contains("interleaved") && pluginState.value("interleaved").toBool()) {
+    if (parameters.contains("interleaved") && parameters.value("interleaved").toBool()) {
         return 2;
     }
     return 1;
 }
 
-int TakeSkip::getMaxInputContainers(const QJsonObject &pluginState)
+int TakeSkip::getMaxInputContainers(const Parameters &parameters)
 {
-    if (pluginState.contains("interleaved") && pluginState.value("interleaved").toBool()) {
+    if (parameters.contains("interleaved") && parameters.value("interleaved").toBool()) {
         return 100;
     }
     return 1;
@@ -84,7 +83,7 @@ int TakeSkip::getMaxInputContainers(const QJsonObject &pluginState)
 
 QSharedPointer<const OperatorResult> TakeSkip::operateOnBits(
         QList<QSharedPointer<const BitContainer>> inputContainers,
-        const QJsonObject &parameters,
+        const Parameters &parameters,
         QSharedPointer<PluginActionProgress> progress)
 {
     QSharedPointer<const OperatorResult> nullResult;

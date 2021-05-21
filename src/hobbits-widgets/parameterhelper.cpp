@@ -1,5 +1,5 @@
 #include "parameterhelper.h"
-#include <QJsonObject>
+#include "parameters.h"
 
 ParameterHelper::ParameterHelper(QSharedPointer<ParameterDelegate> delegate) :
     m_delegate(delegate)
@@ -113,7 +113,7 @@ void ParameterHelper::addComboBoxParameter(QString name, QComboBox* comboBox, in
     });
 }
 
-bool ParameterHelper::applyParametersToUi(const QJsonObject &parameters)
+bool ParameterHelper::applyParametersToUi(const Parameters &parameters)
 {
     if (!m_delegate->validate(parameters).isEmpty()) {
         return false;
@@ -134,18 +134,18 @@ bool ParameterHelper::applyParametersToUi(const QJsonObject &parameters)
     return true;
 }
 
-QJsonObject ParameterHelper::getParametersFromUi()
+Parameters ParameterHelper::getParametersFromUi()
 {
-    QJsonObject pluginState;
+    Parameters parameters;
     for (auto param : m_parameterInfos) {
         QJsonValue value = param->getFromUi();
         if (value.isUndefined()) {
             if (param->info().optional) {
                 continue;
             }
-            return QJsonObject();
+            return Parameters::nullParameters();
         }
-        pluginState.insert(param->info().name, value);
+        parameters.insert(param->info().name, value);
     }
-    return pluginState;
+    return parameters;
 }

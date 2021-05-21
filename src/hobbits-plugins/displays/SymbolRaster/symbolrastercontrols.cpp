@@ -75,12 +75,12 @@ QString SymbolRasterControls::title()
     return "Configure Symbol Raster";
 }
 
-bool SymbolRasterControls::setParameters(QJsonObject parameters)
+bool SymbolRasterControls::setParameters(const Parameters &parameters)
 {
     return m_stateHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject SymbolRasterControls::parameters()
+Parameters SymbolRasterControls::parameters()
 {
     return m_stateHelper->getParametersFromUi();
 }

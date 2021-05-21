@@ -8,6 +8,7 @@
 #include "bitcontainerpreview.h"
 #include "parameterdelegate.h"
 #include "hobbitsplugin.h"
+#include "parameters.h"
 
 /**
   * @brief Implementations of the AnalyzerInterface plugin interface enrich BitContainer metadata
@@ -33,7 +34,7 @@ public:
 
     virtual QSharedPointer<const AnalyzerResult> analyzeBits(
             QSharedPointer<const BitContainer> container,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) = 0;
 };
 

@@ -11,14 +11,16 @@ ByteRaster::ByteRaster() :
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
     m_renderConfig->setOverlayRedrawTriggers(DisplayRenderConfig::NewBitHover);
 
+    ParameterDelegate::ParameterInfo scaleParam = {"scale", ParameterDelegate::ParameterType::Integer};
+    scaleParam.ranges.append({1, 128});
     QList<ParameterDelegate::ParameterInfo> infos = {
-        {"scale", ParameterDelegate::ParameterType::Integer},
+        scaleParam,
         {"show_headers", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         int scale = parameters.value("scale").toInt();
                         if (parameters.value("show_headers").toBool()) {
                             return QString("Byte Raster %1x with headers").arg(scale);
@@ -79,7 +81,7 @@ QSharedPointer<ParameterDelegate> ByteRaster::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> ByteRaster::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> ByteRaster::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(progress)
     m_lastParams = parameters;
@@ -95,9 +97,6 @@ QSharedPointer<DisplayResult> ByteRaster::renderDisplay(QSize viewportSize, cons
     }
 
     int scale = parameters.value("scale").toInt();
-    if (scale < 1) {
-        return DisplayResult::error(QString("Invalid scale value: %1").arg(scale));
-    }
     QPoint offset = headerOffset(parameters);
     QSize rasterSize(viewportSize.width() - offset.x(), viewportSize.height() - offset.y());
     QSize sourceSize(qMax(1, rasterSize.width() / scale), qMax(1, rasterSize.height() / scale));
@@ -134,7 +133,7 @@ QSharedPointer<DisplayResult> ByteRaster::renderDisplay(QSize viewportSize, cons
     return DisplayResult::result(destImage, parameters);
 }
 
-QSharedPointer<DisplayResult> ByteRaster::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> ByteRaster::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     m_lastParams = parameters;
     QStringList invalidations = m_delegate->validate(parameters);
@@ -152,7 +151,7 @@ QSharedPointer<DisplayResult> ByteRaster::renderOverlay(QSize viewportSize, cons
     return DisplayResult::result(overlay, parameters);
 }
 
-QPoint ByteRaster::headerOffset(const QJsonObject &parameters)
+QPoint ByteRaster::headerOffset(const Parameters &parameters)
 {
     if (!parameters.value("show_headers").toBool() || m_handle->currentContainer().isNull()) {
         return QPoint(0, 0);

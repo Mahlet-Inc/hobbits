@@ -27,17 +27,17 @@ public:
 
     QSharedPointer<DisplayResult> renderDisplay(
             QSize viewportSize,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
     QSharedPointer<DisplayResult> renderOverlay(
             QSize viewportSize,
-            const QJsonObject &parameters) override;
+            const Parameters &parameters) override;
 
 private:
     QRect spectrogramRectangle(QSize viewportSize,
                            QSharedPointer<DisplayHandle> displayHandle,
-                           const QJsonObject &parameters);
+                           const Parameters &parameters);
     QString timeString(qint64 sample, double sampleRate);
     void fillSamples(fftw_complex* buffer,
                         qint64 offset,

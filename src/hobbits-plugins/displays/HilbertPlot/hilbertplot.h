@@ -26,12 +26,12 @@ public:
 
     QSharedPointer<DisplayResult> renderDisplay(
             QSize viewportSize,
-            const QJsonObject &parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progress) override;
 
     QSharedPointer<DisplayResult> renderOverlay(
             QSize viewportSize,
-            const QJsonObject &parameters) override;
+            const Parameters &parameters) override;
 
 private:
     void rotate(QPoint &p, int n, bool rx, bool ry);

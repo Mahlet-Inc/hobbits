@@ -10,16 +10,15 @@ TcpData::TcpData()
         {"timeout", ParameterDelegate::ParameterType::Integer}
     };
 
-    m_importDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_importDelegate = ParameterDelegate::create(
                     importInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         return QString("TCP Listen on port %1").arg(parameters.value("port").toInt());
                     },
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new TcpReceiver(delegate);
-                    }));
+                    });
 
 
     QList<ParameterDelegate::ParameterInfo> exportInfos = {
@@ -27,10 +26,9 @@ TcpData::TcpData()
         {"port", ParameterDelegate::ParameterType::Integer},
         {"timeout", ParameterDelegate::ParameterType::Integer}
     };
-    m_exportDelegate = QSharedPointer<ParameterDelegateUi>(
-                new ParameterDelegateUi(
+    m_exportDelegate = ParameterDelegate::create(
                     exportInfos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         return QString("TCP Send to %1:%2")
                                 .arg(parameters.value("host").toString())
                                 .arg(parameters.value("port").toInt());
@@ -38,7 +36,7 @@ TcpData::TcpData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         return new TcpSender(delegate);
-                    }));
+                    });
 }
 
 ImporterExporterInterface* TcpData::createDefaultImporterExporter()
@@ -81,7 +79,7 @@ QSharedPointer<ParameterDelegate> TcpData::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-QSharedPointer<ImportResult> TcpData::importBits(QJsonObject parameters,
+QSharedPointer<ImportResult> TcpData::importBits(const Parameters &parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_importDelegate->validate(parameters);
@@ -93,7 +91,7 @@ QSharedPointer<ImportResult> TcpData::importBits(QJsonObject parameters,
 }
 
 QSharedPointer<ExportResult> TcpData::exportBits(QSharedPointer<const BitContainer> container,
-                                                 QJsonObject parameters,
+                                                 const Parameters &parameters,
                                                  QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_exportDelegate->validate(parameters);

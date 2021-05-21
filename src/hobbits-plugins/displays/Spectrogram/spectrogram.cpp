@@ -30,7 +30,7 @@ Spectrogram::Spectrogram():
 
     m_delegate = ParameterDelegate::create(
                     infos,
-                    [](const QJsonObject &parameters) {
+                    [](const Parameters &parameters) {
                         int fftSize = parameters.value("fft_size").toInt();
                         QString format = parameters.value("sample_format").toString();
                         return QString("Spectrogram %1 %2").arg(fftSize).arg(format);
@@ -76,7 +76,7 @@ QSharedPointer<ParameterDelegate> Spectrogram::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -201,7 +201,7 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
     return DisplayResult::result(result, parameters);
 }
 
-QSharedPointer<DisplayResult> Spectrogram::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> Spectrogram::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     QStringList invalidations = m_delegate->validate(parameters);
     if (!invalidations.isEmpty()) {
@@ -418,7 +418,7 @@ QSharedPointer<DisplayResult> Spectrogram::renderOverlay(QSize viewportSize, con
     return DisplayResult::result(overlay, parameters);
 }
 
-QRect Spectrogram::spectrogramRectangle(QSize viewportSize, QSharedPointer<DisplayHandle> displayHandle, const QJsonObject &parameters)
+QRect Spectrogram::spectrogramRectangle(QSize viewportSize, QSharedPointer<DisplayHandle> displayHandle, const Parameters &parameters)
 {
     if (displayHandle->currentContainer().isNull()) {
         return QRect();

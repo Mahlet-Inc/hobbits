@@ -15,7 +15,7 @@ HilbertPlot::HilbertPlot() :
 
     m_delegate = ParameterDelegate::create(
                 infos,
-                [this](const QJsonObject &parameters) {
+                [this](const Parameters &parameters) {
         Q_UNUSED(parameters)
         return QString("Hilbert Plot").arg(this->name());
     },
@@ -65,7 +65,7 @@ QSharedPointer<ParameterDelegate> HilbertPlot::parameterDelegate()
     return m_delegate;
 }
 
-QSharedPointer<DisplayResult> HilbertPlot::renderDisplay(QSize viewportSize, const QJsonObject &parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<DisplayResult> HilbertPlot::renderDisplay(QSize viewportSize, const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     Q_UNUSED(parameters)
 
@@ -137,7 +137,7 @@ QSharedPointer<DisplayResult> HilbertPlot::renderDisplay(QSize viewportSize, con
     return DisplayResult::result(raster, parameters);
 }
 
-QSharedPointer<DisplayResult> HilbertPlot::renderOverlay(QSize viewportSize, const QJsonObject &parameters)
+QSharedPointer<DisplayResult> HilbertPlot::renderOverlay(QSize viewportSize, const Parameters &parameters)
 {
     Q_UNUSED(viewportSize)
     Q_UNUSED(parameters)

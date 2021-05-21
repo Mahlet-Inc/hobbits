@@ -2,7 +2,7 @@
 #define ABSTRACTPLUGINRUNNER_H
 
 #include <QObject>
-#include <QJsonObject>
+#include "parameters.h"
 #include <QUuid>
 #include "pluginactionwatcher.h"
 #include "hobbits-core_global.h"
@@ -52,15 +52,15 @@ public:
     }
 
 protected:
-    bool commonPreRun(const QJsonObject &parameters)
+    bool commonPreRun(const Parameters &parameters)
     {
         if (!m_actionWatcher.isNull() && m_actionWatcher->watcher()->future().isRunning()) {
             emit reportError(m_id, QString("Runner is already running"));
             return false;
         }
 
-        if (parameters.isEmpty()) {
-            emit reportError(m_id, QString("Cannot run plugin '%1' without parameters").arg(m_pluginName));
+        if (parameters.isNull()) {
+            emit reportError(m_id, QString("Cannot run plugin '%1' with uninitialized parameters").arg(m_pluginName));
             return false;
         }
 
@@ -80,12 +80,15 @@ protected:
         m_actionWatcher = QSharedPointer<PluginActionWatcher<QSharedPointer<T>>>(
                 new PluginActionWatcher<QSharedPointer<T>>(
                         future,
-                        progress));
+                        progress,
+                        true));
 
         connect(m_actionWatcher->watcher(), SIGNAL(finished()), this, SLOT(postProcess()));
         connect(m_actionWatcher->progress().data(), &PluginActionProgress::progressPercentChanged, [this](int prog) {
             this->progress(m_id, prog);
         });
+
+        m_actionWatcher->setFutureInWatcher();
 
         return m_actionWatcher;
     }

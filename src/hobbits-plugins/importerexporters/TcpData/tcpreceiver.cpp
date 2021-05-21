@@ -23,12 +23,12 @@ QString TcpReceiver::title()
     return "Configure TCP Receiver";
 }
 
-bool TcpReceiver::setParameters(QJsonObject parameters)
+bool TcpReceiver::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-QJsonObject TcpReceiver::parameters()
+Parameters TcpReceiver::parameters()
 {
     return m_paramHelper->getParametersFromUi();
 }
@@ -38,7 +38,7 @@ bool TcpReceiver::isStandaloneDialog()
     return true;
 }
 
-QSharedPointer<ImportResult> TcpReceiver::importData(QJsonObject parameters, QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> TcpReceiver::importData(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress)
 {
     int port = parameters.value("port").toInt();
     qint64 maxBytes = qint64(parameters.value("max_kb").toInt()) * 1000ll;

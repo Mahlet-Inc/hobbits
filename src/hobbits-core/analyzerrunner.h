@@ -4,7 +4,7 @@
 #include "pluginactionwatcher.h"
 #include "analyzerresult.h"
 #include "hobbitspluginmanager.h"
-#include <QJsonObject>
+#include "parameters.h"
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
 #include "hobbits-core_global.h"
@@ -36,7 +36,7 @@ private:
     static QSharedPointer<const AnalyzerResult> analyzerCall(
             QSharedPointer<AnalyzerInterface> analyzer,
             QSharedPointer<const BitContainer> bits,
-            QJsonObject parameters,
+            const Parameters &parameters,
             QSharedPointer<PluginActionProgress> progressTracker);
 
     QSharedPointer<const PluginAction> m_action;

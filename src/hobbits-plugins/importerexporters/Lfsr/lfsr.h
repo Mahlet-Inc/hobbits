@@ -26,10 +26,10 @@ public:
     virtual QSharedPointer<ParameterDelegate> importParameterDelegate() override;
     virtual QSharedPointer<ParameterDelegate> exportParameterDelegate() override;
 
-    QSharedPointer<ImportResult> importBits(QJsonObject parameters,
+    QSharedPointer<ImportResult> importBits(const Parameters &parameters,
                                             QSharedPointer<PluginActionProgress> progress) override;
     QSharedPointer<ExportResult> exportBits(QSharedPointer<const BitContainer> container,
-                                            QJsonObject parameters,
+                                            const Parameters &parameters,
                                             QSharedPointer<PluginActionProgress> progress) override;
 
 private:

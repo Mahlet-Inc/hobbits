@@ -97,7 +97,7 @@ BatchEditItem *BatchEditItem::fromMimeData(QSharedPointer<HobbitsPluginManager> 
 
     QSharedPointer<PluginActionBatch::ActionStep> step(
                 new PluginActionBatch::ActionStep(QUuid::createUuid(),
-                                                  PluginAction::createAction(pluginType, pluginName, QJsonObject())));
+                                                  PluginAction::createAction(pluginType, pluginName, Parameters())));
     return new BatchEditItem(pluginManager, step);
 }
 
