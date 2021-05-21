@@ -1,3 +1,10 @@
+## [0.48.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.0...v0.48.1) (2021-05-21)
+
+
+### Bug Fixes
+
+* release artifact paths ([f316a08](https://github.com/Mahlet-Inc/hobbits/commit/f316a0881c538228d068b4dc4353ca40f0b268a1))
+
 # [0.48.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.47.0...v0.48.0) (2021-05-21)
 
 
