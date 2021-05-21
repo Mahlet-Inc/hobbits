@@ -14,6 +14,11 @@ The documentation is available at
 There are pre-built binaries of the latest release on the
 [GitHub releases page](https://github.com/Mahlet-Inc/hobbits/releases).
 
+## Using Hobbits
+Read the [user guide](https://mahlet-inc.github.io/user-guide/) in the
+documentation and/or watch
+[this walkthrough video](https://youtu.be/6ygkhze36qM)
+
 ## Building with Conan, Python 3, and CMake 3.12+
 1. Install Conan with pip: `pip install conan`
 2. Configure Conan to use a custom remote and keep `*.pyc` files:
@@ -34,10 +39,8 @@ If you have any issues building, you can check out more detailed steps and
 environmental setup in the [continuous integration files](ci) or
 [open an issue](https://github.com/Mahlet-Inc/hobbits/issues/new).
 
-## Using Hobbits
-Read the [user guide](https://mahlet-inc.github.io/user-guide/) in the
-documentation and/or watch
-[this walkthrough video](https://youtu.be/6ygkhze36qM)
+Plain CMake (no Conan) building also works if you have your dependencies
+handled. The [CentOS 7 GCC 4.8 CI build](ci/linux-cmake.yml) does this.
 
 ## Adding plugins
 ```
@@ -51,15 +54,11 @@ and screenshots are still lagging a little behind.
 Update (March 2021): My goal is to have the documentation and API stabilized
 around June 2021.
 ```
-1. Read the
+Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)
 in the documentation and/or watch
 [this plugin development video](https://youtu.be/Dg3vknwLO74)
-2. Run [wizard_installer.sh](wizards/wizard_installer.sh) from inside the
-[wizards](wizards) directory to add Hobbits Plugin Qt Creator templates (restart
-Qt Creator after doing this)
-3. Add a plugin subproject to the appropriate plugins project and implement your
-desired functionality
+
 
 ## Get Involved
 Join our [Discord server](https://discord.gg/wRQJpZZ), send us an
