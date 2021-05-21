@@ -47,3 +47,23 @@ elseif(APPLE)
 else()
     install(TARGETS "hobbits" COMPONENT "runtime")
 endif()
+
+if (LINUX)
+    list(APPEND CPACK_PACKAGE_EXECUTABLES "hobbits;Hobbits")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/624x624/apps")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/624x624")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "${CMAKE_INSTALL_FULL_DATADIR}/icons")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "${CMAKE_INSTALL_FULL_DATADIR}/applications")
+
+    install(FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/Hobbits.desktop"
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+            COMPONENT "runtime"
+    )
+    install(FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/images/icons/HobbitsRingSmall.png"
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/624x624/apps/
+            COMPONENT "runtime"
+    )
+endif()
