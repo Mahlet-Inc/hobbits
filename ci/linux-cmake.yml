@@ -58,7 +58,7 @@ steps:
       find $(Build.ArtifactStagingDirectory) -name "hobbits-*-Linux.tar.xz" -type f -exec tar -xf {} -C app --strip-components=1 \;
       ./prepare_tests.js
       export QT_DEBUG_PLUGINS=1
-      ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/python
+      ./test_hobbits.js `pwd`/app/bin/hobbits-runner `pwd`/app/hobbits-cpython
     displayName: 'Run tests'
     workingDirectory: $(Build.SourcesDirectory)/tests
   
