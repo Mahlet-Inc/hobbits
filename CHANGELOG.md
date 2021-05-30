@@ -1,3 +1,15 @@
+# [0.49.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.1...v0.49.0) (2021-05-30)
+
+
+### Bug Fixes
+
+* [plugin] re-enable autocorrelation in Width Framer ([402fcf0](https://github.com/Mahlet-Inc/hobbits/commit/402fcf0a5d65d39af803e28e8e45ceb61e2e1c51))
+
+
+### Features
+
+* add Bit Container import/export plugin ([4907d2d](https://github.com/Mahlet-Inc/hobbits/commit/4907d2da31e817f17a0e670cdf04098925a20031))
+
 ## [0.48.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.0...v0.48.1) (2021-05-21)
 
 
