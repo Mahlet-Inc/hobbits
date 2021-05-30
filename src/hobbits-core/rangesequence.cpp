@@ -1,6 +1,7 @@
 #include "rangesequence.h"
 #include <QMutexLocker>
 #include <QSharedPointer>
+#include <QDataStream>
 #include <stdexcept>
 
 #define CACHE_CHUNK_64_SIZE (1000ll * 10ll)
@@ -298,4 +299,65 @@ void RangeSequence::clearCache() const
 qint64 RangeSequence::getValueCount() const
 {
     return m_valueCount;
+}
+
+QSharedPointer<RangeSequence> RangeSequence::deserialize(QDataStream &stream)
+{
+    qint64 valueCount;
+    qint64 constantSize;
+    stream >> valueCount;
+    stream >> constantSize;
+    if (constantSize > 0) {
+        return RangeSequence::fromConstantSize(constantSize, valueCount);
+    }
+
+    QSharedPointer<RangeSequence> sequence(new RangeSequence());
+
+    qint64 size;
+    qint64 maxSize;
+    int dataCacheBlockCount;
+    stream >> size;
+    stream >> maxSize;
+    stream >> dataCacheBlockCount;
+
+    sequence->m_valueCount = valueCount;
+    sequence->m_size = size;
+    sequence->m_maxSize = maxSize;
+    sequence->resizeCache(dataCacheBlockCount);
+    char* buffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    for (int i = 0; i < dataCacheBlockCount; i++) {
+        int read = stream.readRawData(buffer, CACHE_CHUNK_BYTE_SIZE);
+        if (read < 1) {
+            stream.setStatus(QDataStream::Status::ReadCorruptData);
+            break;
+        }
+        sequence->m_dataFile.write(buffer, CACHE_CHUNK_BYTE_SIZE);
+    }
+    delete[] buffer;
+
+    return sequence;
+}
+
+void RangeSequence::serialize(QDataStream &stream) const
+{
+    stream << m_valueCount;
+    stream << m_constantSize;
+    if (m_constantSize > 0) {
+        return;
+    }
+
+    stream << m_size;
+    stream << m_maxSize;
+    stream << m_dataCacheBlockCount;
+    char* buffer = new char[CACHE_CHUNK_BYTE_SIZE];
+    syncCacheWithFile();
+    m_dataFile.seek(0);
+    while (m_dataFile.bytesAvailable() > 0) {
+        qint64 bytes = m_dataFile.read(buffer, CACHE_CHUNK_BYTE_SIZE);
+        if (bytes < 1) {
+            break;
+        }
+        stream.writeRawData(buffer, bytes);
+    }
+    delete[] buffer;
 }

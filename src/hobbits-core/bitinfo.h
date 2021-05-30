@@ -43,8 +43,8 @@ public:
 
     qint64 frameOffsetContaining(qint64 value, Range indexBounds = Range()) const;
 
-    friend QDataStream& operator<<(QDataStream&, const BitInfo&);
-    friend QDataStream& operator>>(QDataStream&, BitInfo&);
+    static QSharedPointer<BitInfo> deserialize(QDataStream &stream);
+    void serialize(QDataStream &stream) const;
 
 Q_SIGNALS:
     void changed();

@@ -64,6 +64,9 @@ public:
     void addChild(QUuid childId);
     void addParent(QUuid parentId);
 
+    static QSharedPointer<BitContainer> deserialize(QDataStream &stream);
+    void serialize(QDataStream &stream) const;
+
 private:
     explicit BitContainer();
 

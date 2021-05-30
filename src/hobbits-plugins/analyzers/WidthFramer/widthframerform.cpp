@@ -5,9 +5,7 @@
 #include <QVBoxLayout>
 #include <QtGlobal>
 
-#ifdef FFTW_AUTOCORRELATION
 #include <fftw3.h>
-#endif
 
 WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::WidthFramerForm()),
@@ -31,16 +29,10 @@ WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
     connect(ui->lv_correlations, SIGNAL(clicked(QModelIndex)), this, SLOT(widthSelected(QModelIndex)));
     connect(ui->rb_all, SIGNAL(toggled(bool)), this, SLOT(setupScoreList(bool)));
     connect(ui->rb_top100, SIGNAL(toggled(bool)), this, SLOT(setupScoreList(bool)));
-
-#ifdef FFTW_AUTOCORRELATION
-#endif
 }
 
 WidthFramerForm::~WidthFramerForm()
 {
-#ifdef FFTW_AUTOCORRELATION
-#endif
-
     delete m_peakSelector;
     delete ui;
 }
@@ -148,7 +140,6 @@ void WidthFramerForm::widthSelected(QModelIndex index)
 
 QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> bits)
 {
-#ifdef FFTW_AUTOCORRELATION
     int N = 1 << 19;
     fftw_complex *fft_in = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
     fftw_complex *fft_out = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
@@ -192,7 +183,4 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     fftw_free(fft_out);
 
     return results;
-#else
-    return QVector<QPointF>();
-#endif
 }
