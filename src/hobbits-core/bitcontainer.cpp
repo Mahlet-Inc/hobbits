@@ -161,3 +161,38 @@ void BitContainer::addParent(QUuid parentId)
     QMutexLocker lock(&m_mutex);
     m_parents.append(parentId);
 }
+
+static const QString STREAM_HEADER_V1 = "HobbitsBitContainerStream_V1";
+
+QSharedPointer<BitContainer> BitContainer::deserialize(QDataStream &stream)
+{
+    int streamVersion;
+    QString streamHeader;
+
+    stream >> streamVersion;
+    stream.setVersion(streamVersion);
+
+    stream >> streamHeader;
+    if (streamHeader != STREAM_HEADER_V1) {
+        return QSharedPointer<BitContainer>();
+    }
+
+    auto container = QSharedPointer<BitContainer>(new BitContainer());
+
+    stream >> container->m_name;
+    stream >> container->m_nameWasSet;
+    container->m_bits = QSharedPointer<BitArray>(BitArray::deserialize(stream));
+    container->setInfo(BitInfo::deserialize(stream));
+
+    return container;
+}
+
+void BitContainer::serialize(QDataStream &stream) const
+{
+    stream << stream.version();
+    stream << STREAM_HEADER_V1;
+    stream << m_name;
+    stream << m_nameWasSet;
+    m_bits->serialize(stream);
+    m_info->serialize(stream);
+}

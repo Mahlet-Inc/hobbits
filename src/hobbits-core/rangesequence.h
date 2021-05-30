@@ -33,6 +33,9 @@ public:
 
     qint64 getValueCount() const;
 
+    static QSharedPointer<RangeSequence> deserialize(QDataStream &stream);
+    void serialize(QDataStream &stream) const;
+
 private:
     void writeRange(qint64 i, qint64 end);
     Range readRange(qint64 i) const;

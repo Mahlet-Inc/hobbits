@@ -155,3 +155,20 @@ qint64 BitInfo::frameOffsetContaining(qint64 value, Range indexBounds) const
 {
     return m_frames->indexOf(value, indexBounds);
 }
+
+QSharedPointer<BitInfo> BitInfo::deserialize(QDataStream &stream)
+{
+    auto info = new BitInfo();
+    info->m_frames = RangeSequence::deserialize(stream);
+    stream >> info->m_rangeHighlights;
+    stream >> info->m_metadata;
+
+    return QSharedPointer<BitInfo>(info);
+}
+
+void BitInfo::serialize(QDataStream &stream) const
+{
+    m_frames->serialize(stream);
+    stream << m_rangeHighlights;
+    stream << m_metadata;
+}

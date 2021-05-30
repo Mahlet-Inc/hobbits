@@ -66,9 +66,14 @@ public:
     QByteArray readBytes(qint64 byteOffset, qint64 maxBytes) const;
     void writeTo(QIODevice *outputStream) const;
 
+    static BitArray* deserialize(QDataStream &stream);
+    void serialize(QDataStream &stream) const;
+
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
 
 private:
+    void writeToStream(QDataStream &dataStream) const; // private for use by serializer and writeTo
+
     class CacheLoadLocker {
     public:
         CacheLoadLocker(qint64 bitIndex, const BitArray* bitArray);
@@ -80,6 +85,7 @@ private:
     QByteArray readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const;
     QIODevice* dataReader() const;
     void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
+    void initFromStream(QDataStream &dataStream, qint64 sizeInBits);
     void reinitializeCache();
     void deleteCache();
     void loadCacheAt(qint64 bitIndex) const;

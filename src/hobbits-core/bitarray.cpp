@@ -4,6 +4,7 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
+#include <QDataStream>
 #include <stdexcept>
 
 #ifdef Q_OS_UNIX
@@ -148,11 +149,19 @@ void BitArray::initFromIO(QIODevice *dataStream, qint64 sizeInBits)
     if (sizeInBits < 0) {
         sizeInBits = dataStream->bytesAvailable() * 8;
     }
+    
+    QDataStream stream(dataStream);
+    initFromStream(stream, sizeInBits);
+}
+
+void BitArray::initFromStream(QDataStream &dataStream, qint64 sizeInBits)
+{
     m_size = sizeInBits;
     qint64 bytesToRead = this->sizeInBytes();
     char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
     while (bytesToRead > 0) {
-        qint64 bytesRead = dataStream->read(byteBuffer, CACHE_CHUNK_BYTE_SIZE);
+        qint64 actualBytes = qMin(bytesToRead, qint64(CACHE_CHUNK_BYTE_SIZE));
+        qint64 bytesRead = dataStream.readRawData(byteBuffer, actualBytes);
         m_dataFile.write(byteBuffer, bytesRead);
         bytesToRead -= bytesRead;
 
@@ -630,12 +639,39 @@ QByteArray BitArray::readBytes(qint64 byteOffset, qint64 maxBytes) const
 
 void BitArray::writeTo(QIODevice *outputStream) const
 {
+    QDataStream stream(outputStream);
+    writeToStream(stream);
+}
+
+BitArray* BitArray::deserialize(QDataStream &stream)
+{
+    qint64 sizeInBits;
+    stream >> sizeInBits;
+    if (sizeInBits < 0) {
+        stream.setStatus(QDataStream::Status::ReadCorruptData);
+        return nullptr;
+    }
+
+    auto bitArray = new BitArray();
+    bitArray->initFromStream(stream, sizeInBits);
+    return bitArray;
+}
+
+void BitArray::serialize(QDataStream &stream) const
+{
+    stream << m_size;
+    writeToStream(stream);
+}
+
+void BitArray::writeToStream(QDataStream &dataStream) const
+{
     QIODevice *reader = dataReader();
     char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
     qint64 bytesToWrite = sizeInBytes();
     while (bytesToWrite > 0) {
-        qint64 bytesRead = reader->read(byteBuffer, CACHE_CHUNK_BYTE_SIZE);
-        outputStream->write(byteBuffer, bytesRead);
+        qint64 actualBytes = qMin(bytesToWrite, qint64(CACHE_CHUNK_BYTE_SIZE));
+        qint64 bytesRead = reader->read(byteBuffer, actualBytes);
+        dataStream.writeRawData(byteBuffer, bytesRead);
         bytesToWrite -= bytesRead;
 
         if (bytesToWrite > 0 && bytesRead < 1) {
