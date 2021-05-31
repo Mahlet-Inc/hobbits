@@ -43,22 +43,11 @@ Plain CMake (no Conan) building also works if you have your dependencies
 handled. The [CentOS 7 GCC 4.8 CI build](ci/linux-cmake.yml) does this.
 
 ## Adding plugins
-```
-Notice (November 2020): Several plugin interfaces are currently being refactored
-and much of the documentation is out of date by a few minor version numbers. The
-documentation will be updated as the 1.0 interface is decided upon.
-
-Update (December 2020): most of the text documentation is updated, but videos
-and screenshots are still lagging a little behind.
-
-Update (March 2021): My goal is to have the documentation and API stabilized
-around June 2021.
-```
 Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)
-in the documentation and/or watch
-[this plugin development video](https://youtu.be/Dg3vknwLO74)
-
+in the documentation. As of v0.50.0, the plugin interfaces are pretty stable.
+It is possible, maybe even likely, that plugins built to the current interfaces
+will be version 1.x.x-compatible. 
 
 ## Get Involved
 Join our [Discord server](https://discord.gg/wRQJpZZ), send us an

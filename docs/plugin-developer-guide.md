@@ -11,6 +11,8 @@ type of plugin.
 
 ## Example Plugin Development Video
 
+This video is out-of-date, but some of the concepts still apply.
+
 ![YOUTUBE](Dg3vknwLO74)
 
 ## General Terms and Concepts
@@ -216,12 +218,12 @@ successful at importing data along with the `Parameters`.
 ## Helpful Tools
 
 In order to simplify the process of developing plugins, there are
-[cookiecutter](https://cookiecutter.readthedocs.io/en/latest/)
+[cookiecutters](https://cookiecutter.readthedocs.io/en/latest/)
 that take care of most of the boilerplate code.
 
-You can install cookiecutter in your development machine's python environment
-with `pip install cookiecutter` and then create the boilerplate code with
-`cookiecutter <path to cookiecutter>`
+Visit the
+[GitHub repository for Hobbits plugin cookiecutters](https://github.com/Mahlet-Inc/hobbits-cookiecutters)
+for a variety of useful cookiecutters and instructions for how to use them.
 
 ## Get in touch
 
