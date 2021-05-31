@@ -23,6 +23,7 @@
 #include "abstractparametereditor.h"
 #include "parametereditordialog.h"
 #include "batcheditor.h"
+#include "widgetssettings.h"
 
 #include "pythonpluginconfig.h"
 #include "simpleparametereditor.h"
@@ -713,16 +714,19 @@ void MainWindow::on_pb_analyze_clicked()
 
 void MainWindow::on_action_Apply_Batch_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(
-            this,
-            tr("Apply Batch"),
-            SettingsManager::getPrivateSetting(SettingsManager::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Batch Files (*.hobbits_batch)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
+    QString fileName = WidgetsSettings::getFile(
+        this,
+        tr("Apply Batch"),
+        QDir::homePath(),
+        tr("Hobbits Batch Files (*.hbat)"),
+        QFileDialog::AcceptOpen,
+        QFileDialog::ExistingFile,
+        SettingsManager::LAST_BATCH_KEY
+    );
 
-    applyBatchFile(fileName);
+    if (!fileName.isEmpty()) {
+        applyBatchFile(fileName);
+    }
 }
 
 void MainWindow::on_action_Save_Batch_triggered()
@@ -756,9 +760,6 @@ void MainWindow::on_action_Save_Batch_triggered()
 void MainWindow::applyBatchFile(QString fileName)
 {
     QFile file(fileName);
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_BATCH_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     if (!file.open(QIODevice::ReadOnly)) {
         warningMessage(QString("Could not open hobbits batch file '%1'").arg(fileName));

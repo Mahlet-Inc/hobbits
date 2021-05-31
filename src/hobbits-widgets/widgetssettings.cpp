@@ -16,3 +16,62 @@ WidgetsSettings::WidgetsSettings()
     SettingsManager::instance().m_data.setUiSetting(SettingsManager::HIGHLIGHT_4_COLOR_KEY, QColor(200, 140, 0, 100));
     SettingsManager::instance().m_data.setUiSetting(SettingsManager::HIGHLIGHT_5_COLOR_KEY, QColor(250, 50, 0, 100));
 }
+
+QString WidgetsSettings::dialogDirKey(QString baseKey) 
+{
+    return baseKey + "_dir";
+}
+
+QString WidgetsSettings::dialogSizeKey(QString baseKey) 
+{
+    return baseKey + "_size";
+}
+
+QString WidgetsSettings::dialogRectKey(QString baseKey) 
+{
+    return baseKey + "_rect";
+}
+
+QString WidgetsSettings::getFile(QWidget *parent,
+        const QString &caption,
+        const QString &defaultDirectory,
+        const QString &filter,
+        QFileDialog::AcceptMode acceptMode,
+        QFileDialog::FileMode fileMode,
+        const QString &dialogSettingsKey) 
+{
+    QScopedPointer<QFileDialog> dialog(
+        new QFileDialog(parent,
+            caption,
+            defaultDirectory,
+            filter));
+    
+    dialog->setAcceptMode(acceptMode);
+    dialog->setFileMode(fileMode);
+
+    QString dirKey = dialogDirKey(dialogSettingsKey);
+    QString rectKey = dialogRectKey(dialogSettingsKey);
+
+    QVariant lastDir = SettingsManager::getPrivateSetting(dirKey);
+    if (lastDir.isValid() && lastDir.canConvert<QString>()) {
+        dialog->setDirectory(lastDir.toString());
+    }
+
+    QVariant lastRect = SettingsManager::getPrivateSetting(rectKey);
+    if (lastRect.isValid() && lastRect.canConvert<QRect>()) {
+        dialog->setGeometry(lastRect.toRect());
+    }
+
+    QString fileName;
+    if (dialog->exec()) {
+        QStringList fileNames = dialog->selectedFiles();
+        if (!fileNames.isEmpty()) {
+            fileName = fileNames.at(0);
+        }
+    }
+
+    SettingsManager::setPrivateSetting(dirKey, dialog->directory().path());
+    SettingsManager::setPrivateSetting(rectKey, dialog->geometry());
+
+    return fileName;
+}

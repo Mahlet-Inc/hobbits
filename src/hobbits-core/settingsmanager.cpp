@@ -23,9 +23,8 @@ const QString SettingsManager::DISPLAY_DISPLAY_ORDER_KEY = "Display Display Orde
 const QString SettingsManager::WINDOW_SIZE_KEY = "window_size";
 const QString SettingsManager::WINDOW_POSITION_KEY = "window_position";
 const QString SettingsManager::WINDOW_STATE_KEY = "window_state";
-const QString SettingsManager::LAST_BATCH_PATH_KEY = "last_batch_path";
-const QString SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY = "last_import_export_path";
-const QString SettingsManager::LAST_CONTAINER_PATH_KEY = "last_container_path";
+const QString SettingsManager::LAST_BATCH_KEY = "last_batch";
+const QString SettingsManager::LAST_IMPORT_EXPORT_KEY = "last_import_export";
 const QString SettingsManager::PLUGINS_RUNNING_KEY = "plugins_running";
 const QString SettingsManager::PYTHON_HOME_KEY = "python_home_dir";
 

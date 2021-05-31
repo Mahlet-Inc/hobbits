@@ -21,6 +21,8 @@ ParameterEditorDialog::ParameterEditorDialog(
 
     setWindowTitle(m_editor->title());
 
+    this->resize(m_editor->size());
+    
     ui->mainLayout->insertWidget(0, m_editor);
 
     if (m_editor->isStandaloneDialog()) {

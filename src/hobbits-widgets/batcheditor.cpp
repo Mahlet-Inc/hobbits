@@ -1,6 +1,7 @@
 #include "batcheditor.h"
 #include "ui_batcheditor.h"
 #include "plugintreemodel.h"
+#include "widgetssettings.h"
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -37,24 +38,24 @@ void BatchEditor::on_action_saveBatchAs_triggered()
 {
     auto batch = m_editScene->getBatch();
 
-    QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Batch"),
-            SettingsManager::getPrivateSetting(
-                    SettingsManager::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Batch Files (*.hobbits_batch)"));
+    QString fileName = WidgetsSettings::getFile(
+        this,
+        tr("Save Batch As"),
+        QDir::homePath(),
+        tr("Hobbits Batch Files (*.hbat)"),
+        QFileDialog::AcceptSave,
+        QFileDialog::AnyFile,
+        SettingsManager::LAST_BATCH_KEY
+    );
 
     if (fileName.isEmpty()) {
         return;
     }
-    if (!fileName.endsWith(".hobbits_batch")) {
-        fileName += ".hobbits_batch";
+    if (!fileName.endsWith(".hbat")) {
+        fileName += ".hbat";
     }
 
     QFile file(fileName);
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_BATCH_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this, "Cannot Save Batch", QString("Could not open file '%1' for writing").arg(fileName));
@@ -67,19 +68,21 @@ void BatchEditor::on_action_saveBatchAs_triggered()
 
 void BatchEditor::on_action_openBatch_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(
-            this,
-            tr("Apply Batch"),
-            SettingsManager::getPrivateSetting(SettingsManager::LAST_BATCH_PATH_KEY).toString(),
-            tr("Hobbits Batch Files (*.hobbits_batch)"));
+    QString fileName = WidgetsSettings::getFile(
+        this,
+        tr("Open Batch"),
+        QDir::homePath(),
+        tr("Hobbits Batch Files (*.hbat)"),
+        QFileDialog::AcceptOpen,
+        QFileDialog::ExistingFile,
+        SettingsManager::LAST_BATCH_KEY
+    );
+
     if (fileName.isEmpty()) {
         return;
     }
 
     QFile file(fileName);
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_BATCH_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::warning(this, "Cannot Open Batch", QString("Could not open file '%1'").arg(fileName));
