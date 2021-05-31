@@ -102,9 +102,6 @@ QSharedPointer<ImportResult> FileData::importBits(const Parameters &parameters,
     if (!file.open(QIODevice::ReadOnly)) {
         return ImportResult::error(QString("Failed to open file for import: '%1'").arg(fileName));
     }
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     QSharedPointer<BitContainer> container = BitContainer::create(&file);
     container->setName(QFileInfo(file).fileName());
@@ -126,9 +123,6 @@ QSharedPointer<ExportResult> FileData::exportBits(QSharedPointer<const BitContai
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return ExportResult::error(QString("Failed to open export bit file: '%1'").arg(fileName));
     }
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     container->bits()->writeTo(&file);
     file.close();

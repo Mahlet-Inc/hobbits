@@ -103,8 +103,6 @@ QSharedPointer<ImportResult> HexString::importBits(const Parameters &parameters,
     Q_UNUSED(progress)
     QSharedPointer<BitContainer> container;
 
-    auto importer = QSharedPointer<HexStringImportForm>(new HexStringImportForm());
-
     if (parameters.contains("filename")) {
         QString fileName = parameters.value("filename").toString();
         return HexStringImportForm::importFromFile(fileName);
@@ -139,9 +137,6 @@ QSharedPointer<ExportResult> HexString::exportBits(QSharedPointer<const BitConta
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         ExportResult::error(QString("Failed to open export file: '%1'").arg(fileName));
     }
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     qint64 byteLen = container->bits()->sizeInBytes();
     qint64 offset = 0;

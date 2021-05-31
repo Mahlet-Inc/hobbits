@@ -1,5 +1,6 @@
 #include "hexstringimportform.h"
 #include "settingsmanager.h"
+#include "widgetssettings.h"
 #include "ui_hexstringimportform.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -133,14 +134,19 @@ QSharedPointer<ImportResult> HexStringImportForm::importFromHexString(QString he
 }
 
 void HexStringImportForm::on_pb_selectFile_pressed()
-{
-    m_fileName = QFileDialog::getOpenFileName(
-            this,
-            tr("Import Hex String File"),
-            SettingsManager::getPrivateSetting(SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY).toString(),
-            tr("All Files (*)"));
+{   
+    QString fileName = WidgetsSettings::getFile(
+        this,
+        tr("Import Hex String File"),
+        QDir::homePath(),
+        tr("All Files (*)"),
+        QFileDialog::AcceptOpen,
+        QFileDialog::ExistingFile,
+        SettingsManager::LAST_IMPORT_EXPORT_KEY
+    );
 
-    if (!m_fileName.isEmpty()) {
+    if (!fileName.isEmpty()) {
+        m_fileName = fileName;
         emit accepted();
     }
 }

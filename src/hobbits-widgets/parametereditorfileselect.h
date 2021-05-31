@@ -14,7 +14,8 @@ public:
     ParameterEditorFileSelect(
             QFileDialog::AcceptMode acceptMode,
             QString fileKey = "filename",
-            QString editorTitle = "Select File");
+            QString editorTitle = "Select File",
+            QString stateKey = QString());
     ~ParameterEditorFileSelect() override;
 
     QString title() override;

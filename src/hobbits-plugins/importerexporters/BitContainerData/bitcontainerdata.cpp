@@ -2,6 +2,8 @@
 #include "parametereditorfileselect.h"
 #include "settingsmanager.h"
 
+static const QString LAST_BIT_CONTAINER_IMPORT_EXPORT = "last_bit_container_import_export";
+
 BitContainerData::BitContainerData() 
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
@@ -21,7 +23,11 @@ BitContainerData::BitContainerData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
-                        return new ParameterEditorFileSelect(QFileDialog::AcceptOpen);
+                        return new ParameterEditorFileSelect(
+                            QFileDialog::AcceptOpen,
+                            "filename",
+                            "Select Bit Container File",
+                            LAST_BIT_CONTAINER_IMPORT_EXPORT);
                     });
 
     m_exportDelegate = ParameterDelegate::create(
@@ -37,7 +43,11 @@ BitContainerData::BitContainerData()
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                         Q_UNUSED(size)
                         Q_UNUSED(delegate)
-                        return new ParameterEditorFileSelect(QFileDialog::AcceptSave);
+                        return new ParameterEditorFileSelect(
+                            QFileDialog::AcceptSave,
+                            "filename",
+                            "Save Bit Container File",
+                            LAST_BIT_CONTAINER_IMPORT_EXPORT);
                     });
 }
 
@@ -81,7 +91,6 @@ QSharedPointer<ParameterDelegate>  BitContainerData::exportParameterDelegate()
     return m_exportDelegate;
 }
 
-static const QString LAST_BIT_CONTAINER_IMPORT_EXPORT = "last_bit_container_import_export";
 
 QSharedPointer<ImportResult> BitContainerData::importBits(const Parameters &parameters,
                                                       QSharedPointer<PluginActionProgress> progress)
@@ -99,9 +108,6 @@ QSharedPointer<ImportResult> BitContainerData::importBits(const Parameters &para
     if (!file.open(QIODevice::ReadOnly)) {
         return ImportResult::error(QString("Failed to open file for import: '%1'").arg(fileName));
     }
-    SettingsManager::setPrivateSetting(
-            LAST_BIT_CONTAINER_IMPORT_EXPORT,
-            QFileInfo(file).dir().path());
     
     QDataStream stream(&file);
     QSharedPointer<BitContainer> container = BitContainer::deserialize(stream);
@@ -132,9 +138,6 @@ QSharedPointer<ExportResult> BitContainerData::exportBits(QSharedPointer<const B
     if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
         return ExportResult::error(QString("Failed to open export bit file: '%1'").arg(fileName));
     }
-    SettingsManager::setPrivateSetting(
-            SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY,
-            QFileInfo(file).dir().path());
 
     QDataStream stream(&file);
     container->serialize(stream);

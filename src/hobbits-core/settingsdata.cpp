@@ -156,9 +156,6 @@ void SettingsData::initialize()
 
     m_privateSettings.insert(SettingsManager::WINDOW_SIZE_KEY, QSize(640, 480));
     m_privateSettings.insert(SettingsManager::WINDOW_POSITION_KEY, QPoint(100, 100));
-    m_privateSettings.insert(SettingsManager::LAST_BATCH_PATH_KEY, QDir::homePath());
-    m_privateSettings.insert(SettingsManager::LAST_IMPORT_EXPORT_PATH_KEY, QDir::homePath());
-    m_privateSettings.insert(SettingsManager::LAST_CONTAINER_PATH_KEY, QDir::homePath());
 
     m_pluginLoaderSettings.insert(SettingsManager::PLUGIN_PATH_KEY, HobbitsCoreConfig::PLUGINS_DEFAULT_PATH);
     m_pluginLoaderSettings.insert(SettingsManager::PLUGIN_BLACKLIST_KEY, QStringList({}));
