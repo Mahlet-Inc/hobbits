@@ -1,3 +1,10 @@
+# [0.50.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.49.0...v0.50.0) (2021-05-31)
+
+
+### Features
+
+* better file dialog behavior during and between runs ([63bbb1d](https://github.com/Mahlet-Inc/hobbits/commit/63bbb1dd4a2ef26eb6ebbaf1e842a6902f3c02d4))
+
 # [0.49.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.1...v0.49.0) (2021-05-30)
 
 
