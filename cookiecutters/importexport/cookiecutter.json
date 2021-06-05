@@ -1,8 +1,0 @@
-{
-    "class" : "MyImportExport",
-    "import_editor" : "{{cookiecutter.class}}ImportEditor",
-    "export_editor" : "{{cookiecutter.class}}ExportEditor",
-    "class_file" : "{{ cookiecutter.class|lower }}",
-    "import_editor_file" : "{{ cookiecutter.import_editor|lower }}",
-    "export_editor_file" : "{{ cookiecutter.export_editor|lower }}"
-}
