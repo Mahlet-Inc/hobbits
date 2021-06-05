@@ -10,8 +10,7 @@ class HobbitsConan(ConanFile):
         if os.path.exists(version_file):
             self.version = load(version_file)
         else:
-            git = tools.Git(folder=self.recipe_folder)
-            self.version = f"dev-{git.get_revision()[0:7]}"
+            self.version = f"development-build"
 
     license = "MIT"
     author = "Adam Nash adam@smr.llc"
