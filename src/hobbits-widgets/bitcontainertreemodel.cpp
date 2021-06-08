@@ -18,7 +18,7 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
 
     BitContainer *container = static_cast<BitContainer*>(index.internalPointer());
     if (role == Qt::DisplayRole) {
-        return QVariant(container->name());
+        return QVariant(QString(container->name()+"\n%1 bits").arg(container->size()));
     }
     else if (role == Qt::DecorationRole) {
         return QVariant(DisplayHelper::bitRasterThumbnail(container));

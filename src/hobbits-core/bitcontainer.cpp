@@ -85,8 +85,11 @@ qint64 BitContainer::maxFrameWidth() const
 
 QString BitContainer::name() const
 {
-    int size = m_bits->sizeInBits();
-    return (m_name + "\n%1 bits").arg(size);
+    return m_name;
+}
+
+qint64 BitContainer::size() const {
+    return m_bits->sizeInBits();
 }
 
 void BitContainer::setName(QString name)
