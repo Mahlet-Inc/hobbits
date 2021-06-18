@@ -7,7 +7,8 @@ Edit::Edit()
         // TODO: add parameters like {"myparametername", ParameterDelegate::ParameterType::Decimal}
         {"start", ParameterDelegate::ParameterType::Decimal},
         {"length", ParameterDelegate::ParameterType::Decimal},
-        {"new_bits_in_range", ParameterDelegate::ParameterType::String, false}
+        {"new_bits_in_range", ParameterDelegate::ParameterType::String, false},
+        {"edit_type", ParameterDelegate::ParameterType::String}
     };
 
     m_delegate = ParameterDelegate::create(
@@ -78,6 +79,9 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     qint64 start = parameters.value("start").toInt();
     qint64 length = parameters.value("length").toInt();
 
+    //get mode: bits, hex, ascii
+    //int mode = 1;
+
     //get bits from text box
     QString newBitsInRange = parameters.value("new_bits_in_range").toString();
 
@@ -87,49 +91,230 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     //
     //auto bitContainer = inputContainers.first();
     QList<QSharedPointer<BitContainer>> outputContainers;
+    QSharedPointer<BitArray> outBits;
 
-    //things I can do:
-    // create an identical bit container
-    // create a bitContainer of same size with all zeros
-    // get bit array from inputContainer
-
-    //things I'd like to do:
-    //change individual bits in BitArray
     
-
-    //bits as ?
-    int end = start + length;
-    int inputContainerSize = inputContainers.at(0)->size();
-    QSharedPointer<const BitArray> bits = inputContainers.at(0)->bits();
-    int outputSize = inputContainerSize - length + newBitsInRange.length();
-    auto outBits = QSharedPointer<BitArray>(new BitArray(outputSize));
-    bits->copyBits(0, outBits.data(), 0, outputSize, BitArray::Copy);
 
     //do something with bits here
     //ex 0000 1111 -> 1111 0000
-    
-    int j = 0; //j represents the index of the newBitsInRange string
-    int i2 = 0; //the index from the input container
-    bool setiToEnd;
 
-    for (int i = 0; i < outputSize; i ++) { //i represents the index of the outBits, soon to be outputContainer
-        if (i < start || i > start + newBitsInRange.length() - 1) {
-            if (setiToEnd) {
-                i2 = end;
-                setiToEnd = false;
+    int end = start + length;
+    int inputContainerSize = inputContainers.at(0)->size();
+    QSharedPointer<const BitArray> bits = inputContainers.at(0)->bits();
+    int newBitsInRangeLength = newBitsInRange.length();
+    
+
+    if (parameters.value("edit_type").toString() == "bit") { //bits
+
+        int outputSize = inputContainerSize - length + newBitsInRangeLength;
+        outBits = QSharedPointer<BitArray>(new BitArray(outputSize));
+        bits->copyBits(0, outBits.data(), 0, outputSize, BitArray::Copy);
+
+        
+    
+        int j = 0; //j represents the index of the newBitsInRange string
+        int i2 = 0; //the index from the input container
+        bool setiToEnd = false;
+        bool checkSeti = true;
+
+        for (int i = 0; i < outputSize; i ++) { //i represents the index of the outBits, soon to be outputContainer
+            if (i < start || i > start + newBitsInRangeLength - 1) {
+                if (newBitsInRangeLength == 0 && i >= start && checkSeti) { //if input is empty set index from input container to ending index
+                    setiToEnd = true;
+                    checkSeti = false;
+                }
+                if (setiToEnd) {
+                    i2 = end;
+                    setiToEnd = false;
+                }
+                if (i2 < inputContainerSize) {
+                    outBits->set(i, inputContainers.at(0)->bits()->at(i2)); //copy bits from input container
+                }
+                i2++;
+            } else {
+                const QChar x = newBitsInRange.at(j);
+                if (x.digitValue() == 0)
+                    outBits->set(i, false); //false is 0, true is 1
+                else if (x.digitValue() == 1)
+                    outBits->set(i, true); //false is 0, true is 1
+                else
+                    return OperatorResult::error("You can only use 0 or 1 in bit mode.");
+                j++;
+                setiToEnd = true;
             }
-            if (i2 < inputContainerSize) {
-                outBits->set(i, inputContainers.at(0)->bits()->at(i2)); //copy bits from input container
+        }
+    } else if (parameters.value("edit_type").toString() == "hex") { //hex
+
+        int outputSize = inputContainerSize - (length * 4) + (newBitsInRangeLength * 4);
+        outBits = QSharedPointer<BitArray>(new BitArray(outputSize));
+        bits->copyBits(0, outBits.data(), 0, outputSize, BitArray::Copy);
+
+        int i2 = 0;
+        int j = 0;
+        int ji = 0; //increment 4 times before incrementing j
+        bool setiToEnd = false;
+        bool checkSeti = true;
+        for (int i = 0; i < outputSize; i++) {
+            if (i < start * 4 || i > (start * 4) + ((newBitsInRangeLength * 4)-1)) {
+                
+                if (newBitsInRangeLength == 0 && i >= start && checkSeti) { //if input is empty set index from input container to ending index
+                    setiToEnd = true;
+                    checkSeti = false;
+                }
+                if (setiToEnd) {
+                    i2 = end * 4;
+                    setiToEnd = false;
+                }
+                if (i2 < inputContainerSize) {
+                    outBits->set(i, inputContainers.at(0)->bits()->at(i2)); //copy bits from input container
+                }
+
+            } else {
+                
+                const QChar x = newBitsInRange.at(j);
+                
+                if (x == '0') {
+                    outBits->set(i, false); //false is 0, true is 1
+                } else
+                if (x == '1') {
+                    if (ji < 3) { 
+                        outBits->set(i, false); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, true); //false is 0, true is 1
+                    }
+                } else
+                if (x == '2') {
+                    if (ji < 2 || ji > 2) { 
+                        outBits->set(i, false); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, true); //false is 0, true is 1
+                    }
+                } else
+                if (x == '3') {
+                    if (ji == 2 || ji == 3) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+
+
+                if (x == '4') {
+                    if (ji == 1) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == '5') {
+                    if (ji == 1 || ji == 3) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == '6') {
+                    if (ji == 1 || ji == 2) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == '7') {
+                    if (ji > 0) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+
+
+                if (x == '8') {
+                    if (ji == 0) {
+                        outBits->set(i, true);
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == '9') {
+                    if (ji == 0 || ji > 2) {
+                        outBits->set(i, true);
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == 'a') {
+                    if (ji == 0 || ji == 2) {
+                        outBits->set(i, true);
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == 'b') {
+                    if (ji == 1) { 
+                        outBits->set(i, false); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, true); //false is 0, true is 1
+                    }
+                } else
+
+
+                if (x == 'c') {
+                    if (ji < 2) { 
+                        outBits->set(i, true); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, false); //false is 0, true is 1
+                    }
+                } else
+                if (x == 'd') {
+                    if (ji == 2) { 
+                        outBits->set(i, false); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, true); //false is 0, true is 1
+                    }
+                } else
+                if (x == 'e') {
+                    if (ji == 3) { 
+                        outBits->set(i, false); //false is 0, true is 1
+                    } else {
+                        outBits->set(i, true); //false is 0, true is 1
+                    }
+                } else
+                if (x == 'f') {
+                    outBits->set(i, true); //false is 0, true is 1
+                } else {
+                    QString str = " is an invalid character.";
+                    return OperatorResult::error(x + str);
+                }
+                ji+=1; //increment 4 times before incrementing j
+                if (ji >= 4) {
+                    j++;
+                    ji = 0;
+                }
+                
+                setiToEnd = true;
             }
-            i2+=1;
+            i2++;
+        }
+
+    } else if (parameters.value("edit_type").toString() == "ascii") { //ascii
+
+        int outputSize = inputContainerSize - (length * 8) + (newBitsInRangeLength * 8);
+        outBits = QSharedPointer<BitArray>(new BitArray(outputSize));
+        bits->copyBits(0, outBits.data(), 0, outputSize, BitArray::Copy);
+
+        QByteArray nair = newBitsInRange.toLocal8Bit();
+        const char * newAsciiInRange = nair.data();
+
+        if (newBitsInRangeLength == length) {     
+            outBits->setBytes(start, newAsciiInRange, 0, newBitsInRangeLength);
         } else {
-            const QChar x = newBitsInRange.at(j);
-            if (x.digitValue() == 0)
-                outBits->set(i, false); //false is 0, true is 1
-            else
-                outBits->set(i, true); //false is 0, true is 1
-            j += 1;
-            setiToEnd = true;
+            QSharedPointer<BitArray> postBits = QSharedPointer<BitArray>(new BitArray(outputSize - start + length ));
+            QByteArray byteArray = bits->readBytes(start + length, outputSize - 1);
+            int endLength = byteArray.length();
+            const char* data = byteArray.data();
+            outBits->setBytes(start+newBitsInRangeLength, data, 0, endLength);
+            outBits->setBytes(start, newAsciiInRange, 0, newBitsInRangeLength);
         }
     }
 

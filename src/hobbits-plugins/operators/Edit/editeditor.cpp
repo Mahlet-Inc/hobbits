@@ -18,10 +18,37 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     connect(ui->sb_start, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
 
+    //On radio button value change
+    connect(ui->rb_bit, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+    connect(ui->rb_hex, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+    connect(ui->rb_ascii, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+
+
     m_paramHelper->addSpinBoxIntParameter("start", ui->sb_start);
     m_paramHelper->addSpinBoxIntParameter("length", ui->sb_length);
 
     m_paramHelper->addTextEditStringParameter("new_bits_in_range", ui->pte_bits);
+
+    m_paramHelper->addParameter("edit_type", [this](QJsonValue value) {
+        if (value.toString() == "bit") {
+            ui->rb_bit->setChecked(true);
+        }
+        else if (value.toString() == "hex") {
+            ui->rb_hex->setChecked(true);
+        } else {
+            ui->rb_ascii->setChecked(true);
+        }
+        return true;
+    }, [this]() {
+        if (ui->rb_bit->isChecked()) {
+            return QJsonValue("bit");
+        }
+        else if (ui->rb_hex->isChecked()) {
+            return QJsonValue("hex");
+        } else {
+            return QJsonValue("ascii");
+        }
+    });
 
 
     // TODO: Correlate parameters in given delegate to form fields
