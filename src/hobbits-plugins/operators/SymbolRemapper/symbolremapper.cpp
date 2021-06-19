@@ -95,8 +95,8 @@ QSharedPointer<const OperatorResult> SymbolRemapper::operateOnBits(
 
         QStringList parseErrors;
 
-        auto oldBits = BitArray::fromString("0b" + oldVal, parseErrors);
-        QSharedPointer<BitArray> newBits = BitArray::fromString("0b" + newVal, parseErrors);
+        auto oldBits = BitArray::fromString("0b" + oldVal, &parseErrors);
+        QSharedPointer<BitArray> newBits = BitArray::fromString("0b" + newVal, &parseErrors);
 
         if (!parseErrors.isEmpty()) {
             return nullResult;
