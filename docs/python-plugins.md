@@ -194,3 +194,14 @@ that takes:
  - `ImageBuffer.set_bytes(x)` sets the image data to bytes-like object `x` (should be 4 * `width` * `height` long)
  - `ImageBuffer.width` width of the image (read-only)
  - `ImageBuffer.height` the height of the image (read-only)
+
+
+## Helpful Tools
+
+In order to simplify the process of developing plugins, there are
+[cookiecutters](https://cookiecutter.readthedocs.io/en/latest/)
+that take care of most of the boilerplate code.
+
+Visit the
+[GitHub repository for Hobbits plugin cookiecutters](https://github.com/Mahlet-Inc/hobbits-cookiecutters)
+for a variety of useful cookiecutters and instructions for how to use them.
