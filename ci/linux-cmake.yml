@@ -37,7 +37,7 @@ steps:
   - script: | 
       mkdir build_sc
       cd build_sc
-      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DSELF_CONTAINED_APP=1 -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ../src
+      cmake -GNinja -DMANUAL_PYTHON_PATH=$(Build.SourcesDirectory)/hobbits_python -DSELF_CONTAINED_APP=1 -DCMAKE_PREFIX_PATH="${QT_LIB_DIR}"/cmake ..
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Configure for self-contained'
   

@@ -10,8 +10,7 @@ class HobbitsConan(ConanFile):
         if os.path.exists(version_file):
             self.version = load(version_file)
         else:
-            git = tools.Git(folder=self.recipe_folder)
-            self.version = f"dev-{git.get_revision()[0:7]}"
+            self.version = f"development-build"
 
     license = "MIT"
     author = "Adam Nash adam@smr.llc"
@@ -31,7 +30,7 @@ class HobbitsConan(ConanFile):
         "icu:shared":True
         }
     generators = "cmake"
-    exports_sources = "src/*"
+    exports_sources = "CMakeLists.txt", "cmake*", "src*"
 
     requires = [
         ("qt/5.15.2"),
@@ -51,17 +50,14 @@ class HobbitsConan(ConanFile):
             self.options['fftw'].shared = False
 
     def _configure_cmake(self):
-        if self.settings.os == "Windows":
-            cmake = CMake(self)
-        else:
-            cmake = CMake(self, generator="Ninja")
+        cmake = CMake(self)
         defs = {
             "SELF_CONTAINED_APP" : 1,
             "BUILDING_WITH_CONAN" : 1
         }
         if self.settings.build_type == "Release":
             defs["QT_NO_DEBUG"] = 1
-        cmake.configure(source_folder="src", defs=defs)
+        cmake.configure(source_folder=".", defs=defs)
         return cmake
 
     def build(self):
