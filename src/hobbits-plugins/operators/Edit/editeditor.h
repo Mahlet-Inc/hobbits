@@ -33,8 +33,8 @@ private:
 
 signals:
 public slots:
-    //void labelSetText(QString str1, QString str2);
-    void labelSetText();
+
+    void setLabelText();
 
 };
 

@@ -1,10 +1,13 @@
 #include "editeditor.h"
 #include "ui_editeditor.h"
 
+char* lastType = "bit";
+
 EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     ui(new Ui::EditEditor()),
     m_paramHelper(new ParameterHelper(delegate))
 {
+    
 
     
     ui->setupUi(this);
@@ -22,9 +25,9 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
 
     //On radio button value change
 
-    connect(ui->rb_bit, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
-    connect(ui->rb_hex, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
-    connect(ui->rb_ascii, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
+    connect(ui->rb_bit, SIGNAL(toggled(bool)), this, SLOT(setLabelText()));
+    connect(ui->rb_hex, SIGNAL(toggled(bool)), this, SLOT(setLabelText()));
+    connect(ui->rb_ascii, SIGNAL(toggled(bool)), this, SLOT(setLabelText()));
 
 
 
@@ -73,16 +76,42 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     // });
 }
 
-void EditEditor::labelSetText() {
+void EditEditor::setLabelText() {
+    int start = ui->sb_start->value();
+    int length = ui->sb_length->value();
     if (ui->rb_bit->isChecked()) {
         ui->lb_start->setText("Bit Start");
         ui->lb_length->setText("Bit Length");
+        if (lastType == "byte") {
+            ui->sb_start->setValue(start*8);
+            ui->sb_length->setValue(length*8);
+        } else if (lastType == "hex") {
+            ui->sb_start->setValue(start*4);
+            ui->sb_length->setValue(length*4);
+        }
+        lastType = "bit";
     } else if (ui->rb_hex->isChecked()) {
         ui->lb_start->setText("Nibble Start");
         ui->lb_length->setText("Nibble Length");
+        if (lastType == "bit") {
+            ui->sb_start->setValue(start/4);
+            ui->sb_length->setValue(length/4);
+        } else if (lastType == "byte") {
+            ui->sb_start->setValue(start*2);
+            ui->sb_length->setValue(length*2);
+        }
+        lastType = "hex";
     } else {
         ui->lb_start->setText("Byte Start");
         ui->lb_length->setText("Byte Length");
+        if (lastType == "bit") {
+            ui->sb_start->setValue(start/8);
+            ui->sb_length->setValue(length/8);
+        } else if (lastType == "hex") {
+            ui->sb_start->setValue(start/2);
+            ui->sb_length->setValue(length/2);
+        }
+        lastType = "byte";
     }
     
 }
