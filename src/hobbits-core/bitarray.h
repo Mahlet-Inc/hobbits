@@ -69,7 +69,7 @@ public:
     static BitArray* deserialize(QDataStream &stream);
     void serialize(QDataStream &stream) const;
 
-    static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList parseErrors = QStringList());
+    static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList *parseErrors = nullptr);
 
 private:
     void writeToStream(QDataStream &dataStream) const; // private for use by serializer and writeTo
