@@ -30,6 +30,12 @@ private:
 
     Ui::EditEditor *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
+
+signals:
+public slots:
+    //void labelSetText(QString str1, QString str2);
+    void labelSetText();
+
 };
 
 

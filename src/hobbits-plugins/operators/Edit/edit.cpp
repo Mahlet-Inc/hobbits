@@ -36,7 +36,7 @@ QString Edit::name()
 QString Edit::description()
 {
     // TODO: create actual description
-    return "Load Hexidecimal characters, and modify them individually.";
+    return "Load bits, and modify them individually.";
 }
 
 QStringList Edit::tags()
@@ -67,6 +67,7 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     const Parameters &parameters,
     QSharedPointer<PluginActionProgress> progress)
 {    
+    
     if (inputContainers.length() != 1) {
         return OperatorResult::error("Requires a single input bit container");
     }
@@ -79,13 +80,9 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     qint64 start = parameters.value("start").toInt();
     qint64 length = parameters.value("length").toInt();
 
-    //get mode: bits, hex, ascii
-    //int mode = 1;
 
     //get bits from text box
     QString newBitsInRange = parameters.value("new_bits_in_range").toString();
-
-    //length = 8; //force for now
 
     //TODO: pte_bits is already filled with data from start to length
     //
@@ -324,6 +321,7 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     auto bitContainer = BitContainer::create(outBits);
 
     outputContainers.append(bitContainer);
+    //return OperatorResult::error("Hej");
     return OperatorResult::result(outputContainers, parameters);
     // TODO: Perform operation and return result with OperatorResult::result
     //return OperatorResult::error("Bits from start to length would be changed according to your entry, but that is not implemented yet.");

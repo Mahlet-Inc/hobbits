@@ -14,18 +14,26 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
 
     ui->sb_length->setMinimum(0);
     ui->sb_start->setMinimum(0);
+
+    
     //On spinbox value change, change the bits shown in pte_bits
     connect(ui->sb_start, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
 
     //On radio button value change
-    connect(ui->rb_bit, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
-    connect(ui->rb_hex, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
-    connect(ui->rb_ascii, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+
+    connect(ui->rb_bit, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
+    connect(ui->rb_hex, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
+    connect(ui->rb_ascii, SIGNAL(toggled(bool)), this, SLOT(labelSetText()));
+
+
 
 
     m_paramHelper->addSpinBoxIntParameter("start", ui->sb_start);
     m_paramHelper->addSpinBoxIntParameter("length", ui->sb_length);
+
+    //m_paramHelper->addLabelParameter("start_label", ui->lb_start);
+    //m_paramHelper->addLabelParameter("length_label", ui->lb_length);
 
     m_paramHelper->addTextEditStringParameter("new_bits_in_range", ui->pte_bits);
 
@@ -63,6 +71,20 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     //     // get the QJsonValue from the editor
     //     return QJsonValue(ui->spinBox->value());
     // });
+}
+
+void EditEditor::labelSetText() {
+    if (ui->rb_bit->isChecked()) {
+        ui->lb_start->setText("Bit Start");
+        ui->lb_length->setText("Bit Length");
+    } else if (ui->rb_hex->isChecked()) {
+        ui->lb_start->setText("Nibble Start");
+        ui->lb_length->setText("Nibble Length");
+    } else {
+        ui->lb_start->setText("Byte Start");
+        ui->lb_length->setText("Byte Length");
+    }
+    
 }
 
 EditEditor::~EditEditor()

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>604</width>
-    <height>156</height>
+    <height>179</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,7 +56,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="sb_start"/>
+          <widget class="QSpinBox" name="sb_start">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -70,7 +77,17 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="sb_length"/>
+          <widget class="QSpinBox" name="sb_length">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>2147483647</number>
+           </property>
+           <property name="value">
+            <number>8</number>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
