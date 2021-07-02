@@ -69,6 +69,8 @@ public:
     static QSharedPointer<BitContainer> deserialize(QDataStream &stream);
     void serialize(QDataStream &stream) const;
 
+    
+
 private:
     explicit BitContainer();
 

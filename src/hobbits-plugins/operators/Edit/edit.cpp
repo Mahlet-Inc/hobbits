@@ -67,9 +67,21 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     const Parameters &parameters,
     QSharedPointer<PluginActionProgress> progress)
 {    
-    
-    if (inputContainers.length() != 1) {
+    if (inputContainers.length() == 0) {
+        QList<QSharedPointer<BitContainer>> outputContainers;
+        int outputSize = 10;
+        QSharedPointer<BitArray> outBits;
+        outBits = QSharedPointer<BitArray>(new BitArray(outputSize));
+
+        auto bitContainer = BitContainer::create(outBits);
+
+        outputContainers.append(bitContainer);
+        return OperatorResult::result(outputContainers, parameters);
+    }
+
+    if (inputContainers.length() > 1) {
         return OperatorResult::error("Requires a single input bit container");
+        
     }
 
     QStringList invalidations = m_delegate->validate(parameters);

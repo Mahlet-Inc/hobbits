@@ -35,6 +35,12 @@ signals:
 public slots:
 
     void setLabelText();
+    void changeSliderStart();
+    void changeSliderLength();
+    void changeSpinBoxStart();
+    void changeSpinBoxLength();
+    void changeTextBox();
+    void toggleInsert();
 
 };
 

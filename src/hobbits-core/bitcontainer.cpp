@@ -200,3 +200,5 @@ void BitContainer::serialize(QDataStream &stream) const
     m_bits->serialize(stream);
     m_info->serialize(stream);
 }
+
+
