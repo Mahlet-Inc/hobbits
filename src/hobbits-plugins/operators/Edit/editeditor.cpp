@@ -5,6 +5,7 @@
 enum data { bit, hexa, byte }; //compiler doesn't like the name 'hex' for some reason
 data lastType = bit;
 QSharedPointer<const BitArray> bits;
+QSharedPointer<BitContainerPreview> bitContainer;
 
 EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     ui(new Ui::EditEditor()),
@@ -34,6 +35,8 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SLOT(changeSliderLength()));
     connect(ui->sb_start, SIGNAL(valueChanged(int)), this, SLOT(changeTextBox()));
     connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SLOT(changeTextBox()));
+    connect(ui->sb_start, SIGNAL(valueChanged(int)), this, SLOT(setHighlight()));
+    connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SLOT(setHighlight()));
 
     //On slider value change, change the bits shown in pte_bits
     connect(ui->hs_start, SIGNAL(valueChanged(int)), this, SLOT(changeSpinBoxStart()));
@@ -92,6 +95,29 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     //     // get the QJsonValue from the editor
     //     return QJsonValue(ui->spinBox->value());
     // });
+}
+
+void EditEditor::setHighlight() {
+    int start = ui->sb_start->value();
+    int length = ui->sb_length->value();
+    if (ui->rb_hex->isChecked()) {
+        start*=4;
+        length*=4;
+    } else if (ui->rb_ascii->isChecked()) {
+        start*=8;
+        length*=8;
+    }
+    quint32 color = 0x553498db;
+    Range range(start, start + length - 1);
+    if (! bitContainer.isNull()) {
+        //clear current highlights
+        bitContainer->clearHighlightCategory("edit_highlights");
+        bitContainer->addHighlight(RangeHighlight("edit_highlights",
+                                        QString("%1 to %2").arg(range.start()).arg(range.end()),
+                                        range,
+                                        color));
+    }
+    
 }
 
 void EditEditor::changeSliderStart() {
@@ -275,9 +301,12 @@ void EditEditor::previewBitsImpl(QSharedPointer<BitContainerPreview> container,
 
 void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
+    bitContainer = container;
+
     if (! container.isNull()) {
         QString str;
         bits = container->bits();
+
         qint64 size = bits->sizeInBits();
 
         if (ui->rb_hex->isChecked()) {
@@ -301,8 +330,14 @@ void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container
         } else {
             str = bits->toAscii(start, length);
         }
+
+        //setHighlight();
+        
         
         ui->pte_bits->document()->setPlainText(str);
+    } else {
+        //clear pte_bits
+        ui->pte_bits->document()->setPlainText("");
     }
     // TODO: (Optional) Update UI elements to account for preprocessing in previewBitsImpl and/or other metadata
 }

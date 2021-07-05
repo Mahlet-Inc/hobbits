@@ -41,6 +41,7 @@ public slots:
     void changeSpinBoxLength();
     void changeTextBox();
     void toggleInsert();
+    void setHighlight();
 
 };
 
