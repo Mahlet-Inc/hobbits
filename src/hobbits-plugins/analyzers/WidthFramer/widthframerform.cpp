@@ -4,7 +4,6 @@
 #include <QMetaObject>
 #include <QVBoxLayout>
 #include <QtGlobal>
-
 #include <fftw3.h>
 
 WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
@@ -140,10 +139,15 @@ void WidthFramerForm::widthSelected(QModelIndex index)
 
 QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> bits)
 {
+    //left shift
     int N = 1 << 19;
+
+    //reference: https://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html#Complex-One_002dDimensional-DFTs
+    //allocate input and output arrays
     fftw_complex *fft_in = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
     fftw_complex *fft_out = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
 
+    //create plans (read about arguments in the documentation)
     fftw_plan fft_plan1 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_plan fft_plan2 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
