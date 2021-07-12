@@ -233,6 +233,7 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             .arg(frame.size()));
     labelAction->setEnabled(false);
 
+
     QMenu gotoMenu("Go to Location");
     gotoMenu.addAction(
             tr("End of Frame"),
@@ -332,6 +333,7 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             }
         }
     });
+
 
     menu.addMenu(&gotoMenu);
 
@@ -436,6 +438,22 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             [this, frame]() {
         auto container = m_handle->currentContainer();
         container->info()->clearHighlightCategory("manual_highlights");
+    });
+
+    menu.addSeparator();
+
+    menu.addAction(
+            tr("Edit from Here"),
+            [this, frame, bitOffsetHover]() {
+        quint32 color = 0x553498db;
+        qint64 start = frame.start()+bitOffsetHover;
+        Range range(start, -1); //if length is -1 set length in editeditor.cpp
+        auto container = m_handle->currentContainer();
+        container->info()->clearHighlightCategory("edit_highlights");
+        container->info()->addHighlight(RangeHighlight("edit_highlights",
+                                        QString("%1 to %2").arg(range.start()).arg(range.end()),
+                                        range,
+                                        color));
     });
 
     menu.exec(this->mapToGlobal(point));

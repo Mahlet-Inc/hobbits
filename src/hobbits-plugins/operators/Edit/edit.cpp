@@ -338,3 +338,4 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     // TODO: Perform operation and return result with OperatorResult::result
     //return OperatorResult::error("Bits from start to length would be changed according to your entry, but that is not implemented yet.");
 }
+

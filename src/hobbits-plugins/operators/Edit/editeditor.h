@@ -15,6 +15,7 @@ class EditEditor : public AbstractParameterEditor
     Q_OBJECT
 
 public:
+
     EditEditor(QSharedPointer<ParameterDelegate> delegate);
     ~EditEditor() override;
 

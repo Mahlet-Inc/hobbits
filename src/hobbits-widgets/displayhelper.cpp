@@ -653,3 +653,4 @@ void DisplayHelper::sendHoverUpdate(QSharedPointer<DisplayHandle> handle, QPoint
 
     handle->setBitHover(true, diff.x(), diff.y());
 }
+

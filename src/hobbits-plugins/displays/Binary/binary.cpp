@@ -6,6 +6,7 @@
 #include <QtMath>
 
 Binary::Binary() :
+
     m_renderConfig(new DisplayRenderConfig())
 {
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);
@@ -138,3 +139,6 @@ QPoint Binary::headerOffset(const Parameters &parameters)
                 DisplayHelper::textSize(font, container->frameCount()).width() + margin,
                 DisplayHelper::textSize(font, container->maxFrameWidth()).width() + margin);
 }
+
+
+

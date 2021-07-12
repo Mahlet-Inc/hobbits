@@ -332,6 +332,33 @@ void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container
         }
 
         //setHighlight();
+        //if rangeHighlight in edit_highlights length == -1
+        RangeHighlight highlight;
+        QList<RangeHighlight> highlights = container->info()->highlights("edit_highlights");
+        for (RangeHighlight h : highlights) {
+            highlight = h;
+        }
+        if (highlight.range().end() == -1) {
+            int start2;
+            if (ui->rb_hex->isChecked()) {
+                start2 = highlight.range().start() / 4;
+            } else if (ui->rb_ascii->isChecked()) {
+                start2 = highlight.range().start() / 8;
+            } else {
+                start2 = highlight.range().start();
+            }
+            //set spinbox start to highlight start
+            ui->sb_start->setValue(start2);
+            //highlight length will set to spinbox length automatically
+        }
+        //always set edit highlight
+        else if (highlight.range().isNull()) {
+            //getto way of setting range highlight
+            ui->sb_start->setValue(start+1); 
+            ui->sb_start->setValue(start);
+        }
+
+        
         
         
         ui->pte_bits->document()->setPlainText(str);

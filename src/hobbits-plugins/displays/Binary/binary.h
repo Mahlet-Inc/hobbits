@@ -10,8 +10,9 @@ class Binary : public QObject, DisplayInterface
     Q_INTERFACES(DisplayInterface)
 
 public:
-    Binary();
 
+    Binary();
+    
     DisplayInterface* createDefaultDisplay() override;
 
     QString name() override;
@@ -19,6 +20,7 @@ public:
     QStringList tags() override;
 
     QSharedPointer<DisplayRenderConfig> renderConfig() override;
+    
     void setDisplayHandle(QSharedPointer<DisplayHandle> displayHandle) override;
     QSharedPointer<ParameterDelegate> parameterDelegate() override;
 
