@@ -139,6 +139,8 @@ void WidthFramerForm::widthSelected(QModelIndex index)
 
 QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> bits)
 {
+    //replace FFTW library
+
     //left shift
     int N = 1 << 19;
 
