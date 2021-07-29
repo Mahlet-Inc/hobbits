@@ -2,21 +2,170 @@
 <ui version="4.0">
  <class>USBDeviceImportEditor</class>
  <widget class="QWidget" name="USBDeviceImportEditor">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
-    <height>147</height>
+    <width>654</width>
+    <height>423</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>10</horstretch>
+    <verstretch>10</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="14" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="TransferTimeoutLabel">
+     <property name="text">
+      <string>Enter the Transfer Timeout Duration (ms):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="InterfaceLabel">
+     <property name="text">
+      <string>Select an Interface:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QSpinBox" name="TransferDelay"/>
+   </item>
+   <item row="5" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="AltSetLabel">
+     <property name="text">
+      <string>Select an Alternate Setting:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="InterfaceSelector">
+     <property name="placeholderText">
+      <string>Select an Interface</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="AltSetSelector">
+     <property name="placeholderText">
+      <string>Select an Alternate Setting</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="DeviceSelector">
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>Select a Device:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QSpinBox" name="TransferNum">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>200</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>2147483647</number>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <widget class="Line" name="HozRule">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="TransferNumLabel">
+     <property name="text">
+      <string>Enter the Number of Transfers Desired:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="TransferDelayLabel">
+     <property name="text">
+      <string>Enter the Delay in between Transfers (ms):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="1">
+    <widget class="QSpinBox" name="TransferTimeout"/>
+   </item>
+   <item row="1" column="0" alignment="Qt::AlignRight|Qt::AlignVCenter">
+    <widget class="QLabel" name="DeviceLabel">
+     <property name="text">
+      <string>Select a Device: </string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <property name="indent">
+      <number>-1</number>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QComboBox" name="EndpointSelector">
+     <property name="placeholderText">
+      <string>Select an Endpoint:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="EndpointLabel">
+     <property name="text">
+      <string>Select an Endpoint: </string>
+     </property>
+    </widget>
+   </item>
   </layout>
-  
  </widget>
  <resources/>
  <connections/>
