@@ -25,27 +25,29 @@ USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> d
     //     return QJsonValue(ui->spinBox->value());
     // });
 
-    libusb_context *ctx;
-    initLibusb(ctx);
+    
+    initLibusb();
 
-    m_paramHelper->addComboBoxParameter("DeviceNum", ui->DeviceSelector);
-    m_paramHelper->addComboBoxParameter("InterfaceNum", ui->InterfaceSelector);
-    m_paramHelper->addComboBoxParameter("AltSetNum", ui->AltSetSelector);
-    m_paramHelper->addComboBoxParameter("EndpointNum", ui->InterfaceSelector);
+    m_paramHelper->addComboBoxParameter("DeviceNum", ui->DeviceSelector, Qt::UserRole);
+    m_paramHelper->addComboBoxParameter("InterfaceNum", ui->InterfaceSelector, Qt::UserRole);
+    m_paramHelper->addComboBoxParameter("AltSetNum", ui->AltSetSelector, Qt::UserRole);
+    m_paramHelper->addComboBoxParameter("EndpointNum", ui->EndpointSelector, Qt::UserRole);
     m_paramHelper->addSpinBoxIntParameter("TransferNum", ui->TransferNum);
     m_paramHelper->addSpinBoxIntParameter("TransferDelay", ui->TransferDelay);
     m_paramHelper->addSpinBoxIntParameter("TransferTimeout", ui->TransferTimeout);
 
     m_devices = this->getUsbDevices();
     this->updateSelector(ui->DeviceSelector, m_devices);
-    connect(ui->DeviceSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(setInterfaces(const QString &)));
-    connect(ui->InterfaceSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(setAltSet(const QString &)));
-    connect(ui->AltSetSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(setEndpoint(const QString &)));
+    connect(ui->DeviceSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(populateInterfaces(const QString &)));
+    connect(ui->InterfaceSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(populateAltSet(const QString &)));
+    connect(ui->AltSetSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(populateEndpoint(const QString &)));
+    connect(ui->EndpointSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(configureEndpoint(const QString &)));
 
 }
 
 USBDeviceImportEditor::~USBDeviceImportEditor()
 {
+    libusb_exit(m_ctx);
     delete ui;
 }
 
@@ -56,7 +58,10 @@ QString USBDeviceImportEditor::title()
 
 Parameters USBDeviceImportEditor::parameters()
 {
-    return m_paramHelper->getParametersFromUi();
+    auto params = m_paramHelper->getParametersFromUi();
+    params.insert("TransferType", (int)m_transferType);
+    params.insert("TransferSize", (int)m_transferSize);
+    return params;
 }
 
 bool USBDeviceImportEditor::setParameters(const Parameters &parameters)
@@ -64,34 +69,19 @@ bool USBDeviceImportEditor::setParameters(const Parameters &parameters)
     return m_paramHelper->applyParametersToUi(parameters);
 }
 
-void USBDeviceImportEditor::previewBitsImpl(QSharedPointer<BitContainerPreview> container,
-                                      QSharedPointer<PluginActionProgress> progress)
-{
-    // TODO: (Optional) Preview the currently active BitContainer (preprocess it, enrich it, etc)
-}
 
-void USBDeviceImportEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
-{
-    // TODO: (Optional) Update UI elements to account for preprocessing in previewBitsImpl and/or other metadata
-}
-
-void USBDeviceImportEditor::initLibusb(libusb_context *ctx){
+void USBDeviceImportEditor::initLibusb(){
     m_devices.clear();
-    int r = libusb_init(&ctx); //initialize a library session
+    int r = libusb_init(&m_ctx); //initialize a library session
 	if(r < 0) {
         std::runtime_error libusb_init_error("Error while trying to initialize Libusb");
 		throw libusb_init_error;
 	}
-    libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, 4 );
-    int cnt = libusb_get_device_list(ctx, &m_devs);
-    if (cnt < 0){
-        std::runtime_error libusb_device_list_error("Error getting device list");
-        throw libusb_device_list_error;
-    }
-
+    libusb_set_option(m_ctx, LIBUSB_OPTION_LOG_LEVEL, 4 );
 }
     
 QStringList USBDeviceImportEditor::getUsbDevices(){
+    //TODO: see if you can use the library/system that lsusb uses to get device information
     auto obuf = sp::check_output({"lsusb"});
     QString output = obuf.buf.data();
     QStringList devices = output.split("\n");
@@ -99,14 +89,21 @@ QStringList USBDeviceImportEditor::getUsbDevices(){
     return devices;
 }
 
-void USBDeviceImportEditor::setInterfaces(QString device){
+
+//Redefine to populateInterfaces to make clearer
+void USBDeviceImportEditor::populateInterfaces(QString device){
     
-   int deviceNum;
+    int cnt = libusb_get_device_list(m_ctx, &m_devs);
+    if (cnt < 0){
+        std::runtime_error libusb_device_list_error("Error getting device list");
+        throw libusb_device_list_error;
+    }
+
    m_interfaces.clear();
    if(m_devices.contains(device) == true){
 
-        deviceNum = m_devices.indexOf(device);
-        m_dev = m_devs[deviceNum];
+        m_deviceNum = m_devices.indexOf(device);
+        m_dev = m_devs[m_deviceNum];
         libusb_config_descriptor *config;
         libusb_get_active_config_descriptor(m_dev, &config);
         
@@ -122,13 +119,15 @@ void USBDeviceImportEditor::setInterfaces(QString device){
         ui->AltSetSelector->clear();
         m_endpoints.clear();
         ui->EndpointSelector->clear();
+        libusb_free_device_list(m_devs, m_deviceNum);
+        libusb_free_config_descriptor(config);
         updateSelector(ui->InterfaceSelector, m_interfaces);
    }
    
 
 }
 
-void USBDeviceImportEditor::setAltSet(QString interface){
+void USBDeviceImportEditor::populateAltSet(QString interface){
     
     m_altSets.clear();
     if(m_interfaces.contains(interface) == true){
@@ -149,11 +148,12 @@ void USBDeviceImportEditor::setAltSet(QString interface){
         }
         m_endpoints.clear();
         ui->EndpointSelector->clear();
+        libusb_free_config_descriptor(config);
         updateSelector(ui->AltSetSelector, m_altSets);
     }
 }
 
-void USBDeviceImportEditor::setEndpoint(QString altSet){
+void USBDeviceImportEditor::populateEndpoint(QString altSet){
     m_endpoints.clear();
     if(m_altSets.contains(altSet) == true){
 
@@ -174,11 +174,33 @@ void USBDeviceImportEditor::setEndpoint(QString altSet){
             m_endpoints.append(endpt);
             }
         }
+        libusb_free_config_descriptor(config);
         updateSelector(ui->EndpointSelector, m_endpoints);
+    }
+}
+//rename to make clearer
+void USBDeviceImportEditor::configureEndpoint(QString endpoint){
+    if(m_endpoints.contains(endpoint)){
+        m_endpointNum = m_endpoints.indexOf(endpoint);
+
+        libusb_config_descriptor *config;
+        libusb_get_active_config_descriptor(m_dev, &config);
+        
+        const libusb_interface *inter = &config->interface[m_interfaceNum];
+        const libusb_interface_descriptor *interdesc = &inter->altsetting[m_altSetNum];
+        const libusb_endpoint_descriptor *epdesc = &interdesc->endpoint[m_endpointNum];
+
+        m_transferType = epdesc->bmAttributes;
+        m_transferSize = epdesc->wMaxPacketSize;
+        libusb_free_config_descriptor(config);
     }
 }
 
 void USBDeviceImportEditor::updateSelector(QComboBox *selector, QStringList items){
     selector->clear();
-    selector->addItems(items);
+    for(int i = 0; i < items.length(); i++){
+    selector->addItem(items[i], i);
+    }
 }
+
+
