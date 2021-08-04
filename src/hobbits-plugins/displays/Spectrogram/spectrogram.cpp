@@ -7,6 +7,8 @@
 #include "viridis.h"
 #include "displayresult.h"
 #include <QtMath>
+#include "pffft.h"
+
 
 Spectrogram::Spectrogram():
     m_renderConfig(new DisplayRenderConfig())
@@ -102,9 +104,18 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
         return DisplayResult::error(QString("Invalid sample format word size: %1").arg(sampleFormat.wordSize));
     }
 
-    fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(fftSize)));
+    /*fftw_complex *fftIn = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(fftSize)));
     fftw_complex *fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(fftSize)));
     fftw_plan plan = fftw_plan_dft_1d(fftSize, fftIn, fftOut, FFTW_FORWARD, FFTW_ESTIMATE);
+    */
+    
+    //PFFFT set up
+    PFFFT_Setup *s = pffft_new_setup(fftSize, PFFFT_COMPLEX);
+
+    //PFFFT allocate memory for input, output, and work arrays or "float buffers"
+    float *input = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
+    float *output = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
+    float *work = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
 
     QVector<double> hanningWindow(fftSize);
     for (int i = 0; i < fftSize; i++) {
@@ -141,32 +152,51 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
     QTime lastTime = QTime::currentTime();
     for (int i = 0; i < spectRect.height(); i++) {
         if (!progress.isNull() && progress->isCancelled()) {
-            fftw_destroy_plan(plan);
+            /*fftw_destroy_plan(plan);
             fftw_free(fftIn);
             fftw_free(fftOut);
+            */
+            pffft_aligned_free(work);
+            pffft_aligned_free(output);
+            pffft_aligned_free(input);
+            pffft_destroy_setup(s);
             return DisplayResult::error(QString("Render cancelled"));
         }
 
         if (currOffset + fftBits >= container->bits()->sizeInBits()) {
             break;
         }
-        fillSamples(fftIn, currOffset, container, sampleFormat, fftSize, dataType);
+        //fillSamples(fftIn, currOffset, container, sampleFormat, fftSize, dataType);
+        fillSamples(input, currOffset, container, sampleFormat, fftSize, dataType);
 
-        for (int i = 0; i < fftSize; i++) {
+        /*for (int i = 0; i < fftSize; i++) {
             fftIn[i][0] *= hanningWindow[i];
             fftIn[i][1] *= hanningWindow[i];
+        }*/
+
+        for(int i = 0; i < fftSize; i++){
+            //handle the PFFFT arrays
+            input[i*2] *= hanningWindow[i];
+            input[i*2+1] *= hanningWindow[i];
         }
-        fftw_execute_dft(plan, fftIn, fftOut);
+
+        //fftw_execute_dft(plan, fftIn, fftOut);
+        //running the first FFT (with PFFFT)
+        pffft_transform_ordered(s, input, output, work, PFFFT_FORWARD);
 
         QVector<double> spectrum(fftSize/2);
         if (logarithmicScaling) {
             for (int n = 0; n < spectrum.size(); n++) {
-                spectrum[n] = log(outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]))) / log(10);
+                //spectrum[n] = log(outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]))) / log(10);
+                //not sure about the following line
+                spectrum[n] = log(outputFactor * ((output[n*2] * output[n*2]) + (output[i*2+1] * output[i*2+1]))) / log(10);
             }
         }
         else {
             for (int n = 0; n < spectrum.size(); n++) {
-                spectrum[n] = outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]));
+                //spectrum[n] = outputFactor * ((fftOut[n][0] * fftOut[n][0]) + (fftOut[n][1] * fftOut[n][1]));
+                //not sure about the following line
+                spectrum[n] = outputFactor * ((output[n*2] * output[n*2]) + (output[n*2+1] * output[n*2+1]));
             }
         }
         spectrums.append(spectrum);
@@ -188,9 +218,14 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
         }
     }
 
-    fftw_destroy_plan(plan);
+    /*fftw_destroy_plan(plan);
     fftw_free(fftIn);
     fftw_free(fftOut);
+    */
+    pffft_aligned_free(work);
+    pffft_aligned_free(output);
+    pffft_aligned_free(input);
+    pffft_destroy_setup(s);
 
     setSpectrums(spectrums);
     QImage result(viewportSize, QImage::Format_ARGB32);
@@ -472,7 +507,10 @@ QString Spectrogram::timeString(qint64 sample, double sampleRate)
     }
 }
 
-void Spectrogram::fillSamples(fftw_complex* buffer,
+
+//COME TO THIS FUNCTION! FFTW STUFF NEEDS TO BE REPLACED WITH PFFFT
+/*void Spectrogram::fillSamples(fftw_complex* buffer*/
+void Spectrogram::fillSamples(float* buffer,
                               qint64 offset,
                               QSharedPointer<BitContainer> bitContainer,
                               const MetadataHelper::SampleFormat &sampleFormat,
@@ -492,14 +530,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(fBuffer[i*2]);
-                buffer[i][1] = double(fBuffer[i*2 + 1]);
+                //buffer[i][0] = double(fBuffer[i*2]);
+                //buffer[i][1] = double(fBuffer[i*2 + 1]);
+                buffer[i*2] = double(fBuffer[i*2]);
+                buffer[i*2+1] = double(fBuffer[i*2 + 1]);
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(fBuffer[i]);
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(fBuffer[i]);
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(fBuffer[i]);
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] fBuffer;
@@ -510,14 +552,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]);
-                buffer[i][1] = double(sBuffer[i*2 + 1]);
+                //buffer[i][0] = double(sBuffer[i*2]);
+                //buffer[i][1] = double(sBuffer[i*2 + 1]);
+                buffer[i*2] = double(sBuffer[i*2]);
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]);
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]);
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]);
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]);
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -528,14 +574,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -546,14 +596,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -564,14 +618,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -582,14 +640,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -600,14 +662,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -618,14 +684,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -636,14 +706,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -654,14 +728,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -672,14 +750,18 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = 0.0;
             }
         }
         delete[] sBuffer;
@@ -690,22 +772,28 @@ void Spectrogram::fillSamples(fftw_complex* buffer,
 
         if (dataType == SpectrogramControls::RealComplexInterleaved) {
             for (int i = 0; i < samples/2; i++) {
-                buffer[i][0] = double(sBuffer[i*2]) / weight;
-                buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                //buffer[i][0] = double(sBuffer[i*2]) / weight;
+                //buffer[i][1] = double(sBuffer[i*2 + 1]) / weight;
+                buffer[i*2] = double(sBuffer[i*2]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         else {
             for (int i = 0; i < samples; i++) {
-                buffer[i][0] = double(sBuffer[i]) / weight;
-                buffer[i][1] = 0.0;
+                //buffer[i][0] = double(sBuffer[i]) / weight;
+                //buffer[i][1] = 0.0;
+                buffer[i*2] = double(sBuffer[i]) / weight;
+                buffer[i*2+1] = double(sBuffer[i*2 + 1]) / weight;
             }
         }
         delete[] sBuffer;
     }
 
     for (qint64 i = samples; i < fftSize; i++) {
-        buffer[i][0] = 0.0;
-        buffer[i][1] = 0.0;
+        //buffer[i][0] = 0.0;
+        //buffer[i][1] = 0.0;
+        buffer[i*2] = 0.0;
+        buffer[i*2+1] = 0.0;
     }
 }
 
