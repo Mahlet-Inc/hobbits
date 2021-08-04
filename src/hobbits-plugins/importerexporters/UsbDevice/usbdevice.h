@@ -33,8 +33,21 @@ public:
                                             const Parameters &parameters,
                                             QSharedPointer<PluginActionProgress> progress) override;
 
+    void setupLibusb();
+    void exitLibusb();
+
 private:
     QSharedPointer<ParameterDelegate> m_importDelegate;
     QSharedPointer<ParameterDelegate> m_exportDelegate;
+    libusb_device *m_dev;
+    libusb_device **m_devs;
+    libusb_config_descriptor *m_config;
+    libusb_context *m_ctx;
+    unsigned char m_endpoint;
+    libusb_device_handle *m_handle;
+    int m_deviceNum;
+    int m_interfaceNum;
+    int m_altSetNum;
+    int m_endpointNum;
 };
 

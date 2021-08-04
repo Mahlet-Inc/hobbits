@@ -61,6 +61,7 @@ Parameters USBDeviceImportEditor::parameters()
     auto params = m_paramHelper->getParametersFromUi();
     params.insert("TransferType", (int)m_transferType);
     params.insert("TransferSize", (int)m_transferSize);
+    params.insert("DeviceName", m_device);
     return params;
 }
 
@@ -78,27 +79,46 @@ void USBDeviceImportEditor::initLibusb(){
 		throw libusb_init_error;
 	}
     libusb_set_option(m_ctx, LIBUSB_OPTION_LOG_LEVEL, 4 );
+    m_cnt = libusb_get_device_list(m_ctx, &m_devs);
+    if (m_cnt < 0){
+        std::runtime_error libusb_device_list_error("Error getting device list");
+        throw libusb_device_list_error;
+    }
 }
     
 QStringList USBDeviceImportEditor::getUsbDevices(){
-    //TODO: see if you can use the library/system that lsusb uses to get device information
-    auto obuf = sp::check_output({"lsusb"});
-    QString output = obuf.buf.data();
-    QStringList devices = output.split("\n");
-    devices.removeLast();
+
+    //windows compatible, but not verbose enough so i would like to make it more verbose
+    QStringList devices;
+    for(int i = 0; i < m_cnt; i++){
+        libusb_device *dev = m_devs[i];
+        libusb_device_descriptor desc;
+        libusb_get_device_descriptor(dev, &desc);
+        std::stringstream sstream;
+        sstream << std::hex << desc.idVendor;
+        std::string idVendor = sstream.str();
+        std::stringstream sstream2;
+        sstream2 << std::hex << desc.idProduct;
+        std::string idProduct = sstream2.str();
+        QString temp = "Device " + QString::number(i) + ": Vendor ID: " + QString::fromStdString(idVendor) + ", Product ID: " + QString::fromStdString(idProduct);
+        devices.append(temp);
+    }
     return devices;
+
+    //TODO: see if you can use the library/system that lsusb uses to get device information
+    // auto obuf = sp::check_output({"lsusb"});
+    // QString output = obuf.buf.data();
+    // QStringList devices = output.split("\n");
+    // devices.removeLast();
+    // return devices;
 }
 
 
 //Redefine to populateInterfaces to make clearer
 void USBDeviceImportEditor::populateInterfaces(QString device){
     
-    int cnt = libusb_get_device_list(m_ctx, &m_devs);
-    if (cnt < 0){
-        std::runtime_error libusb_device_list_error("Error getting device list");
-        throw libusb_device_list_error;
-    }
-
+    
+    m_device = device;
    m_interfaces.clear();
    if(m_devices.contains(device) == true){
 

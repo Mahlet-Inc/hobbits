@@ -41,7 +41,11 @@
     </widget>
    </item>
    <item row="12" column="1">
-    <widget class="QSpinBox" name="TransferDelay"/>
+    <widget class="QSpinBox" name="TransferDelay">
+     <property name="maximum">
+      <number>2147483647</number>
+     </property>
+    </widget>
    </item>
    <item row="5" column="0" alignment="Qt::AlignRight">
     <widget class="QLabel" name="AltSetLabel">
@@ -130,7 +134,11 @@
     </widget>
    </item>
    <item row="14" column="1">
-    <widget class="QSpinBox" name="TransferTimeout"/>
+    <widget class="QSpinBox" name="TransferTimeout">
+     <property name="maximum">
+      <number>2147483647</number>
+     </property>
+    </widget>
    </item>
    <item row="1" column="0" alignment="Qt::AlignRight|Qt::AlignVCenter">
     <widget class="QLabel" name="DeviceLabel">

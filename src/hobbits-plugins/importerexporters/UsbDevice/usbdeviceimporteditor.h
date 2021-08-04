@@ -33,11 +33,10 @@ public:
     unsigned char m_endpoint;
 public slots:
 
-    
     void populateInterfaces(QString device);
     void populateAltSet(QString interface);
     void populateEndpoint(QString altSet);
-    void configurEndpoint(QString endpoint);
+    void configureEndpoint(QString endpoint);
 
 private:
 
@@ -58,6 +57,8 @@ private:
     libusb_config_descriptor *m_config;
     libusb_context *m_ctx;
     int m_deviceNum;
+    int m_cnt;
+    QString m_device;
 };
 
 
