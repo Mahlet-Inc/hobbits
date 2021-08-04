@@ -6,6 +6,12 @@
 #include <QtGlobal>
 #include <fftw3.h>
 
+#include "pffft.h"
+
+
+#include <iostream>
+using namespace std;
+
 WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::WidthFramerForm()),
     m_delegate(delegate),
@@ -144,18 +150,31 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     //left shift
     int N = 1 << 19;
 
-    //reference: https://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html#Complex-One_002dDimensional-DFTs
-    //allocate input and output arrays
-    fftw_complex *fft_in = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
-    fftw_complex *fft_out = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
+    //allocate memory for the input and output arrays
+    //"array of type fftw_complex which is by default double[2]"
+    //fftw_complex *fft_in = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
+    //fftw_complex *fft_out = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * unsigned(N)));
 
-    //create plans (read about arguments in the documentation)
-    fftw_plan fft_plan1 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_plan fft_plan2 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_BACKWARD, FFTW_ESTIMATE);
+    //create set up for PFFFT
+    PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
 
-    // prepare and run first FFT
+
+    //create plans for FFTW
+    //fftw_plan fft_plan1 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
+    //fftw_plan fft_plan2 = fftw_plan_dft_1d(N, fft_in, fft_out, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    //allocate the arrays, or "float buffers," for input, output, and work
+    float *input = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
+    float *output = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
+    float *work= (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
+
+
+/*    // prepare and run first FFT
+        //is this adding data to the fft_in array?
     for (int i = 0; i < N; i++) {
+        //real 
         fft_in[i][0] = 0;
+        //imaginary
         fft_in[i][1] = 0;
         if (i < bits->sizeInBits()) {
             fft_in[i][0] = bits->at(i) ? 1 : -1;
@@ -163,30 +182,74 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
         fft_out[i][0] = 0;
         fft_out[i][1] = 0;
     }
-    fftw_execute(fft_plan1);
+*/
+    //and run first FFT (with PFFFT)
+    for (int i = 0; i < N; i++){
+        input[i*2] = 0; //real
+        input[i*2+1] = 0; //imaginary
+        if (i < bits->sizeInBits()) {
+            input[i*2] = bits->at(i) ? 1 : -1;
+        }
+        output[i*2] = 0;
+        output[i*2+1]= 0;
+    }
 
-    // prepare and run second FFT
+
+    //running the first FFT
+    //fftw_execute(fft_plan1);
+  
+    //running the first FFT (with PFFFT)
+    pffft_transform_ordered(setup, input, output, work, PFFFT_FORWARD);
+    
+   /*
+   // prepare and run second FFT
     for (int i = 0; i < N; i++) {
         double re = fft_out[i][0];
+        //printf("%f \n", re);
         double im = fft_out[i][1];
+        //printf("%f \n", im);
         fft_in[i][0] = (re * re + im * im) / static_cast<double>(N);
         fft_in[i][1] = 0.0;
     }
+    //running the second FFT
     fftw_execute(fft_plan2);
+    */
+
+    for (int i = 0; i < N; i++) {
+        float re = output[i*2];
+        float im = output[i*2+1];
+        input[i*2] = (re * re + im * im) / static_cast<float>(N);
+        input[i*2+1] = 0.0;
+    }
+
+    //perform the second FFT (with PFFFT)
+    pffft_transform_ordered(setup, input, output, work, PFFFT_BACKWARD);
+
+
 
     // get results
+    //results vector size is equal to N / 2
     QVector<QPointF> results(N / 2);
+    //insert at first index
     results.insert(0, QPointF(0, 0));
     for (int i = 1; i < N / 2; i++) {
-        double re = qAbs(double(fft_out[i][0] / double(N)));
+        double re = qAbs(double(output[i*2] / double(N)));
+        //store in results vector
         results[i] = QPointF(i, re);
     }
 
     // clean up
+    /*
     fftw_destroy_plan(fft_plan1);
     fftw_destroy_plan(fft_plan2);
     fftw_free(fft_in);
     fftw_free(fft_out);
+    */
 
+    pffft_aligned_free(work);
+    pffft_aligned_free(output);
+    pffft_aligned_free(input);
+    pffft_destroy_setup(setup);
+   
     return results;
 }
