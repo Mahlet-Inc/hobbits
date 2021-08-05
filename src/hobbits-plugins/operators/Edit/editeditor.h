@@ -29,13 +29,28 @@ private:
                              QSharedPointer<PluginActionProgress> progress) override;
     void previewBitsUiImpl(QSharedPointer<BitContainerPreview> container) override;
 
+    void adjustMax();
+    int getUnitSize();
+    void editFromHere(RangeHighlight highlight);
+    void overflow();
+    void adjust();
+    
+
     Ui::EditEditor *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
+
+    qint64 m_bitStart;
+    qint64 m_bitLength;
+    int m_lengthMax;
+    int m_startMax;
+    QSharedPointer<const BitArray> m_bits;
+    QSharedPointer<BitContainerPreview> m_bitContainer;
+    bool m_changeBits;
 
 signals:
 public slots:
 
-    void setLabelText();
+    void adjustToUnit();
     void changeSliderStart();
     void changeSliderLength();
     void changeSpinBoxStart();
@@ -43,6 +58,8 @@ public slots:
     void changeTextBox();
     void toggleInsert();
     void setHighlight();
+
+    void spinBoxChange();
 
 };
 

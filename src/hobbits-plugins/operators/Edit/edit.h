@@ -29,6 +29,12 @@ public:
             QSharedPointer<PluginActionProgress> progress) override;
 
 private:
+    int getUnitSize(Parameters parameters);
+    QSharedPointer<BitArray> parseBits(QString newBitsInRange);
+    QSharedPointer<BitArray> parseHex(QString newBitsInRange);
+    QSharedPointer<BitArray> parseAscii(QString newBitsInRange);
+
     QSharedPointer<ParameterDelegate> m_delegate;
+
 };
 

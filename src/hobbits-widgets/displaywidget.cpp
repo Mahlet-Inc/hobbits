@@ -447,13 +447,18 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             [this, frame, bitOffsetHover]() {
         quint32 color = 0x553498db;
         qint64 start = frame.start()+bitOffsetHover;
-        Range range(start, -1); //if length is -1 set length in editeditor.cpp
-        auto container = m_handle->currentContainer();
-        container->info()->clearHighlightCategory("edit_highlights");
-        container->info()->addHighlight(RangeHighlight("edit_highlights",
-                                        QString("%1 to %2").arg(range.start()).arg(range.end()),
-                                        range,
-                                        color));
+        if (start >= 0) {
+            Range range(start, -2); //if length is -2 set length in editeditor.cpp
+            auto container = m_handle->currentContainer();
+            container->info()->clearHighlightCategory("edit_highlights");
+            container->info()->addHighlight(RangeHighlight("edit_highlights",
+                                            QString("%1 to %2").arg(range.start()).arg(range.end()),
+                                            range,
+                                            color));
+        } else {
+            //error int overflow
+        }
+        
     });
 
     menu.exec(this->mapToGlobal(point));
