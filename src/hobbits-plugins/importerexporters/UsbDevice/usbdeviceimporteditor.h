@@ -44,7 +44,8 @@ private:
     QStringList getUsbDevices();
     void updateSelector(QComboBox *selector, QStringList items);
     void clearSelectors(QComboBox *boxes[]);
-
+    QString addLeadingZeros(std::string str);
+    QStringList getVendorAndProduct(QString idVendor, QString idProduct);
     Ui::USBDeviceImportEditor *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
     
@@ -60,6 +61,3 @@ private:
     int m_cnt;
     QString m_device;
 };
-
-
-

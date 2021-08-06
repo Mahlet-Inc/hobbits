@@ -4,7 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-
+#include <QList>
 
 
 
@@ -21,7 +21,8 @@ USBDevice::USBDevice()
         {"TransferTimeout", ParameterDelegate::ParameterType::Integer},
         {"TransferType", ParameterDelegate::ParameterType::Integer},
         {"TransferSize", ParameterDelegate::ParameterType::Integer},
-        {"DeviceName", ParameterDelegate::ParameterType::String}
+        {"DeviceName", ParameterDelegate::ParameterType::String},
+        {"TimeoutIn", ParameterDelegate::ParameterType::Boolean}
     };
 
     m_importDelegate = ParameterDelegate::create(
@@ -150,10 +151,13 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     m_endpointNum = parameters.value("EndpointNum").toInt();
     int transferNum = parameters.value("TransferNum").toInt();
     int transferDelay = parameters.value("TransferDelay").toInt();
-    int transferTimout = parameters.value("TransferTimeout").toInt();
+    int transferTimeout = parameters.value("TransferTimeout").toInt();
     int transferType = parameters.value("TransferType").toInt();
     int transferSize = parameters.value("TransferSize").toInt();
+    QString transferTypeStr = QString::number(transferType);
     QString deviceName = parameters.value("DeviceName").toString();
+    bool includeTimeout = parameters.value("TimeoutIn").toBool();
+    QSharedPointer<RangeSequence> frames = RangeSequence::createEmpty();
     QByteArray largeBuffer;
     int actualLength;
     unsigned char smallBuffer[transferSize];
@@ -170,34 +174,20 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
         break;
 
     case 2: 
-        /*setupLibusb()
-        in loop of numTransfers:
-            dettach kernel driver
-            initiate bulk transfer
-            recieve transfer
-            reset the device
-            append the data to a hobbits bitcontainer
-            check if the action has been cancelled
-            update the progressbar
-            wait the transferDelay duration
-        exitLibusb()
-        */
-
+        transferTypeStr += ", Bulk Transfer";
         setupLibusb();
         for(int i = 0; i < transferNum; i++){
             if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){
                 attach = true;
                 libusb_detach_kernel_driver(m_handle, m_interfaceNum);
             }
-            int transferReturn = libusb_bulk_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimout);
+            int transferReturn = libusb_bulk_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
             if(transferReturn == 0 && actualLength != 0){
+                frames->appendRange((int)sizeof(smallBuffer)*8);
                 for(int j = 0; j < (int)sizeof(smallBuffer); j++){
                     largeBuffer.append(smallBuffer[j]);
                 }   
             }else{
-                if(transferReturn == LIBUSB_ERROR_TIMEOUT){
-                    continue;
-                }else{
                     if(transferReturn != LIBUSB_ERROR_TIMEOUT){
                         if(attach){
                             libusb_reset_device(m_handle);
@@ -205,9 +195,11 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
                         }
                         return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn) + ": " + libusb_strerror(transferReturn));
                     }else{
-                        largeBuffer.append("TIMEOUT");
+                        if(includeTimeout){
+                            largeBuffer.append("TIMEOUT");
+                            frames->appendRange(56);
+                        }
                     }
-                }
             }
             if(attach){
                 libusb_reset_device(m_handle);
@@ -223,25 +215,16 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
         exitLibusb();
         break;
     case 3:
-        /*setupLibusb()
-        create data buffer
-        in loop of numTransfers:
-            dettach kernel driver
-            initiate interrupt transfer
-            recieve transfer
-            reset the device
-            append the data to a hobbits bitcontainer
-            wait the transferDelay duration
-        exitLibusb()
-        */
+       transferTypeStr += ", Interrupt Transfer";
        setupLibusb();
         for(int i = 0; i < transferNum; i++){
             if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){
                 attach = true;
                 libusb_detach_kernel_driver(m_handle, m_interfaceNum);
             }
-            int transferReturn = libusb_interrupt_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimout);
+            int transferReturn = libusb_interrupt_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
             if(transferReturn == 0 && actualLength != 0){
+                frames->appendRange((int)sizeof(smallBuffer)*8);
                 for(int j = 0; j < (int)sizeof(smallBuffer); j++){
                     largeBuffer.append(smallBuffer[j]);
                 }   
@@ -253,7 +236,10 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
                     }
                     return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn) + ": " + libusb_strerror(transferReturn));
                 }else{
-                    largeBuffer.append("TIMEOUT");
+                    if(includeTimeout){
+                        largeBuffer.append("TIMEOUT");
+                        frames->appendRange(56);
+                    }
                 }
             }
             if(attach){
@@ -273,10 +259,23 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     default:
         break;
     }
-
     QSharedPointer<BitContainer> container = BitContainer::create(largeBuffer);
     container->setName("USB Device " + deviceName);
-
+    QSharedPointer<BitInfo> info = BitInfo::create(container->bits()->sizeInBits());
+    info->setFrames(frames);
+    info->setMetadata("Device Name", deviceName);
+    info->setMetadata("Device Number", m_deviceNum);
+    info->setMetadata("Interface Number", m_interfaceNum);
+    info->setMetadata("Alternate Setting Number", m_altSetNum);
+    info->setMetadata("Endpoint Number", m_endpointNum);
+    info->setMetadata("Endpoint Address", (int)m_endpoint);
+    info->setMetadata("Number of Transfers", transferNum);
+    info->setMetadata("Transfer Delay Duration", transferDelay);
+    info->setMetadata("Transfer Timeout Duration", transferTimeout);
+    info->setMetadata("Transfer Type", transferTypeStr);
+    info->setMetadata("TransferSize", transferSize);
+    container->setInfo(info);
+   
     return ImportResult::result(container, parameters);
 }
 

@@ -1,30 +1,19 @@
 #include "usbdeviceimporteditor.h"
 #include "ui_usbdeviceimporteditor.h"
 #include <libusb-1.0/libusb.h>
-#include "subprocess.hpp"
-
-namespace sp = subprocess;
+#include <string>
+#include <sstream>
 
 USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> delegate):
     ui(new Ui::USBDeviceImportEditor()),
     m_paramHelper(new ParameterHelper(delegate))
   
 {
+
+    /*Constructor for USBDeviceImportEditor*/
     ui->setupUi(this);
 
-    // TODO: Correlate parameters in given delegate to form fields
-    // Ex 1.
-    // m_paramHelper->addSpinBoxIntParameter("myparametername", ui->spinBox);
-    // Ex 2.
-    // m_paramHelper->addParameter("otherparameter", [this](QJsonValue value) {
-    //     // set the value in the editor
-    //     ui->spinBox->setValue(value.toInt());
-    //     return true; // return false if unable to set the value in the editor
-    // }, [this]() {
-    //     // get the QJsonValue from the editor
-    //     return QJsonValue(ui->spinBox->value());
-    // });
-
+    
     
     initLibusb();
 
@@ -35,6 +24,7 @@ USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> d
     m_paramHelper->addSpinBoxIntParameter("TransferNum", ui->TransferNum);
     m_paramHelper->addSpinBoxIntParameter("TransferDelay", ui->TransferDelay);
     m_paramHelper->addSpinBoxIntParameter("TransferTimeout", ui->TransferTimeout);
+    m_paramHelper->addCheckBoxBoolParameter("TimeoutIn", ui->IncludeTimeoutCheck);
 
     m_devices = this->getUsbDevices();
     this->updateSelector(ui->DeviceSelector, m_devices);
@@ -47,6 +37,7 @@ USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> d
 
 USBDeviceImportEditor::~USBDeviceImportEditor()
 {
+    libusb_free_device_list(m_devs, m_deviceNum);
     libusb_exit(m_ctx);
     delete ui;
 }
@@ -88,33 +79,31 @@ void USBDeviceImportEditor::initLibusb(){
     
 QStringList USBDeviceImportEditor::getUsbDevices(){
 
-    //windows compatible, but not verbose enough so i would like to make it more verbose
     QStringList devices;
     for(int i = 0; i < m_cnt; i++){
         libusb_device *dev = m_devs[i];
         libusb_device_descriptor desc;
         libusb_get_device_descriptor(dev, &desc);
+
         std::stringstream sstream;
         sstream << std::hex << desc.idVendor;
-        std::string idVendor = sstream.str();
+        QString idVendor = addLeadingZeros(sstream.str());
+
         std::stringstream sstream2;
         sstream2 << std::hex << desc.idProduct;
-        std::string idProduct = sstream2.str();
-        QString temp = "Device " + QString::number(i) + ": Vendor ID: " + QString::fromStdString(idVendor) + ", Product ID: " + QString::fromStdString(idProduct);
+        QString idProduct = addLeadingZeros(sstream2.str());
+
+        QStringList productAndVendor = getVendorAndProduct(idVendor, idProduct);
+
+        QString temp = "Device " + QString::number(i) + ": Vendor ID: " + idVendor + ", Product ID: " + idProduct + " " + productAndVendor[0] + " " + productAndVendor[1];
         devices.append(temp);
     }
     return devices;
 
-    //TODO: see if you can use the library/system that lsusb uses to get device information
-    // auto obuf = sp::check_output({"lsusb"});
-    // QString output = obuf.buf.data();
-    // QStringList devices = output.split("\n");
-    // devices.removeLast();
-    // return devices;
 }
 
 
-//Redefine to populateInterfaces to make clearer
+
 void USBDeviceImportEditor::populateInterfaces(QString device){
     
     
@@ -126,7 +115,7 @@ void USBDeviceImportEditor::populateInterfaces(QString device){
         m_dev = m_devs[m_deviceNum];
         libusb_config_descriptor *config;
         libusb_get_active_config_descriptor(m_dev, &config);
-        
+
         const libusb_interface *inter;
 
         for(int i  = 0; i < (int)config->bNumInterfaces; i++){
@@ -139,7 +128,7 @@ void USBDeviceImportEditor::populateInterfaces(QString device){
         ui->AltSetSelector->clear();
         m_endpoints.clear();
         ui->EndpointSelector->clear();
-        libusb_free_device_list(m_devs, m_deviceNum);
+        
         libusb_free_config_descriptor(config);
         updateSelector(ui->InterfaceSelector, m_interfaces);
    }
@@ -223,4 +212,61 @@ void USBDeviceImportEditor::updateSelector(QComboBox *selector, QStringList item
     }
 }
 
+QString USBDeviceImportEditor::addLeadingZeros(std::string str){
+    switch (str.length())
+    {
+    case 1:
+        return "000" + QString::fromStdString(str);
+        break;
+    case 2:
+        return "00" + QString::fromStdString(str);
+        break;
+    case 3:
+        return "0" + QString::fromStdString(str);
+        break;
+    default:
+        return QString::fromStdString(str);
+        break;
+    }
+}
 
+
+QStringList USBDeviceImportEditor::getVendorAndProduct(QString idVendor, QString idProduct){
+    bool findProduct = false;
+    QStringList returnVals;
+    QFile vendorProductFile(":/usbresources/usb_resources/usb.ids");
+    if(!vendorProductFile.open(QIODevice::ReadOnly)){
+        std::runtime_error file_read_error("Error opening USB Vendor and Product ID file");
+        throw file_read_error;
+    }
+
+    QTextStream in(&vendorProductFile);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if(line.startsWith("#")){
+            continue;
+        }else if(!line.startsWith("\t")){
+            if(findProduct){
+                returnVals.append("Product Name Not Found");
+                return returnVals;
+            }else{
+                if(line.startsWith(idVendor)){
+                    QStringList temp = line.split("  ");
+                    returnVals.append(temp[1]);
+                    findProduct = true;
+                }
+            }
+        }else if(line.startsWith("\t")){
+            if(findProduct){
+                line = line.remove("\t");
+                if(line.startsWith(idProduct)){
+                    QStringList temp = line.split("  ");
+                    returnVals.append(temp[1]);
+                    return returnVals;
+                }
+            }else{
+                continue;
+            }
+        }
+    }
+}
