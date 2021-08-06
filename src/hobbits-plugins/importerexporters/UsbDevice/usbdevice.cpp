@@ -96,7 +96,7 @@ QSharedPointer<ParameterDelegate>  USBDevice::exportParameterDelegate()
 }
 
 
-void USBDevice::setupLibusb(){
+int USBDevice::setupLibusb(){
     /*initialize libusb,
     get device list,
     get device,
@@ -108,8 +108,7 @@ void USBDevice::setupLibusb(){
     */
    int r = libusb_init(&m_ctx);
     if(r < 0){
-        std::runtime_error libusb_init_error("Error while trying to initialize Libusb");
-		throw libusb_init_error;
+        return -1;
     }
    libusb_set_option(m_ctx, LIBUSB_OPTION_LOG_LEVEL, 4 );
    libusb_get_device_list(m_ctx, &m_devs);
@@ -123,15 +122,35 @@ void USBDevice::setupLibusb(){
 
    m_endpoint = epdesc->bEndpointAddress;
    
-   libusb_open(m_dev, &m_handle);
-   libusb_set_interface_alt_setting(m_handle, m_interfaceNum, m_altSetNum);
+   r = libusb_open(m_dev, &m_handle);
+    if(r != 0){
+        switch (r)
+        {
+        case LIBUSB_ERROR_NO_MEM:
+            return -2;
+            break;
+
+        case LIBUSB_ERROR_ACCESS:
+            return -3;
+            break;
+        
+         case LIBUSB_ERROR_NO_DEVICE:
+            return -4;
+            break;
+        default:
+            break;
+        }
+    return 0;
+    }
 }
 
-void USBDevice::exitLibusb(){
+void USBDevice::exitLibusb(bool closeDevice){
     /*free config descriptor,
     free device handle
     exit libusb session*/
+    if(closeDevice){
     libusb_close(m_handle);
+    }
     libusb_free_config_descriptor(m_config);
     libusb_exit(m_ctx);
 }
@@ -162,6 +181,7 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     int actualLength;
     unsigned char smallBuffer[transferSize];
     bool attach;
+    int setupErr;
 
     switch (transferType)
     {
@@ -175,7 +195,31 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
 
     case 2: 
         transferTypeStr += ", Bulk Transfer";
-        setupLibusb();
+        setupErr = setupLibusb();
+        switch (setupErr)
+        {
+        case -1:
+            return ImportResult::error("Error Initializing Libusb, restart hobbits and try again.");
+            break;
+        
+        case -2:
+            exitLibusb(false);
+            return ImportResult::error("Error Allocating Memory for Device, restart hobbits and try again.");
+            break;
+        
+        case -3:
+            exitLibusb(false);
+            return ImportResult::error("Error Opening Device, no access to device, restart hobbits in root/Administrator and try again.");
+            break;
+
+        case -4:
+            exitLibusb(false);
+            return ImportResult::error("Error No Device Found, check device and try again.");
+            break;
+
+        default:
+            break;
+        }
         for(int i = 0; i < transferNum; i++){
             if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){
                 attach = true;
@@ -212,11 +256,35 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay));
 
         }
-        exitLibusb();
+        exitLibusb(true);
         break;
     case 3:
        transferTypeStr += ", Interrupt Transfer";
-       setupLibusb();
+        setupErr = setupLibusb();
+        switch (setupErr)
+        {
+        case -1:
+            return ImportResult::error("Error Initializing Libusb, restart hobbits and try again.");
+            break;
+        
+        case -2:
+            exitLibusb(false);
+            return ImportResult::error("Error Allocating Memory for Libusb, restart hobbits and try again.");
+            break;
+        
+        case -3:
+            exitLibusb(false);
+            return ImportResult::error("Error Opening Device, no access to device, restart hobbits in root/Administrator and try again.");
+            break;
+
+        case -4:
+            exitLibusb(false);
+            return ImportResult::error("Error No Device Found, check device and try again.");
+            break;
+            
+        default:
+            break;
+        }
         for(int i = 0; i < transferNum; i++){
             if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){
                 attach = true;
@@ -253,14 +321,14 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay));
 
         }
-        exitLibusb();
+        exitLibusb(true);
         break;
     
     default:
         break;
     }
     QSharedPointer<BitContainer> container = BitContainer::create(largeBuffer);
-    container->setName("USB Device " + deviceName);
+    container->setName("USB " + deviceName);
     QSharedPointer<BitInfo> info = BitInfo::create(container->bits()->sizeInBits());
     info->setFrames(frames);
     info->setMetadata("Device Name", deviceName);
