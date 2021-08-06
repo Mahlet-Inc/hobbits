@@ -23,64 +23,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="14" column="0" alignment="Qt::AlignRight">
-    <widget class="QLabel" name="TransferTimeoutLabel">
-     <property name="text">
-      <string>Enter the Transfer Timeout Duration (ms):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" alignment="Qt::AlignRight">
-    <widget class="QLabel" name="InterfaceLabel">
-     <property name="text">
-      <string>Select an Interface:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="1">
-    <widget class="QSpinBox" name="TransferDelay">
-     <property name="maximum">
-      <number>2147483647</number>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0" alignment="Qt::AlignRight">
-    <widget class="QLabel" name="AltSetLabel">
-     <property name="text">
-      <string>Select an Alternate Setting:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QComboBox" name="InterfaceSelector">
-     <property name="placeholderText">
-      <string>Select an Interface</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QComboBox" name="AltSetSelector">
-     <property name="placeholderText">
-      <string>Select an Alternate Setting</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="DeviceSelector">
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>Select a Device:</string>
-     </property>
-    </widget>
-   </item>
    <item row="10" column="1">
     <widget class="QSpinBox" name="TransferNum">
      <property name="enabled">
@@ -104,6 +46,9 @@
        <height>10</height>
       </size>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Each transfer is one request for data from a Device, this box allows you to enter however many times you would like to request data from the device. Maximum is 2147483647 Transfers, Minimum is 1 Transfer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="minimum">
       <number>1</number>
      </property>
@@ -112,10 +57,20 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
-    <widget class="Line" name="HozRule">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="3" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="InterfaceLabel">
+     <property name="text">
+      <string>Select an Interface:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="AltSetLabel">
+     <property name="text">
+      <string>Select an Alternate Setting:</string>
      </property>
     </widget>
    </item>
@@ -126,6 +81,86 @@
      </property>
     </widget>
    </item>
+   <item row="14" column="1">
+    <widget class="QSpinBox" name="TransferTimeout">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How long in milliseconds until program should wait for a transfer to be returned from a device, useful if you are unsure if a device will return something.&lt;/p&gt;&lt;p&gt;Enter 0 for no timeout duration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="maximum">
+      <number>2147483647</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="AltSetSelector">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an Alternate Setting from this Dropdown box, the possible alternate settings change based off of the Interface selected, choose a Device and Interface before choosing an Alternate Setting. Alternate Settings are displayed with their number and their number of Endpoints to choose from.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="placeholderText">
+      <string>Select an Alternate Setting</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="DeviceSelector">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the Device you would like to read data from using this dropdown menu. Devices are displayed with their device number, their Vendor and Product IDs and then their Vendor and Product Names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>Select a Device:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QSpinBox" name="TransferDelay">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of milliseconds in between transfers. While a transfer is being read, the program must detatch the Kernel Driver from the device. The transfer delay is how long in between reattaching the kernel driver for a device after a transfer, and detaching the kernel driver for the next transfer. A longer delay increases reading time, but increases the time you can use your device, a shorter transfer does the opposite.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="maximum">
+      <number>2147483647</number>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="InterfaceSelector">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a Device Interface from this Dropdown box, Interfaces change depending on the device selected, please select a device before selecting an Interface. Interfaces are displayed, with their number and then their number of possible Alternate Settings. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="placeholderText">
+      <string>Select an Interface</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QComboBox" name="EndpointSelector">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an Endpoint from the Dropdown below, the endpoint is the location that data is read from. Endpoints are dependent on the Alternate Setting chosen, choose a Device, Interface, and Alternate Setting before choosing an Endpoint. Keep in mind that not all Endpoints may be shown, only endpoints that transfer data Device to Host (IN Endpoints) are shown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="placeholderText">
+      <string>Select an Endpoint:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="EndpointLabel">
+     <property name="text">
+      <string>Select an Endpoint: </string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="0" alignment="Qt::AlignRight">
+    <widget class="QLabel" name="TransferTimeoutLabel">
+     <property name="text">
+      <string>Enter the Transfer Timeout Duration (ms):</string>
+     </property>
+    </widget>
+   </item>
    <item row="12" column="0">
     <widget class="QLabel" name="TransferDelayLabel">
      <property name="text">
@@ -133,10 +168,10 @@
      </property>
     </widget>
    </item>
-   <item row="14" column="1">
-    <widget class="QSpinBox" name="TransferTimeout">
-     <property name="maximum">
-      <number>2147483647</number>
+   <item row="8" column="0" colspan="2">
+    <widget class="Line" name="HozRule">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -159,17 +194,22 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
-    <widget class="QComboBox" name="EndpointSelector">
-     <property name="placeholderText">
-      <string>Select an Endpoint:</string>
+   <item row="15" column="0" colspan="2">
+    <widget class="QCheckBox" name="IncludeTimeoutCheck">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a transfer is to exceed the timeout duration, should we add &amp;quot;TIMEOUT&amp;quot; to the BitContainer bits or not. Check the box to add it, uncheck the box to remove it.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-    </widget>
-   </item>
-   <item row="7" column="0" alignment="Qt::AlignRight">
-    <widget class="QLabel" name="EndpointLabel">
+     <property name="layoutDirection">
+      <enum>Qt::RightToLeft</enum>
+     </property>
      <property name="text">
-      <string>Select an Endpoint: </string>
+      <string>Add &quot;TIMEOUT&quot; to BitContainer on transfer timeout?</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="tristate">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
