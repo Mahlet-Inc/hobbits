@@ -384,4 +384,5 @@ QStringList USBDeviceImportEditor::getVendorAndProduct(QString idVendor, QString
             }
         }
     }
+    return returnVals;
 }

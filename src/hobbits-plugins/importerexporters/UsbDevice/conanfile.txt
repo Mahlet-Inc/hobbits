@@ -1,5 +1,0 @@
-[requires]
-hobbits/unstable
-
-[generators]
-cmake

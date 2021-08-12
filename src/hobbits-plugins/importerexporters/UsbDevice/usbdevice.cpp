@@ -169,7 +169,7 @@ int USBDevice::setupLibusb(){
             return -4;
             break;
         default:
-            return -4;
+            return -5;
             break;
         }
     return 0;
@@ -224,7 +224,7 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     QSharedPointer<RangeSequence> frames = RangeSequence::createEmpty();
     QByteArray largeBuffer;
     int actualLength;
-    unsigned char smallBuffer[transferSize];
+    unsigned char smallBuffer[1024];
     bool attach;
     int setupErr;
 
@@ -264,6 +264,11 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             return ImportResult::error("Error No Device Found, check device and try again.");
             break;
 
+        case -5:
+            exitLibusb(false);
+            return ImportResult::error("Error Opening Device, Libusb ran into an error with its processing.");
+            break;
+
         default:
             break;
         }
@@ -275,8 +280,8 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             //transfer time
             int transferReturn = libusb_bulk_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
             if(transferReturn == 0 && actualLength != 0){ //check that the transfer is valid
-                frames->appendRange((int)sizeof(smallBuffer)*8); //create a new frame on every transfer
-                for(int j = 0; j < (int)sizeof(smallBuffer); j++){
+                frames->appendRange(transferSize*8); //create a new frame on every transfer
+                for(int j = 0; j < transferSize; j++){
                     largeBuffer.append(smallBuffer[j]); //add the data from the data buffer to the bigger resizable buffer
                 }   
             }else{
@@ -310,7 +315,7 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     case 3:
         /**
          * This is the same thing as the bulk transfer implementation, but instead with an interrup transfer, only 2 lines of
-         * code are different, 317 and 348 refer to the bulk transfer implementation for a thorough explanation.
+         * code are different, 244/322 and 281/358 refer to the bulk transfer implementation for a thorough explanation.
          * 
          */
 
@@ -336,7 +341,12 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             exitLibusb(false);
             return ImportResult::error("Error No Device Found, check device and try again.");
             break;
-            
+
+        case -5:
+            exitLibusb(false);
+            return ImportResult::error("Error Opening Device, Libusb ran into an error with its processing.");
+            break;
+    
         default:
             break;
         }
@@ -347,8 +357,8 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
             }
             int transferReturn = libusb_interrupt_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
             if(transferReturn == 0 && actualLength != 0){
-                frames->appendRange((int)sizeof(smallBuffer)*8);
-                for(int j = 0; j < (int)sizeof(smallBuffer); j++){
+                frames->appendRange(transferSize*8);
+                for(int j = 0; j < transferSize; j++){
                     largeBuffer.append(smallBuffer[j]);
                 }   
             }else{
