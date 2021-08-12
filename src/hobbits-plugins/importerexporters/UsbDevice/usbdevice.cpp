@@ -101,7 +101,11 @@ bool USBDevice::canExport()
  */
 bool USBDevice::canImport()
 {
+    #ifdef _WIN32
+    return false;
+    #else
     return true;
+    #endif
 }
 
 /**
