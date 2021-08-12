@@ -95,9 +95,10 @@ bool USBDevice::canExport()
 }
 
 /**
- * @brief Tells hobbits if plugin can import data
+ * @brief Tells hobbits if plugin can import data depending on the OS being built for.
  * 
- * @return true - can only import data so always returns true
+ * @return true - can only import data if not on Windows so returns true if not on windows
+ * @return false - can only import data if not on Windows so returns false if on Windows.
  */
 bool USBDevice::canImport()
 {
