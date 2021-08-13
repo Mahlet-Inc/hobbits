@@ -96,9 +96,6 @@
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an Alternate Setting from this Dropdown box, the possible alternate settings change based off of the Interface selected, choose a Device and Interface before choosing an Alternate Setting. Alternate Settings are displayed with their number and their number of Endpoints to choose from.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="placeholderText">
-      <string>Select an Alternate Setting: </string>
-     </property>
     </widget>
    </item>
    <item row="1" column="1">
@@ -111,9 +108,6 @@
      </property>
      <property name="currentText">
       <string/>
-     </property>
-     <property name="placeholderText">
-      <string>Select a Device:</string>
      </property>
     </widget>
    </item>
@@ -132,18 +126,12 @@
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a Device Interface from this Dropdown box, Interfaces change depending on the device selected, please select a device before selecting an Interface. Interfaces are displayed, with their number and then their number of possible Alternate Settings. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="placeholderText">
-      <string>Select an Interface:</string>
-     </property>
     </widget>
    </item>
    <item row="7" column="1">
     <widget class="QComboBox" name="EndpointSelector">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an Endpoint from the Dropdown below, the endpoint is the location that data is read from. Endpoints are dependent on the Alternate Setting chosen, choose a Device, Interface, and Alternate Setting before choosing an Endpoint. Keep in mind that not all Endpoints may be shown, only endpoints that transfer data Device to Host (IN Endpoints) are shown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="placeholderText">
-      <string>Select an Endpoint:</string>
      </property>
     </widget>
    </item>
