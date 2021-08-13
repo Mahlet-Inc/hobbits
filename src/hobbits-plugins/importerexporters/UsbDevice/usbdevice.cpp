@@ -13,7 +13,6 @@
 USBDevice::USBDevice() 
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
-        // TODO: add parameters like {"myparametername", ParameterDelegate::ParameterType::Decimal}
         {"DeviceNum", ParameterDelegate::ParameterType::Integer},
         {"InterfaceNum", ParameterDelegate::ParameterType::Integer},
         {"AltSetNum", ParameterDelegate::ParameterType::Integer},
@@ -80,7 +79,6 @@ QString USBDevice::description()
  */
 QStringList USBDevice::tags()
 {
-    // TODO: add relevant tags
     return {"Generic"};
 }
 
