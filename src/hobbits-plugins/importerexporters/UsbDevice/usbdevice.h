@@ -2,7 +2,7 @@
 
 #include "importexportinterface.h"
 #include "parameterdelegate.h"
-#include <libusb.h>
+#include <libusb-1.0/libusb.h>
 
 class USBDevice : public QObject, ImporterExporterInterface
 {
