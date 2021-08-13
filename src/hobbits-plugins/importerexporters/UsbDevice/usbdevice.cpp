@@ -293,7 +293,7 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
                             attach = false;
                         }
                         //throw an error if an error occured
-                        return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn) + ": " + libusb_strerror(transferReturn));
+                        return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
                     }else{
                         if(includeTimeout){ //check if the user wants to include timeout
                             largeBuffer.append("TIMEOUT"); 
@@ -369,7 +369,7 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
                         libusb_reset_device(m_handle);
                         attach = false;
                     }
-                    return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn) + ": " + libusb_strerror(transferReturn));
+                    return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
                 }else{
                     if(includeTimeout){
                         largeBuffer.append("TIMEOUT");
