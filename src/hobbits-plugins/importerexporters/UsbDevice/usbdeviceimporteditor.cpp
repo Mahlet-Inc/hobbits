@@ -120,7 +120,6 @@ void USBDeviceImportEditor::initLibusb(){
         std::runtime_error libusb_init_error("Error while trying to initialize Libusb");
 		throw libusb_init_error;
 	}
-    libusb_set_option(m_ctx, LIBUSB_OPTION_LOG_LEVEL, 2 ); //set so that we see warning and error messages in the terminal
     m_cnt = libusb_get_device_list(m_ctx, &m_devs);
     if (m_cnt < 0){ //check if there is an error, if there is an error m_cnt will be less than 0
         std::runtime_error libusb_device_list_error("Error getting device list");

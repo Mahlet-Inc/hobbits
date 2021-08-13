@@ -141,7 +141,6 @@ int USBDevice::setupLibusb(){
     if(r < 0){ //checking for errors, if r < 0  then there is an error
         return -1;
     }
-   libusb_set_option(m_ctx, LIBUSB_OPTION_LOG_LEVEL, 2 ); //set terminal output for errors and warnings only
    libusb_get_device_list(m_ctx, &m_devs);
    m_dev = m_devs[m_deviceNum];
    libusb_free_device_list(m_devs, m_deviceNum);
