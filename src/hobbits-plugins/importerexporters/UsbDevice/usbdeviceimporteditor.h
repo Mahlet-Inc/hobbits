@@ -2,7 +2,7 @@
 
 #include "abstractparametereditor.h"
 #include "parameterhelper.h"
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 #include "importresult.h"
 
 namespace Ui
