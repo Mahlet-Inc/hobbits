@@ -702,7 +702,7 @@ QByteArray BitArray::readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const
     return m_dataFile.read(maxBytes);
 }
 
-QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList parseErrors)
+QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList *parseErrors)
 {
     int size = 0;
     if (bitArraySpec.startsWith("0x")) {
@@ -718,7 +718,9 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
             return QSharedPointer<BitArray>(new BitArray(bytes, size));
         }
         else {
-            parseErrors.append(QString("Expected only hex digits in '0x'-prefixed data - got '%1'").arg(bitArraySpec));
+            if (parseErrors != nullptr) {
+                parseErrors->append(QString("Expected only hex digits in '0x'-prefixed data - got '%1'").arg(bitArraySpec));
+            }
             return QSharedPointer<BitArray>(new BitArray());
         }
     }
@@ -731,10 +733,12 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
             int val = bitArraySpec.mid(i, 1).toInt(&parseOk, 8);
 
             if (!parseOk) {
-                parseErrors.append(
+                if (parseErrors != nullptr) {
+                    parseErrors->append(
                         QString("Expected octal digit in '0o'-prefixed data - got %1").arg(
                                 bitArraySpec.at(
                                         i)));
+                }
                 continue;
             }
 
@@ -752,8 +756,10 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
                 bits->set(i - 2, true);
             }
             else if (bitArraySpec.at(i) != '0') {
-                parseErrors.append(
+                if (parseErrors != nullptr) {
+                    parseErrors->append(
                         QString("Expected '1' or '0' in '0b'-prefixed data - got '%1'").arg(bitArraySpec.at(i)));
+                }
             }
         }
         return bits;
