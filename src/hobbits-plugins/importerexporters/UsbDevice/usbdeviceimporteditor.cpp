@@ -117,12 +117,14 @@ bool UsbDeviceImportEditor::setParameters(const Parameters &parameters)
 void UsbDeviceImportEditor::initLibusb(){
     m_devices.clear(); //clearing the device list
     int r = libusb_init(&m_ctx); //initialize a library session
-	if(r < 0) { //check if error, if there is an error r will be less than 0
+	if(r < 0)
+     { //check if error, if there is an error r will be less than 0
         std::runtime_error libusb_init_error("Error while trying to initialize Libusb");
 		throw libusb_init_error;
 	}
     m_cnt = libusb_get_device_list(m_ctx, &m_devs);
-    if (m_cnt < 0){ //check if there is an error, if there is an error m_cnt will be less than 0
+    if (m_cnt < 0)
+    { //check if there is an error, if there is an error m_cnt will be less than 0
         std::runtime_error libusb_device_list_error("Error getting device list");
         throw libusb_device_list_error;
     }
@@ -168,7 +170,8 @@ void UsbDeviceImportEditor::populateInterfaces(QString device){
     
     m_device = device; // setting the global device descriptor string
    m_interfaces.clear(); //clear the interfaces selector
-   if(m_devices.contains(device) == true){ //check if the device selected is actually in the devices list
+   if(m_devices.contains(device) == true)
+   { //check if the device selected is actually in the devices list
 
         m_deviceNum = m_devices.indexOf(device); 
         m_dev = m_devs[m_deviceNum]; //set the libusb device
@@ -209,7 +212,8 @@ void UsbDeviceImportEditor::populateInterfaces(QString device){
 void UsbDeviceImportEditor::populateAltSet(QString interface){
     
     m_altSets.clear();
-    if(m_interfaces.contains(interface) == true){
+    if(m_interfaces.contains(interface) == true)
+    {
 
         m_interfaceNum = m_interfaces.indexOf(interface);
     
@@ -242,7 +246,8 @@ void UsbDeviceImportEditor::populateAltSet(QString interface){
  * 
  * @param altSet The QString describing the Alternate Setting selected from the AltSetSelector ComboBox
  */
-void UsbDeviceImportEditor::populateEndpoint(QString altSet){
+void UsbDeviceImportEditor::populateEndpoint(QString altSet)
+{
     m_endpoints.clear();
     if(m_altSets.contains(altSet) == true){
 
@@ -276,7 +281,8 @@ void UsbDeviceImportEditor::populateEndpoint(QString altSet){
  * @param endpoint The QString of the endpoint selected from the EndpointSelector ComboBox 
  */
 void UsbDeviceImportEditor::configureEndpoint(QString endpoint){
-    if(m_endpoints.contains(endpoint)){
+    if(m_endpoints.contains(endpoint))
+    {
         m_endpointNum = m_endpoints.indexOf(endpoint);
 
         libusb_config_descriptor *config;

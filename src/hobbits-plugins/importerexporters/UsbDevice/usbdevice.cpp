@@ -9,8 +9,6 @@
  * @brief Construct a new UsbDevice::UsbDevice object and setup the parameters and parameter helper.
  * 
  */
-
-//Fix CLass name
 UsbDevice::UsbDevice()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
@@ -225,13 +223,16 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
 
     //determine transfer type, as some transfers we can't handle yet.
     
-    if (transferType == 0){
+    if (transferType == 0)
+    {
         return ImportResult::error("Control Transfer Endpoints Not Supported");
     }
-    else if(transferType == 1){
+    else if(transferType == 1)
+    {
         return ImportResult::error("Isochronous Transfer Endpoints Not Supported");
     }
-    else if(transferType == 2){
+    else if(transferType == 2)
+    {
         transferTypeStr += ", Bulk Transfer"; //for setting metadata
         setupLibusb(params);             //try to init libusb
         if (params.errorCode < 0)
@@ -290,7 +291,8 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
         }
         exitLibusb(true, params); //exit libusb with closing the device
     }
-    else if (transferType == 3){
+    else if (transferType == 3)
+    {
         /**
          * This is the same thing as the bulk transfer implementation, but instead with an interrup transfer, only 2 lines of
          * code are different, these lines replace bulk transfer with interrupt transfer.
