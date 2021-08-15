@@ -5,12 +5,13 @@
 #include <chrono>
 #include <thread>
 
-
 /**
- * @brief Construct a new USBDevice::USBDevice object and setup the parameters and parameter helper.
+ * @brief Construct a new UsbDevice::UsbDevice object and setup the parameters and parameter helper.
  * 
  */
-USBDevice::USBDevice() 
+
+//Fix CLass name
+UsbDevice::UsbDevice()
 {
     QList<ParameterDelegate::ParameterInfo> importInfos = {
         {"DeviceNum", ParameterDelegate::ParameterType::Integer},
@@ -23,33 +24,36 @@ USBDevice::USBDevice()
         {"TransferType", ParameterDelegate::ParameterType::Integer},
         {"TransferSize", ParameterDelegate::ParameterType::Integer},
         {"DeviceName", ParameterDelegate::ParameterType::String},
-        {"TimeoutIn", ParameterDelegate::ParameterType::Boolean}
-    };
+        {"TimeoutIn", ParameterDelegate::ParameterType::Boolean}};
 
     m_importDelegate = ParameterDelegate::create(
-                    importInfos,
-                    [this](const Parameters &parameters) {
-                        return QString("%1 Import").arg(this->name());
-                    },
-                    [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
-                        Q_UNUSED(size)
-                        return new USBDeviceImportEditor(delegate);
-                    });
+        importInfos,
+        [this](const Parameters &parameters)
+        {
+            QString dev = parameters.value("DeviceName").toString();
+            int trNum = parameters.value("TransferNum").toInt();
+            QString output = ", Import " + QString::number(trNum) + " Transfers From USB Device " + dev;
+            return QString("%1" + output).arg(this->name());
+        },
+        [](QSharedPointer<ParameterDelegate> delegate, QSize size)
+        {
+            Q_UNUSED(size)
+            return new UsbDeviceImportEditor(delegate);
+        });
 
-    QList<ParameterDelegate::ParameterInfo> exportInfos = {
-    };
+    QList<ParameterDelegate::ParameterInfo> exportInfos = {};
 
-     m_exportDelegate = nullptr;
+    m_exportDelegate = nullptr;
 }
 
 /**
- * @brief Creates a new USBDevice Importer Exporter Interface
+ * @brief Creates a new UsbDevice Importer Exporter Interface
  * 
  * @return ImporterExporterInterface* - the actual Importer that imports the data from USB
  */
-ImporterExporterInterface* USBDevice::createDefaultImporterExporter()
+ImporterExporterInterface *UsbDevice::createDefaultImporterExporter()
 {
-    return new USBDevice();
+    return new UsbDevice();
 }
 
 /**
@@ -57,7 +61,7 @@ ImporterExporterInterface* USBDevice::createDefaultImporterExporter()
  * 
  * @return QString - the name of the plugin
  */
-QString USBDevice::name()
+QString UsbDevice::name()
 {
     return "USB Device";
 }
@@ -67,7 +71,7 @@ QString USBDevice::name()
  * 
  * @return QString - a description of the plugin
  */
-QString USBDevice::description()
+QString UsbDevice::description()
 {
     return "Imports the data sent Device->Host from a Selected USB Device Endpoint";
 }
@@ -77,7 +81,7 @@ QString USBDevice::description()
  * 
  * @return QStringList - the relevant tags of the plugin
  */
-QStringList USBDevice::tags()
+QStringList UsbDevice::tags()
 {
     return {"Generic"};
 }
@@ -87,7 +91,7 @@ QStringList USBDevice::tags()
  *  
  * @return false - plugin cannot export data so always returns false.
  */
-bool USBDevice::canExport()
+bool UsbDevice::canExport()
 {
     return false;
 }
@@ -98,13 +102,9 @@ bool USBDevice::canExport()
  * @return true - can only import data if not on Windows so returns true if not on windows
  * @return false - can only import data if not on Windows so returns false if on Windows.
  */
-bool USBDevice::canImport()
+bool UsbDevice::canImport()
 {
-    #ifdef _WIN32
-    return false;
-    #else
     return true;
-    #endif
 }
 
 /**
@@ -112,7 +112,7 @@ bool USBDevice::canImport()
  * 
  * @return QSharedPointer<ParameterDelegate> - the importer parameter delegate and parameters 
  */
-QSharedPointer<ParameterDelegate>  USBDevice::importParameterDelegate()
+QSharedPointer<ParameterDelegate> UsbDevice::importParameterDelegate()
 {
     return m_importDelegate;
 }
@@ -124,58 +124,48 @@ QSharedPointer<ParameterDelegate>  USBDevice::importParameterDelegate()
  * @return QSharedPointer<ParameterDelegate> - the non-existent parameter delegate and parameters from the non-existent 
  * exporter interface
  */
-QSharedPointer<ParameterDelegate>  USBDevice::exportParameterDelegate()
+QSharedPointer<ParameterDelegate> UsbDevice::exportParameterDelegate()
 {
     return m_exportDelegate;
 }
 
 /**
- * @brief initializes libusb session to m_ctx, gets the device, gets the config descriptor, gets the relevant information,
+ * @brief initializes libusb session to params.ctx, gets the device, gets the config descriptor, gets the relevant information,
  *  gets the endpoint addr, and sets the device handle returns an int depending on success of the initialization.
+ * 
+ * @param params the usbParams struct that contains all the necessary data for libusb to read from the device properly
  * 
  * @return int - returns 0 on success and returns a negative number on a failure or error, -1 on libusb init failure,
  * -2 on libusb device handle no mem failure, -3 on libusb handle no access failure, -4 on device handle no device failure.
  */
-int USBDevice::setupLibusb(){
-   int r = libusb_init(&m_ctx); //try initializing libusb
-    if(r < 0){ //checking for errors, if r < 0  then there is an error
-        return -1;
+
+//create parameters structure to handle variables
+struct usbParams UsbDevice::setupLibusb(usbParams params)
+{
+    int r = libusb_init(&params.ctx); //try initializing libusb
+    if (r < 0)
+    { //checking for errors, if r < 0  then there is an error
+        params.errorCode = r;
+        return params;
     }
-   libusb_get_device_list(m_ctx, &m_devs);
-   m_dev = m_devs[m_deviceNum];
-   libusb_free_device_list(m_devs, m_deviceNum);
+    libusb_get_device_list(params.ctx, &params.devs);
+    params.dev = params.devs[params.deviceNum];
+    libusb_free_device_list(params.devs, params.deviceNum);
 
-   //getting the endpoint address
-   libusb_get_active_config_descriptor(m_dev, &m_config);
+    //getting the endpoint address
+    libusb_get_active_config_descriptor(params.dev, &params.config);
 
-   const libusb_interface *inter = &m_config->interface[m_interfaceNum];
-   const libusb_interface_descriptor *interdesc = &inter->altsetting[m_altSetNum];
-   const libusb_endpoint_descriptor *epdesc = &interdesc->endpoint[m_endpointNum];
+    const libusb_interface *inter = &params.config->interface[params.interfaceNum];
+    const libusb_interface_descriptor *interdesc = &inter->altsetting[params.altSetNum];
+    const libusb_endpoint_descriptor *epdesc = &interdesc->endpoint[params.endpointNum];
 
-   m_endpoint = epdesc->bEndpointAddress; 
-   
-   //try to open a libusb device handle
-   r = libusb_open(m_dev, &m_handle); 
-    if(r != 0){ //check for error
-        switch (r) //return error codes if any
-        {
-        case LIBUSB_ERROR_NO_MEM:
-            return -2;
-            break;
+    params.endpoint = epdesc->bEndpointAddress;
 
-        case LIBUSB_ERROR_ACCESS:
-            return -3;
-            break;
-        
-         case LIBUSB_ERROR_NO_DEVICE:
-            return -4;
-            break;
-        default:
-            return -5;
-            break;
-        }
-    return 0;
-    }
+    //try to open a libusb device handle
+    r = libusb_open(params.dev, &params.handle);
+
+    params.errorCode = r;
+    return params;
 }
 
 /**
@@ -183,13 +173,17 @@ int USBDevice::setupLibusb(){
  * 
  * @param closeDevice  is there a device handle initialized to be able to close, not always true as if there
  *  is an error initializing a device handle. 
+ * @param params a usbParams struct that handles all the parameters that need to be passed for libusb to close properly
  */
-void USBDevice::exitLibusb(bool closeDevice){
-    if(closeDevice){ //check if there is a device handle to close
-    libusb_close(m_handle);
+struct usbParams UsbDevice::exitLibusb(bool closeDevice, usbParams params)
+{
+    if (closeDevice)
+    { //check if there is a device handle to close
+        libusb_close(params.handle);
     }
-    libusb_free_config_descriptor(m_config);
-    libusb_exit(m_ctx);
+    libusb_free_config_descriptor(params.config);
+    libusb_exit(params.ctx);
+    return params;
 }
 
 /**
@@ -201,20 +195,23 @@ void USBDevice::exitLibusb(bool closeDevice){
  * @param progress the pointer resposible for updating the progressbar and checking for cancelled tasks
  * @return QSharedPointer<ImportResult> - the pointer towards the bitcontainer so that hobbits can read the data being imported
  */
-QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
-                                                      QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
+                                                   QSharedPointer<PluginActionProgress> progress)
 {
     //validating params
     QStringList invalidations = m_importDelegate->validate(parameters);
-    if (!invalidations.isEmpty()) {
+    if (!invalidations.isEmpty())
+    {
         return ImportResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
+    //setting up our struct
+    usbParams params;
     //getting parameters
-    m_deviceNum = parameters.value("DeviceNum").toInt();
-    m_interfaceNum = parameters.value("InterfaceNum").toInt();
-    m_altSetNum = parameters.value("AltSetNum").toInt();
-    m_endpointNum = parameters.value("EndpointNum").toInt();
+    params.deviceNum = parameters.value("DeviceNum").toInt();
+    params.interfaceNum = parameters.value("InterfaceNum").toInt();
+    params.altSetNum = parameters.value("AltSetNum").toInt();
+    params.endpointNum = parameters.value("EndpointNum").toInt();
     int transferNum = parameters.value("TransferNum").toInt();
     int transferDelay = parameters.value("TransferDelay").toInt();
     int transferTimeout = parameters.value("TransferTimeout").toInt();
@@ -228,8 +225,6 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
     int actualLength;
     unsigned char smallBuffer[1024];
     bool attach;
-    int setupErr;
-
 
     //determine transfer type, as some transfers we can't handle yet.
     switch (transferType)
@@ -238,199 +233,226 @@ QSharedPointer<ImportResult> USBDevice::importBits(const Parameters &parameters,
         return ImportResult::error("Control Transfer Endpoints Not Supported");
         break;
 
-    case 1: 
+    case 1:
         return ImportResult::error("Isochronous Transfer Endpoints Not Supported");
         break;
 
-    case 2: 
+    case 2:
         transferTypeStr += ", Bulk Transfer"; //for setting metadata
-        setupErr = setupLibusb(); //try to init libusb
-        switch (setupErr) //raise errors if any are encountered
+        params = setupLibusb(params);             //try to init libusb
+        if (params.errorCode < 0)
         {
-        case -1:
-            return ImportResult::error("Error Initializing Libusb, restart hobbits and try again.");
-            break;
-        
-        case -2:
-            exitLibusb(false);
-            return ImportResult::error("Error Allocating Memory for Device, restart hobbits and try again.");
-            break;
-        
-        case -3:
-            exitLibusb(false);
-            return ImportResult::error("Error Opening Device, no access to device, restart hobbits in root/Administrator and try again.");
-            break;
-
-        case -4:
-            exitLibusb(false);
-            return ImportResult::error("Error No Device Found, check device and try again.");
-            break;
-
-        case -5:
-            exitLibusb(false);
-            return ImportResult::error("Error Opening Device, Libusb ran into an error with its processing.");
-            break;
-
-        default:
-            break;
+            return returnError(params.errorCode);
         }
-        for(int i = 0; i < transferNum; i++){ //for every transfer
-            if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){ //check if the kernel has a driver active
-                attach = true; //need to reattach driver later
-                libusb_detach_kernel_driver(m_handle, m_interfaceNum); //dettach driver now 
+        for (int i = 0; i < transferNum; i++)
+        { //for every transfer
+            if (libusb_kernel_driver_active(params.handle, params.interfaceNum) == 1)
+            {                                                          //check if the kernel has a driver active
+                attach = true;                                         //need to reattach driver later
+                libusb_detach_kernel_driver(params.handle, params.interfaceNum); //dettach driver now
             }
             //transfer time
-            int transferReturn = libusb_bulk_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
-            if(transferReturn == 0 && actualLength != 0){ //check that the transfer is valid
-                frames->appendRange(transferSize*8); //create a new frame on every transfer
-                for(int j = 0; j < transferSize; j++){
+            int transferReturn = libusb_bulk_transfer(params.handle, params.endpoint, smallBuffer, (int)sizeof(smallBuffer), &actualLength, transferTimeout);
+            if (transferReturn == 0 && actualLength != 0)
+            {                                          //check that the transfer is valid
+                frames->appendRange(transferSize * 8); //create a new frame on every transfer
+                for (int j = 0; j < transferSize; j++)
+                {
                     largeBuffer.append(smallBuffer[j]); //add the data from the data buffer to the bigger resizable buffer
-                }   
-            }else{
-                    if(transferReturn != LIBUSB_ERROR_TIMEOUT){// check if an error was raised that isnt a timeout
-                        if(attach){
-                            libusb_reset_device(m_handle); //reset the device reattaching the kernel driver
-                            attach = false;
-                        }
-                        //throw an error if an error occured
-                        return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
-                    }else{
-                        if(includeTimeout){ //check if the user wants to include timeout
-                            largeBuffer.append("TIMEOUT"); 
-                            frames->appendRange(56);
-                        }
-                    }
+                }
             }
-            if(attach){
-                libusb_reset_device(m_handle); //reset the device to reattach the kernel driver
-                attach = false;
-            }
-            if(progress->isCancelled()){ // check if the user has cancelled the import operation
-                break;
-            }
-            progress->setProgress(i, transferNum);  //update the progressbar
-            std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay)); //wait for the durration of the transfer delay
-
-        }
-        exitLibusb(true); //exit libusb with closing the device
-        break;
-    case 3:
-        /**
-         * This is the same thing as the bulk transfer implementation, but instead with an interrup transfer, only 2 lines of
-         * code are different, 244/322 and 281/358 refer to the bulk transfer implementation for a thorough explanation.
-         * 
-         */
-
-       transferTypeStr += ", Interrupt Transfer";
-        setupErr = setupLibusb();
-        switch (setupErr)
-        {
-        case -1:
-            return ImportResult::error("Error Initializing Libusb, restart hobbits and try again.");
-            break;
-        
-        case -2:
-            exitLibusb(false);
-            return ImportResult::error("Error Allocating Memory for Libusb, restart hobbits and try again.");
-            break;
-        
-        case -3:
-            exitLibusb(false);
-            return ImportResult::error("Error Opening Device, no access to device, restart hobbits in root/Administrator and try again.");
-            break;
-
-        case -4:
-            exitLibusb(false);
-            return ImportResult::error("Error No Device Found, check device and try again.");
-            break;
-
-        case -5:
-            exitLibusb(false);
-            return ImportResult::error("Error Opening Device, Libusb ran into an error with its processing.");
-            break;
-    
-        default:
-            break;
-        }
-        for(int i = 0; i < transferNum; i++){
-            if(libusb_kernel_driver_active(m_handle, m_interfaceNum) == 1){
-                attach = true;
-                libusb_detach_kernel_driver(m_handle, m_interfaceNum);
-            }
-            int transferReturn = libusb_interrupt_transfer(m_handle, m_endpoint, smallBuffer,(int)sizeof(smallBuffer), &actualLength, transferTimeout);
-            if(transferReturn == 0 && actualLength != 0){
-                frames->appendRange(transferSize*8);
-                for(int j = 0; j < transferSize; j++){
-                    largeBuffer.append(smallBuffer[j]);
-                }   
-            }else{
-                if(transferReturn != LIBUSB_ERROR_TIMEOUT){
-                    if(attach){
-                        libusb_reset_device(m_handle);
+            else
+            {
+                if (transferReturn != LIBUSB_ERROR_TIMEOUT)
+                { // check if an error was raised that isnt a timeout
+                    if (attach)
+                    {
+                        libusb_reset_device(params.handle); //reset the device reattaching the kernel driver
                         attach = false;
                     }
+                    //throw an error if an error occured
                     return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
-                }else{
-                    if(includeTimeout){
+                }
+                else
+                {
+                    if (includeTimeout)
+                    { //check if the user wants to include timeout
                         largeBuffer.append("TIMEOUT");
                         frames->appendRange(56);
                     }
                 }
             }
-            if(attach){
-                libusb_reset_device(m_handle);
+            if (attach)
+            {
+                libusb_reset_device(params.handle); //reset the device to reattach the kernel driver
                 attach = false;
             }
-            if(progress->isCancelled()){
+            if (progress->isCancelled())
+            { // check if the user has cancelled the import operation
                 break;
             }
-            progress->setProgress(i, transferNum);  
-            std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay));
-
+            progress->setProgress(i, transferNum);                                 //update the progressbar
+            std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay)); //wait for the durration of the transfer delay
         }
-        exitLibusb(true);
+        params = exitLibusb(true, params); //exit libusb with closing the device
         break;
-    
+    case 3:
+        /**
+         * This is the same thing as the bulk transfer implementation, but instead with an interrup transfer, only 2 lines of
+         * code are different, these lines replace bulk transfer with interrupt transfer.
+         * Refer to the bulk transfer implementation for a thorough explanation.
+         * 
+         */
+
+        transferTypeStr += ", Interrupt Transfer";
+        params = setupLibusb(params);
+
+        if (params.errorCode < 0)
+        {
+            return returnError(params.errorCode);
+        }
+
+        for (int i = 0; i < transferNum; i++)
+        {
+            if (libusb_kernel_driver_active(params.handle, params.interfaceNum) == 1)
+            {
+                attach = true;
+                libusb_detach_kernel_driver(params.handle, params.interfaceNum);
+            }
+            int transferReturn = libusb_interrupt_transfer(params.handle, params.endpoint, smallBuffer, (int)sizeof(smallBuffer), &actualLength, transferTimeout);
+            if (transferReturn == 0 && actualLength != 0)
+            {
+                frames->appendRange(transferSize * 8);
+                for (int j = 0; j < transferSize; j++)
+                {
+                    largeBuffer.append(smallBuffer[j]);
+                }
+            }
+            else
+            {
+                if (transferReturn != LIBUSB_ERROR_TIMEOUT)
+                {
+                    if (attach)
+                    {
+                        libusb_reset_device(params.handle);
+                        attach = false;
+                    }
+                    return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
+                }
+                else
+                {
+                    if (includeTimeout)
+                    {
+                        largeBuffer.append("TIMEOUT");
+                        frames->appendRange(56);
+                    }
+                }
+            }
+            if (attach)
+            {
+                libusb_reset_device(params.handle);
+                attach = false;
+            }
+            if (progress->isCancelled())
+            {
+                break;
+            }
+            progress->setProgress(i, transferNum);
+            std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay));
+        }
+        params = exitLibusb(true, params);
+        break;
+
     default:
         break;
     }
-    QSharedPointer<BitContainer> container = BitContainer::create(largeBuffer); //creating a bit container with all the data in it
-    container->setName("USB " + deviceName); //esetting the name you see on the side of hobbits
+    QSharedPointer<BitContainer> container = BitContainer::create(largeBuffer);      //creating a bit container with all the data in it
+    container->setName("USB " + deviceName);                                         //esetting the name you see on the side of hobbits
     QSharedPointer<BitInfo> info = BitInfo::create(container->bits()->sizeInBits()); //creating a bit infor for setting frames
-    info->setFrames(frames); // setting frames on every transfer
+    info->setFrames(frames);                                                         // setting frames on every transfer
 
     //setting the metadata
     info->setMetadata("Device Name", deviceName);
-    info->setMetadata("Device Number", m_deviceNum);
-    info->setMetadata("Interface Number", m_interfaceNum);
-    info->setMetadata("Alternate Setting Number", m_altSetNum);
-    info->setMetadata("Endpoint Number", m_endpointNum);
-    info->setMetadata("Endpoint Address", (int)m_endpoint);
+    info->setMetadata("Device Number", params.deviceNum);
+    info->setMetadata("Interface Number", params.interfaceNum);
+    info->setMetadata("Alternate Setting Number", params.altSetNum);
+    info->setMetadata("Endpoint Number", params.endpointNum);
+    info->setMetadata("Endpoint Address", (int)params.endpoint);
     info->setMetadata("Number of Transfers", transferNum);
     info->setMetadata("Transfer Delay Duration", transferDelay);
     info->setMetadata("Transfer Timeout Duration", transferTimeout);
     info->setMetadata("Transfer Type", transferTypeStr);
-    info->setMetadata("TransferSize", transferSize);
+    info->setMetadata("Transfer Size", transferSize);
 
     //adding the info to the BitContainer
     container->setInfo(info);
-   
+
     //returning the bit container
     return ImportResult::result(container, parameters);
 }
 
+QSharedPointer<ImportResult> returnError(int errorCode)
+{
+    if (errorCode == LIBUSB_ERROR_IO)
+    {
+        return ImportResult::error("Device IO Error, error reading from the device, please try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_INVALID_PARAM)
+    {
+        return ImportResult::error("Invalid Parameter Error, An invalid device parameter was passed, please check your entry and try again.");
+    }
+    else if (errorCode == LIBUSB_ERROR_ACCESS)
+    {
+        return ImportResult::error("Insufficient Permissions Error, Try restarting hobbits in root, or with valid chmod permissions like a+x.");
+    }
+    else if (errorCode == LIBUSB_ERROR_NO_DEVICE)
+    {
+        return ImportResult::error("No Device Found Error, Device selected could not be found, try replugging your device and/or restarting hobbits.");
+    }
+    else if (errorCode == LIBUSB_ERROR_NOT_FOUND)
+    {
+        return ImportResult::error("Entity Not Found Error, A Device, Interface, Alternate Setting, or Endpoint was not found, check your selection and try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_BUSY)
+    {
+        return ImportResult::error("Device Busy Error, the device you selected is busy with another task, please try again in a bit. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_OVERFLOW)
+    {
+        return ImportResult::error("Buffer Overflow Error, The buffer used to temporarily store the usb data has overflown, please try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_PIPE)
+    {
+        return ImportResult::error("Pipe Error, The endpoint you selected stopped sending data, please replug your device and try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_NO_MEM)
+    {
+        return ImportResult::error("Out Of Memory Error, Libusb cannot find enough memory to open a device, please close some other applications, and try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_NOT_SUPPORTED)
+    {
+        return ImportResult::error("Not Supported Error, The device you selected is not supported, please choose a different device and try again. If the problem continues, raise an issue on GitHub.");
+    }
+    else if (errorCode == LIBUSB_ERROR_OTHER)
+    {
+        return ImportResult::error("Libusb Ran Into an Error in its Processing, please try again. If the problem continues, raise an issue on GitHub.");
+    }
+    return nullptr;
+}
+
 /**
  * @brief The function that would export the bits if the plugin allowed for exporting bits, DO NOT REMOVE
- * it may break hobbits without it IDK why.
+ * as it is needed for the importexport plugin definition to work
+ * 
  * 
  * @param container The container to export
  * @param parameters the parameters require for the export
  * @param progress the progressbar and progress checker for the output
  * @return QSharedPointer<ExportResult> - a pointer towards the export result, right now throws an error if its ever called 
  */
-QSharedPointer<ExportResult> USBDevice::exportBits(QSharedPointer<const BitContainer> container,
-                                                      const Parameters &parameters,
-                                                      QSharedPointer<PluginActionProgress> progress)
+QSharedPointer<ExportResult> UsbDevice::exportBits(QSharedPointer<const BitContainer> container,
+                                                   const Parameters &parameters,
+                                                   QSharedPointer<PluginActionProgress> progress)
 {
     return ExportResult::error("Export not implemented");
 }

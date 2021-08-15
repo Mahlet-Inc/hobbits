@@ -7,22 +7,21 @@
 
 namespace Ui
 {
-class USBDeviceImportEditor;
+class UsbDeviceImportEditor;
 }
 
-class USBDeviceImportEditor : public AbstractParameterEditor
+class UsbDeviceImportEditor : public AbstractParameterEditor
 {
     Q_OBJECT
 
 public:
-    USBDeviceImportEditor(QSharedPointer<ParameterDelegate> delegate);
-    ~USBDeviceImportEditor() override;
+    UsbDeviceImportEditor(QSharedPointer<ParameterDelegate> delegate);
+    ~UsbDeviceImportEditor() override;
 
     QString title() override;
 
     bool setParameters(const Parameters &parameters) override;
     Parameters parameters() override;
-    static QSharedPointer<ImportResult> importData(const Parameters &parameters, QSharedPointer<PluginActionProgress> progress);
 
     //the type of the transfer the endpoint can perform
     uint8_t m_transferType;
@@ -51,7 +50,7 @@ private:
     void clearSelectors(QComboBox *boxes[]);
     QString addLeadingZeros(std::string str);
     QStringList getVendorAndProduct(QString idVendor, QString idProduct);
-    Ui::USBDeviceImportEditor *ui;
+    Ui::UsbDeviceImportEditor *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
     
     //the list of different devices

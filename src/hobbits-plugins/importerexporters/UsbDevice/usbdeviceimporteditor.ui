@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>USBDeviceImportEditor</class>
- <widget class="QWidget" name="USBDeviceImportEditor">
+ <class>UsbDeviceImportEditor</class>
+ <widget class="QWidget" name="UsbDeviceImportEditor">
   <property name="enabled">
    <bool>true</bool>
   </property>

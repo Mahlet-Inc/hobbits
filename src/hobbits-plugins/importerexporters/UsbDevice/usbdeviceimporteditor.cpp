@@ -2,11 +2,12 @@
 #include "ui_usbdeviceimporteditor.h"
 #include <libusb-1.0/libusb.h>
 #include <string>
+#include <iostream>
 #include <sstream>
 
 
 /**
- * @brief Construct a new USBDeviceImportEditor::USBDeviceImportEditor object, sets ui elements, initializes libusb gets a device
+ * @brief Construct a new UsbDeviceImportEditor::UsbDeviceImportEditor object, sets ui elements, initializes libusb gets a device
  * list, populates the device selector ComboBox and sets Signals and Slots.
  * 
  * @param delegate a pointer that points to a ParameterDelegate object, used to initialize the parameter helper object,
@@ -14,8 +15,8 @@
  * 
  */
 
-USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> delegate):
-    ui(new Ui::USBDeviceImportEditor()),
+UsbDeviceImportEditor::UsbDeviceImportEditor(QSharedPointer<ParameterDelegate> delegate):
+    ui(new Ui::UsbDeviceImportEditor()),
     m_paramHelper(new ParameterHelper(delegate))
   
 {
@@ -52,13 +53,13 @@ USBDeviceImportEditor::USBDeviceImportEditor(QSharedPointer<ParameterDelegate> d
 }
 
 /**
- * @brief Destroy the USBDeviceImportEditor::USBDeviceImportEditor object, free libusb variables, and delete the ui.
+ * @brief Destroy the UsbDeviceImportEditor::UsbDeviceImportEditor object, free libusb variables, and delete the ui.
  * 
  * Frees the device list, by deleting the libusb_device pointer, exits libusb, and deletes the ui class, then deconstructs the 
- * USBDeviceImportEditor object.
+ * UsbDeviceImportEditor object.
  * 
  */
-USBDeviceImportEditor::~USBDeviceImportEditor()
+UsbDeviceImportEditor::~UsbDeviceImportEditor()
 {
     libusb_free_device_list(m_devs, m_deviceNum); 
     libusb_exit(m_ctx);
@@ -70,9 +71,9 @@ USBDeviceImportEditor::~USBDeviceImportEditor()
  * 
  * @return QString the title to be displayed on the top of the UI window 
  */
-QString USBDeviceImportEditor::title()
+QString UsbDeviceImportEditor::title()
 {
-    return "Select USB Device & Configurations to Read From";
+    return "Select USB Device & Read Configuurations";
 }
 
 /**
@@ -83,7 +84,7 @@ QString USBDeviceImportEditor::title()
  * 
  * @return Parameters - the various parameters from the users UI selection, and other parameters determined by the program. 
  */
-Parameters USBDeviceImportEditor::parameters()
+Parameters UsbDeviceImportEditor::parameters()
 {
     auto params = m_paramHelper->getParametersFromUi(); //gather our parameter values from the ui
     params.insert("TransferType", (int)m_transferType); // adding the transfer type parameter
@@ -101,7 +102,7 @@ Parameters USBDeviceImportEditor::parameters()
  * @return bool - returns true if successful, false if unsucessful
  * 
  */
-bool USBDeviceImportEditor::setParameters(const Parameters &parameters)
+bool UsbDeviceImportEditor::setParameters(const Parameters &parameters)
 {
     return m_paramHelper->applyParametersToUi(parameters);
 }
@@ -113,7 +114,7 @@ bool USBDeviceImportEditor::setParameters(const Parameters &parameters)
  * alt set, and endpoint selectors. Throws errors if libusb raises an error in initalization or getting the device list.
  * 
  */
-void USBDeviceImportEditor::initLibusb(){
+void UsbDeviceImportEditor::initLibusb(){
     m_devices.clear(); //clearing the device list
     int r = libusb_init(&m_ctx); //initialize a library session
 	if(r < 0) { //check if error, if there is an error r will be less than 0
@@ -135,7 +136,7 @@ void USBDeviceImportEditor::initLibusb(){
  * 
  * @return QStringList - list of strings describing devices recognized by libusb, used to populate the device selector 
  */  
-QStringList USBDeviceImportEditor::getUsbDevices(){
+QStringList UsbDeviceImportEditor::getUsbDevices(){
 
     QStringList devices; //the QStringList we will return
     for(int i = 0; i < m_cnt; i++){ //for every device in the libusb device list
@@ -143,13 +144,8 @@ QStringList USBDeviceImportEditor::getUsbDevices(){
         libusb_device_descriptor desc; 
         libusb_get_device_descriptor(dev, &desc); //get the device descriptor
 
-        std::stringstream sstream; //set up a string stream to allow for converting a short int to hexadecimal
-        sstream << std::hex << desc.idVendor; //convert short to hex
-        QString idVendor = addLeadingZeros(sstream.str()); //get the vendor ID after adding the leading 0s if needed
-
-        std::stringstream sstream2; //same as above but with the product id
-        sstream2 << std::hex << desc.idProduct;
-        QString idProduct = addLeadingZeros(sstream2.str());
+        QString idVendor = QString("%1").arg((int)desc.idVendor, 4, 16, QChar('0'));
+        QString idProduct = QString("%1").arg((int)desc.idProduct, 4, 16, QChar('0'));
 
         QStringList productAndVendor = getVendorAndProduct(idVendor, idProduct); //getting the vendor and product names
 
@@ -167,7 +163,7 @@ QStringList USBDeviceImportEditor::getUsbDevices(){
  * 
  * @param device The QString that was selected from the DeviceSelector ComboBox
  */
-void USBDeviceImportEditor::populateInterfaces(QString device){
+void UsbDeviceImportEditor::populateInterfaces(QString device){
     
     
     m_device = device; // setting the global device descriptor string
@@ -210,7 +206,7 @@ void USBDeviceImportEditor::populateInterfaces(QString device){
  * 
  * @param interface The QString describing the interface selected from the InterfaceSelector ComboBox
  */
-void USBDeviceImportEditor::populateAltSet(QString interface){
+void UsbDeviceImportEditor::populateAltSet(QString interface){
     
     m_altSets.clear();
     if(m_interfaces.contains(interface) == true){
@@ -246,7 +242,7 @@ void USBDeviceImportEditor::populateAltSet(QString interface){
  * 
  * @param altSet The QString describing the Alternate Setting selected from the AltSetSelector ComboBox
  */
-void USBDeviceImportEditor::populateEndpoint(QString altSet){
+void UsbDeviceImportEditor::populateEndpoint(QString altSet){
     m_endpoints.clear();
     if(m_altSets.contains(altSet) == true){
 
@@ -279,7 +275,7 @@ void USBDeviceImportEditor::populateEndpoint(QString altSet){
  * 
  * @param endpoint The QString of the endpoint selected from the EndpointSelector ComboBox 
  */
-void USBDeviceImportEditor::configureEndpoint(QString endpoint){
+void UsbDeviceImportEditor::configureEndpoint(QString endpoint){
     if(m_endpoints.contains(endpoint)){
         m_endpointNum = m_endpoints.indexOf(endpoint);
 
@@ -303,10 +299,10 @@ void USBDeviceImportEditor::configureEndpoint(QString endpoint){
  * @param selector The QComboBox to clear and populate.
  * @param items The QStringList of items to populate the selector with.
  */
-void USBDeviceImportEditor::updateSelector(QComboBox *selector, QStringList items){
+void UsbDeviceImportEditor::updateSelector(QComboBox *selector, QStringList items){
     selector->clear();
     for(int i = 0; i < items.length(); i++){
-    selector->addItem(items[i], i);
+        selector->addItem(items[i], i);
     }
 }
 
@@ -317,7 +313,7 @@ void USBDeviceImportEditor::updateSelector(QComboBox *selector, QStringList item
  * @param str std::string, the hex string of either the vendorID or productID
  * @return QString - the hex string, but with the proper number of leading zeroes added to it. 
  */
-QString USBDeviceImportEditor::addLeadingZeros(std::string str){
+QString UsbDeviceImportEditor::addLeadingZeros(std::string str){
     switch (str.length())
     {
     case 1: 
@@ -344,7 +340,7 @@ QString USBDeviceImportEditor::addLeadingZeros(std::string str){
  * @return QStringList - a list of 2 QStrings the First being the Vendor name, the second being the Product name or
  *  "Product Name not Found" if the product name is not in the list.
  */
-QStringList USBDeviceImportEditor::getVendorAndProduct(QString idVendor, QString idProduct){
+QStringList UsbDeviceImportEditor::getVendorAndProduct(QString idVendor, QString idProduct){
     bool findProduct = false; //true if the vendor has been identified
     QStringList returnVals; //the values to return
     QFile vendorProductFile(":/usbresources/usb_resources/usb.ids"); //the resource file that needs to be opened has been complied into the MOC 
@@ -359,18 +355,22 @@ QStringList USBDeviceImportEditor::getVendorAndProduct(QString idVendor, QString
         QString line = in.readLine(); //reads the next line into memory
         if(line.startsWith("#")){ //lines starting with # are comment lines and can be disregarded
             continue;
-        }else if(!line.startsWith("\t")){ //are we on a vendor line, a \t signifies a product line 
+        }
+        else if(!line.startsWith("\t")){ //are we on a vendor line, a \t signifies a product line 
             if(findProduct){ // are we looking for a product? if so then we have gone too far and the product name does not exist
                 returnVals.append("Product Name Not Found");
                 return returnVals; //return vendor and "product name not found"
-            }else{
+            }
+            else
+            {
                 if(line.startsWith(idVendor)){ //if the line starts with the vendorID we are looking for
                     QStringList temp = line.split("  "); //there are two spaces that sepparate the vendorID and the vendor name
                     returnVals.append(temp[1]);
                     findProduct = true; //we have found the vendor now looking for the product
                 }
             }
-        }else if(line.startsWith("\t")){ //are we on a product line
+        }
+        else if(line.startsWith("\t")){ //are we on a product line
             if(findProduct){ //if we are looking for a product
                 line = line.remove("\t"); //then remove the tab
                 if(line.startsWith(idProduct)){ //check for product id
@@ -378,7 +378,9 @@ QStringList USBDeviceImportEditor::getVendorAndProduct(QString idVendor, QString
                     returnVals.append(temp[1]); //if found append the product name
                     return returnVals; //return the vendor and product name
                 }
-            }else{
+            }
+            else
+            {
                 continue;
             }
         }
