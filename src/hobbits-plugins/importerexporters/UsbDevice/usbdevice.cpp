@@ -133,20 +133,19 @@ QSharedPointer<ParameterDelegate> UsbDevice::exportParameterDelegate()
  * @brief initializes libusb session to params.ctx, gets the device, gets the config descriptor, gets the relevant information,
  *  gets the endpoint addr, and sets the device handle returns an int depending on success of the initialization.
  * 
- * @param params the usbParams struct that contains all the necessary data for libusb to read from the device properly
+ * @param params the UsbParams struct that contains all the necessary data for libusb to read from the device properly
  * 
  * @return int - returns 0 on success and returns a negative number on a failure or error, -1 on libusb init failure,
  * -2 on libusb device handle no mem failure, -3 on libusb handle no access failure, -4 on device handle no device failure.
  */
 
 //create parameters structure to handle variables
-struct usbParams UsbDevice::setupLibusb(usbParams params)
+void UsbDevice::setupLibusb(UsbParams &params)
 {
     int r = libusb_init(&params.ctx); //try initializing libusb
     if (r < 0)
     { //checking for errors, if r < 0  then there is an error
         params.errorCode = r;
-        return params;
     }
     libusb_get_device_list(params.ctx, &params.devs);
     params.dev = params.devs[params.deviceNum];
@@ -165,7 +164,6 @@ struct usbParams UsbDevice::setupLibusb(usbParams params)
     r = libusb_open(params.dev, &params.handle);
 
     params.errorCode = r;
-    return params;
 }
 
 /**
@@ -173,9 +171,9 @@ struct usbParams UsbDevice::setupLibusb(usbParams params)
  * 
  * @param closeDevice  is there a device handle initialized to be able to close, not always true as if there
  *  is an error initializing a device handle. 
- * @param params a usbParams struct that handles all the parameters that need to be passed for libusb to close properly
+ * @param params a UsbParams struct that handles all the parameters that need to be passed for libusb to close properly
  */
-struct usbParams UsbDevice::exitLibusb(bool closeDevice, usbParams params)
+void UsbDevice::exitLibusb(bool closeDevice, UsbParams &params)
 {
     if (closeDevice)
     { //check if there is a device handle to close
@@ -183,7 +181,6 @@ struct usbParams UsbDevice::exitLibusb(bool closeDevice, usbParams params)
     }
     libusb_free_config_descriptor(params.config);
     libusb_exit(params.ctx);
-    return params;
 }
 
 /**
@@ -206,7 +203,7 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
     }
 
     //setting up our struct
-    usbParams params;
+    UsbParams params;
     //getting parameters
     params.deviceNum = parameters.value("DeviceNum").toInt();
     params.interfaceNum = parameters.value("InterfaceNum").toInt();
@@ -227,19 +224,16 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
     bool attach;
 
     //determine transfer type, as some transfers we can't handle yet.
-    switch (transferType)
-    {
-    case 0:
+    
+    if (transferType == 0){
         return ImportResult::error("Control Transfer Endpoints Not Supported");
-        break;
-
-    case 1:
+    }
+    else if(transferType == 1){
         return ImportResult::error("Isochronous Transfer Endpoints Not Supported");
-        break;
-
-    case 2:
+    }
+    else if(transferType == 2){
         transferTypeStr += ", Bulk Transfer"; //for setting metadata
-        params = setupLibusb(params);             //try to init libusb
+        setupLibusb(params);             //try to init libusb
         if (params.errorCode < 0)
         {
             return returnError(params.errorCode);
@@ -294,9 +288,9 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
             progress->setProgress(i, transferNum);                                 //update the progressbar
             std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay)); //wait for the durration of the transfer delay
         }
-        params = exitLibusb(true, params); //exit libusb with closing the device
-        break;
-    case 3:
+        exitLibusb(true, params); //exit libusb with closing the device
+    }
+    else if (transferType == 3){
         /**
          * This is the same thing as the bulk transfer implementation, but instead with an interrup transfer, only 2 lines of
          * code are different, these lines replace bulk transfer with interrupt transfer.
@@ -305,7 +299,7 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
          */
 
         transferTypeStr += ", Interrupt Transfer";
-        params = setupLibusb(params);
+        setupLibusb(params);
 
         if (params.errorCode < 0)
         {
@@ -360,12 +354,13 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
             progress->setProgress(i, transferNum);
             std::this_thread::sleep_for(std::chrono::milliseconds(transferDelay));
         }
-        params = exitLibusb(true, params);
-        break;
-
-    default:
-        break;
+        exitLibusb(true, params);
     }
+    else
+    {
+        return ImportResult::error("Invalid Transfer Type Error, please reselect settings and try again.");
+    }
+
     QSharedPointer<BitContainer> container = BitContainer::create(largeBuffer);      //creating a bit container with all the data in it
     container->setName("USB " + deviceName);                                         //esetting the name you see on the side of hobbits
     QSharedPointer<BitInfo> info = BitInfo::create(container->bits()->sizeInBits()); //creating a bit infor for setting frames
