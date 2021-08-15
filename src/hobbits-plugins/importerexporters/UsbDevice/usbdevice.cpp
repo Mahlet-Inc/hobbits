@@ -391,7 +391,7 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
     return ImportResult::result(container, parameters);
 }
 
-QSharedPointer<ImportResult> returnError(int errorCode)
+QSharedPointer<ImportResult> UsbDevice::returnError(int errorCode)
 {
     if (errorCode == LIBUSB_ERROR_IO)
     {

@@ -307,31 +307,6 @@ void UsbDeviceImportEditor::updateSelector(QComboBox *selector, QStringList item
 }
 
 /**
- * @brief Adds the leading zeros to the hex string passed into the parameter str, and returns the new string
- * useful for getting the list of devices, and identifiying their vendor and product name from ID.
- * 
- * @param str std::string, the hex string of either the vendorID or productID
- * @return QString - the hex string, but with the proper number of leading zeroes added to it. 
- */
-QString UsbDeviceImportEditor::addLeadingZeros(std::string str){
-    switch (str.length())
-    {
-    case 1: 
-        return "000" + QString::fromStdString(str);
-        break;
-    case 2:
-        return "00" + QString::fromStdString(str);
-        break;
-    case 3:
-        return "0" + QString::fromStdString(str);
-        break;
-    default:
-        return QString::fromStdString(str);
-        break;
-    }
-}
-
-/**
  * @brief Gets the name of the Vendor and the Product in a human understandable string, based of the product and vendor IDs 
  * passed as parameters
  * 
