@@ -54,7 +54,13 @@ QSharedPointer<const AnalyzerResult> Find::analyzeBits(
         return AnalyzerResult::error(QString("Invalid parameters passed to %1:\n%2").arg(name()).arg(invalidations.join("\n")));
     }
 
-    auto findBits = BitArray::fromString(parameters.value("search_string").toString());
+    QStringList parseErrors;
+    QString searchString = parameters.value("search_string").toString();
+    auto findBits = BitArray::fromString(searchString, &parseErrors);
+    if (!parseErrors.isEmpty()) {
+        return AnalyzerResult::error(QString("Failed to parse search term:\n%1").arg(parseErrors.mid(0, 10).join("\n")));
+    }
+
     auto bits = container->bits();
 
     if (findBits->sizeInBits() < 1) {

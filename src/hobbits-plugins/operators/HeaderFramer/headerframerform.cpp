@@ -99,7 +99,7 @@ QString HeaderFramerForm::getHeaderString()
     }
 
     QStringList parseErrors;
-    QSharedPointer<BitArray> header = BitArray::fromString(ui->le_header->text(), parseErrors);
+    QSharedPointer<BitArray> header = BitArray::fromString(ui->le_header->text(), &parseErrors);
     if (!parseErrors.isEmpty()) {
         return QString();
     }
