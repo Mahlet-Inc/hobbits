@@ -109,24 +109,13 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
 
 
     //SIMD size is archetitecure dependent
-    //read PFFFT documentation for more info
     int simd_size = pffft_simd_size(); 
     cout << "SIMD SIZE FUNCTION:" << simd_size << endl;
 
-    //check if SIMD size is 4
-    //if(simd_size == 4){
-        //the fftSize needs to be divisble by 16 (for complex FFTs)
-        //if(fftSize % 16 == 0){
-            //PFFFT_Setup *s = pffft_new_setup(fftSize, PFFFT_COMPLEX);
-        //}
-    //}
-    //check if SIMD size is 1
-   /* else if(size == 1){
-        //the fftSize needs to be divisble by 1
-        //any number would be divisble by 1
-    }
-    */
-    
+    //Note:
+    //FFT size needs to be of the form specified in the documentation
+    //need to add logic to this file to ensure that the correct FFT size is used
+
     //PFFFT set up
     PFFFT_Setup *s = pffft_new_setup(fftSize, PFFFT_COMPLEX);
 
