@@ -116,15 +116,15 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
     //FFT size needs to be of the form specified in the documentation
     //need to add logic to this file to ensure that the correct FFT size is used
 
-    //PFFFT set up
     //check if fftSize is 16
     //according to PFFFT documenation, complex FFTs must have an FFT Size that is divisble by 16
     //make fftSize the next number divisble by 16
-
     if(fftSize % 16 != 0 || fftSize < 32){
         fftSize = (16 - (fftSize % 16)) + fftSize;
         cout << "Changed FFT Size to this value: " << fftSize << endl;
     }
+    
+    //PFFFT set up
     PFFFT_Setup *s = pffft_new_setup(fftSize, PFFFT_COMPLEX);
 
     //PFFFT allocate memory for input, output, and work arrays aka "float buffers"
