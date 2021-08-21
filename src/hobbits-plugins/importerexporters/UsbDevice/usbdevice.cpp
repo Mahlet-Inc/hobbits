@@ -266,7 +266,7 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
                         attach = false;
                     }
                     //throw an error if an error occured
-                    return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
+                    return returnError(transferReturn);
                 }
                 else
                 {
@@ -333,7 +333,7 @@ QSharedPointer<ImportResult> UsbDevice::importBits(const Parameters &parameters,
                         libusb_reset_device(params.handle);
                         attach = false;
                     }
-                    return ImportResult::error("Transfer Error, Code: " + QString::number(transferReturn) + " " + libusb_error_name(transferReturn));
+                    return returnError(transferReturn);
                 }
                 else
                 {

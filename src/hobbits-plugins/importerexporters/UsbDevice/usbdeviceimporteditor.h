@@ -47,8 +47,6 @@ private:
     void initLibusb();
     QStringList getUsbDevices();
     void updateSelector(QComboBox *selector, QStringList items);
-    void clearSelectors(QComboBox *boxes[]);
-    QString addLeadingZeros(std::string str);
     QStringList getVendorAndProduct(QString idVendor, QString idProduct);
     Ui::UsbDeviceImportEditor *ui;
     QSharedPointer<ParameterHelper> m_paramHelper;
