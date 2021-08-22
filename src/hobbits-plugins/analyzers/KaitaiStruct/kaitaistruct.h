@@ -28,7 +28,14 @@ public:
 
 
 private:
-    RangeHighlight makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData, int &colorIdx);
+    typedef struct KsField {
+        QString label;
+        Range range;
+        QString value;
+        QString type;
+        QVector<QString> children;
+    } KsField;
+    RangeHighlight makeHighlight(QString label, const QMap<QString, QSharedPointer<KsField>> &fieldData, int &colorIdx);
 
     QSharedPointer<ParameterDelegate> m_delegate;
 
