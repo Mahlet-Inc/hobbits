@@ -1,3 +1,16 @@
+# [0.51.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.50.0...v0.51.0) (2021-08-22)
+
+
+### Bug Fixes
+
+* [core] BitArray fromString parsing error reports ([4b176de](https://github.com/Mahlet-Inc/hobbits/commit/4b176de2145bf5eb53a467817cde27f5a870e534))
+* improve kaitai parser parser [#119](https://github.com/Mahlet-Inc/hobbits/issues/119) ([e1efaa2](https://github.com/Mahlet-Inc/hobbits/commit/e1efaa292200a28eef097aa629ce2371f3c567d0))
+
+
+### Features
+
+* big fixes and improvements to kaitai [#110](https://github.com/Mahlet-Inc/hobbits/issues/110) [#119](https://github.com/Mahlet-Inc/hobbits/issues/119) ([34bbc4d](https://github.com/Mahlet-Inc/hobbits/commit/34bbc4d987129c4f3e8a89f6c2c3270684fd260d))
+
 # [0.50.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.49.0...v0.50.0) (2021-05-31)
 
 
