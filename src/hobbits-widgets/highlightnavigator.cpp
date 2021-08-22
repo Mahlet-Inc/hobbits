@@ -87,6 +87,10 @@ QTreeWidgetItem* HighlightNavigator::highlightToItem(const RangeHighlight &highl
 
     item->setData(0, Qt::UserRole + 1, ++count);
 
+    for (int i = 0; i < highlight.tags().size() && i < 5; i++) {
+        item->setData(i+1, Qt::DisplayRole, highlight.tags().at(i));
+    }
+
     for (auto child : highlight.children()) {
         item->addChild(highlightToItem(child, count));
     }
@@ -137,12 +141,28 @@ void HighlightNavigator::refresh()
 
     QList<QTreeWidgetItem*> items;
     m_allHighlightCount = 0;
+    int maxColumns = 1;
     for (auto highlight: m_container->info()->highlights(m_category)) {
-        items.append(highlightToItem(highlight, m_allHighlightCount));
+        auto item = highlightToItem(highlight, m_allHighlightCount);
+        maxColumns = qMax(item->columnCount(), maxColumns);
+        items.append(item);
     }
+    ui->tw_highlights->setColumnCount(maxColumns);
     ui->tw_highlights->addTopLevelItems(items);
     if (items.size() > 0) {
         ui->tw_highlights->setCurrentItem(items.first());
+    }
+
+    if (maxColumns == 1) {
+        ui->tw_highlights->setHeaderHidden(true);
+    }
+    else {
+        // TODO: this is pretty garbage and should be better.
+        //       not helped by the fact that this method seems to incorrectly
+        //       get called 3 times per update
+        int w = qMax(250, ui->tw_highlights->width()/2);
+        ui->tw_highlights->setColumnWidth(0, w);
+        ui->tw_highlights->setHeaderHidden(false);
     }
 }
 
