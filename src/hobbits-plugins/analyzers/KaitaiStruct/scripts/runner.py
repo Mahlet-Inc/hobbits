@@ -6,54 +6,12 @@ import glob
 import os
 import binascii
 import traceback
+from enum import Enum
 
 from kaitaistruct import KaitaiStruct
 
 import pprint
 pp = pprint.PrettyPrinter(indent=2)
-
-def dump_struct(s, sections, prefix="", parent_offset = 0, root_io=None, root_offset=0):
-    if isinstance(s, list):
-        print(f"\n[BEGIN List Under '{prefix}']")
-        for i, item in enumerate(s):
-            label = prefix + "[" + str(i) + "]"
-            print(label)
-            sections.append({
-                "label": label,
-                "parent": prefix
-            })
-            dump_struct(item, sections, label, parent_offset, root_io, root_offset)
-        print(f"[END OF List Under '{prefix}']\n")
-    elif isinstance(s, KaitaiStruct):
-        pp.pprint(vars(s))
-        if hasattr(s, "_debug"):
-
-            section_io = s._io
-            if root_io is None:
-                root_io = section_io
-            elif section_io is not root_io:
-                root_io = section_io
-                root_offset = root_offset + parent_offset
-
-            print("\nITEMS {\n")
-            for name, descr in s._debug.items():
-                prop = getattr(s, name)
-                label = prefix + "." + name if prefix else name
-                print(f"(\n  name: {label},\n  descr: {descr},\n  prop: {prop},\n  offset: {root_offset}\n)\n")
-
-                sections.append({
-                    "start": descr["start"] + root_offset,
-                    "end": descr["end"] + root_offset,
-                    "label": label,
-                    "parent": prefix
-                })
-
-
-                parent_offset = descr["start"] + root_offset
-
-                dump_struct(prop, sections, label, parent_offset, root_io, root_offset)
-
-            print("}\n")
 
 
 def process_value(value, section):
@@ -65,6 +23,11 @@ def process_value(value, section):
             value = f"0x{binascii.hexlify(value).decode()}"
         section['value'] = value
 
+    elif isinstance(value, str):
+        if len(value) > 15:
+            value = f"{value[:12]}..."
+        section['value'] = value
+
     elif isinstance(value, float):
         section['value'] = value
 
@@ -74,17 +37,21 @@ def process_value(value, section):
     elif isinstance(value, bool):
         section['value'] = value
 
+    elif isinstance(value, Enum):
+        section['type'] = type(value).__name__
+        section['value'] = value.name
+
     else:
         return False
     
     return True
 
 
-def parse_struct(struct, sections, prefix="", parent_offset = 0, root_io=None, root_offset=0):
+def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, base_offset=0):
     if not isinstance(struct, KaitaiStruct):
         return
     
-    print(f"Parsing {struct} at '{prefix}'")
+    print(f"Parsing {type(struct).__name__} at '{prefix}'")
 
     # iterate through members in order to read lazy instances
     for attr in vars(type(struct)):
@@ -101,13 +68,13 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, root_io=None, r
         return
     
     
-
     section_io = struct._io
-    if root_io is None:
-        root_io = section_io
-    elif section_io is not root_io:
-        root_io = section_io
-        root_offset = root_offset + parent_offset
+    if base_io is None:
+        base_io = section_io
+    elif section_io is not base_io:
+        base_io = section_io
+        base_offset = base_offset + parent_offset
+        print(f"New base offset for {type(struct).__name__}: {base_offset}")
     
     for name, info in struct._debug.items():
         try:
@@ -117,7 +84,7 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, root_io=None, r
             continue
 
         label = prefix + "." + name if prefix else name
-        parent_offset = info["start"] + root_offset
+        parent_offset = info["start"] + base_offset
 
         #print(f"{name}:")
         #pp.pprint(info)
@@ -127,35 +94,39 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, root_io=None, r
             continue
 
         section = {
-            "start": info["start"] + root_offset,
-            "end": info["end"] + root_offset,
+            "start": info["start"] + base_offset,
+            "end": info["end"] + base_offset,
             "label": label,
             "parent": prefix
         }
 
 
         if isinstance(value, KaitaiStruct):
+            section['type'] = type(value).__name__
             sections.append(section)
-            parse_struct(value, sections, label, parent_offset, root_io, root_offset)
+            parse_struct(value, sections, label, parent_offset, base_io, base_offset)
         
         elif isinstance(value, list) and len(value) > 0:
             sections.append(section)
             for idx, value_item in enumerate(value):
+                if not struct._debug[name] or not struct._debug[name]['arr'] or idx >= len(struct._debug[name]['arr']):
+                    continue
+
                 idx_label = f"{label}[{idx}]"
                 idx_section = {
                     "label": idx_label,
                     "parent": label
                 }
 
+                idx_offset = struct._debug[name]['arr'][idx]['start'] + base_offset
+
                 if isinstance(value_item, KaitaiStruct):
                     sections.append(idx_section)
-                    parse_struct(value_item, sections, idx_label, parent_offset, root_io, root_offset)
+                    parse_struct(value_item, sections, idx_label, idx_offset, base_io, base_offset)
                 else:
-                    if not struct._debug[name] or not struct._debug[name]['arr'] or idx >= len(struct._debug[name]['arr']):
-                        continue
                     value_item_section = {
-                        "start": struct._debug[name]['arr'][idx]['start'] + root_offset,
-                        "end": struct._debug[name]['arr'][idx]['end'] + root_offset,
+                        "start": idx_offset,
+                        "end": struct._debug[name]['arr'][idx]['end'] + base_offset,
                         "label": idx_section["label"],
                         "parent": idx_section["parent"],
                     }
@@ -163,6 +134,10 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, root_io=None, r
                         sections.append(value_item_section)
         
         elif process_value(value, section):
+            sections.append(section)
+        
+        else:
+            section["value"] = f"<? {str(value)[:50]} ?>"
             sections.append(section)
             
 
@@ -195,7 +170,7 @@ def parse_data(input_filename, output_filename, action_progress):
     finally:
         target._io.close()
 
-    pp.pprint(sections)
+    #pp.pprint(sections)
 
     action_progress.set_progress_percent(80)
 

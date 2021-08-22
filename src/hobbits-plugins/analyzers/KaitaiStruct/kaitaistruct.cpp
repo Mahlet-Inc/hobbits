@@ -259,7 +259,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         return AnalyzerResult::error("Output analysis file doesn't contain a 'sections' specification");
     }
     QList<RangeHighlight> highlights;
-    QMap<QString, QPair<Range, QList<QString>>> labelMap;
+    QMap<QString, QSharedPointer<KsField>> fieldMap;
     QList<QString> topLevel;
     QJsonArray sections = outputObj.value("sections").toArray();
     int sectionNum = 0;
@@ -269,29 +269,39 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         }
         sectionNum++;
         QJsonObject s = section.toObject();
+
         QString label = QString("<%1>").arg(sectionNum);
         if (s.contains("label") && s.value("label").isString()) {
             label = s.value("label").toString();
         }
-        if (!s.contains("start") || !s.contains("end") || !s.value("start").isDouble() || !s.value("end").isDouble()) {
-            labelMap.insert(label, {Range(), {}});
-        }
-        else {
+        auto field = QSharedPointer<KsField>(new KsField);
+        fieldMap.insert(label, field);
+        field->label = label;
+
+        if (s.contains("start") && s.contains("end") && s.value("start").isDouble() && s.value("end").isDouble()) {
             Range range(qint64(s.value("start").toDouble())*8, qint64(s.value("end").toDouble())*8 - 1);
-            labelMap.insert(label, {range, {}});
+            field->range = range;
+        }
+
+        if (s.contains("value")) {
+            field->value = s.value("value").toVariant().toString();
+        }
+
+        if (s.contains("type")) {
+            field->type = s.value("type").toVariant().toString();
         }
 
         if (!s.contains("parent") || s.value("parent").toString().isEmpty()) {
             topLevel.append(label);
         }
-        else if (labelMap.contains(s.value("parent").toString())) {
-            labelMap[s.value("parent").toString()].second.append(label);
+        else if (fieldMap.contains(s.value("parent").toString())) {
+            fieldMap[s.value("parent").toString()]->children.append(label);
         }
     }
 
     int colorIdx = 0;
     for (auto label : topLevel) {
-        highlights.append(makeHighlight(label, labelMap, colorIdx));
+        highlights.append(makeHighlight(label, fieldMap, colorIdx));
     }
 
     QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
@@ -308,7 +318,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     return AnalyzerResult::result(bitInfo, parameters);
 }
 
-RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData, int &colorIdx)
+RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QSharedPointer<KsField>> &fieldData, int &colorIdx)
 {
     QList<QColor> colors = {
         QColor(100, 220, 100, 200),
@@ -317,9 +327,9 @@ RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QP
         QColor(200, 140, 0, 200),
         QColor(250, 50, 0, 200)
     };
-    auto pair = rangeData.value(label);
-    if (pair.second.isEmpty()) {
-        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, pair.first, colors.at(colorIdx).rgba());
+    auto field = fieldData.value(label);
+    if (field->children.isEmpty()) {
+        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, field->range, colors.at(colorIdx).rgba(), {}, {field->type, field->value});
         colorIdx = (colorIdx + 1) % colors.size();
         return highlight;
     }
@@ -327,11 +337,11 @@ RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QP
         int parentColorIndex = colorIdx;
         colorIdx = 0;
         QList<RangeHighlight> children;
-        for (auto child : pair.second) {
-            children.append(makeHighlight(child, rangeData, colorIdx));
+        for (auto child : field->children) {
+            children.append(makeHighlight(child, fieldData, colorIdx));
         }
         colorIdx = parentColorIndex;
-        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, children, colors.at(colorIdx).rgba());
+        auto highlight = RangeHighlight(KAITAI_STRUCT_CATEGORY, label, children, colors.at(colorIdx).rgba(), {field->type});
         colorIdx = (colorIdx + 1) % colors.size();
         return highlight;
     }
