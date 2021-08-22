@@ -295,6 +295,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     }
 
     QSharedPointer<BitInfo> bitInfo = BitInfo::copyFromContainer(container);
+    bitInfo->clearHighlightCategory(KAITAI_STRUCT_CATEGORY);
     bitInfo->addHighlights(highlights);
 
     if (!kscOutput.isEmpty()) {
@@ -310,11 +311,11 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 RangeHighlight KaitaiStruct::makeHighlight(QString label, const QMap<QString, QPair<Range, QList<QString>>> &rangeData, int &colorIdx)
 {
     QList<QColor> colors = {
-        QColor(100, 220, 100, 85),
-        QColor(100, 0, 255, 50),
-        QColor(0, 150, 230, 100),
-        QColor(200, 140, 0, 100),
-        QColor(250, 50, 0, 100)
+        QColor(100, 220, 100, 200),
+        QColor(100, 0, 255, 200),
+        QColor(0, 150, 230, 200),
+        QColor(200, 140, 0, 200),
+        QColor(250, 50, 0, 200)
     };
     auto pair = rangeData.value(label);
     if (pair.second.isEmpty()) {
