@@ -151,6 +151,10 @@ def parse_data(input_filename, output_filename, action_progress):
     sys.path.append(os.path.dirname(scripts[0]))
     package_name = os.path.splitext(module_file)[0]
     class_name = package_name.capitalize()
+    try:
+        del sys.modules[package_name]
+    except KeyError:
+        pass
     struct_module = importlib.__import__(package_name, fromlist=[class_name])
     Struct = getattr(struct_module, class_name)
 
