@@ -22,11 +22,13 @@ def process_value(value, section):
         else:
             value = f"0x{binascii.hexlify(value).decode()}"
         section['value'] = value
+        section['type'] = f"bytes[{len(value)}]"
 
     elif isinstance(value, str):
         if len(value) > 15:
             value = f"{value[:12]}..."
         section['value'] = value
+        section['type'] = f"str[{len(value)}]"
 
     elif isinstance(value, float):
         section['value'] = value
@@ -121,6 +123,7 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, b
                 idx_offset = struct._debug[name]['arr'][idx]['start'] + base_offset
 
                 if isinstance(value_item, KaitaiStruct):
+                    section['type'] = f"{type(value_item).__name__}[{len(value)}]"
                     sections.append(idx_section)
                     parse_struct(value_item, sections, idx_label, idx_offset, base_io, base_offset)
                 else:
@@ -131,6 +134,7 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, b
                         "parent": idx_section["parent"],
                     }
                     if process_value(value_item, value_item_section):
+                        section['type'] = f"{value_item_section.get('type', 'array')}[{len(value)}]"
                         sections.append(value_item_section)
         
         elif process_value(value, section):
