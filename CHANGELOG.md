@@ -1,3 +1,11 @@
+## [0.51.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.51.0...v0.51.1) (2021-08-24)
+
+
+### Bug Fixes
+
+* correctly reload custom kaitai KSY after it is edited ([e675f67](https://github.com/Mahlet-Inc/hobbits/commit/e675f67221954f172e03d75c3ecdf54bdf2a29ff))
+* show type for array, byte, and string in kaitai display ([cc54677](https://github.com/Mahlet-Inc/hobbits/commit/cc54677fa9512061ad736763b04358dd05fe454d))
+
 # [0.51.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.50.0...v0.51.0) (2021-08-22)
 
 
