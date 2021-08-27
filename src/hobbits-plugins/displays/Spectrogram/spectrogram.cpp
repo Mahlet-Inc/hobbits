@@ -93,7 +93,6 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
     }
 
     int fftSize = parameters.value("fft_size").toInt();
-    //int fftSize = 2064;
     int fftOverlap = parameters.value("fft_overlap").toInt();
     auto sampleFormat = MetadataHelper::sampleFormat(parameters.value("sample_format").toString());
     auto dataType = static_cast<SpectrogramControls::DataType>(parameters.value("data_type").toInt());
@@ -107,27 +106,20 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
         return DisplayResult::error(QString("Invalid sample format word size: %1").arg(sampleFormat.wordSize));
     }
 
-
-    //SIMD size is archetitecure dependent
-    int simd_size = pffft_simd_size(); 
-    cout << "SIMD SIZE FUNCTION:" << simd_size << endl;
-
-    //Note:
-    //FFT size needs to be of the form specified in the documentation
-    //need to add logic to this file to ensure that the correct FFT size is used
-
-    //check if fftSize is 16
-    //according to PFFFT documenation, complex FFTs must have an FFT Size that is divisble by 16
-    //make fftSize the next number divisble by 16
-    if(fftSize % 16 != 0 || fftSize < 32){
-        fftSize = (16 - (fftSize % 16)) + fftSize;
-        cout << "Changed FFT Size to this value: " << fftSize << endl;
+    //check whether the fftSize is divisible by 32
+    if(fftSize % 32 != 0){
+        return DisplayResult::error(QString("FFT Size needs to be divisible by 32 - %1 is invalid").arg(fftSize));
     }
-    
-    //PFFFT set up
+
+    //set up for PFFFT
     PFFFT_Setup *s = pffft_new_setup(fftSize, PFFFT_COMPLEX);
 
-    //PFFFT allocate memory for input, output, and work arrays aka "float buffers"
+    //check whether the setup pointer is null
+    if(!s){
+        return DisplayResult::error(QString("PFFFT failed to initialize with FFT Size %1").arg(fftSize));
+    }
+
+    //allocate memory for input, output, and work arrays aka "float buffers"
     float *input = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
     float *output = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
     float *work = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
@@ -186,12 +178,8 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
             input[i*2+1] *= hanningWindow[i];
         }
 
-        //running the FFT (with PFFFT)
-        //clock_t start2 = clock();
+        //execute the FFT with PFFFT
         pffft_transform_ordered(s, input, output, work, PFFFT_FORWARD);
-        //clock_t end2 = clock();
-        //double cpu_time_used2 = ((double) (end2 - start2)) / CLOCKS_PER_SEC;
-        //cout << "here is the time in spectrogram (PFFFT): " << cpu_time_used2 << endl;
 
         QVector<double> spectrum(fftSize/2);
         if (logarithmicScaling) {
