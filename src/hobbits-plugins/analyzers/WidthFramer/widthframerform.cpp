@@ -4,7 +4,6 @@
 #include <QMetaObject>
 #include <QVBoxLayout>
 #include <QtGlobal>
-#include <fftw3.h>
 #include <ctime>
 #include "pffft.h"
 
@@ -156,7 +155,7 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     float *output = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
     float *work= (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
 
-    //prepare and run first FFT (with PFFFT)
+    //prepare first FFT 
     for (int i = 0; i < N; i++){
         input[i*2] = 0; //real
         input[i*2+1] = 0; //imaginary
@@ -167,15 +166,11 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
         output[i*2+1]= 0;
     }
 
-    //clock_t start2 = clock();
-    //run the first FFT (with PFFFT)
+    //run first FFT
     pffft_transform_ordered(setup, input, output, work, PFFFT_FORWARD);
-    /*clock_t end2 = clock();
-    double cpu_time_used2 = ((double) (end2 - start2)) / CLOCKS_PER_SEC;
-    //cout << "\n" << "here is the time (PFFFT1): " << cpu_time_used2 << endl;
-    */
+
   
-   //prepare and run second FFT
+   //prepare second FFT
     for (int i = 0; i < N; i++) {
         float re = output[i*2];
         float im = output[i*2+1];
@@ -183,13 +178,9 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
         input[i*2+1] = 0.0;
     }
 
-    //clock_t start4 = clock();
-    //perform the second FFT (with PFFFT)
+    //run second FFT
     pffft_transform_ordered(setup, input, output, work, PFFFT_BACKWARD);
-    /*clock_t end4 = clock();
-    double cpu_time_used4 = ((double) (end4 - start4)) / CLOCKS_PER_SEC;
-    cout << "\n" << "here is the time in width framer (PFFFT): " << cpu_time_used4 << endl;
-    */
+
 
     // get results
     QVector<QPointF> results(N / 2);
