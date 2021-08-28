@@ -1,3 +1,144 @@
+# [0.51.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.50.0...v0.51.0) (2021-08-22)
+
+
+### Bug Fixes
+
+* [core] BitArray fromString parsing error reports ([4b176de](https://github.com/Mahlet-Inc/hobbits/commit/4b176de2145bf5eb53a467817cde27f5a870e534))
+* improve kaitai parser parser [#119](https://github.com/Mahlet-Inc/hobbits/issues/119) ([e1efaa2](https://github.com/Mahlet-Inc/hobbits/commit/e1efaa292200a28eef097aa629ce2371f3c567d0))
+
+
+### Features
+
+* big fixes and improvements to kaitai [#110](https://github.com/Mahlet-Inc/hobbits/issues/110) [#119](https://github.com/Mahlet-Inc/hobbits/issues/119) ([34bbc4d](https://github.com/Mahlet-Inc/hobbits/commit/34bbc4d987129c4f3e8a89f6c2c3270684fd260d))
+
+# [0.50.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.49.0...v0.50.0) (2021-05-31)
+
+
+### Features
+
+* better file dialog behavior during and between runs ([63bbb1d](https://github.com/Mahlet-Inc/hobbits/commit/63bbb1dd4a2ef26eb6ebbaf1e842a6902f3c02d4))
+
+# [0.49.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.1...v0.49.0) (2021-05-30)
+
+
+### Bug Fixes
+
+* [plugin] re-enable autocorrelation in Width Framer ([402fcf0](https://github.com/Mahlet-Inc/hobbits/commit/402fcf0a5d65d39af803e28e8e45ceb61e2e1c51))
+
+
+### Features
+
+* add Bit Container import/export plugin ([4907d2d](https://github.com/Mahlet-Inc/hobbits/commit/4907d2da31e817f17a0e670cdf04098925a20031))
+
+## [0.48.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.48.0...v0.48.1) (2021-05-21)
+
+
+### Bug Fixes
+
+* release artifact paths ([f316a08](https://github.com/Mahlet-Inc/hobbits/commit/f316a0881c538228d068b4dc4353ca40f0b268a1))
+
+# [0.48.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.47.0...v0.48.0) (2021-05-21)
+
+
+### Bug Fixes
+
+* [plugin] json error parsing for  kaitai compilers ([#102](https://github.com/Mahlet-Inc/hobbits/issues/102)) ([b2fafbf](https://github.com/Mahlet-Inc/hobbits/commit/b2fafbf513a286b4fe607d948168d17437da7a1f))
+* correctly load config in standalone builds ([8e5e97e](https://github.com/Mahlet-Inc/hobbits/commit/8e5e97e5d0061aa0b466538925541c94533b8ec3))
+* correctly register Range and RangeHighlight meta types ([bb90767](https://github.com/Mahlet-Inc/hobbits/commit/bb9076786b8a81398eb3013a5f8d4943d9569717))
+* correctly resize BitArrays when setBytes is called ([5611e18](https://github.com/Mahlet-Inc/hobbits/commit/5611e1840c508a917a82cf766546648268c08d01))
+* prevent potential QFutureWatcher race conditions ([d5a72d8](https://github.com/Mahlet-Inc/hobbits/commit/d5a72d8b71132e499549bc7cfd6b95e1b5b91738))
+
+
+### Features
+
+* add basic "What's This?" help for plugin widgets ([#63](https://github.com/Mahlet-Inc/hobbits/issues/63)) ([7c3bec2](https://github.com/Mahlet-Inc/hobbits/commit/7c3bec2ffa584ab2ece9483703afff5ccfa9351a))
+* arbitrary view splitting and full view persistence for [#100](https://github.com/Mahlet-Inc/hobbits/issues/100) ([6e665a6](https://github.com/Mahlet-Inc/hobbits/commit/6e665a6a41134fa7081209f56c761604a58b247f))
+
+# [0.47.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.8...v0.47.0) (2021-05-04)
+
+
+### Features
+
+* improve plugin parameter specification (helps [#84](https://github.com/Mahlet-Inc/hobbits/issues/84)) ([cef1055](https://github.com/Mahlet-Inc/hobbits/commit/cef1055d2119e1892c13d2baf3da38062b1d7ff1))
+
+## [0.46.8](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.7...v0.46.8) (2021-04-25)
+
+
+### Bug Fixes
+
+* handle bad display parameters without crashing [#99](https://github.com/Mahlet-Inc/hobbits/issues/99) ([7c3c587](https://github.com/Mahlet-Inc/hobbits/commit/7c3c58712ad6ebe165ad0684f4b0afb9433e07f3))
+
+## [0.46.7](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.6...v0.46.7) (2021-04-24)
+
+
+### Bug Fixes
+
+* appropriately offset imported sub-sections in kaitai ([#93](https://github.com/Mahlet-Inc/hobbits/issues/93)) ([03067d4](https://github.com/Mahlet-Inc/hobbits/commit/03067d421d7f221791bb92377c4356f23c2566d1))
+
+## [0.46.6](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.5...v0.46.6) (2021-04-23)
+
+
+### Bug Fixes
+
+* rollback offset changes in kaitai struct plugin ([e2ac3c3](https://github.com/Mahlet-Inc/hobbits/commit/e2ac3c38f2588fc57fb60dba3da942a7ff50ddf4))
+
+## [0.46.5](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.4...v0.46.5) (2021-04-23)
+
+
+### Bug Fixes
+
+* *actually* synchronize parameter editor preview calls (fixes crashes) ([a53e554](https://github.com/Mahlet-Inc/hobbits/commit/a53e5546c4fa1dcf47fb08fcd4e6a447b14ce9d2))
+* track section offsets in kaitai parsing for [#93](https://github.com/Mahlet-Inc/hobbits/issues/93) ([ccd01f3](https://github.com/Mahlet-Inc/hobbits/commit/ccd01f313a09deb5df261bb3b63dd91e77f962d8))
+
+## [0.46.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.3...v0.46.4) (2021-04-13)
+
+
+### Bug Fixes
+
+* swapped mac and windows binary releases [#94](https://github.com/Mahlet-Inc/hobbits/issues/94) ([2e102f9](https://github.com/Mahlet-Inc/hobbits/commit/2e102f9c2bbdd7efed3fa5987e0e405fc707d35f))
+
+## [0.46.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.2...v0.46.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* correctly enforce FFTW thread-safety ([586042a](https://github.com/Mahlet-Inc/hobbits/commit/586042ae68ca59dee9d3be453dcd02a60a0546ba)), closes [#85](https://github.com/Mahlet-Inc/hobbits/issues/85)
+* load python plugins correctly ([505acae](https://github.com/Mahlet-Inc/hobbits/commit/505acae2ae90f83d1ed4c37aa9f3627872e81300))
+
+## [0.46.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.1...v0.46.2) (2021-02-02)
+
+
+### Bug Fixes
+
+* prevent duplicate release file names ([5f5ec94](https://github.com/Mahlet-Inc/hobbits/commit/5f5ec947cdf59fd198368764d5308b91da16b37e))
+
+## [0.46.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.46.0...v0.46.1) (2021-02-02)
+
+
+### Bug Fixes
+
+* update release file globs ([db61841](https://github.com/Mahlet-Inc/hobbits/commit/db61841037cbdcc4b0e24d942bc4e9d14885b9c7))
+
+# [0.46.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.45.0...v0.46.0) (2021-02-02)
+
+
+### Features
+
+* from 0.45.0 - python exporter plugins and some bug fixes ([dbf0011](https://github.com/Mahlet-Inc/hobbits/commit/dbf001108a5999c932ab4db5ec8e4eb28b218c54))
+
+# [0.45.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.1...v0.45.0) (2021-02-02)
+
+
+### Bug Fixes
+
+*  [Mac] update python library version in build ([0d8673e](https://github.com/Mahlet-Inc/hobbits/commit/0d8673e7b700813bccd9c1d0ae83c8d6aedba097))
+* prevent python config from deallocating before init ([289b073](https://github.com/Mahlet-Inc/hobbits/commit/289b073aeec4a70d43e6c90ed7d4f35f0b0664d8))
+
+
+### Features
+
+* add python exporter plugin support ([9dec63c](https://github.com/Mahlet-Inc/hobbits/commit/9dec63c4d60729c68af34a20f0ab6274e3095c54))
+
 ## [0.44.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.44.0...v0.44.1) (2020-12-18)
 
 
