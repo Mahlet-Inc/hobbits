@@ -213,47 +213,56 @@ QVector<QRectF> DisplayHelper::drawHighlightRects(
     }
 
     QVector<QRectF> rects;
-    if (container->info()->highlights(category).size() > 0) {
-        int lastHighlight = 0;
-        int rowOffset = -1;
-        for (qint64 i = frameOffset; i < container->frameCount(); i++) {
-            rowOffset++;
-            if (rowOffset >= rowCount) {
-                break;
-            }
-            Frame frame = container->frameAt(i);
-            Frame displayFrame =
-                Frame(
-                        container->bits(),
-                        frame.start() + bitOffset,
-                        qMin(frame.end(), frame.start() + bitOffset + colCount - 1));
-            QList<RangeHighlight> spots = getHighlightSpots(
-                    container->info()->highlights(category),
-                    lastHighlight,
-                    displayFrame);
 
-            while(!spots.isEmpty()) {
-                RangeHighlight spot = spots.takeFirst();
-                if (!spot.children().isEmpty()) {
-                    painter->setOpacity(0.35);
-                    int minIndex = 0;
-                    spots.append(getHighlightSpots(spot.children(), minIndex, displayFrame));
-                }
-                else {
-                    painter->setOpacity(1);
-                }
-                qint64 displayStart = (spot.range().start() - displayFrame.start());
-                double hx = getGroupedOffset(displayStart, colWidth, colGroupSize, bitOffset, colGroupMargin);
-                double hy = (i - frameOffset) * rowHeight;
-                qint64 displayEnd = (spot.range().end() - displayFrame.start());
-                double hw =
-                    getGroupedOffset(displayEnd, colWidth, colGroupSize, bitOffset, colGroupMargin) + colWidth - hx;
-                double hh = rowHeight;
-                painter->setBrush(QColor::fromRgba(spot.color()));
-                painter->drawRect(QRectF(hx, hy, hw, hh));
+    if (container->info()->highlights(category).size() < 1) {
+        return rects;
+    }
+
+    int bufW = getGroupedOffset(colCount + 1, colWidth, colGroupSize, bitOffset, colGroupMargin);
+    int bufH = rowHeight * (rowCount + 1);
+    QImage buffer(bufW, bufH, QImage::Format_RGBA8888);
+    QPainter bufPainter(&buffer);
+    bufPainter.setPen(Qt::transparent);
+    buffer.fill(Qt::transparent);
+
+    int lastHighlight = 0;
+    int rowOffset = -1;
+    for (qint64 i = frameOffset; i < container->frameCount(); i++) {
+        rowOffset++;
+        if (rowOffset >= rowCount) {
+            break;
+        }
+        Frame frame = container->frameAt(i);
+        Frame displayFrame =
+            Frame(
+                    container->bits(),
+                    frame.start() + bitOffset,
+                    qMin(frame.end(), frame.start() + bitOffset + colCount - 1));
+        QList<RangeHighlight> spots = getHighlightSpots(
+                container->info()->highlights(category),
+                lastHighlight,
+                displayFrame);
+
+        while(!spots.isEmpty()) {
+            RangeHighlight spot = spots.takeFirst();
+            if (!spot.children().isEmpty()) {
+                int minIndex = 0;
+                spots.append(getHighlightSpots(spot.children(), minIndex, displayFrame));
             }
+            qint64 displayStart = (spot.range().start() - displayFrame.start());
+            double hx = getGroupedOffset(displayStart, colWidth, colGroupSize, bitOffset, colGroupMargin);
+            double hy = (i - frameOffset) * rowHeight;
+            qint64 displayEnd = (spot.range().end() - displayFrame.start());
+            double hw =
+                getGroupedOffset(displayEnd, colWidth, colGroupSize, bitOffset, colGroupMargin) + colWidth - hx;
+            double hh = rowHeight;
+            bufPainter.setBrush(QColor::fromRgb(spot.color()));
+            bufPainter.drawRect(QRectF(hx, hy, hw, hh));
         }
     }
+    painter->setOpacity(0.25);
+    painter->drawImage(0, 0, buffer);
+
     return rects;
 }
 
@@ -585,7 +594,7 @@ int DisplayHelper::drawTextRaster(QPainter *painter,
                 handle,
                 painter,
                 QSizeF(double(textSize.width()) / double(bitsPerChar), rowH),
-                textSectionSize,
+                QSize(charsPerRow * bitsPerChar, rows),
                 handle->bitOffset(),
                 handle->frameOffset(),
                 columnGrouping,

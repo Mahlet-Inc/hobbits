@@ -70,6 +70,7 @@ public:
     void serialize(QDataStream &stream) const;
 
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList *parseErrors = nullptr);
+
     QString toBin() const;
     QString toBin(qint64 start, int length) const;
     QString toHex() const;
