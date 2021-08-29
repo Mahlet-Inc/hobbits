@@ -4,12 +4,7 @@
 #include <QMetaObject>
 #include <QVBoxLayout>
 #include <QtGlobal>
-#include <ctime>
 #include "pffft.h"
-
-
-#include <iostream>
-using namespace std;
 
 WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::WidthFramerForm()),
@@ -144,21 +139,40 @@ void WidthFramerForm::widthSelected(QModelIndex index)
 
 QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> bits)
 {
-    //left shift
     int N = 1 << 19;
 
     //create set up for PFFFT
     PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
+    
+    if(!setup){
+        //return an empty vector
+        QVector<QPointF> badSetup(N / 2);
+        return badSetup;
+    }
 
     //allocate the arrays, or "float buffers," for input, output, and work
     float *input = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
     float *output = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
     float *work= (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
 
+    //if any float buffers are null return an empty vector
+    if(!input){
+        QVector<QPointF> nullInput(N / 2);
+        return nullInput;
+    }
+    if(!output){
+        QVector<QPointF> nullOutput(N / 2);
+        return nullOutput;
+    }
+    if(!work){
+        QVector<QPointF> nullWork(N / 2);
+        return nullWork;
+    }
+    
     //prepare first FFT 
     for (int i = 0; i < N; i++){
-        input[i*2] = 0; //real
-        input[i*2+1] = 0; //imaginary
+        input[i*2] = 0;
+        input[i*2+1] = 0;
         if (i < bits->sizeInBits()) {
             input[i*2] = bits->at(i) ? 1 : -1;
         }
@@ -186,8 +200,7 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     QVector<QPointF> results(N / 2);
     results.insert(0, QPointF(0, 0));
     for (int i = 1; i < N / 2; i++) {
-        double re = qAbs(double(output[i*2] / double(N)));
-        //store in results vector
+        float re = qAbs(float(output[i*2] / float(N)));
         results[i] = QPointF(i, re);
     }
 

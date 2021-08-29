@@ -2,6 +2,7 @@
 #include "ui_spectrogramcontrols.h"
 #include "metadatahelper.h"
 
+
 SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::SpectrogramControls()),
     m_paramHelper(new ParameterHelper(delegate))
@@ -33,18 +34,16 @@ SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> deleg
 
     m_paramHelper->addSliderIntParameter("sensitivity", ui->hs_sensitivity);
    
-    ui->cb_fftSize->addItem("32", (pow(2.0, 5.0)));
-    ui->cb_fftSize->addItem("64", (pow(2.0, 6.0)));
-    ui->cb_fftSize->addItem("128", (pow(2.0, 7.0)));
-    ui->cb_fftSize->addItem("256", (pow(2.0, 8.0)));
-    ui->cb_fftSize->addItem("512", (pow(2.0, 9.0)));
-    ui->cb_fftSize->addItem("1,024", (pow(2.0, 10.0)));
-    ui->cb_fftSize->addItem("2,048", (pow(2.0, 11.0)));
-    ui->cb_fftSize->addItem("4,096", (pow(2.0, 12.0)));
-    ui->cb_fftSize->addItem("8,192", (pow(2.0, 13.0)));
-    ui->cb_fftSize->addItem("16,384", (pow(2.0, 14.0)));
-    ui->cb_fftSize->addItem("32,768", (pow(2.0, 15.0)));
-    ui->cb_fftSize->addItem("65,536", (pow(2.0, 16.0)));
+    ui->cb_fftSize->addItem("32", 1 << 5);
+    ui->cb_fftSize->addItem("64", 1 << 6);
+    ui->cb_fftSize->addItem("128", 1 << 7);
+    ui->cb_fftSize->addItem("256", 1 << 8);
+    ui->cb_fftSize->addItem("512", 1 << 9);
+    ui->cb_fftSize->addItem("1,024", 1 << 10);
+    ui->cb_fftSize->addItem("2,048", 1 << 11);
+    ui->cb_fftSize->addItem("4,096", 1 << 12);
+    ui->cb_fftSize->addItem("8,192", 1 << 13);
+    ui->cb_fftSize->addItem("16,384", 1 << 14);
     m_paramHelper->addComboBoxParameter("fft_size", ui->cb_fftSize);
 
     m_paramHelper->addSpinBoxIntParameter("fft_overlap", ui->sb_overlap);
