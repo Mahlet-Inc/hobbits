@@ -27,7 +27,7 @@ class HobbitsConan(ConanFile):
         "libpcap:shared": True,
         "fftw:threads": True,
         "fftw:combinedthreads": True,
-        "icu:shared":True
+        "icu:shared":False
         }
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "cmake*", "src*"
