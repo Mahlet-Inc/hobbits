@@ -145,9 +145,7 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
     
     if(!setup){
-        //return an empty vector
-        QVector<QPointF> badSetup(N / 2);
-        return badSetup;
+        return QVector<QPointF>();
     }
 
     //allocate the arrays, or "float buffers," for input, output, and work
@@ -155,20 +153,10 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     float *output = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
     float *work= (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
 
-    //if any float buffers are null return an empty vector
-    if(!input){
-        QVector<QPointF> nullInput(N / 2);
-        return nullInput;
+    if(!input || !output || !work){
+        return QVector<QPointF>();
     }
-    if(!output){
-        QVector<QPointF> nullOutput(N / 2);
-        return nullOutput;
-    }
-    if(!work){
-        QVector<QPointF> nullWork(N / 2);
-        return nullWork;
-    }
-    
+
     //prepare first FFT 
     for (int i = 0; i < N; i++){
         input[i*2] = 0;
