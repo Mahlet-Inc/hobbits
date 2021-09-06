@@ -145,6 +145,7 @@ QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> b
     PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
     
     if(!setup){
+        //return empty vector
         return QVector<QPointF>();
     }
 

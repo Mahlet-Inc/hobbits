@@ -7,9 +7,6 @@
 #include "viridis.h"
 #include "displayresult.h"
 #include <QtMath>
-#include <ctime>
-#include <iostream>
-using namespace std;
 
 
 Spectrogram::Spectrogram():
@@ -123,6 +120,10 @@ QSharedPointer<DisplayResult> Spectrogram::renderDisplay(QSize viewportSize, con
     float *input = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
     float *output = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
     float *work = (float*)pffft_aligned_malloc(fftSize * 2 * sizeof(float));
+
+    if(!input || !output || !work){
+        return DisplayResult::error(QString("Failed to allocate float buffers."));
+    }
 
     QVector<double> hanningWindow(fftSize);
     for (int i = 0; i < fftSize; i++) {
