@@ -17,7 +17,7 @@ file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DI
 add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
 
 if (BUILDING_WITH_CONAN)
-	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONAN_PKG::fftw)
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt CONAN_PKG::pffft)
 else()
 	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
 	if(WIN32)

@@ -10,12 +10,12 @@
 #include <unistd.h>
 #endif
 
-#include "fftw3.h"
+//#include "pffft.h"
 
 int main(int argc, char *argv[])
 {
     // See http://www.fftw.org/fftw3_doc/Thread-safety.html
-    fftw_make_planner_thread_safe();
+    // fftw_make_planner_thread_safe();
 
     QApplication a(argc, argv);
 
