@@ -44,7 +44,7 @@ jobs:
       parameters:
         artifactName: win_2019_release
 
-- job: Windows-vs2017-win2016
+- job: Windows2016vs2017
   pool:
     vmImage: 'vs2017-win2016'
   steps:
@@ -52,7 +52,7 @@ jobs:
       parameters:
         artifactName: win_2016_release
 
-- job: Mac10.14
+- job: Mac1014
   pool:
     vmImage: 'macOS-10.14'
   steps:
