@@ -1,3 +1,8 @@
+parameters:
+  - name: artifactName
+    type: string
+    default: win_release
+
 steps:
   - checkout: self
     persistCredentials: true
@@ -49,10 +54,10 @@ steps:
     inputs:
       rootFolderOrFile: $(Build.SourcesDirectory)/build/package
       includeRootFolder: false
-      archiveFile: $(Build.ArtifactStagingDirectory)/windows_release.zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/${{ parameters.artifactName }}.zip
       verbose: true
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: windows_release
+      artifactName: ${{ parameters.artifactName }}

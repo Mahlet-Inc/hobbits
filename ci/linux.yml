@@ -2,9 +2,6 @@ parameters:
   - name: artifactName
     type: string
     default: linux_release
-  - name: pythonArtifact
-    type: string
-    default: python_linux
 
 steps:
   - checkout: self
