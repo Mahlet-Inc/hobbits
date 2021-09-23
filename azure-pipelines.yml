@@ -36,7 +36,7 @@ jobs:
         artifactName: centos7_gcc48_release
         pythonArtifact: python_centos_74
 
-- job: Windows 2019
+- job: Windows2019
   pool:
     vmImage: 'windows-2019'
   steps:
@@ -44,7 +44,7 @@ jobs:
       parameters:
         artifactName: win_2019_release
 
-- job: Windows vs2017-win2016
+- job: Windows-vs2017-win2016
   pool:
     vmImage: 'vs2017-win2016'
   steps:
@@ -52,7 +52,7 @@ jobs:
       parameters:
         artifactName: win_2016_release
 
-- job: Mac 10.14
+- job: Mac10.14
   pool:
     vmImage: 'macOS-10.14'
   steps:
@@ -60,7 +60,7 @@ jobs:
       parameters:
         artifactName: mac_1014_release
 
-- job: Mac 11
+- job: Mac11
   pool:
     vmImage: 'macOS-11'
   steps:
