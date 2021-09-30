@@ -154,7 +154,7 @@ def parse_data(input_filename, output_filename, action_progress):
     module_file = os.path.basename(scripts[0])
     sys.path.append(os.path.dirname(scripts[0]))
     package_name = os.path.splitext(module_file)[0]
-    class_name = package_name.capitalize()
+    class_name = "".join([s.capitalize() for s in package_name.split("_")])
     try:
         del sys.modules[package_name]
     except KeyError:
