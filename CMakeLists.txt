@@ -104,6 +104,10 @@ else()
 	else()
 		find_package(FFTW COMPONENTS DOUBLE_LIB DOUBLE_THREADS_LIB REQUIRED)
 	endif()
+
+	# Libusb
+	find_package(libusb-1.0 REQUIRED)
+
 endif()
 
 #

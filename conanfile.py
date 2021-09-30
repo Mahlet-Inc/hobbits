@@ -27,15 +27,16 @@ class HobbitsConan(ConanFile):
         "libpcap:shared": True,
         "fftw:threads": True,
         "fftw:combinedthreads": True,
-        "icu:shared":True
+        "icu:shared":False
         }
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "cmake*", "src*"
 
     requires = [
         ("qt/5.15.2"),
-        ("hobbits-cpython/3.9.1"),
-        ("fftw/3.3.9")
+        ("hobbits-cpython/3.9.7"),
+        ("fftw/3.3.9"),
+        ("libusb/1.0.24")
     ]
 
     def requirements(self):

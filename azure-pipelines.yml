@@ -8,7 +8,7 @@ pr:
     - develop
 
 jobs:
-- job: UbuntuLinuxGCC7
+- job: UbuntuLinux18GCC7
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
@@ -16,7 +16,16 @@ jobs:
     - template: ci/linux.yml
       parameters:
         artifactName: ubuntu18_gcc7_release
-        pythonArtifact: python_ubuntu_1804
+
+- job: UbuntuLinux20GCC9
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - template: ci/ubuntu-setup.yml
+    - template: ci/linux.yml
+      parameters:
+        artifactName: ubuntu20_gcc9_release
+
 - job: CentOS74LinuxGCC48
   pool:
     vmImage: 'ubuntu-18.04'
@@ -26,13 +35,35 @@ jobs:
       parameters:
         artifactName: centos7_gcc48_release
         pythonArtifact: python_centos_74
-- job: Windows
+
+- job: Windows2019
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+    - template: ci/windows.yml
+      parameters:
+        artifactName: win_2019_release
+
+- job: Windows2016vs2017
   pool:
     vmImage: 'vs2017-win2016'
   steps:
     - template: ci/windows.yml
-- job: Mac
+      parameters:
+        artifactName: win_2016_release
+
+- job: Mac1014
   pool:
     vmImage: 'macOS-10.14'
   steps:
     - template: ci/mac.yml
+      parameters:
+        artifactName: mac_1014_release
+
+- job: Mac11
+  pool:
+    vmImage: 'macOS-11'
+  steps:
+    - template: ci/mac.yml
+      parameters:
+        artifactName: mac_11_release
