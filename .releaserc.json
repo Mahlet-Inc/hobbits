@@ -35,14 +35,29 @@
                     "name": "hobbits-${nextRelease.version}-gcc7.tgz"
                 },
                 {
-                    "path": "hobbits/windows_release/windows_release.zip",
-                    "label": "Hobbits (64-bit Windows 2016 msvc2017)",
-                    "name": "hobbits-${nextRelease.version}-win.zip"
+                    "path": "hobbits/ubuntu20_gcc9_release/ubuntu20_gcc9_release.tar.gz",
+                    "label": "Hobbits (64-bit Ubuntu 20.04 GCC 9)",
+                    "name": "hobbits-${nextRelease.version}-gcc9.tgz"
                 },
                 {
-                    "path": "hobbits/mac_release/mac_release.tar.gz",
+                    "path": "hobbits/win_2016_release/win_2016_release.zip",
+                    "label": "Hobbits (64-bit Windows 2016 msvc2017)",
+                    "name": "hobbits-${nextRelease.version}-win2016.zip"
+                },
+                {
+                    "path": "hobbits/win_2019_release/win_2019_release.zip",
+                    "label": "Hobbits (64-bit Windows 2019)",
+                    "name": "hobbits-${nextRelease.version}-win2019.zip"
+                },
+                {
+                    "path": "hobbits/mac_1014_release/mac_1014_release.tar.gz",
                     "label": "Hobbits (64-bit Mac OSX 10.14)",
-                    "name": "hobbits-${nextRelease.version}-mac.tgz"
+                    "name": "hobbits-${nextRelease.version}-mac1014.tgz"
+                },
+                {
+                    "path": "hobbits/mac_11_release/mac_11_release.tar.gz",
+                    "label": "Hobbits (64-bit Mac OSX 11)",
+                    "name": "hobbits-${nextRelease.version}-mac11.tgz"
                 }
                 ]
             }

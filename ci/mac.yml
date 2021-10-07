@@ -1,3 +1,8 @@
+parameters:
+  - name: artifactName
+    type: string
+    default: mac_release
+
 steps:
   - checkout: self
     persistCredentials: true
@@ -58,12 +63,12 @@ steps:
     displayName: 'Run conan package'
 
   - bash: |
-      tar -czf ../mac_release.tar.gz .
-      cp ../mac_release.tar.gz $(Build.ArtifactStagingDirectory)
+      tar -czf ../${{ parameters.artifactName }}.tar.gz .
+      cp ../${{ parameters.artifactName }}.tar.gz $(Build.ArtifactStagingDirectory)
     workingDirectory: $(Build.SourcesDirectory)/build/package
     displayName: 'Collect and zip package files'
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: mac_release
+      artifactName: ${{ parameters.artifactName }}
