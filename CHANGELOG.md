@@ -1,3 +1,28 @@
+# [0.52.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.51.1...v0.52.0) (2021-10-07)
+
+
+### Bug Fixes
+
+* code quality improvements ([a44f957](https://github.com/Mahlet-Inc/hobbits/commit/a44f9573e6f38191de5137455613a3b56cc41869))
+* fixing macOs build issues, removing outdated code ([fc602c2](https://github.com/Mahlet-Inc/hobbits/commit/fc602c273698da7ba8fb22f8e05c518031011762))
+* idk why this wont work anymore ([c6c86be](https://github.com/Mahlet-Inc/hobbits/commit/c6c86be29c02daeee353b2e209efe6cec5218bbe))
+* libusb import headers may have been causing the centOS build to fail ([ff05cf0](https://github.com/Mahlet-Inc/hobbits/commit/ff05cf04e3f99183eeeb18569f897a6d546e1b40))
+* more centOS fixes ([3385239](https://github.com/Mahlet-Inc/hobbits/commit/338523938f6e22fddf0436f0af3291d632c7c9bc))
+* more code quality improvements ([e51252e](https://github.com/Mahlet-Inc/hobbits/commit/e51252e189d554614281c75ff608741b8f2a6697))
+* more readability changes ([001e772](https://github.com/Mahlet-Inc/hobbits/commit/001e772ebce20c7d4528a9ac39c1f2ca622f8b48))
+* reimplementing the libusb-1.0 into the include statement ([e5a2a61](https://github.com/Mahlet-Inc/hobbits/commit/e5a2a6116902f3ba8a81184507dbf7ccf8fe068e))
+* removed libusb-1.0/ from the .h files as that was causing problems too ([14c5dc9](https://github.com/Mahlet-Inc/hobbits/commit/14c5dc9e1d3f5999004dea45e07e28be3fa38921))
+* removing the plaeholder text in usb reader ([4f89aab](https://github.com/Mahlet-Inc/hobbits/commit/4f89aaba13af59a3db003c34b8d9472dd55578d5))
+* removing trouble causing lines in USBreader ([94e6151](https://github.com/Mahlet-Inc/hobbits/commit/94e6151b49f434e70ce46f46946d820e3229674a))
+* resolve parser class names for kaitai specs with underscores ([33613e9](https://github.com/Mahlet-Inc/hobbits/commit/33613e926c8c452fb1d52cce22da97a06fb33d9b))
+
+
+### Features
+
+* add USB reader importer plugin ([65ce534](https://github.com/Mahlet-Inc/hobbits/commit/65ce534e33176371faa2877ab726eb200b72fdf3))
+* UI for USB reader plugin is almost done ([495ffb1](https://github.com/Mahlet-Inc/hobbits/commit/495ffb1f4552d0969b7bf0d554bca84949c0ac80))
+* USB reader plugin, device, interface, alternate setting, and endpoint selectors ([7e415c7](https://github.com/Mahlet-Inc/hobbits/commit/7e415c7c3ddf59f75752c2dd6600bd89ed3211f2))
+
 ## [0.51.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.51.0...v0.51.1) (2021-08-24)
 
 
