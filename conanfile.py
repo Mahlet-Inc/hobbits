@@ -36,7 +36,8 @@ class HobbitsConan(ConanFile):
         ("qt/5.15.2"),
         ("hobbits-cpython/3.9.7"),
         ("fftw/3.3.9"),
-        ("libusb/1.0.24")
+        ("libusb/1.0.24"),
+        ("pffft/cci.20210511")
     ]
 
     def requirements(self):
