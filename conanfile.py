@@ -23,10 +23,7 @@ class HobbitsConan(ConanFile):
         "shared": True,
         "fPIC": True,
         "qt:shared": True,
-        "fftw:shared": True,
         "libpcap:shared": True,
-        "fftw:threads": True,
-        "fftw:combinedthreads": True,
         "icu:shared":False
         }
     generators = "cmake"
@@ -36,7 +33,6 @@ class HobbitsConan(ConanFile):
         ("qt/5.15.2"),
         ("hobbits-cpython/3.9.7"),
         ("pffft/cci.20210511"),
-        ("fftw/3.3.9"),
         ("libusb/1.0.24")
     ]
 
@@ -49,7 +45,6 @@ class HobbitsConan(ConanFile):
             del self.options.fPIC
         elif self.settings.os == "Macos":
             self.options['libpcap'].shared = False
-            self.options['fftw'].shared = False
 
     def _configure_cmake(self):
         cmake = CMake(self)
