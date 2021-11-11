@@ -3,7 +3,7 @@
 
 #include "displayinterface.h"
 #include "spectrogramcontrols.h"
-#include "fftw3.h"
+#include "pffft.h"
 #include "metadatahelper.h"
 
 class Spectrogram : public QObject, DisplayInterface
@@ -39,12 +39,12 @@ private:
                            QSharedPointer<DisplayHandle> displayHandle,
                            const Parameters &parameters);
     QString timeString(qint64 sample, double sampleRate);
-    void fillSamples(fftw_complex* buffer,
+    void fillSamples(float* buffer,
                         qint64 offset,
                         QSharedPointer<BitContainer> bitContainer,
                         const MetadataHelper::SampleFormat &sampleFormat,
                         int fftSize,
-                        SpectrogramControls::DataType dataType);
+                        SpectrogramControls::DataType dataType);                    
 
     void setSpectrums(QList<QVector<double>> spectrums);
 

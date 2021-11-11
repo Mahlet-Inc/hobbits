@@ -1,16 +1,5 @@
 Copyright (c) 2020-2021 Mahlet, Inc.
 
-IMPORTANT: While all the code in hobbits is released under the MIT License
-(set out below), some capabilities require FFTW3. FFTW3 is available
-under two licenses, the free GPL and a non-free license that allows it to be
-used in proprietary programs.
-
-If you distribute FFTW3-enabled hobbits with the GPLed FFTW3 library, your code
-must also be GPL licensed. If you do not wish to comply with the terms of the
-GPL, you have to buy a FFTW3 license from the copyright holder, MIT. See
-http://www.fftw.org/doc/License-and-Copyright.html for more information.
-
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to

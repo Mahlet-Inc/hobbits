@@ -70,20 +70,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sb_fftSize">
-       <property name="suffix">
-        <string/>
-       </property>
-       <property name="minimum">
-        <number>32</number>
-       </property>
-       <property name="maximum">
-        <number>131072</number>
-       </property>
-       <property name="value">
-        <number>2048</number>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="cb_fftSize"/>
      </item>
      <item>
       <widget class="QLabel" name="label_2">

@@ -87,6 +87,8 @@ if (BUILDING_WITH_CONAN)
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CONAN_LIB_DIRS_QT}/cmake/Qt5Core")
 	include(conan_qt_executables_variables)
 else()
+	find_package(PkgConfig)
+
 	# Qt
 	find_package(Qt5Core CONFIG REQUIRED)
 	find_package(Qt5Widgets CONFIG REQUIRED)
@@ -98,15 +100,13 @@ else()
 		find_package(PCAP REQUIRED)
 	endif()
 
-	# FFTW
-	if (WIN32)
-		find_package(FFTW COMPONENTS DOUBLE_LIB REQUIRED)
-	else()
-		find_package(FFTW COMPONENTS DOUBLE_LIB DOUBLE_THREADS_LIB REQUIRED)
+	if(NOT WIN32)
+		# Libusb
+		find_package(libusb-1.0 REQUIRED)
 	endif()
 
-	# Libusb
-	find_package(libusb-1.0 REQUIRED)
+	# PFFFT
+	find_package(PFFFT REQUIRED)
 
 endif()
 
@@ -200,9 +200,9 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 
 cpack_add_component("runtime")
 set(CPACK_DEBIAN_RUNTIME_PACKAGE_NAME "hobbits")
-set(CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libfftw3-3, libpcap0.8")
+set(CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libpcap0.8")
 set(CPACK_RPM_RUNTIME_PACKAGE_NAME "hobbits")
-set(CPACK_RPM_RUNTIME_PACKAGE_REQUIRES "qt5-qtbase, qt5-qtbase-gui, fftw, libpcap")
+set(CPACK_RPM_RUNTIME_PACKAGE_REQUIRES "qt5-qtbase, qt5-qtbase-gui, libpcap")
 
 cpack_add_component("dev")
 set(CPACK_DEBIAN_DEV_PACKAGE_NAME "hobbits-dev")
@@ -215,8 +215,8 @@ set(CPACK_COMPONENT_DEV_DISPLAY_NAME "Hobbits Development Tools")
 
 set(CPACK_COMPONENTS_ALL runtime dev)
 
-set(CPACK_RPM_PACKAGE_REQUIRES "qt5-qtbase-devel, qt5-qtbase-gui, fftw, libpcap")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "qt5-default, libfftw3-3, libpcap0.8")
+set(CPACK_RPM_PACKAGE_REQUIRES "qt5-qtbase-devel, qt5-qtbase-gui, libpcap")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "qt5-default, libpcap0.8")
 set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
 #
@@ -234,7 +234,7 @@ if (NOT BUILDING_WITH_CONAN)
 	if (SELF_CONTAINED_APP OR APPLE OR WIN32)
 		pack_qt_libs()
 		pack_python()
-		pack_fftw()
+		pack_pffft()
 		pack_pcap()
 	endif()
 	include(CPack)
