@@ -6,6 +6,7 @@
 | ------ | ------- |
 |[![Master Build Status](https://dev.azure.com/mahlet-inc/hobbits/_apis/build/status/Mahlet-Inc.hobbits?branchName=master)](https://dev.azure.com/mahlet-inc/hobbits/_build/latest?definitionId=1&branchName=master)|[![Develop Build Status](https://dev.azure.com/mahlet-inc/hobbits/_apis/build/status/Mahlet-Inc.hobbits?branchName=develop)](https://dev.azure.com/mahlet-inc/hobbits/_build/latest?definitionId=1&branchName=develop)|
 
+
 ## Documentation
 The documentation is available at
 [mahlet-inc.github.io](https://mahlet-inc.github.io).
@@ -21,10 +22,9 @@ documentation and/or watch
 
 ## Building with Conan, Python 3, and CMake 3.12+
 1. Install Conan with pip: `pip install conan`
-2. Configure Conan to use a custom remote and keep `*.pyc` files:
+2. Configure Conan to use a custom remote:
 ```
 conan remote add hobbitsconan https://helloadam.jfrog.io/artifactory/api/conan/conan
-conan config set general.keep_python_files=True
 ```
 3. Use conan to get/build dependencies, then build and package hobbits:
 ```
@@ -45,9 +45,9 @@ handled. The [CentOS 7 GCC 4.8 CI build](ci/linux-cmake.yml) does this.
 ## Adding plugins
 Read the
 [plugin developer guide](https://mahlet-inc.github.io/plugin-developer-guide/)
-in the documentation. As of v0.50.0, the plugin interfaces are pretty stable.
-It is possible, maybe even likely, that plugins built to the current interfaces
-will be version 1.x.x-compatible. 
+in the documentation. As of v0.50.0, the plugin interfaces are pretty stable,
+but some planned refactoring efforts will change parts of it before 1.x is
+finalized.
 
 ## Get Involved
 Join our [Discord server](https://discord.gg/wRQJpZZ), send us an
