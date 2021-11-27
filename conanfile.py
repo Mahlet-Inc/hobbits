@@ -23,10 +23,7 @@ class HobbitsConan(ConanFile):
         "shared": True,
         "fPIC": True,
         "qt:shared": True,
-        "fftw:shared": True,
         "libpcap:shared": True,
-        "fftw:threads": True,
-        "fftw:combinedthreads": True,
         "icu:shared":False
         }
     generators = "cmake"
@@ -35,7 +32,7 @@ class HobbitsConan(ConanFile):
     requires = [
         ("qt/5.15.2"),
         ("hobbits-cpython/3.9.7"),
-        ("fftw/3.3.9"),
+        ("pffft/cci.20210511"),
         ("libusb/1.0.24")
     ]
 
@@ -48,7 +45,6 @@ class HobbitsConan(ConanFile):
             del self.options.fPIC
         elif self.settings.os == "Macos":
             self.options['libpcap'].shared = False
-            self.options['fftw'].shared = False
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -88,7 +84,7 @@ class HobbitsConan(ConanFile):
         self.cpp_info.libs = ["hobbits-core", "hobbits-widgets", "hobbits-python"]
 
     def imports(self):
-        for pkg in ["qt", "fftw", "libpcap", "icu"]:
+        for pkg in ["qt", "pffft", "libpcap", "icu"]:
             self.copy("*.dll", "bin", "bin", root_package=pkg)
             self.copy("*.dylib*", "lib", "lib", root_package=pkg)
             self.copy("*.so*", "lib", "lib", root_package=pkg)

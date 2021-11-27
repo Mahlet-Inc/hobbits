@@ -2,6 +2,7 @@
 #include "ui_spectrogramcontrols.h"
 #include "metadatahelper.h"
 
+
 SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::SpectrogramControls()),
     m_paramHelper(new ParameterHelper(delegate))
@@ -32,7 +33,19 @@ SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> deleg
     m_paramHelper->addComboBoxParameter("data_type", ui->cb_dataType);
 
     m_paramHelper->addSliderIntParameter("sensitivity", ui->hs_sensitivity);
-    m_paramHelper->addSpinBoxIntParameter("fft_size", ui->sb_fftSize);
+   
+    ui->cb_fftSize->addItem("32", 1 << 5);
+    ui->cb_fftSize->addItem("64", 1 << 6);
+    ui->cb_fftSize->addItem("128", 1 << 7);
+    ui->cb_fftSize->addItem("256", 1 << 8);
+    ui->cb_fftSize->addItem("512", 1 << 9);
+    ui->cb_fftSize->addItem("1,024", 1 << 10);
+    ui->cb_fftSize->addItem("2,048", 1 << 11);
+    ui->cb_fftSize->addItem("4,096", 1 << 12);
+    ui->cb_fftSize->addItem("8,192", 1 << 13);
+    ui->cb_fftSize->addItem("16,384", 1 << 14);
+    m_paramHelper->addComboBoxParameter("fft_size", ui->cb_fftSize);
+
     m_paramHelper->addSpinBoxIntParameter("fft_overlap", ui->sb_overlap);
 
     m_paramHelper->addCheckBoxBoolParameter("show_headers", ui->ck_showHeaders);
@@ -40,7 +53,6 @@ SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> deleg
     m_paramHelper->addCheckBoxBoolParameter("logarithmic_scaling", ui->ck_logarithmic);
 
     connect(ui->hs_sensitivity, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
-    connect(ui->sb_fftSize, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->sb_overlap, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->ck_showHeaders, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
     connect(ui->ck_hoverSlices, SIGNAL(toggled(bool)), this, SIGNAL(changed()));
@@ -48,6 +60,7 @@ SpectrogramControls::SpectrogramControls(QSharedPointer<ParameterDelegate> deleg
 
     connect(ui->cb_sampleFormat, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));
     connect(ui->cb_dataType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));
+    connect(ui->cb_fftSize, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));
 
     connect(ui->sb_sampleRate, SIGNAL(valueChanged(double)), this, SIGNAL(changed()));
     connect(ui->cb_rateUnits, SIGNAL(currentIndexChanged(int)), this, SIGNAL(changed()));

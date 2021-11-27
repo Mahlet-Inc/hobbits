@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>batches/byte_align.hbat</file>
+    </qresource>
+</RCC>

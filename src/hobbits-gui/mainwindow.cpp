@@ -66,6 +66,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
     // More menu initialization
     populateRecentBatchesMenu();
+    populatePresetBatchesMenu();
 
     // Configure Bit Container View
     ui->tv_bitContainers->setModel(m_bitContainerManager->getTreeModel().data());
@@ -594,17 +595,25 @@ void MainWindow::setCurrentBitContainer()
     }
 }
 
+const QString CONFIRM_BITS_DELETION = "Confirm Bits Deletion";
+
 void MainWindow::deleteCurrentBitcontainer()
 {
     if (!currContainer().isNull()) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
+        auto confirm = SettingsManager::getUiSetting(CONFIRM_BITS_DELETION);
+        if (!confirm.isValid() || confirm.toBool()) {
+            reply = QMessageBox::question(
                 this,
                 "Delete Bits Confirmation",
                 QString("Are you sure you want to delete bit container '%1'?").arg(currContainer()->name()),
-                QMessageBox::Yes | QMessageBox::No);
-        if (reply != QMessageBox::Yes) {
-            return;
+                QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No);
+            if (reply == QMessageBox::YesToAll) {
+                SettingsManager::setUiSetting(CONFIRM_BITS_DELETION, QVariant(false));
+            }
+            else if (reply != QMessageBox::Yes) {
+                return;
+            }
         }
 
         ui->tb_removeBitContainer->setEnabled(false);
@@ -615,13 +624,19 @@ void MainWindow::deleteCurrentBitcontainer()
 void MainWindow::deleteAllBitContainers()
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(
+    auto confirm = SettingsManager::getUiSetting(CONFIRM_BITS_DELETION);
+    if (!confirm.isValid() || confirm.toBool()) {
+        reply = QMessageBox::question(
             this,
             "Delete Bits Confirmation",
             QString("Are you sure you want to delete all bit containers?"),
-            QMessageBox::Yes | QMessageBox::No);
-    if (reply != QMessageBox::Yes) {
-        return;
+            QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::YesToAll) {
+            SettingsManager::setUiSetting(CONFIRM_BITS_DELETION, QVariant(false));
+        }
+        else if (reply != QMessageBox::Yes) {
+            return;
+        }
     }
 
     ui->tb_removeBitContainer->setEnabled(false);
@@ -913,6 +928,21 @@ void MainWindow::populateRecentBatchesMenu(QString addition, QString removal)
     }
 
     ui->menuApply_Recent_Batch->setEnabled(recentlyUsed.length() > 0);
+}
+
+
+void MainWindow::populatePresetBatchesMenu()
+{
+    QMenu* builtInBatchMenu = ui->menuFile->addMenu("Apply Built-in Batch");
+    
+    for (QFileInfo batch: QDir(":/batches").entryInfoList()) {
+        QString batchPath = batch.absoluteFilePath();
+        builtInBatchMenu->addAction(
+            batch.baseName(),
+            [this, batchPath]() {
+                this->applyBatchFile(batchPath);
+            });
+    }
 }
 
 

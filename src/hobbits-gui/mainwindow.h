@@ -99,6 +99,8 @@ private slots:
                                   QPair<QString, Parameters> removal = QPair<QString, Parameters>());
     void populateRecentBatchesMenu(QString addition = QString(), QString removal = QString());
 
+    void populatePresetBatchesMenu();
+
     void sendBitContainerPreview();
     static void processBitPreview(QSharedPointer<BitContainerPreview> preview, AbstractParameterEditor*  editor);
 
