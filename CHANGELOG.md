@@ -1,3 +1,12 @@
+# [0.53.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.52.0...v0.53.0) (2021-11-27)
+
+
+### Features
+
+* add built-in batches ([59b1a5f](https://github.com/Mahlet-Inc/hobbits/commit/59b1a5f14b2bf3bc60d75363958097a623b8b675))
+* add config setting for skipping delete confirmation ([162a8b5](https://github.com/Mahlet-Inc/hobbits/commit/162a8b5f4c2a3a3ec2b0234b525c24c318228319))
+* replace FFTW with PFFFT and improve FFT UI and error reporting ([d23d63c](https://github.com/Mahlet-Inc/hobbits/commit/d23d63c888ee6e512551ec7be1da5e317cd867bc))
+
 # [0.52.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.51.1...v0.52.0) (2021-10-07)
 
 
