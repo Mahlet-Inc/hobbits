@@ -1,0 +1,180 @@
+{
+    "steps": [
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s3t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -546,
+                "y": -642
+            },
+            "id": "{0b225e01-6f5a-4f67-a244-ecd48a761221}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s4t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -546,
+                "y": -499
+            },
+            "id": "{65266ed0-2537-44fb-a701-287cb78243f3}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s1t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -547,
+                "y": -928
+            },
+            "id": "{6653b5d2-a26d-4984-bd60-53053ea83ab3}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s2t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -545,
+                "y": -784
+            },
+            "id": "{7aafc2be-3e37-4f1a-a409-29ffd3330445}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s5t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -542,
+                "y": -360
+            },
+            "id": "{8c4b8a08-5a97-4302-84cc-f28ee6853f2a}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s6t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -534,
+                "y": -215
+            },
+            "id": "{b6689e88-c491-41d9-bbb5-a4e8c8691534}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Take Skip",
+                "state": {
+                    "deinterleave_channels": 1,
+                    "frame_based": false,
+                    "interleaved": false,
+                    "take_skip_string": "s7t*"
+                },
+                "type": 2
+            },
+            "editorPosition": {
+                "x": -526,
+                "y": -66
+            },
+            "id": "{b832bd55-6554-442f-92fa-055258a7566e}",
+            "inputs": [
+                {
+                    "outputPosition": 0,
+                    "stepId": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "Batch Input",
+                "state": {
+                },
+                "type": 6
+            },
+            "editorPosition": {
+                "x": -1049,
+                "y": -295
+            },
+            "id": "{d1d149a7-6cab-465a-a038-bf8601f6dabb}",
+            "inputs": [
+            ]
+        }
+    ]
+}
