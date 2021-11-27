@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QSpacerItem>
 #include <QSpinBox>
+#include <QCheckBox>
 
 PreferencesDialog::PreferencesDialog(QSharedPointer<const HobbitsPluginManager> pluginManager, QWidget *parent) :
     QDialog(parent),
@@ -100,6 +101,17 @@ QLayoutItem* PreferencesDialog::createEditor(
                 editor,
                 QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [setter](double newVal) {
+            setter(QVariant(newVal));
+        });
+        return new QWidgetItem(editor);
+    }
+    else if (value.type() == QVariant::Bool) {
+        QCheckBox *editor = new QCheckBox(parent);
+        editor->setChecked(value.toBool());
+        connect(
+                editor,
+                &QCheckBox::toggled,
+                [setter](bool newVal) {
             setter(QVariant(newVal));
         });
         return new QWidgetItem(editor);
