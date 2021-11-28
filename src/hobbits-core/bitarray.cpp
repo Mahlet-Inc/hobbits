@@ -1,11 +1,8 @@
 #include "bitarray.h"
 
-#include <QRegularExpression>
-#include <QSharedPointer>
-#include <QString>
-#include <QDir>
-#include <QDataStream>
+#include <format>
 #include <stdexcept>
+#include <algorithm> 
 
 #ifdef Q_OS_UNIX
 #define bswap16(X) __builtin_bswap16((X))
@@ -19,6 +16,7 @@
 #define bswap64(X) _byteswap_uint64((X))
 #endif
 
+
 static char BIT_MASKS[8] = {
     -128, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
 };
@@ -27,31 +25,31 @@ static char INVERSE_BIT_MASKS[8] = {
     0x7f, -65, -33, -17, -9, -5, -3, -2
 };
 
-//static quint64 BYTE_MASKS[8] = {
+//static uint64_t BYTE_MASKS[8] = {
 //    0xff00000000000000, 0x00ff000000000000, 0x0000ff0000000000, 0x000000ff00000000, 0x00000000ff000000, 0x0000000000ff0000, 0x000000000000ff00, 0x00000000000000ff
 //};
 
-static quint64 INVERSE_BYTE_MASKS[8] = {
+static uint64_t INVERSE_BYTE_MASKS[8] = {
     0x00000000000000ff, 0x000000000000ff00, 0x0000000000ff0000, 0x00000000ff000000, 0x000000ff00000000, 0x0000ff0000000000, 0x00ff000000000000, 0xff00000000000000
 };
 
-static quint8 IMASK_MSB_8[8] = {
+static uint8_t IMASK_MSB_8[8] = {
     0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe
 };
 
-static quint8 IMASK_LSB_8[8] = {
+static uint8_t IMASK_LSB_8[8] = {
     0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f
 };
 
-static quint64 COPY_64_BIT_LE_MASKS[8] = {
+static uint64_t COPY_64_BIT_LE_MASKS[8] = {
     0x0000000000000000, 0x0000000000000080, 0x00000000000000b0, 0x00000000000000e0, 0x00000000000000f0, 0x00000000000000f8, 0x00000000000000fb, 0x00000000000000fe
 };
 
-//static quint8 MASK_MSB_8[8] {
+//static uint8_t MASK_MSB_8[8] {
 //    0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01
 //};
 
-static quint8 MASK_LSB_8[8] {
+static uint8_t MASK_LSB_8[8] {
     0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
 };
 
@@ -59,61 +57,68 @@ static quint8 MASK_LSB_8[8] {
 #define CACHE_CHUNK_BIT_SIZE (CACHE_CHUNK_BYTE_SIZE * 8)
 #define MAX_ACTIVE_CACHE_CHUNKS 5
 
+std::string random_string( size_t length )
+{
+    auto randchar = []() -> char
+    {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    std::string str(length,0);
+    std::generate_n( str.begin(), length, randchar );
+    return str;
+}
+
 BitArray::BitArray() :
-    m_dataFile(QDir::temp().absoluteFilePath("bitarray")),
     m_size(0),
     m_dataCaches(nullptr)
 {
-    m_dataFile.open();
+    m_dataFilePath = fs::temp_directory_path() / ("bitarr" + random_string(8));
+    while (fs::exists(m_dataFilePath)) {
+        m_dataFilePath = fs::temp_directory_path() / ("bitarr" + random_string(8));
+    }
+    m_dataFile.open(m_dataFilePath, std::fstream::in | std::fstream::out | std::fstream::binary);
 }
 
-BitArray::BitArray(qint64 sizeInBits) :
+BitArray::BitArray(int64_t sizeInBits) :
     BitArray()
 {
     m_size = sizeInBits;
-    qint64 bytesToWrite = this->sizeInBytes();
-    char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
-    for (int i = 0; i < CACHE_CHUNK_BYTE_SIZE; i++) {
-        byteBuffer[i] = 0;
-    }
-    while (bytesToWrite > 0) {
-        qint64 byteChunkSize = qMin(bytesToWrite, qint64(CACHE_CHUNK_BYTE_SIZE));
-        qint64 bytesWritten = m_dataFile.write(byteBuffer, byteChunkSize);
-        bytesToWrite -= bytesWritten;
 
-        if (bytesToWrite > 0 && bytesWritten < 1) {
-            delete[] byteBuffer;
-            throw std::invalid_argument(
-                    QString("Failed to initialize BitArray file of %1 bits").arg(
-                            sizeInBits).toStdString());
-        }
-    }
-    delete[] byteBuffer;
+    fs::resize_file(m_dataFilePath, this->sizeInBytes());
 
     reinitializeCache();
 }
 
-BitArray::BitArray(QByteArray bytes, qint64 sizeInBits) :
+BitArray::BitArray(const char *bytes, int64_t sizeInBits) :
+    BitArray()
+{
+    m_size = sizeInBits;
+    m_dataFile.write(bytes, this->sizeInBytes());
+
+    reinitializeCache();
+}
+
+BitArray::BitArray(fs::path filepath, int64_t sizeInBits) :
     BitArray()
 {
     if (sizeInBits < 0) {
-        sizeInBits = bytes.size() * 8;
+        sizeInBits = fs::file_size(filepath) * 8;
     }
-    if (sizeInBits > bytes.size() * 8) {
-        throw std::invalid_argument(
-                QString("Cannot create BitArray of size '%2' from %1 bytes").arg(bytes.size()).arg(
-                        sizeInBits).toStdString());
-    }
-    m_size = sizeInBits;
-    m_dataFile.write(bytes);
-
-    reinitializeCache();
+    
+    std::ifstream fs(filepath, std::fstream::in | std::fstream::binary);
+    initFromStream(fs, sizeInBits);
+    fs.close();
 }
 
-BitArray::BitArray(QIODevice *dataStream, qint64 sizeInBits) :
+BitArray::BitArray(std::istream &dataStream, int64_t sizeInBits) :
     BitArray()
 {
-    initFromIO(dataStream, sizeInBits);
+    initFromStream(dataStream, sizeInBits);
 }
 
 BitArray::BitArray(const BitArray &other) :
@@ -128,40 +133,31 @@ BitArray::BitArray(const BitArray *other) :
 
 BitArray::~BitArray()
 {
+    m_dataFile.close();
     deleteCache();
 }
 
 BitArray& BitArray::operator=(const BitArray &other)
 {
-    initFromIO(other.dataReader(), other.sizeInBits());
+    initFromStream(other.dataReader(), other.sizeInBits());
     return *this;
 }
 
-QIODevice* BitArray::dataReader() const
+std::istream& BitArray::dataReader() const
 {
     syncCacheToFile();
-    m_dataFile.seek(0);
-    return &m_dataFile;
+    m_dataFile.seekg(0);
+    return m_dataFile;
 }
 
-void BitArray::initFromIO(QIODevice *dataStream, qint64 sizeInBits)
-{
-    if (sizeInBits < 0) {
-        sizeInBits = dataStream->bytesAvailable() * 8;
-    }
-    
-    QDataStream stream(dataStream);
-    initFromStream(stream, sizeInBits);
-}
-
-void BitArray::initFromStream(QDataStream &dataStream, qint64 sizeInBits)
+void BitArray::initFromStream(std::istream &dataStream, int64_t sizeInBits)
 {
     m_size = sizeInBits;
-    qint64 bytesToRead = this->sizeInBytes();
+    int64_t bytesToRead = this->sizeInBytes();
     char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
     while (bytesToRead > 0) {
-        qint64 actualBytes = qMin(bytesToRead, qint64(CACHE_CHUNK_BYTE_SIZE));
-        qint64 bytesRead = dataStream.readRawData(byteBuffer, actualBytes);
+        int64_t actualBytes = std::min(bytesToRead, int64_t(CACHE_CHUNK_BYTE_SIZE));
+        int64_t bytesRead = dataStream.readsome(byteBuffer, actualBytes);
         m_dataFile.write(byteBuffer, bytesRead);
         bytesToRead -= bytesRead;
 
@@ -182,7 +178,7 @@ void BitArray::reinitializeCache()
     }
     if (sizeInBits() > 0) {
         m_cacheMutex.lock();
-        qint64 cacheCount = sizeInBits() / CACHE_CHUNK_BIT_SIZE + (sizeInBits() % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
+        int64_t cacheCount = sizeInBits() / CACHE_CHUNK_BIT_SIZE + (sizeInBits() % CACHE_CHUNK_BIT_SIZE ? 1 : 0);
         m_dataCaches = new char*[cacheCount];
         for (int i = 0; i < cacheCount; i++) {
             m_dataCaches[i] = nullptr;
@@ -193,46 +189,47 @@ void BitArray::reinitializeCache()
 
 void BitArray::deleteCache()
 {
-    QMutexLocker lock(&m_cacheMutex);
-    while (!m_recentCacheAccess.isEmpty()) {
-        delete[] m_dataCaches[m_recentCacheAccess.dequeue()];
+    std::scoped_lock lock(m_cacheMutex);
+    while (m_recentCacheAccess.size() > 0) {
+        delete[] m_dataCaches[m_recentCacheAccess.front()];
+        m_recentCacheAccess.pop_front();
     }
     delete[] m_dataCaches;
 }
 
-bool BitArray::at(qint64 i) const
+bool BitArray::at(int64_t i) const
 {
     if (i < 0 || i >= m_size) {
-        throw std::invalid_argument(QString("Invalid bit index '%1'").arg(i).toStdString());
+        throw std::invalid_argument(std::format("Invalid bit index '{}'", i));
     }
     CacheLoadLocker lock(i, this);
-    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    int64_t cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
     int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     return m_dataCaches[cacheIdx][index / 8] & BIT_MASKS[index % 8];
 }
 
 
-char BitArray::byteAt(qint64 i) const
+char BitArray::byteAt(int64_t i) const
 {
     if (i < 0 || i >= sizeInBytes()) {
-        throw std::invalid_argument(QString("Invalid byte index '%1'").arg(i).toStdString());
+        throw std::invalid_argument(std::format("Invalid byte index '{}'", i));
     }
     CacheLoadLocker lock(i * 8, this);
-    qint64 cacheIdx = i / CACHE_CHUNK_BYTE_SIZE;
+    int64_t cacheIdx = i / CACHE_CHUNK_BYTE_SIZE;
     int index = int(i - cacheIdx * CACHE_CHUNK_BYTE_SIZE);
     return m_dataCaches[cacheIdx][index];
 }
 
-quint64 BitArray::parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+uint64_t BitArray::parseUIntValue(int64_t bitOffset, int wordBitSize, bool littleEndian) const
 {
-    quint64 word = 0;
-    for (qint64 i = 0; i < wordBitSize; i++) {
+    uint64_t word = 0;
+    for (int64_t i = 0; i < wordBitSize; i++) {
         if (this->at(bitOffset + i)) {
             word += 1ull << (wordBitSize - i - 1);
         }
     }
     if (littleEndian && wordBitSize % 8 == 0) {
-        quint64 buffer = 0;
+        uint64_t buffer = 0;
         int bytes = wordBitSize/8;
         for (int i = 0; i < bytes; i++) {
             buffer += (word & INVERSE_BYTE_MASKS[i]) << ((bytes-1-i*2)*8);
@@ -242,14 +239,14 @@ quint64 BitArray::parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleE
     return word;
 }
 
-qint64 BitArray::parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian) const
+int64_t BitArray::parseIntValue(int64_t bitOffset, int wordBitSize, bool littleEndian) const
 {
-    quint64 uVal = parseUIntValue(bitOffset, wordBitSize, littleEndian);
-    qint64 *val = reinterpret_cast<qint64*>(&uVal);
+    uint64_t uVal = parseUIntValue(bitOffset, wordBitSize, littleEndian);
+    int64_t *val = reinterpret_cast<int64_t*>(&uVal);
     if (wordBitSize == 64) {
         return *val;
     }
-    qint64 signBit = 1 << (wordBitSize-1);
+    int64_t signBit = 1 << (wordBitSize-1);
     if (signBit & *val) {
         auto r = (*val - signBit) - signBit;
         return r;
@@ -259,14 +256,14 @@ qint64 BitArray::parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEnd
     }
 }
 
-qint64 BitArray::readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readInt16Samples(int16_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    return readUInt16Samples(reinterpret_cast<quint16*>(data), sampleOffset, maxSamples, bigEndian);
+    return readUInt16Samples(reinterpret_cast<uint16_t*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
-qint64 BitArray::readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readUInt16Samples(uint16_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 2, maxSamples * 2);
+    int64_t samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 2, maxSamples * 2);
     samples /= 2;
 
     if (bigEndian) {
@@ -278,38 +275,38 @@ qint64 BitArray::readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 ma
     return samples;
 }
 
-qint64 BitArray::readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readInt24Samples(int32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    qint64 bitOffset = sampleOffset * 24;
-    qint64 samples = 0;
+    int64_t bitOffset = sampleOffset * 24;
+    int64_t samples = 0;
     while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
-        data[samples] = qint32(parseIntValue(bitOffset, 24, !bigEndian));
+        data[samples] = int32_t(parseIntValue(bitOffset, 24, !bigEndian));
         bitOffset += 24;
         samples++;
     }
     return samples;
 }
 
-qint64 BitArray::readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readUInt24Samples(uint32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    qint64 bitOffset = sampleOffset * 24;
-    qint64 samples = 0;
+    int64_t bitOffset = sampleOffset * 24;
+    int64_t samples = 0;
     while (samples < maxSamples && bitOffset + 24 < sizeInBits()) {
-        data[samples] = quint32(parseUIntValue(bitOffset, 24, !bigEndian));
+        data[samples] = uint32_t(parseUIntValue(bitOffset, 24, !bigEndian));
         bitOffset += 24;
         samples++;
     }
     return samples;
 }
 
-qint64 BitArray::readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readInt32Samples(int32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+    return readUInt32Samples(reinterpret_cast<uint32_t*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
-qint64 BitArray::readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readUInt32Samples(uint32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 4, maxSamples * 4);
+    int64_t samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 4, maxSamples * 4);
     samples /= 4;
 
     if (bigEndian) {
@@ -321,14 +318,14 @@ qint64 BitArray::readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 ma
     return samples;
 }
 
-qint64 BitArray::readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readInt64Samples(int64_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
+    return readUInt64Samples(reinterpret_cast<uint64_t*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
-qint64 BitArray::readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readUInt64Samples(uint64_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    qint64 samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 8, maxSamples * 8);
+    int64_t samples = readBytes(reinterpret_cast<char*>(data), sampleOffset * 8, maxSamples * 8);
     samples /= 8;
 
     if (bigEndian) {
@@ -340,80 +337,76 @@ qint64 BitArray::readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 ma
     return samples;
 }
 
-qint64 BitArray::readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readFloat32Samples(float *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    return readUInt32Samples(reinterpret_cast<quint32*>(data), sampleOffset, maxSamples, bigEndian);
+    return readUInt32Samples(reinterpret_cast<uint32_t*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
-qint64 BitArray::readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian) const
+int64_t BitArray::readFloat64Samples(double *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian) const
 {
-    return readUInt64Samples(reinterpret_cast<quint64*>(data), sampleOffset, maxSamples, bigEndian);
+    return readUInt64Samples(reinterpret_cast<uint64_t*>(data), sampleOffset, maxSamples, bigEndian);
 }
 
-void BitArray::loadCacheAt(qint64 i) const
+void BitArray::loadCacheAt(int64_t i) const
 {
-    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    int64_t cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
     if (m_dataCaches[cacheIdx]) {
         return;
     }
 
-    QQueue<qint64> *unconstRecentCacheAccess = const_cast<QQueue<qint64>*>(&m_recentCacheAccess);
-    char **unconstDataCaches = const_cast<char**>(m_dataCaches);
-
-    qint64 byteIdx = cacheIdx * CACHE_CHUNK_BYTE_SIZE;
+    int64_t byteIdx = cacheIdx * CACHE_CHUNK_BYTE_SIZE;
 
     char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
     readBytesNoSync(byteBuffer, byteIdx, CACHE_CHUNK_BYTE_SIZE);
 
-    unconstDataCaches[cacheIdx] = byteBuffer;
-    unconstRecentCacheAccess->enqueue(cacheIdx);
+    m_dataCaches[cacheIdx] = byteBuffer;
+    m_recentCacheAccess.push_back(cacheIdx);
 
-    if (unconstRecentCacheAccess->size() > MAX_ACTIVE_CACHE_CHUNKS) {
-        qint64 removedCacheIndex = unconstRecentCacheAccess->dequeue();
+    if (m_recentCacheAccess.size() > MAX_ACTIVE_CACHE_CHUNKS) {
+        int64_t removedCacheIndex = m_recentCacheAccess.front();
+        m_recentCacheAccess.pop_front();
 
         if (m_dirtyCache) {
-            QTemporaryFile *noConstFile = const_cast<QTemporaryFile*>(&m_dataFile);
-            noConstFile->seek(removedCacheIndex * CACHE_CHUNK_BYTE_SIZE);
-            qint64 cacheChunkByteLength =
-                qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (removedCacheIndex * CACHE_CHUNK_BIT_SIZE));
-            noConstFile->write(unconstDataCaches[removedCacheIndex], cacheChunkByteLength);
+            m_dataFile.seekp(removedCacheIndex * CACHE_CHUNK_BYTE_SIZE);
+            int64_t cacheChunkByteLength = std::min(int64_t(CACHE_CHUNK_BYTE_SIZE), sizeInBits() - (removedCacheIndex * CACHE_CHUNK_BIT_SIZE));
+            m_dataFile.write(m_dataCaches[removedCacheIndex], cacheChunkByteLength);
         }
 
-        delete[] unconstDataCaches[removedCacheIndex];
-        unconstDataCaches[removedCacheIndex] = nullptr;
+        delete[] m_dataCaches[removedCacheIndex];
+        m_dataCaches[removedCacheIndex] = nullptr;
     }
 }
 
-qint64 BitArray::sizeInBits() const
+int64_t BitArray::sizeInBits() const
 {
     return m_size;
 }
 
-qint64 BitArray::sizeInBytes() const
+int64_t BitArray::sizeInBytes() const
 {
     return m_size / 8 + (m_size % 8 ? 1 : 0);
 }
 
-void BitArray::resize(qint64 sizeInBits)
+void BitArray::resize(int64_t sizeInBits)
 {
-    QMutexLocker lock(&m_mutex);
+    std::scoped_lock lock(m_mutex);
     syncCacheToFile();
     m_size = sizeInBits;
     reinitializeCache();
-    m_dataFile.resize(sizeInBytes());
+    fs::resize_file(m_dataFilePath, sizeInBytes());
 }
 
-void BitArray::set(qint64 i, bool value)
+void BitArray::set(int64_t i, bool value)
 {
     if (i < 0 || i >= m_size) {
         throw std::invalid_argument(QString("Invalid bit index '%1'").arg(i).toStdString());
     }
-    QMutexLocker lock(&m_mutex);
+    std::scoped_lock lock(m_mutex);
 
     m_dirtyCache = true;
 
     CacheLoadLocker cacheLock(i, this);
-    qint64 cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
+    int64_t cacheIdx = i / CACHE_CHUNK_BIT_SIZE;
     int index = int(i - cacheIdx * CACHE_CHUNK_BIT_SIZE);
     if (value) {
         m_dataCaches[cacheIdx][index / 8] = m_dataCaches[cacheIdx][index / 8] | BIT_MASKS[index % 8];
@@ -423,23 +416,23 @@ void BitArray::set(qint64 i, bool value)
     }
 }
 
-void BitArray::setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset, qint64 length)
+void BitArray::setBytes(int64_t byteOffset, const char *src, int64_t srcByteOffset, int64_t length)
 {
     if (sizeInBytes() < byteOffset + length) {
         resize((byteOffset + length) * 8);
     }
 
-    QMutexLocker lock(&m_mutex);
+    std::scoped_lock lock(m_mutex);
     m_dirtyCache = true;
 
-    qint64 bytesToCopy = length;
+    int64_t bytesToCopy = length;
     while (bytesToCopy > 0) {
         CacheLoadLocker lock(byteOffset * 8, this);
-        qint64 cacheIdx = byteOffset / CACHE_CHUNK_BYTE_SIZE;
+        int64_t cacheIdx = byteOffset / CACHE_CHUNK_BYTE_SIZE;
 
-        qint64 byteIndex = byteOffset - (cacheIdx * CACHE_CHUNK_BYTE_SIZE);
+        int64_t byteIndex = byteOffset - (cacheIdx * CACHE_CHUNK_BYTE_SIZE);
 
-        qint64 chunkLength =  qMin(CACHE_CHUNK_BYTE_SIZE - byteIndex, bytesToCopy);
+        int64_t chunkLength =  std::min(CACHE_CHUNK_BYTE_SIZE - byteIndex, bytesToCopy);
 
         memcpy(&m_dataCaches[cacheIdx][byteIndex], src + srcByteOffset, chunkLength);
 
@@ -449,14 +442,14 @@ void BitArray::setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset
     }
 }
 
-qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode) const
+int64_t BitArray::copyBits(int64_t bitOffset, BitArray *dest, int64_t destBitOffset, int64_t maxBits, int copyMode) const
 {
     if (!dest) {
         return 0;
     }
 
     // figure out how many bits will actually be copied
-    qint64 bitsToCopy = qMin(maxBits, sizeInBits() - bitOffset);
+    int64_t bitsToCopy = std::min(maxBits, sizeInBits() - bitOffset);
     if (bitsToCopy <= 0) {
         return 0;
     }
@@ -468,28 +461,28 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
 
     dest->m_mutex.lock();
 
-    qint64 bitsCopied = 0;
+    int64_t bitsCopied = 0;
     while (bitsCopied < bitsToCopy) {
         CacheLoadLocker srcLock(bitOffset, this);
         CacheLoadLocker destLock(destBitOffset, dest);
 
-        qint64 srcCacheIdx = bitOffset / CACHE_CHUNK_BIT_SIZE;
-        qint64 destCacheIdx = destBitOffset / CACHE_CHUNK_BIT_SIZE;
+        int64_t srcCacheIdx = bitOffset / CACHE_CHUNK_BIT_SIZE;
+        int64_t destCacheIdx = destBitOffset / CACHE_CHUNK_BIT_SIZE;
 
         int srcByteAlignment = bitOffset % 8;
         int destByteAlignment = destBitOffset % 8;
 
-        qint64 srcCacheBitOffset = bitOffset - (srcCacheIdx * CACHE_CHUNK_BIT_SIZE);
-        qint64 destCacheBitOffset = destBitOffset - (destCacheIdx * CACHE_CHUNK_BIT_SIZE);
+        int64_t srcCacheBitOffset = bitOffset - (srcCacheIdx * CACHE_CHUNK_BIT_SIZE);
+        int64_t destCacheBitOffset = destBitOffset - (destCacheIdx * CACHE_CHUNK_BIT_SIZE);
 
-        qint64 srcCacheByteOffset = srcCacheBitOffset / 8;
-        qint64 destCacheByteOffset = destCacheBitOffset / 8;
+        int64_t srcCacheByteOffset = srcCacheBitOffset / 8;
+        int64_t destCacheByteOffset = destCacheBitOffset / 8;
 
         char* srcCache = m_dataCaches[srcCacheIdx] + srcCacheByteOffset;
         char* destCache = dest->m_dataCaches[destCacheIdx] + destCacheByteOffset;
 
-        qint64 bitsThisRound = CACHE_CHUNK_BIT_SIZE - qMax(srcCacheBitOffset, destCacheBitOffset);
-        bitsThisRound = qMin(bitsThisRound, (bitsToCopy - bitsCopied));
+        int64_t bitsThisRound = CACHE_CHUNK_BIT_SIZE - std::max(srcCacheBitOffset, destCacheBitOffset);
+        bitsThisRound = std::min(bitsThisRound, (bitsToCopy - bitsCopied));
 
         // TODO: short-circuit for byte-aligned copy here
 
@@ -497,14 +490,14 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
         int destOffset = destByteAlignment;
         int srcByteOffset = 0;
         int destByteOffset = 0;
-        qint64 increment = 0;
-        qint64 bitsLeft = bitsThisRound;
+        int64_t increment = 0;
+        int64_t bitsLeft = bitsThisRound;
         while (bitsLeft > 0) {
             if (bitsLeft < 8) {
-                quint8 mask8 =  IMASK_MSB_8[destByteAlignment];
+                uint8_t mask8 =  IMASK_MSB_8[destByteAlignment];
 
                 // get the source value and shift it to align with the destination
-                quint8 srcVal = quint8(srcCache[srcByteOffset]);
+                uint8_t srcVal = uint8_t(srcCache[srcByteOffset]);
                 if (copyMode == CopyMode::Invert) {
                     srcVal = ~srcVal;
                 }
@@ -534,11 +527,11 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                     *target |= srcVal;
                 }
 
-                increment = 8 - qMax(destByteAlignment, srcByteAlignment);
+                increment = 8 - std::max(destByteAlignment, srcByteAlignment);
             }
             else if (bitsLeft < 64) {
                 // copy up to 8 bits
-                quint8 srcVal = quint8(srcCache[srcByteOffset]);
+                uint8_t srcVal = uint8_t(srcCache[srcByteOffset]);
                 if (copyMode == CopyMode::Invert) {
                     srcVal = ~srcVal;
                 }
@@ -560,11 +553,11 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                     *target |= srcVal;
                 }
 
-                increment = 8 - qMax(destByteAlignment, srcByteAlignment);
+                increment = 8 - std::max(destByteAlignment, srcByteAlignment);
             }
             else {
                 // copy up to 64 bits
-                quint64 srcVal = static_cast<quint64*>(static_cast<void*>(srcCache + srcByteOffset))[0];
+                uint64_t srcVal = static_cast<uint64_t*>(static_cast<void*>(srcCache + srcByteOffset))[0];
                 if (copyMode == CopyMode::Invert) {
                     srcVal = ~srcVal;
                 }
@@ -572,7 +565,7 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                 srcVal <<= srcByteAlignment;
                 srcVal >>= destByteAlignment;
                 srcVal = bswap64(srcVal);
-                quint64* target = static_cast<quint64*>(static_cast<void*>(destCache + destByteOffset));
+                uint64_t* target = static_cast<uint64_t*>(static_cast<void*>(destCache + destByteOffset));
 
                 if (copyMode == CopyMode::Copy || copyMode == CopyMode::Invert) {
                     *target &= COPY_64_BIT_LE_MASKS[destByteAlignment];
@@ -588,7 +581,7 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
                     *target |= srcVal;
                 }
 
-                increment = 64 - qMax(destByteAlignment, srcByteAlignment);
+                increment = 64 - std::max(destByteAlignment, srcByteAlignment);
             }
 
             bitsLeft -= increment;
@@ -614,64 +607,49 @@ qint64 BitArray::copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset
 void BitArray::syncCacheToFile() const
 {
     if (m_dirtyCache) {
-        QMutexLocker cacheLock(&m_cacheMutex);
-        QMutexLocker dataFileLock(&m_dataFileMutex);
-        for (qint64 cacheIdx : m_recentCacheAccess) {
-            m_dataFile.seek(cacheIdx * CACHE_CHUNK_BYTE_SIZE);
-            qint64 cacheChunkByteLength =
-                qMin(qint64(CACHE_CHUNK_BYTE_SIZE), sizeInBytes() - (cacheIdx * CACHE_CHUNK_BYTE_SIZE));
+        std::scoped_lock lock(m_cacheMutex, m_dataFileMutex);
+        for (int64_t cacheIdx : m_recentCacheAccess) {
+            m_dataFile.seekp(cacheIdx * CACHE_CHUNK_BYTE_SIZE);
+            int64_t cacheChunkByteLength =
+                std::min(int64_t(CACHE_CHUNK_BYTE_SIZE), sizeInBytes() - (cacheIdx * CACHE_CHUNK_BYTE_SIZE));
             m_dataFile.write(m_dataCaches[cacheIdx], cacheChunkByteLength);
         }
     }
 }
 
-qint64 BitArray::readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const
+int64_t BitArray::readBytes(char *data, int64_t byteOffset, int64_t maxBytes) const
 {
     syncCacheToFile();
     return readBytesNoSync(data, byteOffset, maxBytes);
 }
 
-QByteArray BitArray::readBytes(qint64 byteOffset, qint64 maxBytes) const
+BitArray* BitArray::deserialize(std::istream &stream)
 {
-    syncCacheToFile();
-    return readBytesNoSync(byteOffset, maxBytes);
-}
-
-void BitArray::writeTo(QIODevice *outputStream) const
-{
-    QDataStream stream(outputStream);
-    writeToStream(stream);
-}
-
-BitArray* BitArray::deserialize(QDataStream &stream)
-{
-    qint64 sizeInBits;
-    stream >> sizeInBits;
+    int64_t sizeInBits;
+    stream.read(reinterpret_cast<char*>(&sizeInBits), 8);
     if (sizeInBits < 0) {
-        stream.setStatus(QDataStream::Status::ReadCorruptData);
         return nullptr;
     }
-
     auto bitArray = new BitArray();
     bitArray->initFromStream(stream, sizeInBits);
     return bitArray;
 }
 
-void BitArray::serialize(QDataStream &stream) const
+void BitArray::serialize(std::ostream &stream) const
 {
-    stream << m_size;
-    writeToStream(stream);
+    stream.write(reinterpret_cast<const char*>(&m_size), 8);
+    writeTo(stream);
 }
 
-void BitArray::writeToStream(QDataStream &dataStream) const
+void BitArray::writeTo(std::ostream &outputStream) const
 {
-    QIODevice *reader = dataReader();
+    dataReader();
     char *byteBuffer = new char[CACHE_CHUNK_BYTE_SIZE];
-    qint64 bytesToWrite = sizeInBytes();
+    int64_t bytesToWrite = sizeInBytes();
     while (bytesToWrite > 0) {
-        qint64 actualBytes = qMin(bytesToWrite, qint64(CACHE_CHUNK_BYTE_SIZE));
-        qint64 bytesRead = reader->read(byteBuffer, actualBytes);
-        dataStream.writeRawData(byteBuffer, bytesRead);
+        int64_t actualBytes = std::min(bytesToWrite, int64_t(CACHE_CHUNK_BYTE_SIZE));
+        int64_t bytesRead = m_dataFile.readsome(byteBuffer, actualBytes);
+        outputStream.write(byteBuffer, bytesRead);
         bytesToWrite -= bytesRead;
 
         if (bytesToWrite > 0 && bytesRead < 1) {
@@ -682,24 +660,14 @@ void BitArray::writeToStream(QDataStream &dataStream) const
     delete[] byteBuffer;
 }
 
-qint64 BitArray::readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const
+int64_t BitArray::readBytesNoSync(char *data, int64_t byteOffset, int64_t maxBytes) const
 {
-    QMutexLocker lock(&m_dataFileMutex);
-    if (!m_dataFile.seek(byteOffset)) {
+    if (byteOffset >= this->sizeInBytes()) {
         return 0;
     }
-
-    return m_dataFile.read(data, maxBytes);
-}
-
-QByteArray BitArray::readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const
-{
-    QMutexLocker lock(&m_dataFileMutex);
-    if (!m_dataFile.seek(byteOffset)) {
-        return QByteArray();
-    }
-
-    return m_dataFile.read(maxBytes);
+    std::scoped_lock lock(m_dataFileMutex);
+    m_dataFile.seekg(byteOffset);
+    return m_dataFile.readsome(data, maxBytes);
 }
 
 QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList *parseErrors)
@@ -714,7 +682,7 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
                 evenSpec += "0";
             }
             QByteArray bytes = QByteArray::fromHex(evenSpec.toLocal8Bit());
-            size = qMin((bitArraySpec.length() - 2) * 4, bytes.size() * 8);
+            size = std::min((bitArraySpec.length() - 2) * 4, bytes.size() * 8);
             return QSharedPointer<BitArray>(new BitArray(bytes, size));
         }
         else {
@@ -771,9 +739,9 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
     }
 }
 
-BitArray::CacheLoadLocker::CacheLoadLocker(qint64 bitIndex, const BitArray *bitArray) :
-    m_locker(&bitArray->m_cacheMutex) {
-    qint64 srcCacheIdx = bitIndex / CACHE_CHUNK_BIT_SIZE;
+BitArray::CacheLoadLocker::CacheLoadLocker(int64_t bitIndex, const BitArray *bitArray) :
+    m_locker(bitArray->m_cacheMutex) {
+    int64_t srcCacheIdx = bitIndex / CACHE_CHUNK_BIT_SIZE;
     if (!bitArray->m_dataCaches[srcCacheIdx]) {
         bitArray->loadCacheAt(bitIndex);
     }

@@ -1,24 +1,24 @@
 #ifndef BITARRAY_H
 #define BITARRAY_H
 
-#include <QByteArray>
-#include <QIODevice>
-#include <QMap>
-#include <QQueue>
-#include <QStringList>
-#include <QTemporaryFile>
-#include <QMutex>
-#include "hobbits-core_global.h"
+#include <cstdint>
+#include <iostream>
+#include <mutex>
+#include <deque>
+#include <filesystem>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 /**
   * @brief The BitArray class simplifies the use of byte-packed bitwise data
   *
   * \see BitContainer
 */
-class HOBBITSCORESHARED_EXPORT BitArray
+class BitArray
 {
 public:
-    enum HOBBITSCORESHARED_EXPORT CopyMode {
+    enum CopyMode {
         Copy = 0,
         Invert = 1,
         Xor = 2,
@@ -27,10 +27,11 @@ public:
     };
 
     BitArray();
-    BitArray(qint64 sizeInBits);
-    BitArray(QByteArray bytes, qint64 sizeInBits = -1);
-    BitArray(QIODevice *dataStream, qint64 sizeInBits = -1);
-    BitArray(const BitArray &other, qint64 sizeInBits);
+    BitArray(int64_t sizeInBits);
+    BitArray(const char *bytes, int64_t sizeInBits = -1);
+    BitArray(fs::path filepath, int64_t sizeInBits = -1);
+    BitArray(std::istream &dataStream, int64_t sizeInBits);
+    BitArray(const BitArray &other, int64_t sizeInBits);
     BitArray(const BitArray &other);
     BitArray(const BitArray *other);
 
@@ -38,69 +39,67 @@ public:
 
     ~BitArray();
 
-    bool at(qint64 i) const;
-    char byteAt(qint64 i) const;
-    qint64 sizeInBits() const;
-    qint64 sizeInBytes() const;
-    quint64 parseUIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
-    qint64 parseIntValue(qint64 bitOffset, int wordBitSize, bool littleEndian = false) const;
-    qint64 readInt16Samples(qint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readUInt16Samples(quint16 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readInt24Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readUInt24Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readInt32Samples(qint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readUInt32Samples(quint32 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readInt64Samples(qint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readUInt64Samples(quint64 *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readFloat32Samples(float *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
-    qint64 readFloat64Samples(double *data, qint64 sampleOffset, qint64 maxSamples, bool bigEndian = false) const;
+    bool at(int64_t i) const;
+    char byteAt(int64_t i) const;
+    int64_t sizeInBits() const;
+    int64_t sizeInBytes() const;
+    uint64_t parseUIntValue(int64_t bitOffset, int wordBitSize, bool littleEndian = false) const;
+    int64_t parseIntValue(int64_t bitOffset, int wordBitSize, bool littleEndian = false) const;
+    int64_t readInt16Samples(int16_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readUInt16Samples(uint16_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readInt24Samples(int32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readUInt24Samples(uint32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readInt32Samples(int32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readUInt32Samples(uint32_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readInt64Samples(int64_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readUInt64Samples(uint64_t *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readFloat32Samples(float *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
+    int64_t readFloat64Samples(double *data, int64_t sampleOffset, int64_t maxSamples, bool bigEndian = false) const;
 
-    void resize(qint64 sizeInBits);
+    void resize(int64_t sizeInBits);
 
-    void set(qint64 i, bool value);
-    void setBytes(qint64 byteOffset, const char *src, qint64 srcByteOffset, qint64 length);
+    void set(int64_t i, bool value);
+    void setBytes(int64_t byteOffset, const char *src, int64_t srcByteOffset, int64_t length);
 
-    qint64 copyBits(qint64 bitOffset, BitArray *dest, qint64 destBitOffset, qint64 maxBits, int copyMode = CopyMode::Copy) const;
+    int64_t copyBits(int64_t bitOffset, BitArray *dest, int64_t destBitOffset, int64_t maxBits, int copyMode = CopyMode::Copy) const;
 
-    qint64 readBytes(char *data, qint64 byteOffset, qint64 maxBytes) const;
-    QByteArray readBytes(qint64 byteOffset, qint64 maxBytes) const;
-    void writeTo(QIODevice *outputStream) const;
+    int64_t readBytes(char *data, int64_t byteOffset, int64_t maxBytes) const;
+    void writeTo(std::ostream &outputStream) const;
 
-    static BitArray* deserialize(QDataStream &stream);
-    void serialize(QDataStream &stream) const;
+    static BitArray* deserialize(std::istream &stream);
+    void serialize(std::ostream &stream) const;
 
-    static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList *parseErrors = nullptr);
+    static std::shared_ptr<BitArray> fromString(std::string bitArraySpec, std::vector<std::string> *parseErrors = nullptr);
 
 private:
-    void writeToStream(QDataStream &dataStream) const; // private for use by serializer and writeTo
 
     class CacheLoadLocker {
     public:
-        CacheLoadLocker(qint64 bitIndex, const BitArray* bitArray);
+        CacheLoadLocker(int64_t bitIndex, const BitArray* bitArray);
     private:
-        QMutexLocker m_locker;
+        std::scoped_lock<std::mutex> m_locker;
     };
 
-    qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;
-    QByteArray readBytesNoSync(qint64 byteOffset, qint64 maxBytes) const;
-    QIODevice* dataReader() const;
-    void initFromIO(QIODevice *dataStream, qint64 sizeInBits);
-    void initFromStream(QDataStream &dataStream, qint64 sizeInBits);
+    int64_t readBytesNoSync(char *data, int64_t byteOffset, int64_t maxBytes) const;
+    std::istream& dataReader() const;
+    void initFromStream(std::istream &dataStream, int64_t sizeInBits);
     void reinitializeCache();
     void deleteCache();
-    void loadCacheAt(qint64 bitIndex) const;
+    void loadCacheAt(int64_t bitIndex) const;
     void syncCacheToFile() const;
 
-    mutable QTemporaryFile m_dataFile;
-    qint64 m_size;
+    mutable std::fstream m_dataFile;
+    fs::path m_dataFilePath;
+    
+    int64_t m_size;
 
-    QQueue<qint64> m_recentCacheAccess;
-    char **m_dataCaches;
+    mutable std::deque<int64_t> m_recentCacheAccess;
+    mutable char **m_dataCaches;
     bool m_dirtyCache;
 
-    QMutex m_mutex;
-    mutable QMutex m_cacheMutex;
-    mutable QMutex m_dataFileMutex;
+    std::mutex m_mutex;
+    mutable std::mutex m_cacheMutex;
+    mutable std::mutex m_dataFileMutex;
 };
 
 #endif // BITARRAY_H

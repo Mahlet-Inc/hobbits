@@ -6,14 +6,15 @@ cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-#
-# Project Config
-#
-
 set(LINUX FALSE)
 if (UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
+
+
+#
+# Version and Project Config
+#
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/.version")
     message("Getting build version from .version file")
