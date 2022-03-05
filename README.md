@@ -26,7 +26,11 @@ documentation and/or watch
 ```
 conan remote add hobbitsconan https://helloadam.jfrog.io/artifactory/api/conan/conan
 ```
-3. Use conan to get/build dependencies, then build and package hobbits:
+3. You might need libudev and patchelf for all of the conan steps to work. Ubuntu example:
+```
+sudo apt-get install -y libudev-dev patchelf
+```
+4. Use conan to get/build dependencies, then build and package hobbits:
 ```
 mkdir build
 cd build

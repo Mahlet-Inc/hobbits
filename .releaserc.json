@@ -50,9 +50,9 @@
                     "name": "hobbits-${nextRelease.version}-win2019.zip"
                 },
                 {
-                    "path": "hobbits/mac_1014_release/mac_1014_release.tar.gz",
-                    "label": "Hobbits (64-bit Mac OSX 10.14)",
-                    "name": "hobbits-${nextRelease.version}-mac1014.tgz"
+                    "path": "hobbits/mac_1015_release/mac_1015_release.tar.gz",
+                    "label": "Hobbits (64-bit Mac OSX 10.15)",
+                    "name": "hobbits-${nextRelease.version}-mac1015.tgz"
                 },
                 {
                     "path": "hobbits/mac_11_release/mac_11_release.tar.gz",

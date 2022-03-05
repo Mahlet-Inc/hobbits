@@ -91,6 +91,10 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     QString kscOutput = "";
 
+    QString pyDepDir = dir.filePath("pydeps");
+
+    QString baseName = "";
+
     if (parameters.contains(PARAM_KSY)
             && !parameters.value(PARAM_KSY).toString().isEmpty()) {
         QString kscPath = SettingsManager::getPrivateSetting(KAITAI_PATH_KEY).toString();
@@ -108,12 +112,14 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
         ksy.write(parameters.value(PARAM_KSY).toString().toLocal8Bit());
         ksy.close();
 
+        HobbitsPython::recursiveDirCopy(":/kaitaidata/ksy/common", dir.filePath("common"));
+
         progress->setProgressPercent(20);
 
     #ifdef Q_OS_WIN
         QStringList kscAgs = {"/C", kscPath, "--debug", "--ksc-json-output", "-t", "python", ksy.fileName()};
     #else
-        QStringList kscAgs = {"--debug", "--ksc-json-output", "-t", "python", ksy.fileName()};
+        QStringList kscAgs = {"--debug", "--ksc-json-output", "-t", "python", "-I", ".", ksy.fileName()};
     #endif
         QProcess kscProcess;
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -156,6 +162,11 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
                 continue;
             }
             QJsonObject obj = json.value(key).toObject();
+
+            if (obj.contains("firstSpecName") && obj.value("firstSpecName").isString()) {
+                baseName = obj.value("firstSpecName").toString();
+            }
+
             if (!obj.contains("errors") || !obj.value("errors").isArray()) {
                 continue;
             }
@@ -199,7 +210,9 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
              && !parameters.value(PARAM_PY).toString().isEmpty()) {
         QString precompiledFilePath = parameters.value(PARAM_PY).toString();
         QFileInfo info(precompiledFilePath);
+        baseName = info.baseName();
         QFile::copy(precompiledFilePath, dir.filePath(info.fileName()));
+        HobbitsPython::recursiveDirCopy(":/kaitaidata/ksy_py/common", dir.path());
     }
     else {
         return AnalyzerResult::error("Invalid parameters - must have a precompiled py or a custom ksy spec");
@@ -207,14 +220,13 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
 
     progress->setProgressPercent(40);
 
-
-    QString pyDepDir = dir.filePath("pydeps");
     HobbitsPython::recursiveDirCopy(":/kaitaistruct/scripts/dependencies", pyDepDir);
 
     auto pyRequest = PythonRequest::create(":/kaitaistruct/scripts/runner.py")->setFunctionName("parse_data");
     pyRequest->addPathExtension(pyDepDir);
     pyRequest->addArg(PythonArg::qString(inputBitFile.fileName()));
     pyRequest->addArg(PythonArg::qString(outputRangeFile.fileName()));
+    pyRequest->addArg(PythonArg::qString(baseName));
     auto watcher = HobbitsPython::getInstance().runProcessScript(pyRequest, true);
     watcher->watcher()->future().waitForFinished();
     auto result = watcher->result();

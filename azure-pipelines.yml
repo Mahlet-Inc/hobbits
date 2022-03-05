@@ -52,13 +52,13 @@ jobs:
       parameters:
         artifactName: win_2016_release
 
-- job: Mac1014
+- job: Mac1015
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
     - template: ci/mac.yml
       parameters:
-        artifactName: mac_1014_release
+        artifactName: mac_1015_release
 
 - job: Mac11
   pool:

@@ -7,6 +7,7 @@ import os
 import binascii
 import traceback
 from enum import Enum
+import shutil
 
 from kaitaistruct import KaitaiStruct
 
@@ -146,15 +147,32 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, b
             
 
 
-def parse_data(input_filename, output_filename, action_progress):
+def parse_data(input_filename, output_filename, base_name, action_progress):
     # locate the compiled struct module
     scripts = glob.glob(os.path.join(os.path.dirname(input_filename), '*.py'))
     if len(scripts) < 1:
         raise FileNotFoundError('Could not find the expected python kaitai parser - did the kaitai struct compiler fail?')
-    module_file = os.path.basename(scripts[0])
-    sys.path.append(os.path.dirname(scripts[0]))
-    package_name = os.path.splitext(module_file)[0]
-    class_name = "".join([s.capitalize() for s in package_name.split("_")])
+
+    if len(scripts) > 1:
+        thedir = os.path.dirname(input_filename)
+        allparsers = os.path.join(thedir, 'concatenated_parsers.py')
+        with open(allparsers,'wb') as concat:
+            for script in scripts:
+                with open(script,'rb') as fd:
+                    shutil.copyfileobj(fd, concat)
+
+        module_file = os.path.basename(allparsers)
+        sys.path.append(os.path.dirname(allparsers))
+        package_name = os.path.splitext(module_file)[0]
+        if not base_name:
+            base_name = os.path.splitext(os.path.basename(scripts[0]))[0]
+        class_name = "".join([s.capitalize() for s in base_name.split("_")])
+
+    else:
+        module_file = os.path.basename(scripts[0])
+        sys.path.append(os.path.dirname(scripts[0]))
+        package_name = os.path.splitext(module_file)[0]
+        class_name = "".join([s.capitalize() for s in package_name.split("_")])
     try:
         del sys.modules[package_name]
     except KeyError:
