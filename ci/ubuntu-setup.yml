@@ -11,6 +11,9 @@ steps:
   - script: sudo apt-get -y install ninja-build
     displayName: 'Install Ninja'
 
+  - script: sudo apt-get -y install libudev-dev patchelf
+    displayName: 'Install libudev and patchelf'
+
   - task: UsePythonVersion@0 
     inputs:
       versionSpec: '3.7'
