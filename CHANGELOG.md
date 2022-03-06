@@ -1,3 +1,10 @@
+## [0.53.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.0...v0.53.1) (2022-03-06)
+
+
+### Bug Fixes
+
+* rework some kaitai plugin stuff that was broken [#132](https://github.com/Mahlet-Inc/hobbits/issues/132) ([5bc7dd2](https://github.com/Mahlet-Inc/hobbits/commit/5bc7dd2f84a1be966fe103f27cfdf02518c72949))
+
 # [0.53.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.52.0...v0.53.0) (2021-11-27)
 
 
