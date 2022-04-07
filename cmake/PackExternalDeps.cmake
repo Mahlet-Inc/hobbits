@@ -145,7 +145,7 @@ endfunction(pack_python)
 function(pack_pffft)
 	install(FILES ${PFFFT_LIBRARIES}
 			DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-endfunction(pack_pcap)
+endfunction(pack_pffft)
 
 function(pack_pcap)
     if (LINUX)
