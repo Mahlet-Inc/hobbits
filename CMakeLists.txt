@@ -124,7 +124,7 @@ elseif( MANUAL_PYTHON_PATH )
 	set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
 endif()
 
-find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
+find_package (Python3 3.9 COMPONENTS Interpreter Development REQUIRED)
 message("Python3 Libs: ${Python3_LIBRARIES}")
 
 #
