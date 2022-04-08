@@ -109,7 +109,7 @@ else()
 	endif()
 
 	# PFFFT
-	find_package(PFFFT REQUIRED)
+	add_subdirectory(external)
 
 endif()
 
