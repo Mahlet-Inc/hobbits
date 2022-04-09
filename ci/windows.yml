@@ -25,7 +25,7 @@ steps:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script: |
-      python -m pip install conan
+      python -m pip install conan==1.45.0
     displayName: 'Install Conan'
 
   - script: |
@@ -39,8 +39,6 @@ steps:
       conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
-    env:
-      CONAN_SYSREQUIRES_MODE: 'enabled'
 
   - script: |
       conan build ..

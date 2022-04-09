@@ -27,8 +27,6 @@ steps:
       conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'
-    env:
-      CONAN_SYSREQUIRES_MODE: 'enabled'
 
   - bash: |
       conan build ..
