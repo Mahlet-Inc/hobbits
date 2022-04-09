@@ -34,18 +34,7 @@ class HobbitsConan(ConanFile):
         ("hobbits-cpython/3.9.10"),
         ("pffft/cci.20210511"),
         ("libusb/1.0.24"),
-    ('bzip2/1.0.8' ),
-    ('double-conversion/3.2.0' ),
-    ('freetype/2.11.1' ),
-    ('libjpeg/9d' ),
-    ('libpcap/1.10.0' ),
-    ('libpng/1.6.37' ),
-    ('libpq/13.4' ),
-    ('openssl/1.1.1m' ),
-    ('pcre2/10.37' ),
-    ('sqlite3/3.37.2'), 
-    ('zlib/1.2.11'), 
-    ('zstd/1.5.2'),
+        ('openssl/1.1.1m' ),
 
     ]
 
@@ -63,7 +52,8 @@ class HobbitsConan(ConanFile):
         cmake = CMake(self)
         defs = {
             "SELF_CONTAINED_APP" : 1,
-            "BUILDING_WITH_CONAN" : 1
+            "BUILDING_WITH_CONAN" : 1,
+            "QT_PKG_CMAKE_DIR": os.path.join(self.deps_cpp_info["qt"].rootpath, "lib", "cmake")
         }
         if self.settings.build_type == "Release":
             defs["QT_NO_DEBUG"] = 1
