@@ -33,7 +33,9 @@ class HobbitsConan(ConanFile):
         ("qt/5.15.2"),
         ("hobbits-cpython/3.9.10"),
         ("pffft/cci.20210511"),
-        ("libusb/1.0.24")
+        ("libusb/1.0.24"),
+        ('openssl/1.1.1n' ),
+
     ]
 
     def requirements(self):
@@ -50,8 +52,11 @@ class HobbitsConan(ConanFile):
         cmake = CMake(self)
         defs = {
             "SELF_CONTAINED_APP" : 1,
-            "BUILDING_WITH_CONAN" : 1
+            "BUILDING_WITH_CONAN" : 1,
+            "QT_PKG_ROOT_DIR": self.deps_cpp_info["qt"].rootpath
         }
+        print(os.listdir(self.deps_cpp_info["qt"].rootpath))
+        print(os.listdir(os.path.join(self.deps_cpp_info["qt"].rootpath, "bin")))
         if self.settings.build_type == "Release":
             defs["QT_NO_DEBUG"] = 1
         cmake.configure(source_folder=".", defs=defs)

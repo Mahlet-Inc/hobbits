@@ -45,6 +45,8 @@ environmental setup in the [continuous integration files](ci) or
 
 Plain CMake (no Conan) building also works if you have your dependencies
 handled. The [CentOS 7 GCC 4.8 CI build](ci/linux-cmake.yml) does this.
+If building using the bundled pffft, ensure you clone or checkout with the
+`--recurse-submodules` flag.
 
 ## Adding plugins
 Read the
