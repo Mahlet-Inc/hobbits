@@ -84,11 +84,8 @@ if (BUILDING_WITH_CONAN)
 	# add conan
 	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	conan_basic_setup(TARGETS KEEP_RPATHS NO_OUTPUT_DIRS)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${QT_PKG_CMAKE_DIR}/Qt5Core")
-	message("CONAN_LIB_DIRS_QT: ${CONAN_LIB_DIRS_QT}")
-	message("QT_PKG_CMAKE_DIR: ${QT_PKG_CMAKE_DIR}")
-	message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-	include(conan_qt_executables_variables)
+	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CONAN_LIB_DIRS_QT}/cmake/Qt5Core")
+	include(conan_qt_executables_variables OPTIONAL)
 else()
 	find_package(PkgConfig)
 
