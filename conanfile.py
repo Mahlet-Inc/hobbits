@@ -53,7 +53,7 @@ class HobbitsConan(ConanFile):
         defs = {
             "SELF_CONTAINED_APP" : 1,
             "BUILDING_WITH_CONAN" : 1,
-            "QT_PKG_CMAKE_DIR": os.path.join(self.deps_cpp_info["qt"].rootpath, "lib", "cmake")
+            "QT_PKG_ROOT_DIR": self.deps_cpp_info["qt"].rootpath
         }
         if self.settings.build_type == "Release":
             defs["QT_NO_DEBUG"] = 1
