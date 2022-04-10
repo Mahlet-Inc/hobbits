@@ -143,7 +143,13 @@ else()
 	endif()
 
 	# PFFFT
-	add_subdirectory(external)
+	option(USE_SYSTEM_PFFFT "Use a system-provided version of pffft" OFF)
+	if(USE_SYSTEM_PFFFT)
+		message(STATUS "Using system pffft")
+		find_package(PFFFT REQUIRED)
+	else()
+		add_subdirectory(external)
+	endif()
 
 endif()
 
