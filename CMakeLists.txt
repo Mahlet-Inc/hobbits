@@ -15,7 +15,10 @@ if (UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
 
-if (EXISTS "${CMAKE_SOURCE_DIR}/.version")
+if (DEFINED BUILD_VERSION)
+    message("Using build version from command-line")
+    set(VERSION_STRING "${BUILD_VERSION}")
+elseif (EXISTS "${CMAKE_SOURCE_DIR}/.version")
     message("Getting build version from .version file")
     file (STRINGS "${CMAKE_SOURCE_DIR}/.version" BUILD_VERSION)
     string(REGEX REPLACE "\n$" "" BUILD_VERSION "${BUILD_VERSION}")
@@ -140,7 +143,7 @@ else()
 	endif()
 
 	# PFFFT
-	find_package(PFFFT REQUIRED)
+	add_subdirectory(external)
 
 endif()
 
@@ -158,7 +161,7 @@ elseif( MANUAL_PYTHON_PATH )
 	set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
 endif()
 
-find_package (Python3 3.9 EXACT COMPONENTS Interpreter Development REQUIRED)
+find_package (Python3 3.9 COMPONENTS Interpreter Development REQUIRED)
 message("Python3 Libs: ${Python3_LIBRARIES}")
 
 #
