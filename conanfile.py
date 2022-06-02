@@ -31,16 +31,18 @@ class HobbitsConan(ConanFile):
 
     requires = [
         ("qt/5.15.2"),
-        ("hobbits-cpython/3.9.10"),
         ("pffft/cci.20210511"),
         ("libusb/1.0.24"),
         ('openssl/1.1.1n' ),
-
     ]
 
     def requirements(self):
         if self.settings.os != "Windows":
             self.requires("libpcap/1.10.0")
+            self.requires("hobbits-cpython/3.9.13")
+        else:
+            self.requires("hobbits-cpython/3.9.10")
+
 
     def config_options(self):
         if self.settings.os == "Windows":

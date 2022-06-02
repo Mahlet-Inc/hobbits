@@ -26,11 +26,17 @@ documentation and/or watch
 ```
 conan remote add hobbitsconan https://helloadam.jfrog.io/artifactory/api/conan/conan
 ```
-3. You might need libudev and patchelf for all of the conan steps to work. Ubuntu example:
+3. You might need libudev, libgl, and patchelf for all of the conan steps to work. Ubuntu 20.04 example:
 ```
-sudo apt-get install -y libudev-dev patchelf
+sudo apt-get install -y libudev-dev libgl-dev patchelf
 ```
-4. Use conan to get/build dependencies, then build and package hobbits:
+4. You might need to add conan to your path and set the `CONAN_SYSREQUIRES_MODE` variable to `enabled`. Ubuntu 20.04 example (this could go in your .bashrc):
+```
+export PATH=/home/<your username>/.local/bin:$PATH
+export CONAN_SYSREQUIRES_MODE=enabled
+```
+
+5. Use conan to get/build dependencies, then build and package hobbits:
 ```
 mkdir build
 cd build
@@ -42,6 +48,8 @@ conan package ..
 If you have any issues building, you can check out more detailed steps and
 environmental setup in the [continuous integration files](ci) or
 [open an issue](https://github.com/Mahlet-Inc/hobbits/issues/new).
+
+## Building with CMake and system dependencies
 
 Plain CMake (no Conan) building also works if you have your dependencies
 handled. The [CentOS 7 GCC 4.8 CI build](ci/linux-cmake.yml) does this.
