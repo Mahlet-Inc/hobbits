@@ -24,6 +24,7 @@ steps:
   - bash: | 
       mkdir build
       cd build
+      export CONAN_SYSREQUIRES_MODE=enabled
       conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'

@@ -38,7 +38,6 @@ steps:
 
   - bash: |
       python -m pip install conan
-      export CONAN_SYSREQUIRES_MODE=enabled
     displayName: 'Install Conan'
 
   - bash: |
@@ -49,6 +48,7 @@ steps:
   - bash: | 
       mkdir build
       cd build
+      export CONAN_SYSREQUIRES_MODE=enabled
       conan install .. --build=missing
     workingDirectory: $(Build.SourcesDirectory)
     displayName: 'Run conan install'

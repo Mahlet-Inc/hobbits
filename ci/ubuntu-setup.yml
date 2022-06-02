@@ -20,7 +20,6 @@ steps:
       
   - script: |
       python3 -m pip install conan
-      export CONAN_SYSREQUIRES_MODE=enabled
     displayName: 'Install conan'
 
   - task: NodeTool@0
