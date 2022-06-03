@@ -18,7 +18,8 @@ steps:
     inputs:
       versionSpec: '3.7'
       
-  - script: python3 -m pip install conan==1.45.0
+  - script: |
+      python3 -m pip install conan
     displayName: 'Install conan'
 
   - task: NodeTool@0

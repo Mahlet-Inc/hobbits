@@ -25,7 +25,7 @@ steps:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script: |
-      python -m pip install conan==1.45.0
+      python -m pip install conan
     displayName: 'Install Conan'
 
   - script: |
