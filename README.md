@@ -22,14 +22,23 @@ documentation and/or watch
 
 ## Building with Conan, Python 3, and CMake 3.12+
 1. Install Conan with pip: `pip install conan`
+
 2. Configure Conan to use a custom remote:
 ```
 conan remote add hobbitsconan https://helloadam.jfrog.io/artifactory/api/conan/conan
 ```
-3. You might need libudev, libgl, and patchelf for all of the conan steps to work. Ubuntu 20.04 example:
+
+3. You might need some system libraries and build tools for all of the conan steps to work.
+
+Ubuntu 20.04 example:
 ```
 sudo apt-get install -y libudev-dev libgl-dev patchelf
 ```
+Fedora 36 example:
+```
+sudo dnf install perl libglvnd-devel systemd-devel patchelf
+```
+
 4. You might need to add conan to your path and set the `CONAN_SYSREQUIRES_MODE` variable to `enabled`. Ubuntu 20.04 example (this could go in your .bashrc):
 ```
 export PATH=/home/<your username>/.local/bin:$PATH
