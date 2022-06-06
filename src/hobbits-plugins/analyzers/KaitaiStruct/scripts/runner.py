@@ -19,16 +19,17 @@ def process_value(value, section):
 
     if isinstance(value, bytes):
         if len(value) > 15:
-            value = f"0x{binascii.hexlify(value[:12]).decode()}..."
+            str_val = f"0x{binascii.hexlify(value[:12]).decode()}..."
         else:
-            value = f"0x{binascii.hexlify(value).decode()}"
-        section['value'] = value
+            str_val = f"0x{binascii.hexlify(value).decode()}"
+        section['value'] = str_val
         section['type'] = f"bytes[{len(value)}]"
 
     elif isinstance(value, str):
+        str_val = value
         if len(value) > 15:
-            value = f"{value[:12]}..."
-        section['value'] = value
+            str_val = f"{value[:12]}..."
+        section['value'] = str_val
         section['type'] = f"str[{len(value)}]"
 
     elif isinstance(value, float):
@@ -78,6 +79,9 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, b
         base_io = section_io
         base_offset = base_offset + parent_offset
         print(f"New base offset for {type(struct).__name__}: {base_offset}")
+
+    #print(vars(struct))
+    #print(struct._debug)
     
     for name, info in struct._debug.items():
         try:
