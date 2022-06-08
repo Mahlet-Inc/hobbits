@@ -34,14 +34,6 @@ jobs:
       parameters:
         artifactName: win_2019_release
 
-- job: Windows2016vs2017
-  pool:
-    vmImage: 'vs2017-win2016'
-  steps:
-    - template: ci/windows.yml
-      parameters:
-        artifactName: win_2016_release
-
 - job: Mac1015
   pool:
     vmImage: 'macOS-10.15'
