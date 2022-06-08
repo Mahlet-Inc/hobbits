@@ -83,12 +83,14 @@ def parse_struct(struct, sections, prefix="", parent_offset = 0, base_io=None, b
     #print(vars(struct))
     #print(struct._debug)
     
-    for name, info in struct._debug.items():
-        try:
-            value = getattr(struct, name)
-        except:
-            print(f"Skipping {name}, not an attribute in struct")
+    for name, value in struct.__dict__.items():
+        if name in ("_io", "_parent", "_root", "_debug") or name.startswith("_raw_"):
             continue
+
+        if name in struct._debug:
+            info = struct._debug[name]
+        else:
+            info = {"start": 0, "end": 0}
 
         label = prefix + "." + name if prefix else name
         parent_offset = info["start"] + base_offset
