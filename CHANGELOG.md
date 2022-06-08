@@ -1,3 +1,11 @@
+## [0.53.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.1...v0.53.2) (2022-06-08)
+
+
+### Bug Fixes
+
+* correctly display kaitai value instances for [#145](https://github.com/Mahlet-Inc/hobbits/issues/145) ([556514b](https://github.com/Mahlet-Inc/hobbits/commit/556514b8a9192feaa0d88a8ec65083b90ebbab65))
+* fix kaitai plugin byte and string array sizes ([fdc2b10](https://github.com/Mahlet-Inc/hobbits/commit/fdc2b10c373a66c110488026e3b130ee47e5d65e))
+
 ## [0.53.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.0...v0.53.1) (2022-03-06)
 
 
