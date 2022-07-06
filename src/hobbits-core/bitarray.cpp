@@ -811,45 +811,16 @@ char BitArray::hexTable(qint64 nibble) const {
     return chr;
 }
 
-QString BitArray::toBin() const {
-    QString str = "";
-
-    for (quint64 i = 0; i < this->sizeInBits(); i ++) {
-        if (i < this->sizeInBits() && i >= 0) {
-            if (this->at(i) == false) {
-                str+="0";
-            } else {
-                str+="1";
-            }
-        }
-    }
-    return str;
-}
-
 QString BitArray::toBin(qint64 start, int length) const {
     QString str = "";
-
-    for (quint64 i = start; i < start + length; i ++) {
-        if (i < this->sizeInBits() && i >= 0) {
+    if (start + length <= this->sizeInBits()) {
+        for (quint64 i = start; i < start + length; i ++) {
             if (this->at(i) == false) {
                 str+="0";
             } else {
                 str+="1";
             }
         }
-    }
-    return str;
-}
-
-QString BitArray::toHex() const {
-    QString str = "";
-    quint64 nib = 0;
-
-    for (quint64 i = 0; i < this->sizeInBits(); i ++) {
-        if (i < this->sizeInBits() && i >= 0) {
-           nib = this->parseUIntValue(i, 4);
-        }
-        str += hexTable(nib);
     }
     return str;
 }
@@ -857,28 +828,16 @@ QString BitArray::toHex() const {
 QString BitArray::toHex(qint64 start, int length) const {
     QString str = "";
     quint64 nib = 0;
-
-    for (quint64 i = start*4; i < start*4+length*4; i += 4) {
-        if (i < this->sizeInBits() && i >= 0) {
+    if (start + length <= this->sizeInBits()/4) {
+        for (quint64 i = start*4; i < start*4+length*4; i += 4) {
            nib = this->parseUIntValue(i, 4);
            str += hexTable(nib);
-        }       
+        }
     }
     return str;
 }
 
-QString BitArray::toAscii() const {
-    quint64 size = this->sizeInBits()/8;
-    QByteArray arr = readBytes(0, size);
-
-    std::string text(arr.constData(), arr.length());
-    QString qtext = QString::fromStdString(text);
-
-    return qtext;
-}
-
 QString BitArray::toAscii(qint64 start, int length) const {
-    quint64 size = this->sizeInBits()/8;
     QByteArray arr = readBytes(start, length);
 
     std::string text(arr.constData(), arr.length());

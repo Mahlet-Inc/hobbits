@@ -71,11 +71,9 @@ public:
 
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList *parseErrors = nullptr);
 
-    QString toBin() const;
+
     QString toBin(qint64 start, int length) const;
-    QString toHex() const;
     QString toHex(qint64 start, int length) const;
-    QString toAscii() const; //could also call this toString
     QString toAscii(qint64 start, int length) const;
 
 private:

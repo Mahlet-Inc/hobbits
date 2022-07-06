@@ -4,6 +4,7 @@ CMakeLists.txt.user
 *.pro.user
 *.autosave
 /build*
+/build-debug
 /src/build
 .vscode
 *.so
