@@ -536,6 +536,7 @@ void MainWindow::activateBitContainer(QSharedPointer<BitContainer> selected, QSh
     }
     else {
         ui->tb_removeBitContainer->setEnabled(true);
+        ui->tv_bitContainers->expand(m_bitContainerManager->getCurrSelectionModel()->selectedIndexes().first());
     }
     setCurrentBitContainer();
 }
