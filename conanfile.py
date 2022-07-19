@@ -33,6 +33,10 @@ class HobbitsConan(ConanFile):
         ("qt/5.15.2"),
         ("pffft/cci.20210511"),
         ("libusb/1.0.24"),
+        # below - prevent higher versions that might cause dependency mismatches
+        ("libiconv/1.17"),
+        ("libxml2/2.9.14"),
+        ("odbc/2.3.9"),
     ]
 
     def requirements(self):
