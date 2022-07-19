@@ -33,12 +33,16 @@ class HobbitsConan(ConanFile):
         ("qt/5.15.2"),
         ("pffft/cci.20210511"),
         ("libusb/1.0.24"),
+        # below - prevent higher versions that might cause dependency mismatches
+        ("libiconv/1.17"),
+        ("libxml2/2.9.14"),
     ]
 
     def requirements(self):
         if self.settings.os != "Windows":
             self.requires("libpcap/1.10.0")
             self.requires("hobbits-cpython/3.9.13")
+            self.requires("odbc/2.3.9")
         else:
             self.requires("hobbits-cpython/3.9.10")
 
