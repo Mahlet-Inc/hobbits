@@ -773,40 +773,57 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
 
 char BitArray::hexTable(qint64 nibble) const {
     char chr;
-    if (nibble == 0) {
-        chr = '0';
-    } else if (nibble == 1) {
-        chr = '1';
-    } else if (nibble == 2) {
-        chr = '2';
-    } else if (nibble == 3) {
-        chr = '3';
-    } else if (nibble == 4) {
-        chr = '4';
-    } else if (nibble == 5) {
-        chr = '5';
-    } else if (nibble == 6) {
-        chr = '6';
-    } else if (nibble == 7) {
-        chr = '7';
-    } else if (nibble == 8) {
-        chr = '8';
-    } else if (nibble == 9) {
-        chr = '9';
-    } else if (nibble == 10) {
-        chr = 'a';
-    } else if (nibble == 11) {
-        chr = 'b';
-    } else if (nibble == 12) {
-        chr = 'c';
-    } else if (nibble == 13) {
-        chr = 'd';
-    } else if (nibble == 14) {
-        chr = 'e';
-    } else if (nibble == 15) {
-        chr = 'f';
-    } else {
-        chr = 'o';
+    switch (nibble) {
+        case 0:
+            chr = '0';
+            break;
+        case 1:
+            chr = '1';
+            break;
+        case 2:
+            chr = '2';
+            break;
+        case 3:
+            chr = '3';
+            break;
+        case 4:
+            chr = '4';
+            break;
+        case 5:
+            chr = '5';
+            break;
+        case 6:
+            chr = '6';
+            break;
+        case 7:
+            chr = '7';
+            break;
+        case 8:
+            chr = '8';
+            break;
+        case 9:
+            chr = '9';
+            break;
+        case 10:
+            chr = 'a';
+            break;
+        case 11:
+            chr = 'b';
+            break;
+        case 12:
+            chr = 'c';
+            break;
+        case 13:
+            chr = 'd';
+            break;
+        case 14:
+            chr = 'e';
+            break;
+        case 15:
+            chr = 'f';
+            break;
+        default:
+            chr = 'o';
     }
     return chr;
 }
@@ -839,9 +856,12 @@ QString BitArray::toHex(qint64 start, int length) const {
 
 QString BitArray::toAscii(qint64 start, int length) const {
     QByteArray arr = readBytes(start, length);
-
-    std::string text(arr.constData(), arr.length());
-    QString qtext = QString::fromStdString(text);
+    for (int i = 0; i < length; i++) {
+        if (arr[i] < 32) {
+            arr[i] = '.';
+        }
+    }
+    QString qtext = QString::fromLatin1(arr);
 
     return qtext;
 }

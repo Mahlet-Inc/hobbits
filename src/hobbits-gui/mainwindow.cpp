@@ -543,7 +543,6 @@ void MainWindow::currBitContainerChanged()
 {
     sendBitContainerPreview();
     checkOperatorInput();
-    //send new data to plugins?
 }
 
 void MainWindow::sendBitContainerPreview()

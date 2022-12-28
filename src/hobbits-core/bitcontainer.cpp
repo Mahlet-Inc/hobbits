@@ -88,10 +88,6 @@ QString BitContainer::name() const
     return m_name;
 }
 
-qint64 BitContainer::size() const {
-    return m_bits->sizeInBits();
-}
-
 void BitContainer::setName(QString name)
 {
     m_mutex.lock();

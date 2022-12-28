@@ -24,7 +24,6 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
         if (size < 1000) {
 
             f_size = size;
-            //QString unit = "bits";
         } else if (size >= 1000 && size < 8000) {
 
             unit = "bytes";

@@ -5,7 +5,6 @@
 Edit::Edit()
 {
     QList<ParameterDelegate::ParameterInfo> infos = {
-        // TODO: add parameters like {"myparametername", ParameterDelegate::ParameterType::Decimal}
         {"start", ParameterDelegate::ParameterType::Decimal},
         {"length", ParameterDelegate::ParameterType::Decimal},
         {"new_bits_in_range", ParameterDelegate::ParameterType::String, false},
@@ -15,7 +14,6 @@ Edit::Edit()
     m_delegate = ParameterDelegate::create(
                     infos,
                     [this](const Parameters &parameters) {
-                        // TODO: use parameters to describe action better
                         return QString("Apply %1").arg(this->name());
                     },
                     [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
@@ -36,13 +34,11 @@ QString Edit::name()
 
 QString Edit::description()
 {
-    // TODO: create actual description
-    return "Load bits, and modify them individually.";
+    return "Directly replace or insert into segments of a bit container";
 }
 
 QStringList Edit::tags()
 {
-    // TODO: add relevant tags
     return {"Generic"};
 }
 
@@ -99,31 +95,6 @@ QSharedPointer<BitArray> Edit::parseAscii(QString newBitsInRange) {
         QString bitArraySpec = newBitsInRange;
         QSharedPointer<BitArray> newBits = newBitArray->fromString(bitArraySpec, &parseErrors);
         return newBits;
-
-        /*
-
-        QByteArray nair = newBitsInRange.toLocal8Bit();
-        const char * newAsciiInRange = nair.data();
-
-        int newBitsInRangeLength = newBitsInRange.length();
-        qint64 outputSize = inputContainerSize - (length * 8) + (newBitsInRangeLength * 8);
-
-        QSharedPointer<const BitArray> bits = inputContainers.at(0)->bits();
-
-        if (newBitsInRangeLength == length) {     
-            m_outBits->setBytes(start, newAsciiInRange, 0, newBitsInRangeLength);
-        } else {
-            QSharedPointer<BitArray> postBits = QSharedPointer<BitArray>(new BitArray(outputSize - start + length ));
-            QByteArray byteArray = bits->readBytes(start + length, outputSize - 1);
-            int endLength = byteArray.length();
-            const char* data = byteArray.data();
-            m_outBits->setBytes(start+newBitsInRangeLength, data, 0, endLength);
-            m_outBits->setBytes(start, newAsciiInRange, 0, newBitsInRangeLength);
-            
-        }
-
-        */
-
 }
 
 QSharedPointer<const OperatorResult> Edit::operateOnBits(
@@ -161,21 +132,9 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     qint64 start = parameters.value("start").toInt();
     qint64 length = parameters.value("length").toInt();
 
-
     //get bits from text box
     QString newBitsInRange = parameters.value("new_bits_in_range").toString();
-
-    //pte_bits is already filled with data from start to length
-    //
-    //auto bitContainer = inputContainers.first();
     QList<QSharedPointer<BitContainer>> outputContainers;
-
-    
-
-    
-
-    //do something with bits here
-    //ex 0000 1111 -> 1111 0000
 
     int end = start + length;
     qint64 inputContainerSize = inputContainers.at(0)->size();
@@ -222,15 +181,9 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     newBits->copyBits(0, outBits.data(), start*unitSize, newBits->sizeInBits()*unitSize, BitArray::Copy);
     progressInt+=15; progress->setProgressPercent(progressInt);
 
-    //for each bit in the bit container
-    //if bit index is less than the start index, or greater than the end index, copy the bit exactly
-
     auto bitContainer = BitContainer::create(outBits);
 
     outputContainers.append(bitContainer);
-    //return OperatorResult::error("Hej");
     return OperatorResult::result(outputContainers, parameters);
-    // TODO: Perform operation and return result with OperatorResult::result
-    //return OperatorResult::error("Bits from start to length would be changed according to your entry, but that is not implemented yet.");
 }
 
