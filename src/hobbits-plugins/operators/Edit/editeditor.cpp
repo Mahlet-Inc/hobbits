@@ -13,11 +13,9 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
 {
     m_bitStart = 0;
     m_bitLength = 8;
-    m_changeBits = true; //when false the spinBox values can change without affecting m_bitStart, m_bitLength
+    m_changeBits = true;
 
     ui->setupUi(this);
-
-    
 
     ui->sb_length->setMinimum(0);
     ui->sb_start->setMinimum(0);
@@ -41,13 +39,11 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     connect(ui->sb_start, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChange()));
     connect(ui->sb_length, SIGNAL(valueChanged(int)), this, SLOT(spinBoxChange()));
 
-
     //On slider value change, change the bits shown in pte_bits
     connect(ui->hs_start, SIGNAL(valueChanged(int)), this, SLOT(changeSpinBoxStart()));
     connect(ui->hs_length, SIGNAL(valueChanged(int)), this, SLOT(changeSpinBoxLength()));
 
     //On radio button value change
-
     connect(ui->rb_bit, SIGNAL(clicked()), this, SLOT(adjustToUnit()));
     connect(ui->rb_hex, SIGNAL(clicked()), this, SLOT(adjustToUnit()));
     connect(ui->rb_ascii, SIGNAL(clicked()), this, SLOT(adjustToUnit()));
@@ -55,13 +51,8 @@ EditEditor::EditEditor(QSharedPointer<ParameterDelegate> delegate):
     //on insert mode change
     connect(ui->cb_insert, SIGNAL(toggled(bool)), this, SLOT(toggleInsert()));
 
-
-
     m_paramHelper->addSpinBoxIntParameter("start", ui->sb_start);
     m_paramHelper->addSpinBoxIntParameter("length", ui->sb_length);
-
-    //m_paramHelper->addLabelParameter("start_label", ui->lb_start);
-    //m_paramHelper->addLabelParameter("length_label", ui->lb_length);
 
     m_paramHelper->addTextEditStringParameter("new_bits_in_range", ui->pte_bits);
 
@@ -108,10 +99,8 @@ void EditEditor::editFromHere(RangeHighlight highlight) {
 
     start2 = highlight.range().start() / getUnitSize();
 
-    //set spinbox start to highlight start
     if (start2 != m_bitStart / getUnitSize()) {
         ui->sb_start->setValue(start2);
-        //highlight length will set to spinbox length automatically
     } else {
         setHighlight();
     }
@@ -121,17 +110,7 @@ void EditEditor::spinBoxChange() {
     if (m_changeBits) {
         m_bitStart = (qint64) ui->sb_start->value() * getUnitSize();
         int l = ui->sb_length->value() * getUnitSize();
-        
-        //if (m_bitStart + l <= START_MAX) {
         m_bitLength = l;
-        /*
-        } else {
-            ui->sb_length->setValue(m_bitLength);
-            return;
-        }
-        */
-        
-        
     }
     changeSliderStart();
     changeSliderLength();
@@ -173,12 +152,6 @@ void EditEditor::changeTextBox() {
 
         qint64 start = m_bitStart / unitSize;
         qint64 length = m_bitLength / unitSize;
-        
-        /*
-        if (start + length > START_MAX) {
-            length = start + length - START_MAX;
-        }
-        */
 
         if (start+length > size / unitSize) {
             length = size / unitSize - start;
@@ -250,7 +223,7 @@ void EditEditor::adjustToUnit() {
         return;
     }
 
-    m_changeBits = false; //don't trigger bitContainer change
+    m_changeBits = false;
 
     adjustMax();
 
@@ -301,8 +274,7 @@ EditEditor::~EditEditor()
 
 QString EditEditor::title()
 {
-    // TODO: Make this more descriptive
-    return "Configure Edit";
+    return "Select Section to Edit";
 }
 
 Parameters EditEditor::parameters()
@@ -323,7 +295,6 @@ void EditEditor::previewBitsImpl(QSharedPointer<BitContainerPreview> container,
 
 void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
-    //QSharedPointer<BitContainerPreview> oldContainer = m_bitContainer;
     m_bitContainer = container;
   
     if (! container.isNull()) {
@@ -336,7 +307,6 @@ void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container
                     editFromHere(highlight);
                     break;
                 }
-                //does this if consume too much pp
                 if (m_bits != m_bitContainer->bits()) {
                     adjust();
                 }
@@ -348,7 +318,6 @@ void EditEditor::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container
             adjust();
         }
     } else {
-        //clear pte_bits
         ui->pte_bits->document()->setPlainText("");
         m_bits = QSharedPointer<BitArray>();
     }
