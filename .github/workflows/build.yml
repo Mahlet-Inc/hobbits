@@ -17,3 +17,9 @@ jobs:
         run: cmake -G Ninja -B build -S ${{ github.workspace }}
       - name: Build
         run: cmake --build build
+      - name: Package
+        run: ninja package -C build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: DEB Packages
+          path: build/hobbits-*deb*
