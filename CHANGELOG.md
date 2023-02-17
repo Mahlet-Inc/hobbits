@@ -1,3 +1,10 @@
+# [0.54.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.4...v0.54.0) (2023-02-17)
+
+
+### Features
+
+* add Edit plugin ([9c091e5](https://github.com/Mahlet-Inc/hobbits/commit/9c091e5db0d9f7052116065b8c5351fc56df0b47))
+
 ## [0.53.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.3...v0.53.4) (2023-02-17)
 
 
