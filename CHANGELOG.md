@@ -1,3 +1,10 @@
+## [0.53.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.3...v0.53.4) (2023-02-17)
+
+
+### Bug Fixes
+
+* update the semantic release config and force a release ([59f69f5](https://github.com/Mahlet-Inc/hobbits/commit/59f69f53e480892c1e725996f06f8e976dc6efc3))
+
 ## [0.53.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.2...v0.53.3) (2023-02-17)
 
 
