@@ -47,6 +47,8 @@ public:
     qint64 frameCount() const;
     qint64 maxFrameWidth() const;
 
+    qint64 size() const;
+
     QString name() const;
     void setName(QString name);
     bool nameWasSet() const;
@@ -66,6 +68,8 @@ public:
 
     static QSharedPointer<BitContainer> deserialize(QDataStream &stream);
     void serialize(QDataStream &stream) const;
+
+    
 
 private:
     explicit BitContainer();

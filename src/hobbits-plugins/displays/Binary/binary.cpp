@@ -6,6 +6,7 @@
 #include <QtMath>
 
 Binary::Binary() :
+
     m_renderConfig(new DisplayRenderConfig())
 {
     m_renderConfig->setFullRedrawTriggers(DisplayRenderConfig::NewBitOffset | DisplayRenderConfig::NewFrameOffset);

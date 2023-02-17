@@ -71,6 +71,11 @@ public:
 
     static QSharedPointer<BitArray> fromString(QString bitArraySpec, QStringList *parseErrors = nullptr);
 
+
+    QString toBin(qint64 start, int length) const;
+    QString toHex(qint64 start, int length) const;
+    QString toAscii(qint64 start, int length) const;
+
 private:
     void writeToStream(QDataStream &dataStream) const; // private for use by serializer and writeTo
 
@@ -91,6 +96,8 @@ private:
     void loadCacheAt(qint64 bitIndex) const;
     void syncCacheToFile() const;
 
+    char hexTable(qint64 nibble) const;
+
     mutable QTemporaryFile m_dataFile;
     qint64 m_size;
 
@@ -101,6 +108,8 @@ private:
     QMutex m_mutex;
     mutable QMutex m_cacheMutex;
     mutable QMutex m_dataFileMutex;
+
+    
 };
 
 #endif // BITARRAY_H
