@@ -51,6 +51,7 @@
     "@semantic-release/release-notes-generator": "^9.0.1",
     "commitizen": "^4.0.4",
     "del": "^5.1.0",
+    "husky": "^4",
     "filecompare": "^1.0.4",
     "glob": "^7.1.6",
     "node-7z": "^2.1.1",

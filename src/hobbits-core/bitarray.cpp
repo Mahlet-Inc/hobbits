@@ -857,7 +857,7 @@ QString BitArray::toHex(qint64 start, int length) const {
 QString BitArray::toAscii(qint64 start, int length) const {
     QByteArray arr = readBytes(start, length);
     for (int i = 0; i < length; i++) {
-        if (arr[i] < 32) {
+        if (arr[i] < ' ') {
             arr[i] = '.';
         }
     }
