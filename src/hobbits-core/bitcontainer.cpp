@@ -88,6 +88,10 @@ QString BitContainer::name() const
     return m_name;
 }
 
+qint64 BitContainer::size() const {
+    return m_bits->sizeInBits();
+}
+
 void BitContainer::setName(QString name)
 {
     m_mutex.lock();
@@ -196,3 +200,5 @@ void BitContainer::serialize(QDataStream &stream) const
     m_bits->serialize(stream);
     m_info->serialize(stream);
 }
+
+

@@ -181,6 +181,7 @@ if (LINUX)
 	else()
 		set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}/hobbits/plugins")
 		list(APPEND HOBBITS_PLUGINS_PATHS "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/plugins")
+		list(APPEND HOBBITS_PLUGINS_PATHS "/usr/lib/hobbits/plugins")
 		list(APPEND HOBBITS_PLUGINS_PATHS "~/.local/share/hobbits/plugins")
 	endif()
 elseif(WIN32)
@@ -231,7 +232,7 @@ set(CPACK_DEB_COMPONENT_INSTALL OFF)
 
 set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libusb-1.0-0, libpcap, python3")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libusb-1.0-0, libpcap0.8, python3")
 set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 
 #

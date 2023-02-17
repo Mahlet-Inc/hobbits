@@ -18,7 +18,30 @@ QVariant BitContainerTreeModel::data(const QModelIndex &index, int role) const
 
     BitContainer *container = static_cast<BitContainer*>(index.internalPointer());
     if (role == Qt::DisplayRole) {
-        return QVariant(container->name());
+        qint64 size = container->size();
+        float f_size;
+        QString unit = "bits";
+        if (size < 1000) {
+
+            f_size = size;
+        } else if (size >= 1000 && size < 8000) {
+
+            unit = "bytes";
+            f_size=size/8.0;
+        } else if (size >= 8000 && size < 8000000) {
+
+            unit = "kB";
+            f_size=size/8000.0;
+        } else if (size >= 8000000 && size < 8000000000) {
+
+            unit = "MB";
+            f_size=size/8000000.0;
+        } else {
+
+            unit = "GB";
+            f_size=size/8000000000.0;
+        }
+        return QVariant(QString(container->name()+"\n%1 "+unit).arg(f_size));
     }
     else if (role == Qt::DecorationRole) {
         return QVariant(DisplayHelper::bitRasterThumbnail(container));

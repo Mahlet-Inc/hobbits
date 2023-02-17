@@ -771,6 +771,101 @@ QSharedPointer<BitArray> BitArray::fromString(QString bitArraySpec, QStringList 
     }
 }
 
+char BitArray::hexTable(qint64 nibble) const {
+    char chr;
+    switch (nibble) {
+        case 0:
+            chr = '0';
+            break;
+        case 1:
+            chr = '1';
+            break;
+        case 2:
+            chr = '2';
+            break;
+        case 3:
+            chr = '3';
+            break;
+        case 4:
+            chr = '4';
+            break;
+        case 5:
+            chr = '5';
+            break;
+        case 6:
+            chr = '6';
+            break;
+        case 7:
+            chr = '7';
+            break;
+        case 8:
+            chr = '8';
+            break;
+        case 9:
+            chr = '9';
+            break;
+        case 10:
+            chr = 'a';
+            break;
+        case 11:
+            chr = 'b';
+            break;
+        case 12:
+            chr = 'c';
+            break;
+        case 13:
+            chr = 'd';
+            break;
+        case 14:
+            chr = 'e';
+            break;
+        case 15:
+            chr = 'f';
+            break;
+        default:
+            chr = 'o';
+    }
+    return chr;
+}
+
+QString BitArray::toBin(qint64 start, int length) const {
+    QString str = "";
+    if (start + length <= this->sizeInBits()) {
+        for (quint64 i = start; i < start + length; i ++) {
+            if (this->at(i) == false) {
+                str+="0";
+            } else {
+                str+="1";
+            }
+        }
+    }
+    return str;
+}
+
+QString BitArray::toHex(qint64 start, int length) const {
+    QString str = "";
+    quint64 nib = 0;
+    if (start + length <= this->sizeInBits()/4) {
+        for (quint64 i = start*4; i < start*4+length*4; i += 4) {
+           nib = this->parseUIntValue(i, 4);
+           str += hexTable(nib);
+        }
+    }
+    return str;
+}
+
+QString BitArray::toAscii(qint64 start, int length) const {
+    QByteArray arr = readBytes(start, length);
+    for (int i = 0; i < length; i++) {
+        if (arr[i] < ' ') {
+            arr[i] = '.';
+        }
+    }
+    QString qtext = QString::fromLatin1(arr);
+
+    return qtext;
+}
+
 BitArray::CacheLoadLocker::CacheLoadLocker(qint64 bitIndex, const BitArray *bitArray) :
     m_locker(&bitArray->m_cacheMutex) {
     qint64 srcCacheIdx = bitIndex / CACHE_CHUNK_BIT_SIZE;
