@@ -1,3 +1,10 @@
+## [0.53.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.2...v0.53.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* add prod build action and force a minor version bump ([4be6f45](https://github.com/Mahlet-Inc/hobbits/commit/4be6f4522db12958caf48e7fc6d65692f5009355))
+
 ## [0.53.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.1...v0.53.2) (2022-06-08)
 
 
