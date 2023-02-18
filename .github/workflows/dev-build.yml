@@ -1,4 +1,4 @@
-name: Build Hobbits
+name: Build and Test develop
 run-name: Build ${{ github.ref }} ${{ github.sha }}
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - develop
 jobs:
   Build-Hobbits:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/setup-node@v3
         with:

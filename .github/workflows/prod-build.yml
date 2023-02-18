@@ -1,4 +1,4 @@
-name: Build and Deploy Hobbits
+name: Build, Test and Release master
 run-name: Deploy ${{ github.ref }} ${{ github.sha }}
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   Build-Hobbits:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/setup-node@v3
         with:
