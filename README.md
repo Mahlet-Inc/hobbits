@@ -1,6 +1,6 @@
 [![Discord Chat](https://discordapp.com/api/guilds/672761400220844042/widget.png?style=shield)](https://discord.gg/wRQJpZZ)
 ![build, test, release master](https://github.com/Mahlet-Inc/hobbits/actions/workflows/prod-build.yml/badge.svg)
-![build, test develop](https://github.com/Mahlet-Inc/hobbits/actions/workflows/dev-build.yml/badge.svg?event=push)|
+![build, test develop](https://github.com/Mahlet-Inc/hobbits/actions/workflows/dev-build.yml/badge.svg?event=push)
 
 
 ## About
