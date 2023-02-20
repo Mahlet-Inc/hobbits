@@ -9,7 +9,11 @@ on:
       - develop
 jobs:
   Build-Hobbits:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [ubuntu-20.04, ubuntu-22.04]
+
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -41,5 +45,17 @@ jobs:
         run: ninja package -C build
       - uses: actions/upload-artifact@v3
         with:
-          name: DEB Packages
+          name: DEB Packages ${{ matrix.os }}
           path: build/hobbits-*deb*
+      
+  Check-Artifacts:
+    needs: Build-Hobbits
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+          
+      - name: Display structure of downloaded files
+        run: ls -R
+
