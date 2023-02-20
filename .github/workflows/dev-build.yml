@@ -56,6 +56,6 @@ jobs:
 
       - uses: actions/download-artifact@v3
           
-      - name: Display structure of downloaded files
+      - name: Check Files
         run: ls -R
 
