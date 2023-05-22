@@ -12,6 +12,7 @@ Hex::Hex() :
     QList<ParameterDelegate::ParameterInfo> infos = {
         {"font_size", ParameterDelegate::ParameterType::Integer},
         {"column_grouping", ParameterDelegate::ParameterType::Integer},
+        {"address_display_base", ParameterDelegate::ParameterType::Integer},
         {"show_headers", ParameterDelegate::ParameterType::Boolean}
     };
 
@@ -130,6 +131,7 @@ QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const Param
 
     QSize fontSize = DisplayHelper::textSize(DisplayHelper::monoFont(m_lastParams.value("font_size").toInt()), "0");
     int columnGrouping = m_lastParams.value("column_grouping").toInt();
+    int addressDisplayBase = m_lastParams.value("address_display_base").toInt();
 
     auto overlay = DisplayHelper::drawHeadersFull(
                 viewportSize,
@@ -137,7 +139,8 @@ QSharedPointer<DisplayResult> Hex::renderOverlay(QSize viewportSize, const Param
                 m_handle,
                 QSizeF(double(fontSize.width()) / 4.0, DisplayHelper::textRowHeight(fontSize.height())),
                 columnGrouping,
-                columnGrouping > 1 ? 1 : 0);
+                columnGrouping > 1 ? 1 : 0,
+                addressDisplayBase);
 
     return DisplayResult::result(overlay, parameters);
 }
