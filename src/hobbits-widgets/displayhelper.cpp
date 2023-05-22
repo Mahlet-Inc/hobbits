@@ -300,7 +300,8 @@ QImage DisplayHelper::drawHeadersFull(QSize viewportSize,
                                       QSharedPointer<DisplayHandle> handle,
                                       QSizeF bitSize,
                                       int columnGrouping,
-                                      int groupMargin)
+                                      int groupMargin,
+                                      int addressDisplayBase)
 {
     if (offset.x() == 0 && offset.y() == 0) {
         return QImage();
@@ -315,7 +316,11 @@ QImage DisplayHelper::drawHeadersFull(QSize viewportSize,
     DisplayHelper::drawFramesHeader(&painter,
                                     QSize(offset.x(), viewportSize.height() - offset.y()),
                                     handle,
-                                    bitSize.height());
+                                    bitSize.height(),
+                                    Qt::Vertical,
+                                    1,
+                                    0,
+                                    addressDisplayBase);
 
     DisplayHelper::drawFramesHeader(&painter,
                                     QSize(viewportSize.width() - offset.x(), offset.y()),
@@ -323,7 +328,8 @@ QImage DisplayHelper::drawHeadersFull(QSize viewportSize,
                                     bitSize.width(),
                                     Qt::Horizontal,
                                     columnGrouping,
-                                    groupMargin);
+                                    groupMargin,
+                                    addressDisplayBase);
 
     return headers;
 }
@@ -334,7 +340,8 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
                                      double frameHeight,
                                      int orientation,
                                      int grouping,
-                                     int groupMargin)
+                                     int groupMargin,
+                                     int addressDisplayBase)
 {
     painter->save();
 
@@ -395,7 +402,7 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
                 textSize,
                 fontSize.height(),
                 textAlign,
-                QString("%1").arg(i + offset));
+                QString("%1").arg(i + offset, 0, addressDisplayBase));
     }
 
     if (highlightOffset >= 0) {
@@ -429,7 +436,7 @@ void DisplayHelper::drawFramesHeader(QPainter *painter,
         painter->drawText(
                 textRect,
                 textAlign,
-                QString("%1").arg(highlightOffset));
+                QString("%1").arg(highlightOffset, 0, addressDisplayBase));
     }
 
     painter->restore();
@@ -662,4 +669,3 @@ void DisplayHelper::sendHoverUpdate(QSharedPointer<DisplayHandle> handle, QPoint
 
     handle->setBitHover(true, diff.x(), diff.y());
 }
-
