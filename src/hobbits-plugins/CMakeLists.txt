@@ -18,7 +18,7 @@ macro(pluginInDir pluginType modName modDir)
 		if (BUILDING_WITH_CONAN)
 			set(ALL_LINK_LIBS hobbits-core hobbits-widgets CONAN_PKG::qt)
 		else()
-			set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt5::Core Qt5::Widgets)
+			set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt::Core Qt::Widgets)
 		endif()
 
         target_link_libraries("${pluginName}" PRIVATE ${ALL_LINK_LIBS})
