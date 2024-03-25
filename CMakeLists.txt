@@ -127,9 +127,7 @@ else()
 	find_package(PkgConfig)
 
 	# Qt
-	find_package(Qt5Core CONFIG REQUIRED)
-	find_package(Qt5Widgets CONFIG REQUIRED)
-	find_package(Qt5Network CONFIG REQUIRED)
+	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Widgets Network)
 
 	# libpcap
 	if (NOT WIN32)

@@ -1,7 +1,7 @@
 
 function(pack_qt_libs)
 
-    get_target_property(QT_CORE_LIB Qt5::Core LOCATION)
+    get_target_property(QT_CORE_LIB Qt::Core LOCATION)
     if (APPLE)
         get_filename_component(CORE_FRAMEWORK_DIR "${QT_CORE_LIB}" DIRECTORY)
         get_filename_component(QT_LIB_DIR "${CORE_FRAMEWORK_DIR}" DIRECTORY)

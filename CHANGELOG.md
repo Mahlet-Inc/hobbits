@@ -1,3 +1,32 @@
+# [0.54.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.4...v0.54.0) (2023-02-17)
+
+
+### Features
+
+* add Edit plugin ([9c091e5](https://github.com/Mahlet-Inc/hobbits/commit/9c091e5db0d9f7052116065b8c5351fc56df0b47))
+
+## [0.53.4](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.3...v0.53.4) (2023-02-17)
+
+
+### Bug Fixes
+
+* update the semantic release config and force a release ([59f69f5](https://github.com/Mahlet-Inc/hobbits/commit/59f69f53e480892c1e725996f06f8e976dc6efc3))
+
+## [0.53.3](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.2...v0.53.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* add prod build action and force a minor version bump ([4be6f45](https://github.com/Mahlet-Inc/hobbits/commit/4be6f4522db12958caf48e7fc6d65692f5009355))
+
+## [0.53.2](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.1...v0.53.2) (2022-06-08)
+
+
+### Bug Fixes
+
+* correctly display kaitai value instances for [#145](https://github.com/Mahlet-Inc/hobbits/issues/145) ([556514b](https://github.com/Mahlet-Inc/hobbits/commit/556514b8a9192feaa0d88a8ec65083b90ebbab65))
+* fix kaitai plugin byte and string array sizes ([fdc2b10](https://github.com/Mahlet-Inc/hobbits/commit/fdc2b10c373a66c110488026e3b130ee47e5d65e))
+
 ## [0.53.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.0...v0.53.1) (2022-03-06)
 
 

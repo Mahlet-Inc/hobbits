@@ -23,7 +23,7 @@ target_include_directories(hobbits-core INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 if (BUILDING_WITH_CONAN)
 	set(ALL_LINK_LIBS CONAN_PKG::qt)
 else()
-	set(ALL_LINK_LIBS Qt5::Core Qt5::Widgets)
+	set(ALL_LINK_LIBS Qt::Core Qt::Widgets)
 endif()
 
 target_link_libraries(hobbits-core ${ALL_LINK_LIBS})
