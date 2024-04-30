@@ -19,7 +19,7 @@ file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DI
 if (BUILDING_WITH_CONAN)
 	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt)
 else()
-	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt5::Widgets)
+	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt::Widgets)
 endif()
 
 add_executable(hobbits MACOSX_BUNDLE "${SRCFILES}" "${HDRFILES}" "${RCFILES}")
