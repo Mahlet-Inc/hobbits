@@ -22,10 +22,6 @@ jobs:
         shell: ${{ matrix.sys.shell }}
 
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-
       - name: Install Dependencies (Ubuntu)
         if: matrix.sys.os == 'ubuntu-22.04'
         run: sudo apt-get install -y patchelf qtchooser qt5-qmake qtbase5-dev-tools ninja-build cmake g++ libusb-1.0-0-dev libpcap-dev qtbase5-dev python3-dev
@@ -37,6 +33,10 @@ jobs:
           msystem: MINGW64
           update: true
           install: git mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5-base mingw-w64-x86_64-libusb mingw-w64-x86_64-libpcap 
+ 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
 
       - name: Check out repo
         uses: actions/checkout@v3
