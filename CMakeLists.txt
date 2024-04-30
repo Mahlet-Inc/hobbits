@@ -127,9 +127,7 @@ else()
 	find_package(PkgConfig)
 
 	# Qt
-	find_package(Qt5Core CONFIG REQUIRED)
-	find_package(Qt5Widgets CONFIG REQUIRED)
-	find_package(Qt5Network CONFIG REQUIRED)
+	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Widgets Network)
 
 	# libpcap
 	if (NOT WIN32)
@@ -167,7 +165,7 @@ elseif( MANUAL_PYTHON_PATH )
 	set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
 endif()
 
-find_package (Python3 3.9 COMPONENTS Interpreter Development REQUIRED)
+find_package (Python3 3.8 COMPONENTS Interpreter Development REQUIRED)
 message("Python3 Libs: ${Python3_LIBRARIES}")
 
 #

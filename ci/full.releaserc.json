@@ -25,7 +25,12 @@
             {
                 "assets": [
                     {
-                        "path": "build/hobbits*deb*"
+                        "path": "DEB Packages ubuntu-20.04/*.deb",
+                        "name": "DEB Package for Ubuntu 20.04"
+                    },
+                    {
+                        "path": "DEB Packages ubuntu-22.04/*.deb",
+                        "name": "DEB Package for Ubuntu 22.04"
                     }
                 ]
             }

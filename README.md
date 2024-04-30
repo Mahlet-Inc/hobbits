@@ -1,6 +1,7 @@
+[![Discord Chat](https://discordapp.com/api/guilds/672761400220844042/widget.png?style=shield)](https://discord.gg/wRQJpZZ)
+[![build, test, release master](https://github.com/Mahlet-Inc/hobbits/actions/workflows/prod-build.yml/badge.svg)](https://github.com/Mahlet-Inc/hobbits/actions/workflows/prod-build.yml)
+[![build, test develop](https://github.com/Mahlet-Inc/hobbits/actions/workflows/dev-build.yml/badge.svg?event=push)](https://github.com/Mahlet-Inc/hobbits/actions/workflows/dev-build.yml)
 
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
-[![Discord Chat](https://discordapp.com/api/guilds/672761400220844042/widget.png?style=shield)](https://discord.gg/wRQJpZZ)  
 
 ## About
 Hobbits was developed at Mahlet in 2019 as an integrated data analysis tool. It was open-sourced

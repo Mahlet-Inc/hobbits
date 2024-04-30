@@ -1,4 +1,4 @@
-name: Build and Deploy Hobbits
+name: Build, Test and Release master
 run-name: Deploy ${{ github.ref }} ${{ github.sha }}
 on:
   push:
@@ -6,7 +6,11 @@ on:
       - master
 jobs:
   Build-Hobbits:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [ubuntu-22.04]
+
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -44,11 +48,26 @@ jobs:
         run: ninja package -C build
       - uses: actions/upload-artifact@v3
         with:
-          name: DEB Packages
+          name: DEB Packages ${{ matrix.os }}
           path: build/hobbits-*deb*
+
+  Release-Hobbits:
+    needs: Build-Hobbits
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+          
+      - name: Check Files
+        run: ls -R
 
       - name: Semantic Release
         run: |
+          npm ci
           cp ci/full.releaserc.json .releaserc.json
           npx semantic-release
         env:
