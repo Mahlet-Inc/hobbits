@@ -34,7 +34,7 @@ jobs:
           update: true
           install: git mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5-base mingw-w64-x86_64-libusb mingw-w64-x86_64-libpcap 
  
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 14
 
@@ -59,7 +59,7 @@ jobs:
       
       - name: Package Build Artifacts
         run: ninja package -C build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: DEB Packages ${{ matrix.os }}
           path: build/hobbits-*deb*
@@ -70,7 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
           
       - name: Check Files
         run: ls -R
