@@ -1,3 +1,10 @@
+## [0.54.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.54.0...v0.54.1) (2024-04-30)
+
+
+### Bug Fixes
+
+* add versionless Qt build compatibility ([2d58fb2](https://github.com/Mahlet-Inc/hobbits/commit/2d58fb2f61cc2b20ac2a901325ad54422ec03215))
+
 # [0.54.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.53.4...v0.54.0) (2023-02-17)
 
 
