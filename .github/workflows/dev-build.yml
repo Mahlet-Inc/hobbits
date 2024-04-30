@@ -44,7 +44,7 @@ jobs:
           submodules: 'true'
 
       - name: Run CMake
-        run: cmake -G Ninja -B build -S ${{ github.workspace }}
+        run: cmake -G Ninja -B build -S "${{ github.workspace }}"
       - name: Build
         run: cmake --build build
 
