@@ -30,9 +30,8 @@ jobs:
         if: matrix.sys.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
-          update: true
-          install: git mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5-base mingw-w64-x86_64-libusb mingw-w64-x86_64-libpcap 
+          msystem: UCRT64
+          install: git mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-qt5-base mingw-w64-ucrt-x86_64-libusb mingw-w64-ucrt-x86_64-libpcap 
  
       - uses: actions/setup-node@v4
 
