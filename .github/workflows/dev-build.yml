@@ -55,7 +55,7 @@ jobs:
           cd tests
           ./prepare_tests.js
           export QT_DEBUG_PLUGINS=1
-          ./test_hobbits.js ${{ github.workspace }}/build/bin/hobbits-runner -p ${{ github.workspace }}/build/plugins
+          ./test_hobbits.js "${{ github.workspace }}/build/bin/hobbits-runner" -p "${{ github.workspace }}/build/plugins"
           cd ${{ github.workspace }}
       
       - name: Package Build Artifacts
