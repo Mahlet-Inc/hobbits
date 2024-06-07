@@ -79,6 +79,10 @@ if ((LINUX AND SELF_CONTAINED_APP) OR APPLE)
 	endif()
 endif()
 
+if (UNIX)
+	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsigned-char")
+endif()
+
 #
 # Dependencies
 #
