@@ -3,32 +3,49 @@ run-name: Build ${{ github.ref }} ${{ github.sha }}
 on:
   push:
     branches:
-      - develop
+      - '*'
+      - '!master'
   pull_request:
     branches:
       - develop
 jobs:
   Build-Hobbits:
-    runs-on: ${{ matrix.os }}
     strategy:
-        matrix:
-            os: [ubuntu-22.04]
+      matrix:
+        sys:
+          - { os: windows-latest, shell: 'msys2 {0}' }
+          - { os: ubuntu-22.04,  shell: bash  }
+
+    runs-on: ${{ matrix.sys.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.sys.shell }}
 
     steps:
-      - uses: actions/setup-node@v3
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 'latest'
+
+      - name: Install Dependencies (Ubuntu)
+        if: matrix.sys.os == 'ubuntu-22.04'
+        run: sudo apt-get install -y patchelf qtchooser qt5-qmake qtbase5-dev-tools ninja-build cmake g++ libusb-1.0-0-dev libpcap-dev qtbase5-dev python3-dev
+
+      - name: Install Dependencies (Windows)
+        if: matrix.sys.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          path-type: inherit
+          msystem: UCRT64
+          install: git mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-qt5-base mingw-w64-ucrt-x86_64-libusb mingw-w64-ucrt-x86_64-libpcap 
+ 
       - name: Check out repo
         uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - name: Install Build Tools
-        run: sudo apt-get install -y patchelf qtchooser qt5-qmake qtbase5-dev-tools ninja-build cmake g++
-      - name: Install Development Libraries
-        run: sudo apt-get install -y libusb-1.0-0-dev libpcap-dev qtbase5-dev python3-dev
 
       - name: Run CMake
-        run: cmake -G Ninja -B build -S ${{ github.workspace }}
+        run: cmake -G Ninja -B build -S "${{ github.workspace }}"
       - name: Build
         run: cmake --build build
 
@@ -38,12 +55,12 @@ jobs:
           cd tests
           ./prepare_tests.js
           export QT_DEBUG_PLUGINS=1
-          ./test_hobbits.js ${{ github.workspace }}/build/bin/hobbits-runner -p ${{ github.workspace }}/build/plugins
+          ./test_hobbits.js "${{ github.workspace }}/build/bin/hobbits-runner" -p "${{ github.workspace }}/build/plugins"
           cd ${{ github.workspace }}
       
       - name: Package Build Artifacts
         run: ninja package -C build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: DEB Packages ${{ matrix.os }}
           path: build/hobbits-*deb*
@@ -54,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
           
       - name: Check Files
         run: ls -R

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { readdirSync, unlinkSync, existsSync } = require('fs')
-const { join } = require('path')
+const { join, normalize } = require('path')
 const { execFileSync } = require("child_process");
 const glob = require('glob');
 const filecompare = require('filecompare');
@@ -26,7 +26,7 @@ async function runTests() {
     let failures = 0;
     let successes = 0;
 
-    let baseDir = join(__dirname, 'extracted_tests')
+    let baseDir = join(normalize(__dirname), 'extracted_tests')
     
     testDirs = readdirSync(baseDir, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
