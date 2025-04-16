@@ -58,7 +58,8 @@ namespace DisplayHelper
                                                       QSharedPointer<DisplayHandle> displayHandle,
                                                       QSizeF bitSize,
                                                       int columnGrouping = 1,
-                                                      int groupMargin = 0);
+                                                      int groupMargin = 0,
+                                                      int addressDisplayBase = 10);
 
     void HOBBITSWIDGETSSHARED_EXPORT drawFramesHeader(QPainter *painter,
                                                       QSize viewportSize,
@@ -66,7 +67,8 @@ namespace DisplayHelper
                                                       double frameHeight,
                                                       int orientation = Qt::Vertical,
                                                       int grouping = 1,
-                                                      int groupMargin = 0);
+                                                      int groupMargin = 0,
+                                                      int addressDisplayBase = 10);
 
 
     void HOBBITSWIDGETSSHARED_EXPORT drawHoverBox(QPainter *painter,

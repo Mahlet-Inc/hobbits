@@ -8,12 +8,14 @@ HexForm::HexForm(QSharedPointer<ParameterDelegate> delegate):
     ui->setupUi(this);
 
     connect(ui->sb_columnGrouping, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
+    connect(ui->sb_addressDisplayBase, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->hs_fontSize, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
     connect(ui->cb_showHeaders, SIGNAL(stateChanged(int)), this, SIGNAL(changed()));
 
     m_paramHelper->addSliderIntParameter("font_size", ui->hs_fontSize);
     m_paramHelper->addCheckBoxBoolParameter("show_headers", ui->cb_showHeaders);
     m_paramHelper->addSpinBoxIntParameter("column_grouping", ui->sb_columnGrouping);
+    m_paramHelper->addSpinBoxIntParameter("address_display_base", ui->sb_addressDisplayBase);
 }
 
 HexForm::~HexForm()
