@@ -1,3 +1,10 @@
+# [0.55.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.54.1...v0.55.0) (2025-04-16)
+
+
+### Features
+
+* add ability to make click-drag highlight selections and copy them with Ctrl+C ([3de7295](https://github.com/Mahlet-Inc/hobbits/commit/3de7295ce8d1bfbdef72949c496a37d927f79945))
+
 ## [0.54.1](https://github.com/Mahlet-Inc/hobbits/compare/v0.54.0...v0.54.1) (2024-04-30)
 
 
