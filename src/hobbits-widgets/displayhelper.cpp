@@ -639,6 +639,44 @@ void DisplayHelper::connectHoverUpdates(DisplayInterface *display,
                     xGrouping,
                     bitsPerSymbol);
     });
+
+    QObject::connect(handle.data(), &DisplayHandle::mouseSelectStart, displayObject, [display, handle, paramSet](DisplayInterface *hoverDisplay, QPoint hover) {
+        if (display != hoverDisplay) {
+            return;
+        }
+        if (hover.isNull()
+                || handle->currentContainer().isNull()) {
+            return;
+        }
+
+        if (handle->currentContainer().isNull()) {
+            return;
+        }
+    
+        if (hover.x() < 0 || hover.y() < 0) {
+            return;
+        }
+
+        QPoint offset(0, 0);
+        QSize symbolSize(1, 1);
+        int xGrouping = 1;
+        int bitsPerSymbol = 1;
+        if (!paramSet(offset, symbolSize, xGrouping, bitsPerSymbol)) {
+            return;
+        }
+    
+        QPoint diff = getOffset(handle->bitOffset(), (hover - offset).x(), (hover - offset).y(), symbolSize.width(), symbolSize.height(), xGrouping, bitsPerSymbol);
+    
+        if (diff.x() < 0 || diff.y() < 0) {
+            return;
+        }
+    
+        handle->setSelecting(true, diff.x(), diff.y(), bitsPerSymbol);
+    });
+
+    QObject::connect(handle.data(), &DisplayHandle::mouseSelectEnd, displayObject, [display, handle, paramSet](DisplayInterface *hoverDisplay, QPoint hover) {
+        handle->setSelecting(false);
+    });
 }
 
 void DisplayHelper::sendHoverUpdate(QSharedPointer<DisplayHandle> handle, QPoint hover, QSize symbolSize, int xGrouping, int bitsPerSymbol)

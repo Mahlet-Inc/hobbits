@@ -38,12 +38,16 @@ public:
 
     Range renderedRange(DisplayInterface* display) const;
 
+    QString highlightString(QString category, QString name) const;
+
     void deactivate();
 
 Q_SIGNALS:
     void newBitOffset(qint64 bitOffset);
     void newFrameOffset(qint64 frameOffset);
     void newOffsets(qint64 bitOffset, qint64 frameOffset);
+    void mouseSelectStart(DisplayInterface*, QPoint);
+    void mouseSelectEnd(DisplayInterface*, QPoint);
     void newMouseHover(DisplayInterface*, QPoint);
     void newBitHover(qint64, qint64);
     void newStatus(QString);
@@ -59,7 +63,10 @@ public Q_SLOTS:
     void setBitOffset(qint64 bitOffset);
     void setFrameOffset(qint64 frameOffset);
     void setOffsets(qint64 bitOffset, qint64 frameOffset);
+    void startMouseSelect(DisplayInterface* display, QPoint mouseHover);
+    void endMouseSelect(DisplayInterface* display, QPoint mouseHover);
     void setMouseHover(DisplayInterface* display, QPoint mouseHover);
+    void setSelecting(bool selecting, qint64 bitOffset = 0, qint64 frameOffset = 0, int bitChunkSize = 1);
     void setBitHover(bool hovering, qint64 bitOffset = 0, qint64 frameOffset = 0);
     void setStatus(QString status);
     void setActiveDisplays(QSet<DisplayWidget*> activeDisplays);
@@ -89,6 +96,10 @@ private:
     qint64 m_frameOffsetHover;
 
     QHash<DisplayInterface*, Range> m_renderedRangeMap;
+
+    qint64 m_selectStartBit;
+    bool m_selecting;
+    int m_selectionBitChunkSize;
 };
 
 #endif // DISPLAYHANDLE_H

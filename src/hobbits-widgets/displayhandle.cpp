@@ -9,7 +9,9 @@ DisplayHandle::DisplayHandle(QSharedPointer<BitContainerManager> bitManager) :
     m_bitOffsetControl(nullptr),
     m_frameOffsetControl(nullptr),
     m_bitOffsetHover(-1),
-    m_frameOffsetHover(-1)
+    m_frameOffsetHover(-1),
+    m_selecting(false),
+    m_selectionBitChunkSize(1)
 {
     connect(
             m_bitManager.data(),
@@ -141,11 +143,29 @@ void DisplayHandle::setOffsets(qint64 bitOffset, qint64 frameOffset)
     }
 }
 
+
+void DisplayHandle::startMouseSelect(DisplayInterface* display, QPoint mouseHover) {
+    emit mouseSelectStart(display, mouseHover);
+}
+
+void DisplayHandle::endMouseSelect(DisplayInterface* display, QPoint mouseHover) {
+    emit mouseSelectEnd(display, mouseHover);
+}
+
 void DisplayHandle::setMouseHover(DisplayInterface* display, QPoint mouseHover)
 {
     m_mouseHoverMap.remove(display);
     m_mouseHoverMap.insert(display, mouseHover);
     emit newMouseHover(display, mouseHover);
+}
+
+void DisplayHandle::setSelecting(bool selecting, qint64 bitOffset, qint64 frameOffset, int bitChunkSize) {
+    m_selecting = selecting;
+    if (selecting) {
+        qint64 totalBitOffset = currentContainer()->frameAt(frameOffset).start() + bitOffset;
+        m_selectStartBit = totalBitOffset;
+        m_selectionBitChunkSize = bitChunkSize;
+    }
 }
 
 void DisplayHandle::setBitHover(bool hovering, qint64 bitOffset, qint64 frameOffset)
@@ -175,10 +195,59 @@ void DisplayHandle::setBitHover(bool hovering, qint64 bitOffset, qint64 frameOff
     m_bitOffsetHover = bitOffset;
     qint64 totalBitOffset = currentContainer()->frameAt(frameOffset).start() + bitOffset;
     qint64 totalByteOffset = totalBitOffset / 8;
-    setStatus(
-            QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4").arg(
-                    totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset));
     emit newBitHover(m_bitOffsetHover, m_frameOffsetHover);
+
+    if (m_selecting) {
+        currentContainer()->info()->clearHighlightCategory("mouse_selection");
+        if (m_selectStartBit > totalBitOffset) {
+            qint64 sStart = totalBitOffset;
+            qint64 sEnd = m_selectStartBit;
+            sEnd = (sEnd / m_selectionBitChunkSize) * m_selectionBitChunkSize - 1;
+            
+            currentContainer()->info()->addHighlight(RangeHighlight("mouse_selection", "selection_1", Range(sStart, sEnd), 0x44bb66aa));
+        } else if (m_selectStartBit < totalBitOffset) {
+            qint64 sStart = m_selectStartBit;
+            qint64 sEnd = totalBitOffset;
+            sEnd = (sEnd / m_selectionBitChunkSize) * m_selectionBitChunkSize - 1;
+            currentContainer()->info()->addHighlight(RangeHighlight("mouse_selection", "selection_1", Range(sStart, sEnd), 0x44bb66aa));
+        } else {
+            qint64 sStart = m_selectStartBit;
+            qint64 sEnd = m_selectStartBit + m_selectionBitChunkSize - 1;
+            currentContainer()->info()->addHighlight(RangeHighlight("mouse_selection", "selection_1", Range(sStart, sEnd), 0x44bb66aa));
+        }
+    }
+
+    QString selectionString = highlightString("mouse_selection", "selection_1");
+    if (selectionString.size() > 0) {
+        if (selectionString.size() > 40) {
+            selectionString = selectionString.mid(0, 37) + "...";
+        }
+        selectionString = "Current Selection: " + selectionString;
+    }
+    setStatus(
+        QString("Bit Offset: %L1  Byte Offset: %L2  Frame Offset: %L3  Frame Bit Offset: %L4 %5").arg(
+                totalBitOffset).arg(totalByteOffset).arg(frameOffset).arg(bitOffset).arg(selectionString));
+}
+
+
+QString DisplayHandle::highlightString(QString category, QString name) const {
+    auto container = currentContainer();
+    if (container.isNull()) {
+        return "";
+    }
+
+    auto selection = container->info()->highlights(category, name);
+    if (selection.size() < 1) {
+        return "";
+    }
+
+    auto r = selection.takeFirst();
+    QString selectionStr;
+    if (r.range().size() % 4 == 0 && r.range().start() %4 == 0) {
+        return "0x" + container->bits()->toHex(r.range().start()/4, r.range().size()/4);
+    } else {
+        return "0b" + container->bits()->toBin(r.range().start(), r.range().size());
+    }
 }
 
 void DisplayHandle::setStatus(QString status)

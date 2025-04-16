@@ -5,6 +5,10 @@
 #include <QMenu>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QShortcut>
+#include <QKeySequence>
+#include <QApplication>
+#include <QClipboard>
 #include "settingsmanager.h"
 
 DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
@@ -64,11 +68,24 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
             checkOverlayRedraw(display);
         });
     }
+
+    setFocusPolicy(Qt::StrongFocus);
+
+    QShortcut *ctrlCShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    connect(ctrlCShortcut, &QShortcut::activated, this, &DisplayWidget::onCtrlC);
 }
 
 DisplayWidget::~DisplayWidget()
 {
     resetRendering();
+}
+
+void DisplayWidget::onCtrlC() {
+    QString selectionStr = m_handle->highlightString("mouse_selection", "selection_1");
+    if (selectionStr.size() > 0) {
+        QClipboard *clipboard = QApplication::clipboard();
+        clipboard->setText(selectionStr);
+    }
 }
 
 void DisplayWidget::paintEvent(QPaintEvent *event)
@@ -115,11 +132,25 @@ void DisplayWidget::wheelEvent(QWheelEvent *event)
 void DisplayWidget::mouseMoveEvent(QMouseEvent *event)
 {
     m_handle->setMouseHover(m_display.data(), event->pos());
+
+}
+
+void DisplayWidget::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) {
+        m_handle->startMouseSelect(m_display.data(), event->pos());
+    }
+}
+
+void DisplayWidget::mouseReleaseEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) {
+        m_handle->endMouseSelect(m_display.data(), event->pos());
+    }
 }
 
 void DisplayWidget::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event)
+    m_handle->endMouseSelect(m_display.data(), QPoint());
     m_handle->setMouseHover(m_display.data(), QPoint());
 }
 
@@ -438,6 +469,7 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             [this, frame]() {
         auto container = m_handle->currentContainer();
         container->info()->clearHighlightCategory("manual_highlights");
+        container->info()->clearHighlightCategory("mouse_selection");
     });
 
     menu.addSeparator();
