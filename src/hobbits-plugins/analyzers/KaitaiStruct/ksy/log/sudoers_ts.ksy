@@ -109,7 +109,7 @@ types:
         type: b8
 enums:
   ts_type:
-    1: global
+    1: global_timestamp
     2: tty
     3: ppid
     4: lockexcl

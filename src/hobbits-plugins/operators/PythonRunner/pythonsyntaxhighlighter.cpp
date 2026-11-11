@@ -86,15 +86,11 @@ void PythonSyntaxHighlighter::initializeRules()
 
 void PythonSyntaxHighlighter::highlightBlock(const QString &text)
 {
-    for (HighlightingRule currRule : rules)
-    {
-        int idx = currRule.pattern.indexIn(text, 0);
-        while (idx >= 0) {
-            // Get index of Nth match
-            idx = currRule.pattern.pos(currRule.nth);
-            int length = currRule.pattern.cap(currRule.nth).length();
-            setFormat(idx, length, currRule.format);
-            idx = currRule.pattern.indexIn(text, idx + length);
+    for (const HighlightingRule &rule : rules) {
+        auto matches = rule.pattern.globalMatch(text);
+        while (matches.hasNext()) {
+            const auto match = matches.next();
+            setFormat(match.capturedStart(rule.nth), match.capturedLength(rule.nth), rule.format);
         }
     }
 
@@ -109,52 +105,29 @@ void PythonSyntaxHighlighter::highlightBlock(const QString &text)
 
 bool PythonSyntaxHighlighter::matchMultiline(
         const QString &text,
-        const QRegExp &delimiter,
+        const QRegularExpression &delimiter,
         const int inState,
         const QTextCharFormat &style)
 {
-    int start = -1;
-    int add = -1;
-    int end = -1;
-    int length = 0;
+    const auto first = delimiter.match(text);
+    int start = previousBlockState() == inState ? 0 : first.capturedStart();
+    int openingLength = previousBlockState() == inState ? 0 : first.capturedLength();
 
-    // If inside triple-single quotes, start at 0
-    if (previousBlockState() == inState) {
-        start = 0;
-        add = 0;
-    }
-    // Otherwise, look for the delimiter on this line
-    else {
-        start = delimiter.indexIn(text);
-        // Move past this match
-        add = delimiter.matchedLength();
-    }
-
-    // As long as there's a delimiter match on this line...
     while (start >= 0) {
-        // Look for the ending delimiter
-        end = delimiter.indexIn(text, start + add);
-        // Ending delimiter on this line?
-        if (end >= add) {
-            length = end - start + add + delimiter.matchedLength();
-            setCurrentBlockState(0);
-        }
-        // No; multi-line string
-        else {
+        const auto closing = delimiter.match(text, start + openingLength);
+        if (!closing.hasMatch()) {
+            setFormat(start, text.size() - start, style);
             setCurrentBlockState(inState);
-            length = text.length() - start + add;
+            return true;
         }
-        // Apply formatting and look for next
-        setFormat(start, length, style);
-        start = delimiter.indexIn(text, start + length);
+        const int end = closing.capturedEnd();
+        setFormat(start, end - start, style);
+        setCurrentBlockState(0);
+        const auto next = delimiter.match(text, end);
+        start = next.capturedStart();
+        openingLength = next.capturedLength();
     }
-    // Return True if still inside a multi-line string, False otherwise
-    if (currentBlockState() == inState) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return false;
 }
 
 const QTextCharFormat PythonSyntaxHighlighter::getTextCharFormat(const QString &colorName, const QString &style)

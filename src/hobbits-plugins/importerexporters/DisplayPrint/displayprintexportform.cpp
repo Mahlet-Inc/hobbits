@@ -56,27 +56,8 @@ Parameters DisplayPrintExportForm::parameters()
 
 QSharedPointer<HobbitsPluginManager> DisplayPrintExportForm::loadUpPluginManager()
 {
-    // TODO: this should be some kind of hobbits core functionality
     QSharedPointer<HobbitsPluginManager> manager(new HobbitsPluginManager());
-
-    QStringList warnings;
-    QStringList pluginPaths;
-    pluginPaths.append(
-            SettingsManager::getPluginLoaderSetting(
-                    SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
-
-    QStringList pathBuffer;
-    for (QString pluginPath : pluginPaths) {
-
-        if (pluginPath.startsWith("~/")) {
-            pluginPath.replace(0, 1, QDir::homePath());
-        }
-        else if (!pluginPath.startsWith("/")) {
-            pluginPath = QApplication::applicationDirPath() + "/" + pluginPath;
-        }
-        pathBuffer.append(pluginPath);
-    }
-    pluginPaths = pathBuffer;
+    const QStringList pluginPaths = SettingsManager::pluginPaths();
 
     for (QString pluginPath : pluginPaths) {
         manager->loadPlugins(pluginPath);

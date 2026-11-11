@@ -1,0 +1,83 @@
+Hobbits dependency notices
+=========================
+
+Hobbits' own code remains licensed under the MIT license in LICENSE.txt.
+Third-party components retain their own licenses.
+
+PocketFFT
+---------
+Source: https://github.com/mreineck/pocketfft
+Revision: 4d865cba24359b05b37da4e75aee24498c3b78e7
+License: BSD-3-Clause
+
+This file is part of pocketfft.
+
+Copyright (C) 2010-2024 Max-Planck-Society
+Copyright (C) 2019-2020 Peter Bell
+
+For the odd-sized DCT-IV transforms:
+  Copyright (C) 2003, 2007-14 Matteo Frigo
+  Copyright (C) 2003, 2007-14 Massachusetts Institute of Technology
+
+For the prev_good_size search:
+  Copyright (C) 2024 Tan Ping Liang, Peter Bell
+
+For the safeguards against integer overflow in good_size search:
+  Copyright (C) 2024 Cris Luengo
+
+Authors: Martin Reinecke, Peter Bell
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimer in the documentation and/or
+  other materials provided with the distribution.
+* Neither the name of the copyright holder nor the names of its contributors may
+  be used to endorse or promote products derived from this software without
+  specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Other dependencies
+------------------
+Qt 6.8.3: LGPL-3.0, GPL, or commercial terms, depending on the selected distribution
+and modules. The default build uses the shared Qt Core, Gui, Widgets, Concurrent and Network
+libraries. Qt's bundled third-party components retain their individual notices.
+Linux desktop builds also include the shared Qt Wayland client and integration
+plugins under LGPL-3.0 (or applicable alternative Qt license terms); the separate
+Wayland compositor module is not built.
+Source and licensing information: https://www.qt.io/licensing/
+
+OpenSSL 3.5.9 (statically linked into bundled Qt on Linux): Apache-2.0;
+https://github.com/openssl/openssl. The full license is installed in
+share/hobbits/licenses/openssl/LICENSE.txt.
+
+libusb 1.0.29 (shared library): LGPL-2.1-or-later; https://github.com/libusb/libusb
+libpcap 1.10.5 (static library): BSD license; https://github.com/the-tcpdump-group/libpcap
+GNU m4 and Bison, and Flex, are used only to build dependencies; they are not
+linked into or installed with Hobbits. Their source archives include their licenses.
+
+Python (optional, supplied by the user): PSF license and its bundled notices;
+https://docs.python.org/3/license.html
+
+Roboto and Roboto Mono: Apache-2.0. License texts are provided in
+src/hobbits-gui/style/fonts/Roboto/LICENSE.txt and
+src/hobbits-gui/style/fonts/Roboto_Mono/LICENSE.txt.
+
+Dependency license files are also installed with the application when those
+sources are fetched by the build. Consult each dependency's full notices and
+source distribution for its applicable terms.

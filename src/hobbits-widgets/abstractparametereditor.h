@@ -44,7 +44,12 @@ public:
         else {
             // Called from worker thread
             previewBitsImpl(container, progress);
-            QMetaObject::invokeMethod(this, "previewBitsUiImpl", Qt::QueuedConnection, Q_ARG(QSharedPointer<BitContainerPreview>, container));
+            // The receiver context discards this callback if the editor is deleted.
+            // Hold the worker's lock while consuming its results on the UI thread.
+            QMetaObject::invokeMethod(this, [this, container]() {
+                QMutexLocker locker(&m_previewLock);
+                previewBitsUiImpl(container);
+            }, Qt::QueuedConnection);
         }
     }
 

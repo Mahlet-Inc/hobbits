@@ -1,13 +1,12 @@
 # This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
 
-from pkg_resources import parse_version
 import kaitaistruct
 from kaitaistruct import KaitaiStruct, KaitaiStream, BytesIO
 from enum import Enum
 import collections
 
 
-if parse_version(kaitaistruct.__version__) < parse_version('0.9'):
+if getattr(kaitaistruct, 'API_VERSION', (0, 0)) < (0, 9):
     raise Exception("Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s" % (kaitaistruct.__version__))
 
 class PythonPickle(KaitaiStruct):
@@ -69,7 +68,7 @@ class PythonPickle(KaitaiStruct):
         empty_list = 93
         append = 97
         build = 98
-        global = 99
+        global_object = 99
         dict = 100
         appends = 101
         get = 103
@@ -634,7 +633,7 @@ class PythonPickle(KaitaiStruct):
                 self.arg._read()
             elif _on == PythonPickle.Opcode.binget:
                 self.arg = self._io.read_u1()
-            elif _on == PythonPickle.Opcode.global:
+            elif _on == PythonPickle.Opcode.global_object:
                 self.arg = PythonPickle.StringnlNoescapePair(self._io, self, self._root)
                 self.arg._read()
             elif _on == PythonPickle.Opcode.dict:

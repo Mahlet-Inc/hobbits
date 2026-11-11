@@ -1,255 +1,136 @@
-#
-# CMake Setup
-#
+cmake_minimum_required(VERSION 3.24)
 
-cmake_minimum_required(VERSION 3.12)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
-#
-# Project Config
-#
-
-set(LINUX FALSE)
-if (UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-endif()
-
-if (DEFINED BUILD_VERSION)
-    message("Using build version from command-line")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if(DEFINED BUILD_VERSION)
     set(VERSION_STRING "${BUILD_VERSION}")
-elseif (EXISTS "${CMAKE_SOURCE_DIR}/.version")
-    message("Getting build version from .version file")
-    file (STRINGS "${CMAKE_SOURCE_DIR}/.version" BUILD_VERSION)
-    string(REGEX REPLACE "\n$" "" BUILD_VERSION "${BUILD_VERSION}")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.version")
+    file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/.version" BUILD_VERSION)
     string(STRIP "${BUILD_VERSION}" BUILD_VERSION)
     set(VERSION_STRING "${BUILD_VERSION}")
 else()
-    message("Attempting to get build version from Git")
     include(gitversion)
     gitversion(BUILD_VERSION)
     set(VERSION_STRING "0.0.0")
 endif()
-
-message("Building hobbits version: ${BUILD_VERSION}")
-
-project("hobbits"
-        VERSION "${VERSION_STRING}"
+project(hobbits VERSION "${VERSION_STRING}" LANGUAGES C CXX
         HOMEPAGE_URL "https://github.com/Mahlet-Inc/hobbits")
+message(STATUS "Building hobbits ${BUILD_VERSION}")
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 include(GNUInstallDirs)
-include(CheckCCompilerFlag)
-include(CPackComponent)
-include(Hardening)
+include(CTest)
+option(HOBBITS_SUPERBUILD "Download and build dependencies before building Hobbits" ON)
+option(HOBBITS_USE_SYSTEM_QT "Use an installed Qt6 instead of building Qt" OFF)
+option(HOBBITS_ENABLE_PYTHON "Build Python plugins when standard Python development files are available" ON)
+option(SELF_CONTAINED_APP "Deploy Qt runtime libraries with the application" ON)
+option(JUST_LIBS "Build only the Hobbits libraries" OFF)
+option(DEVELOPMENT_BUILD "Enable development features" OFF)
+option(HOBBITS_HEADLESS "Build bundled Qt without a desktop display backend (testing only)" OFF)
+option(HOBBITS_ENABLE_WAYLAND "Build the native Wayland desktop plugin on Linux" ON)
+if(HOBBITS_SUPERBUILD)
+    include(Superbuild)
+    return()
+endif()
+
+set(LINUX FALSE)
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
 include(passthroughvars)
 include(installhelper)
-
-#
-# Compile and Link Config
-#
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(BUILD_SHARED_LIBS ON)
-
-if (QT_NO_DEBUG)
-    add_compile_definitions(QT_NO_DEBUG=1)
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path;@executable_path/../Frameworks")
+elseif(UNIX)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-if (LINUX)
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5)
-        SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Widgets Network Concurrent)
+include(CheckQtPlatformPlugins)
+set(HOBBITS_WITH_PYTHON OFF)
+if(HOBBITS_ENABLE_PYTHON)
+    if(NOT DEFINED Python3_USE_STATIC_LIBS)
+        set(Python3_USE_STATIC_LIBS FALSE)
     endif()
-    add_link_options("LINKER:--disable-new-dtags")
+    find_package(Python3 3.8 QUIET COMPONENTS Interpreter Development.Embed)
+    if(Python3_Interpreter_FOUND AND Python3_Development.Embed_FOUND)
+        set(HOBBITS_WITH_PYTHON ON)
+        message(STATUS "Python plugins enabled: ${Python3_EXECUTABLE} (${Python3_VERSION})")
+    else()
+        message(STATUS "Python interpreter/development library unavailable; skipping Python plugins")
+    endif()
 endif()
+add_compile_definitions(HOBBITS_WITH_PYTHON=$<BOOL:${HOBBITS_WITH_PYTHON}>)
+add_subdirectory(external)
 
-if ((LINUX AND SELF_CONTAINED_APP) OR APPLE)
-    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-    SET(CMAKE_INSTALL_RPATH "")
-    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-	if (APPLE)
-		set(MACOSX_RPATH TRUE)
-		set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Frameworks/hobbits-cpython/lib")
-	elseif(LINUX)
-		set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/../lib;$ORIGIN/../lib64;$ORIGIN/../hobbits-cpython/lib;$ORIGIN/../hobbits-cpython/lib64")
-	endif()
-endif()
-
-#
-# Dependencies
-#
-
-if (BUILDING_WITH_CONAN)
-	# add conan
-	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	conan_basic_setup(TARGETS KEEP_RPATHS NO_OUTPUT_DIRS)
-	#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CONAN_LIB_DIRS_QT}/cmake/Qt5Core")
-	#include(conan_qt_executables_variables OPTIONAL)
-	set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
-	set(QT_VERSION_MAJOR 5)
-	set(QT_VERSION_MINOR 15)
-	set(QT_VERSION_PATCH 2)
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::moc)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::moc IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::moc PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/moc${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5Core_MOC_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::moc)
-	endif()
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::rcc)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::rcc IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::rcc PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/rcc${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5Core_RCC_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::rcc)
-	endif()
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::qmake)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::qmake IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::qmake PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/qmake${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5Core_QMAKE_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::qmake)
-	endif()
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::qdbuscpp2xml)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::qdbuscpp2xml IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::qdbuscpp2xml PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/qdbuscpp2xml${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5DBus_QDBUSCPP2XML_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::qdbuscpp2xml)
-	endif()
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::qdbusxml2cpp)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::qdbusxml2cpp IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::qdbusxml2cpp PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/qdbusxml2cpp${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5DBus_QDBUSXML2CPP_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::qdbusxml2cpp)
-	endif()
-	if(NOT TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::uic)
-		add_executable(${QT_CMAKE_EXPORT_NAMESPACE}::uic IMPORTED)
-		set_target_properties(${QT_CMAKE_EXPORT_NAMESPACE}::uic PROPERTIES IMPORTED_LOCATION ${QT_PKG_ROOT_DIR}/bin/uic${CMAKE_EXECUTABLE_SUFFIX})
-		set(Qt5Widgets_UIC_EXECUTABLE ${QT_CMAKE_EXPORT_NAMESPACE}::uic)
-	endif()
-else()
-	find_package(PkgConfig)
-
-	# Qt
-	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Widgets Network)
-
-	# libpcap
-	if (NOT WIN32)
-		include(FindPCAP)
-		find_package(PCAP REQUIRED)
-	endif()
-
-	if(NOT WIN32)
-		# Libusb
-		find_package(libusb-1.0 REQUIRED)
-	endif()
-
-	# PFFFT
-	option(USE_SYSTEM_PFFFT "Use a system-provided version of pffft" OFF)
-	if(USE_SYSTEM_PFFFT)
-		message(STATUS "Using system pffft")
-		find_package(PFFFT REQUIRED)
-	else()
-		add_subdirectory(external)
-	endif()
-
-endif()
-
-#
-# Python Config
-#
-
-if (BUILDING_WITH_CONAN)
-	add_compile_definitions(EMBEDDED_HOBBITS_CPYTHON=1)
-	set ( Python3_ROOT_DIR "${CONAN_HOBBITS-CPYTHON_ROOT}" )
-elseif( MANUAL_PYTHON_PATH )
-	add_compile_definitions(EMBEDDED_HOBBITS_CPYTHON=1)
-	message("Setting manual Python path")
-	message("${MANUAL_PYTHON_PATH}")
-	set ( Python3_ROOT_DIR "${MANUAL_PYTHON_PATH}" )
-endif()
-
-find_package (Python3 3.8 COMPONENTS Interpreter Development REQUIRED)
-message("Python3 Libs: ${Python3_LIBRARIES}")
-
-#
-# Plugin installing and loading
-#
-
-if (LINUX)
-	if (SELF_CONTAINED_APP)
-		set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}/../plugins")
-		list(APPEND HOBBITS_PLUGINS_PATHS "../plugins")
-	else()
-		set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}/hobbits/plugins")
-		list(APPEND HOBBITS_PLUGINS_PATHS "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/plugins")
-		list(APPEND HOBBITS_PLUGINS_PATHS "/usr/lib/hobbits/plugins")
-		list(APPEND HOBBITS_PLUGINS_PATHS "~/.local/share/hobbits/plugins")
-	endif()
+# Keep installed paths relative to the executable so --prefix installs can move.
+if(APPLE)
+    set(HOBBITS_PLUGINS_INSTALL_PATH "hobbits.app/Contents/PlugIns/hobbits")
+    list(APPEND HOBBITS_PLUGINS_PATHS "../PlugIns/hobbits" "../../../../plugins")
 elseif(WIN32)
     set(HOBBITS_PLUGINS_INSTALL_PATH "plugins")
     list(APPEND HOBBITS_PLUGINS_PATHS "plugins")
-elseif(APPLE)
-    set(HOBBITS_PLUGINS_INSTALL_PATH "hobbits.app/Contents/PlugIns/hobbits")
-    list(APPEND HOBBITS_PLUGINS_PATHS "../PlugIns/hobbits")
+else()
+    set(HOBBITS_PLUGINS_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}/hobbits/plugins")
+    file(RELATIVE_PATH _plugins_relative "${CMAKE_INSTALL_FULL_BINDIR}"
+         "${CMAKE_INSTALL_PREFIX}/${HOBBITS_PLUGINS_INSTALL_PATH}")
+    list(APPEND HOBBITS_PLUGINS_PATHS "${_plugins_relative}" "~/.local/share/hobbits/plugins")
+endif()
+if(WIN32)
+    string(JOIN ";" HOBBITS_PLUGINS_PATH ${HOBBITS_PLUGINS_PATHS})
+else()
+    string(JOIN ":" HOBBITS_PLUGINS_PATH ${HOBBITS_PLUGINS_PATHS})
 endif()
 
-string(REPLACE ";" ":" HOBBITS_PLUGINS_PATH "${HOBBITS_PLUGINS_PATHS}")
+set(HOBBITS_OUTPUT_ROOT "${CMAKE_BINARY_DIR}" CACHE PATH "Directory for application build outputs")
+set(HOBBITS_CONFIG_OUTPUT_ROOT "${HOBBITS_OUTPUT_ROOT}")
+if(CMAKE_CONFIGURATION_TYPES)
+    set(HOBBITS_CONFIG_OUTPUT_ROOT "${HOBBITS_OUTPUT_ROOT}/$<CONFIG>")
+endif()
+set(HOBBITS_BIN_OUT_DIR "${HOBBITS_CONFIG_OUTPUT_ROOT}/bin")
+set(HOBBITS_LIB_OUT_DIR "${HOBBITS_CONFIG_OUTPUT_ROOT}/lib")
+set(HOBBITS_PLUGIN_OUT_DIR "${HOBBITS_CONFIG_OUTPUT_ROOT}/plugins")
+# Keep DLLs beside their executables and each build configuration isolated.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${HOBBITS_BIN_OUT_DIR}")
+foreach(_config IN LISTS CMAKE_CONFIGURATION_TYPES)
+    string(TOUPPER "${_config}" _config_upper)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${_config_upper} "${HOBBITS_OUTPUT_ROOT}/${_config}/bin")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${_config_upper} "${HOBBITS_OUTPUT_ROOT}/${_config}/lib")
+endforeach()
+add_subdirectory(src)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
-#
-# Binary build locations
-#
+if(SELF_CONTAINED_APP AND NOT JUST_LIBS)
+    include(PackExternalDeps)
+    pack_qt_libs()
+endif()
+install(FILES LICENSE.txt THIRD_PARTY_NOTICES.txt DESTINATION "${CMAKE_INSTALL_DATADIR}/hobbits")
 
-set(HOBBITS_BIN_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(HOBBITS_LIB_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(HOBBITS_PLUGIN_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/plugins)
-
-#
-# CPack
-#
-
-if (NOT DEFINED CPACK_GENERATOR)
-    if(LINUX)
-        set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_NAME hobbits)
+set(CPACK_PACKAGE_VENDOR "Hobbits Team")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A GUI for bit-based analysis, processing, and visualization")
+set(CPACK_PACKAGE_CONTACT "adam@smr.llc")
+set(CPACK_PACKAGE_VERSION "${CMAKE_PROJECT_VERSION}")
+set(CPACK_PACKAGE_CHECKSUM SHA512)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+if(NOT DEFINED CPACK_GENERATOR)
+    if(WIN32)
+        set(CPACK_GENERATOR ZIP)
+    else()
+        set(CPACK_GENERATOR TGZ)
     endif()
 endif()
-
-set(CPACK_PACKAGE_NAME "hobbits")
-set(CPACK_PACKAGE_VENDOR "Hobbits Team")
-set(CPACK_PACKAGE_DESCRIPTION "A multi-platform GUI for bit-based analysis, processing, and visualization.")
-set(CPACK_HELP_LINK "https://mahlet-inc.github.io/")
-set(CPACK_PACKAGE_CONTACT "adam@smr.llc")
-set(CPACK_PACKAGE_CHECKSUM "SHA512")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
-set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/src/hobbits-gui/images/icons/HobbitsRingSmall.png")
-set(CPACK_PACKAGE_VERSION "${CMAKE_PROJECT_VERSION}")
-set(CPACK_CREATE_DESKTOP_LINKS ON)
-
-set(CPACK_DEBIAN_PACKAGE_NAME "hobbits")
-set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-set(CPACK_DEBIAN_DEBUGINFO_PACKAGE ON)
-set(CPACK_DEB_COMPONENT_INSTALL OFF)
-
-set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
-
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5widgets5, libqt5network5, libusb-1.0-0, libpcap0.8, python3")
-set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
-
-#
-# Add Files
-#
-
-add_subdirectory(src)
-
-#
-# Install
-#
-
-if (NOT BUILDING_WITH_CONAN)
-	include(PackExternalDeps)
-	if (SELF_CONTAINED_APP OR APPLE OR WIN32)
-		pack_qt_libs()
-		pack_python()
-		pack_pffft()
-		pack_pcap()
-	endif()
-	include(CPack)
-endif()
+include(CPack)

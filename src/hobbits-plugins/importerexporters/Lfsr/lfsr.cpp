@@ -188,14 +188,14 @@ QSharedPointer<ImportResult> Lfsr::importBits(const Parameters &parameters,
 
             int tapIndex = seed.length() - allTaps[i];
 
-            QStringRef _bitAtIndex(&lfsr, tapIndex, 1);
+            QStringView _bitAtIndex = QStringView(lfsr).mid(tapIndex, 1);
             int bitAtIndex = _bitAtIndex.toInt();
 
             bitToAdd ^= bitAtIndex;
 
         }
 
-        QStringRef _bitForPRBS(&lfsr, 0, 1);
+        QStringView _bitForPRBS = QStringView(lfsr).mid(0, 1);
         int bitForPRBS = _bitForPRBS.toInt();
         outputBits->set(outputIndex, bitForPRBS);
 

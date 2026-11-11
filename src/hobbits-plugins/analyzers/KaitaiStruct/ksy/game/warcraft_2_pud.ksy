@@ -132,7 +132,7 @@ enums:
     0x06: rescue_passive
     0x07: rescue_active
     # also supported by game engine
-    0x01: computer
+    0x01: computer_old
     # everything else is "passive_computer"
   terrain_type:
     0x00: forest

@@ -25,15 +25,13 @@
             {
                 "assets": [
                     {
-                        "path": "DEB Packages ubuntu-20.04/*.deb",
-                        "name": "DEB Package for Ubuntu 20.04"
+                        "path": "hobbits-*-python-ON/hobbits-*.tar.gz"
                     },
                     {
-                        "path": "DEB Packages ubuntu-22.04/*.deb",
-                        "name": "DEB Package for Ubuntu 22.04"
+                        "path": "hobbits-*-python-ON/hobbits-*.zip"
                     }
                 ]
             }
         ]
-    ]   
+    ]
 }

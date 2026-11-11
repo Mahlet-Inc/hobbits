@@ -3,6 +3,7 @@
 
 #include "pythonrequest.h"
 #include "pythonresult.h"
+#include <QThread>
 
 class HOBBITSPYTHONSHARED_EXPORT PythonInterpreter
 {
@@ -26,6 +27,8 @@ private:
     bool errorCheckAndPrint();
 
     QMutex m_mutex;
+    QThread m_thread;
+    QObject *m_worker;
     QSharedPointer<PythonResult> m_initializationError;
 };
 

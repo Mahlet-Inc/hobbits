@@ -4,13 +4,13 @@
 #include <QMetaObject>
 #include <QVBoxLayout>
 #include <QtGlobal>
-#include "pffft.h"
+#include "../../common/ffttransform.h"
 
 WidthFramerForm::WidthFramerForm(QSharedPointer<ParameterDelegate> delegate) :
     ui(new Ui::WidthFramerForm()),
     m_delegate(delegate),
     m_peakSelector(new PeakSelector()),
-    m_listModel(new QStringListModel())
+    m_listModel(new QStringListModel(this))
 {
     ui->setupUi(this);
 
@@ -82,18 +82,20 @@ void WidthFramerForm::previewBitsImpl(QSharedPointer<BitContainerPreview> contai
 {
     Q_UNUSED(progress)
     if (container.isNull()) {
-        m_autocorrelation = QVector<QPointF>();
+        m_pendingAutocorrelation.clear();
     }
     else {
-        m_autocorrelation = autocorrelate(container->bits());
+        m_pendingAutocorrelation = autocorrelate(container->bits());
     }
-    m_sortedAutocorrelation = m_autocorrelation;
-    std::sort(m_sortedAutocorrelation.begin(), m_sortedAutocorrelation.end(), sortPoints);
+    m_pendingSortedAutocorrelation = m_pendingAutocorrelation;
+    std::sort(m_pendingSortedAutocorrelation.begin(), m_pendingSortedAutocorrelation.end(), sortPoints);
 }
 
 void WidthFramerForm::previewBitsUiImpl(QSharedPointer<BitContainerPreview> container)
 {
     Q_UNUSED(container)
+    m_autocorrelation = m_pendingAutocorrelation;
+    m_sortedAutocorrelation = m_pendingSortedAutocorrelation;
     m_peakSelector->setData(m_autocorrelation);
     setupScoreList();
 }
@@ -139,65 +141,25 @@ void WidthFramerForm::widthSelected(QModelIndex index)
 
 QVector<QPointF> WidthFramerForm::autocorrelate(QSharedPointer<const BitArray> bits)
 {
-    int N = 1 << 19;
-
-    //create set up for PFFFT
-    PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
-    
-    if(!setup){
-        //return empty vector
-        return QVector<QPointF>();
+    if (bits.isNull() || bits->sizeInBits() == 0) {
+        return {};
     }
-
-    //allocate the arrays, or "float buffers," for input, output, and work
-    float *input = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
-    float *output = (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
-    float *work= (float*)pffft_aligned_malloc(N * 2 * sizeof(float));
-
-    if(!input || !output || !work){
-        return QVector<QPointF>();
-    }
-
-    //prepare first FFT 
-    for (int i = 0; i < N; i++){
-        input[i*2] = 0;
-        input[i*2+1] = 0;
-        if (i < bits->sizeInBits()) {
-            input[i*2] = bits->at(i) ? 1 : -1;
+    constexpr int N = 1 << 19;
+    try {
+        std::vector<std::complex<float>> input(N);
+        for (int i = 0; i < N && i < bits->sizeInBits(); ++i) {
+            input[i] = bits->at(i) ? 1.0f : -1.0f;
         }
-        output[i*2] = 0;
-        output[i*2+1]= 0;
+        const auto correlation = HobbitsDsp::autocorrelation(input);
+        QVector<QPointF> results(N / 2);
+        results[0] = QPointF(0, 0);
+        for (int i = 1; i < N / 2; ++i) {
+            results[i] = QPointF(i, correlation[i]);
+        }
+        return results;
     }
-
-    //run first FFT
-    pffft_transform_ordered(setup, input, output, work, PFFFT_FORWARD);
-
-  
-   //prepare second FFT
-    for (int i = 0; i < N; i++) {
-        float re = output[i*2];
-        float im = output[i*2+1];
-        input[i*2] = (re * re + im * im) / static_cast<float>(N);
-        input[i*2+1] = 0.0;
+    catch (const std::exception &) {
+        // Preview failures must not escape into Qt's event dispatch.
+        return {};
     }
-
-    //run second FFT
-    pffft_transform_ordered(setup, input, output, work, PFFFT_BACKWARD);
-
-
-    // get results
-    QVector<QPointF> results(N / 2);
-    results.insert(0, QPointF(0, 0));
-    for (int i = 1; i < N / 2; i++) {
-        float re = qAbs(float(output[i*2] / float(N)));
-        results[i] = QPointF(i, re);
-    }
-
-    // clean up
-    pffft_aligned_free(work);
-    pffft_aligned_free(output);
-    pffft_aligned_free(input);
-    pffft_destroy_setup(setup);
-   
-    return results;
 }

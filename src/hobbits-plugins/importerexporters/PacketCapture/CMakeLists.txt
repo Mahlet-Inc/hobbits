@@ -1,11 +1,4 @@
-
-if (NOT WIN32)
+if (TARGET PCAP::PCAP)
     pluginInDir("${pluginType}" "PacketCapture" "${CMAKE_CURRENT_SOURCE_DIR}")
-
-	if (BUILDING_WITH_CONAN)
-		target_link_libraries("hobbits-plugin-importerexporters-PacketCapture" PRIVATE CONAN_PKG::libpcap)
-	else()
-		target_link_libraries("hobbits-plugin-importerexporters-PacketCapture" PRIVATE ${PCAP_LIBRARY} Qt::Network)
-	endif()
-    
+    target_link_libraries(hobbits-plugin-importerexporters-PacketCapture PRIVATE PCAP::PCAP Qt6::Network)
 endif()

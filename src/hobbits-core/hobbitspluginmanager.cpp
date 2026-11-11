@@ -15,8 +15,6 @@ QMap<QString, QObject*> HobbitsPluginManager::loadPluginsFromDirectory(QDir dire
 
     QList<QDir> pluginDirs;
     pluginDirs.append(directory);
-    bool exist = directory.exists();
-    QStringList there = directory.entryList();
     // Check subdirs, 1 deep
     for (QString subDir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         pluginDirs.append(directory.absoluteFilePath(subDir));
@@ -36,7 +34,7 @@ QMap<QString, QObject*> HobbitsPluginManager::loadPluginsFromDirectory(QDir dire
                 plugins.insert(fileName, plugin);
             }
             else {
-                warnings.append(QString("File '%1' could not be loaded as a plugin - skipping...").arg(fileName));
+                warnings.append(QString("File '%1' could not be loaded as a plugin: %2").arg(fileName, loader.errorString()));
             }
         }
     }

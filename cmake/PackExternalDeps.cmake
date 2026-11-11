@@ -1,162 +1,86 @@
-
+# Use Qt's platform deployment tools and include dynamically loaded Hobbits plugins
+# in dependency discovery. Scanning just the GUI misses QtNetwork and libusb.
 function(pack_qt_libs)
+    # Offscreen is not a default Qt plugin, but installed command-line and CI runs
+    # need it when no desktop session is available.
+    if(TARGET Qt6::QOffscreenIntegrationPlugin)
+        qt_import_plugins(hobbits INCLUDE Qt6::QOffscreenIntegrationPlugin)
+    endif()
+    # WaylandClient is loaded through the platform plugin, so deployment's initial
+    # library scan does not discover its shell and window-decoration plugin types.
+    if(TARGET Qt6::WaylandClient)
+        target_link_libraries(hobbits PRIVATE Qt6::WaylandClient)
+    endif()
+    foreach(plugin QWaylandIntegrationPlugin QWaylandXdgShellIntegrationPlugin
+            QWaylandBradientDecorationPlugin QWaylandAdwaitaDecorationPlugin)
+        if(TARGET Qt6::${plugin})
+            qt_import_plugins(hobbits INCLUDE Qt6::${plugin})
+        endif()
+    endforeach()
+    if(UNIX AND NOT APPLE)
+        # An explicitly scanned library is not itself included in CMake's list of
+        # resolved dependencies. Install these roots as well as their dependencies.
+        install(IMPORTED_RUNTIME_ARTIFACTS Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Concurrent
+            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT runtime)
+    endif()
+    get_property(pluginTargets GLOBAL PROPERTY HOBBITS_PLUGIN_TARGETS)
+    set(modules)
+    foreach(plugin IN LISTS pluginTargets)
+        if(APPLE)
+            # macdeployqt must modify the installed plugins' library references.
+            get_target_property(pluginTypeDir "${plugin}" LIBRARY_OUTPUT_DIRECTORY)
+            get_filename_component(pluginType "${pluginTypeDir}" NAME)
+            string(APPEND modules "\n    \"\${QT_DEPLOY_PREFIX}/${HOBBITS_PLUGINS_INSTALL_PATH}/${pluginType}/$<TARGET_FILE_NAME:${plugin}>\"")
+        else()
+            string(APPEND modules "\n    \"$<TARGET_FILE:${plugin}>\"")
+        endif()
+    endforeach()
 
-    get_target_property(QT_CORE_LIB Qt::Core LOCATION)
-    if (APPLE)
-        get_filename_component(CORE_FRAMEWORK_DIR "${QT_CORE_LIB}" DIRECTORY)
-        get_filename_component(QT_LIB_DIR "${CORE_FRAMEWORK_DIR}" DIRECTORY)
+    if(APPLE)
+        set(executable "hobbits.app")
+        set(runner "\${QT_DEPLOY_PREFIX}/hobbits.app/Contents/MacOS/$<TARGET_FILE_NAME:hobbits-runner>")
+        set(platformOptions "")
     else()
-        get_filename_component(QT_LIB_DIR "${QT_CORE_LIB}" DIRECTORY)
+        set(executable "$<TARGET_FILE:hobbits>")
+        set(runner "$<TARGET_FILE:hobbits-runner>")
+        if(WIN32)
+            set(binDir ".")
+        else()
+            set(binDir "${CMAKE_INSTALL_BINDIR}")
+        endif()
+        set(platformOptions "GENERATE_QT_CONF\n    BIN_DIR \"${binDir}\"\n    LIB_DIR \"${CMAKE_INSTALL_LIBDIR}\"\n    PLUGINS_DIR \"plugins\"")
     endif()
-    get_filename_component(QT_ROOT_DIR "${QT_LIB_DIR}" DIRECTORY)
-    set(QT_PLATFORM_DIR "${QT_ROOT_DIR}/plugins/platforms")
 
-    if (LINUX)
-        file(GLOB LIBICU "${QT_LIB_DIR}/libicu*.so*")
-        file(GLOB LIBCORE "${QT_LIB_DIR}/libQt5Core.so*")
-        file(GLOB LIBCON "${QT_LIB_DIR}/libQt5Concurrent.so*")
-        file(GLOB LIBDBUS "${QT_LIB_DIR}/libQt5DBus.so*")
-        file(GLOB LIBGUI "${QT_LIB_DIR}/libQt5Gui.so*")
-        file(GLOB LIBNET "${QT_LIB_DIR}/libQt5Network.so*")
-        file(GLOB LIBPRNT "${QT_LIB_DIR}/libQt5PrintSupport.so*")
-        file(GLOB LIBWAY "${QT_LIB_DIR}/libQt5WaylandClient.so*")
-        file(GLOB LIBWID "${QT_LIB_DIR}/libQt5Widgets.so*")
-        file(GLOB LIBXCB "${QT_LIB_DIR}/libQt5XcbQpa.so*")
+    # The application's own libraries are already installed with their final RPATH.
+    # Do not overwrite them with build-tree copies during Qt's dependency scan.
+    set(excludedLibraries)
+    foreach(library hobbits-core hobbits-widgets hobbits-python)
+        if(TARGET "${library}")
+            string(APPEND excludedLibraries "\n    \"$<TARGET_FILE:${library}>\"")
+        endif()
+    endforeach()
+    if(HOBBITS_WITH_PYTHON)
+        string(APPEND excludedLibraries "\n    \"$<TARGET_FILE:Python3::Python>\"")
+    endif()
 
-        list(APPEND QTLIBS
-                    ${LIBICU}
-                    ${LIBCORE}
-                    ${LIBCON}
-                    ${LIBDBUS}
-                    ${LIBGUI}
-                    ${LIBNET}
-                    ${LIBPRNT}
-                    ${LIBWID}
-                    ${LIBWAY}
-                    ${LIBXCB}
-                    )
-
-        list(FILTER QTLIBS EXCLUDE REGEX .*debug$)
-
-        file(GLOB QTPLATFORMS "${QT_PLATFORM_DIR}/*.so*")
-        list(FILTER QTPLATFORMS EXCLUDE REGEX .*debug$)
-
-        install(FILES ${QTLIBS}
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-
-        install(FILES ${QTPLATFORMS}
-                DESTINATION "${CMAKE_INSTALL_BINDIR}/platforms")
-
-        foreach(PLATFILEFULL ${QTPLATFORMS})
-            get_filename_component(PLATFILE "${PLATFILEFULL}" NAME)
-            install(
-                CODE
-                "
-                message(\"Updating RPATH of bin/platforms/${PLATFILE}\")
-                execute_process(
-                    COMMAND patchelf --remove-rpath \${CMAKE_INSTALL_PREFIX}/bin/platforms/${PLATFILE}
-                )
-                execute_process(
-                    COMMAND patchelf --force-rpath --set-rpath \\$ORIGIN/../../lib64:\\$ORIGIN/../../lib \${CMAKE_INSTALL_PREFIX}/bin/platforms/${PLATFILE}
-                )"
-            )
+    # Scan Qt libraries explicitly too: excluding an installed Hobbits library from
+    # copying can also stop recursive scanning of its Qt dependencies.
+    set(qtLibraries)
+    if(NOT APPLE)
+        foreach(library Core Gui Widgets Network Concurrent)
+            string(APPEND qtLibraries "\n    \"$<TARGET_FILE:Qt6::${library}>\"")
         endforeach()
-    elseif(APPLE)
-        file(GLOB QTPLATFORMS "${QT_PLATFORM_DIR}/*.dylib")
-        install(FILES ${QTPLATFORMS}
-                DESTINATION "hobbits.app/Contents/PlugIns/platforms")
-        install(DIRECTORY "${QT_LIB_DIR}/QtPrintSupport.framework"
-                          "${QT_LIB_DIR}/QtDBus.framework"
-                          "${QT_LIB_DIR}/QtNetwork.framework"
-                          "${QT_LIB_DIR}/QtConcurrent.framework"
-                          "${QT_LIB_DIR}/QtCore.framework"
-                          "${QT_LIB_DIR}/QtGui.framework"
-                          "${QT_LIB_DIR}/QtWidgets.framework"
-                DESTINATION "hobbits.app/Contents/Frameworks")
-    elseif(WIN32)
-        file(GLOB QTPLATFORMS "${QT_PLATFORM_DIR}/*.dll")
-        install(FILES ${QTPLATFORMS}
-                DESTINATION "platforms")
-        file(GLOB QTTOOLS "${QT_ROOT_DIR}/../../Tools/*.dll")
-        install(FILES ${QTTOOLS}
-                DESTINATION ".")
-        install(FILES "${QT_ROOT_DIR}/bin/Qt5Core.dll"
-                      "${QT_ROOT_DIR}/bin/Qt5Gui.dll"
-                      "${QT_ROOT_DIR}/bin/Qt5Widgets.dll"
-                      "${QT_ROOT_DIR}/bin/Qt5Concurrent.dll"
-                      "${QT_ROOT_DIR}/bin/Qt5Network.dll"
-                      "${QT_ROOT_DIR}/bin/libEGL.dll"
-                      "${QT_ROOT_DIR}/bin/opengl32sw.dll"
-                DESTINATION ".")
     endif()
-
-endfunction(pack_qt_libs)
-
-function(pack_python)
-    get_target_property(PYBIN Python3::Interpreter LOCATION)
-    get_filename_component(PYBIN_DIR "${PYBIN}" DIRECTORY)
-    get_filename_component(PYROOT_DIR "${PYBIN_DIR}" DIRECTORY)
-
-	if (MANUAL_PYTHON_PATH)
-		if (WIN32)
-			file(GLOB PY_DIRS "${PYROOT_DIR}/bin/*")
-			file(GLOB PY_FILES
-				LIST_DIRECTORIES false
-				"${PYROOT_DIR}/bin/*")
-			list(REMOVE_ITEM PY_DIRS ${PY_FILES})
-
-			install(FILES ${PY_FILES}
-					DESTINATION ".")
-			install(DIRECTORY ${PY_DIRS}
-					DESTINATION ".")
-
-		else()
-			set(PY_DEST_DIR "hobbits-cpython")
-			set(LIB_WILDCARD "*.so")
-			if (APPLE)
-				set(PY_DEST_DIR "hobbits.app/Contents/Frameworks/hobbits-cpython")
-				set(LIB_WILDCARD "*.dylib")
-			endif()
-
-			install( DIRECTORY "${PYROOT_DIR}/bin"
-						DESTINATION "${PY_DEST_DIR}"
-						COMPONENT runtime
-						PATTERN "*"
-						PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-									GROUP_READ GROUP_EXECUTE
-									WORLD_READ WORLD_EXECUTE)
-			install( DIRECTORY "${PYROOT_DIR}/lib"
-						DESTINATION "${PY_DEST_DIR}"
-						COMPONENT runtime
-						PATTERN "${LIB_WILDCARD}"
-						PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-									GROUP_READ GROUP_EXECUTE
-									WORLD_READ WORLD_EXECUTE)
-
-			if(APPLE)
-				file(GLOB INTLLIBS "/usr/local/opt/gettext/lib/libintl.*dylib")
-				install(FILES ${INTLLIBS}
-						DESTINATION "hobbits.app/Contents/Frameworks")
-			endif()
-		endif()
-	endif()
-endfunction(pack_python)
-
-function(pack_pffft)
-	install(FILES ${PFFFT_LIBRARIES}
-			DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-endfunction(pack_pffft)
-
-function(pack_pcap)
-    if (LINUX)
-        string(REGEX REPLACE \.so\..*$ ".so" BASELIB ${PCAP_LIBRARY})
-        file(GLOB PCAPLIBS "${BASELIB}*")
-        install(FILES ${PCAPLIBS}
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-    elseif(APPLE)
-        file(GLOB PCAPLIBS "/usr/local/opt/libpcap/lib/libpcap.*dylib")
-        install(FILES ${PCAPLIBS}
-                DESTINATION "hobbits.app/Contents/Frameworks")
-    elseif(WIN32)
-    endif()
-endfunction(pack_pcap)
+    qt_generate_deploy_script(TARGET hobbits OUTPUT_SCRIPT deployScript CONTENT "
+set(QT_DEPLOY_BIN_DIR \"${binDir}\")
+qt_deploy_runtime_dependencies(
+    EXECUTABLE \"${executable}\"
+    ADDITIONAL_EXECUTABLES \"${runner}\"
+    ADDITIONAL_MODULES ${modules}
+    ADDITIONAL_LIBRARIES ${qtLibraries}
+    POST_EXCLUDE_FILES ${excludedLibraries}
+    ${platformOptions}
+    NO_TRANSLATIONS)
+")
+    install(SCRIPT "${deployScript}" COMPONENT runtime)
+endfunction()

@@ -1,6 +1,6 @@
 #include "settingsmanager.h"
 #include "settingsdata.h"
-#include "hobbitscoreconfig.h"
+#include <hobbitscoreconfig.h>
 #include <QDir>
 #include <QCoreApplication>
 #include "range.h"
@@ -45,10 +45,12 @@ void SettingsManager::setConfigFilePath(const QString &configFilePath)
 {
     QMutexLocker lock(&instance().m_mutex);
     instance().m_configFilePath = configFilePath;
+    instance().m_hasRead = false;
 }
 
 SettingsData SettingsManager::getAll()
 {
+    readSettings();
     return instance().m_data;
 }
 
@@ -62,15 +64,7 @@ void SettingsManager::writeSettings()
 {
     QMutexLocker lock(&instance().m_mutex);
     if (instance().m_configFilePath.isEmpty()) {
-#if SELF_CONTAINED_APP
-        QString appDirPath = QCoreApplication::applicationDirPath();
-        if (!appDirPath.isEmpty()) {
-            appDirPath += "/";
-        }
-        QSettings settings(appDirPath + "config.ini", QSettings::IniFormat);
-#else
         QSettings settings("Hobbits", "Hobbits GUI");
-#endif
         instance().writeToSettings(settings);
     }
     else {
@@ -85,23 +79,52 @@ void SettingsManager::readSettings()
         return;
     }
     QMutexLocker lock(&instance().m_mutex);
+    if (instance().m_hasRead) {
+        return;
+    }
 
     if (instance().m_configFilePath.isEmpty()) {
-#if SELF_CONTAINED_APP
-        QString appDirPath = QCoreApplication::applicationDirPath();
-        if (!appDirPath.isEmpty()) {
-            appDirPath += "/";
-        }
-        QSettings settings(appDirPath + "config.ini", QSettings::IniFormat);
-#else
         QSettings settings("Hobbits", "Hobbits GUI");
-#endif
         instance().readFromSettings(settings);
     }
     else {
         QSettings settings(instance().m_configFilePath, QSettings::IniFormat);
         instance().readFromSettings(settings);
     }
+    instance().m_hasRead = true;
+}
+
+QStringList SettingsManager::pluginPaths(const QString &extraPaths)
+{
+    const QChar separator = QDir::listSeparator();
+    QStringList paths = extraPaths.split(separator, Qt::SkipEmptyParts);
+    paths.append(getPluginLoaderSetting(PLUGIN_PATH_KEY).toString().split(separator, Qt::SkipEmptyParts));
+    // Keep defaults available after upgrades, even when an older configuration saved an empty path.
+    paths.append(QString::fromUtf8(HobbitsCoreConfig::PLUGINS_DEFAULT_PATH).split(separator, Qt::SkipEmptyParts));
+    paths.append(QStringLiteral("../plugins"));
+
+    QStringList resolved;
+    const QDir applicationDir(QCoreApplication::applicationDirPath());
+    for (QString path : paths) {
+        path = path.trimmed();
+        if (path.isEmpty()) {
+            continue;
+        }
+        if (path == QStringLiteral("~")) {
+            path = QDir::homePath();
+        }
+        else if (path.startsWith(QStringLiteral("~/")) || path.startsWith(QStringLiteral("~\\"))) {
+            path.replace(0, 1, QDir::homePath());
+        }
+        else if (QDir::isRelativePath(path)) {
+            path = applicationDir.absoluteFilePath(path);
+        }
+        QDir directory(path);
+        const QString canonical = directory.canonicalPath();
+        resolved.append(canonical.isEmpty() ? QDir::cleanPath(path) : canonical);
+    }
+    resolved.removeDuplicates();
+    return resolved;
 }
 
 void SettingsManager::writeToSettings(QSettings &settings)

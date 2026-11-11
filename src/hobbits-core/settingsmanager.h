@@ -25,6 +25,9 @@ public:
     static void writeSettings();
     static void readSettings();
 
+    // Resolve installed, build-tree, saved, and command-line paths consistently on every platform.
+    static QStringList pluginPaths(const QString &extraPaths = QString());
+
     static QVariant getTransientSetting(const QString &key);
     static void setTransientSetting(const QString &key, const QVariant &value);
 

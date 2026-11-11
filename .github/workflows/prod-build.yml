@@ -1,70 +1,45 @@
 name: Build, Test and Release master
-run-name: Deploy ${{ github.ref }} ${{ github.sha }}
 on:
   push:
-    branches:
-      - master
+    branches: [master]
 jobs:
-  Build-Hobbits:
-    runs-on: ${{ matrix.os }}
-    strategy:
-        matrix:
-            os: [ubuntu-22.04]
-
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
         with:
-          node-version: 20
-      - name: Check out repo
-        uses: actions/checkout@v3
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
         with:
-          submodules: 'true'
-
-      - name: Determine version
+          node-version: 22
+      - id: version
         run: |
-          cp ci/justversion.releaserc.json .releaserc.json
           npm ci
+          cp ci/justversion.releaserc.json .releaserc.json
           npx semantic-release
-          rm .releaserc.json
-
-      - name: Install Build Tools
-        run: sudo apt-get install -y patchelf qtchooser qt5-qmake qtbase5-dev-tools ninja-build cmake g++
-      - name: Install Development Libraries
-        run: sudo apt-get install -y libusb-1.0-0-dev libpcap-dev qtbase5-dev python3-dev
-
-      - name: Run CMake
-        run: cmake -G Ninja -B build -S ${{ github.workspace }}
-      - name: Build
-        run: cmake --build build
-
-      - name: Run Tests
-        working-directory: ${{ github.workspace }}/tests
-        run: |
-          ./prepare_tests.js
-          export QT_DEBUG_PLUGINS=1
-          ./test_hobbits.js ${{ github.workspace }}/build/bin/hobbits-runner -p ${{ github.workspace }}/build/plugins
-      
-      - name: Package Build Artifacts
-        run: ninja package -C build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: DEB Packages ${{ matrix.os }}
-          path: build/hobbits-*deb*
-
-  Release-Hobbits:
-    needs: Build-Hobbits
-    runs-on: ubuntu-22.04
+          if [ -f .version ]; then echo "version=$(cat .version)" >> "$GITHUB_OUTPUT"; fi
+  build:
+    needs: version
+    uses: ./.github/workflows/build.yml
+    with:
+      build_version: ${{ needs.version.outputs.version }}
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
         with:
-          node-version: 20
-      - uses: actions/checkout@v3
-
-      - uses: actions/download-artifact@v4
-          
-      - name: Check Files
-        run: ls -R
-
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
       - name: Semantic Release
         run: |
           npm ci

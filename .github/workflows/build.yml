@@ -1,0 +1,136 @@
+name: CMake build
+on:
+  workflow_call:
+    inputs:
+      build_version:
+        type: string
+        required: false
+        default: ''
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            python: 'ON'
+          - os: ubuntu-24.04
+            python: 'OFF'
+          - os: windows-2022
+            python: 'ON'
+          - os: macos-14
+            python: 'ON'
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        if: matrix.python == 'ON'
+        with:
+          python-version: '3.12'
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - name: Install Linux build tools and display SDK
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ make perl pkg-config patchelf \
+            libwayland-dev wayland-protocols xvfb xauth weston \
+            libx11-dev libx11-xcb-dev libxcb1-dev libxcb-cursor-dev libxcb-glx0-dev \
+            libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev \
+            libxcb-render-util0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev \
+            libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-render0-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev
+      - uses: actions/cache@v5
+        with:
+          path: build/downloads
+          key: sources-${{ hashFiles('cmake/Superbuild.cmake', 'external/CMakeLists.txt') }}
+      - name: Configure
+        env:
+          BUILD_VERSION: ${{ inputs.build_version }}
+          ENABLE_PYTHON: ${{ matrix.python }}
+        run: |
+          args=()
+          if [[ -n "$BUILD_VERSION" ]]; then args+=("-DBUILD_VERSION=$BUILD_VERSION"); fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DHOBBITS_ENABLE_PYTHON="$ENABLE_PYTHON" "${args[@]}"
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Regression tests
+        run: ctest --test-dir build --output-on-failure
+        env:
+          QT_QPA_PLATFORM: offscreen
+      - name: Relocatable install
+        run: cmake --install build --prefix "$PWD/install"
+      - name: Installed plugin discovery
+        if: runner.os == 'Linux'
+        run: |
+          mv install relocated
+          QT_QPA_PLATFORM=offscreen ./relocated/bin/hobbits-runner list
+      - name: Installed X11 GUI startup
+        if: runner.os == 'Linux'
+        run: |
+          test -f relocated/plugins/platforms/libqxcb.so
+          runtime_dir=$(mktemp -d "$RUNNER_TEMP/hobbits-xcb.XXXXXX")
+          trap 'rm -rf "$runtime_dir"' EXIT
+          chmod 700 "$runtime_dir"
+          status=0
+          xvfb-run -a -s '-screen 0 1280x800x24' \
+            env -u QT_PLUGIN_PATH -u QT_QPA_PLATFORM_PLUGIN_PATH -u WAYLAND_DISPLAY \
+            QT_QPA_PLATFORM=xcb XDG_SESSION_TYPE=x11 XDG_RUNTIME_DIR="$runtime_dir" \
+            timeout --signal=TERM --kill-after=5s 8s ./relocated/bin/hobbits \
+            --config "$runtime_dir/hobbits.ini" > "$RUNNER_TEMP/hobbits-xcb.log" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/hobbits-xcb.log"
+          # A healthy GUI stays open until timeout; early exit or a crash fails.
+          test "$status" -eq 124
+      - name: Installed Wayland GUI startup
+        if: runner.os == 'Linux'
+        run: |
+          test -f relocated/plugins/platforms/libqwayland-generic.so
+          test -f relocated/plugins/wayland-shell-integration/libxdg-shell.so
+          test -f relocated/plugins/wayland-decoration-client/libbradient.so
+          export XDG_RUNTIME_DIR
+          XDG_RUNTIME_DIR=$(mktemp -d "$RUNNER_TEMP/hobbits-wayland.XXXXXX")
+          chmod 700 "$XDG_RUNTIME_DIR"
+          export WAYLAND_DISPLAY=hobbits-ci
+          weston --backend=headless-backend.so --use-pixman --no-config \
+            --idle-time=0 --socket="$WAYLAND_DISPLAY" \
+            --log="$RUNNER_TEMP/hobbits-weston.log" > "$RUNNER_TEMP/hobbits-weston-output.log" 2>&1 &
+          weston_pid=$!
+          trap 'kill "$weston_pid" 2>/dev/null || true; wait "$weston_pid" 2>/dev/null || true; rm -rf "$XDG_RUNTIME_DIR"' EXIT
+          for attempt in {1..50}; do
+            [[ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]] && break
+            kill -0 "$weston_pid" 2>/dev/null || break
+            sleep 0.1
+          done
+          if [[ ! -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]]; then
+            cat "$RUNNER_TEMP/hobbits-weston.log" "$RUNNER_TEMP/hobbits-weston-output.log"
+            exit 1
+          fi
+          status=0
+          env -u DISPLAY -u QT_PLUGIN_PATH -u QT_QPA_PLATFORM_PLUGIN_PATH \
+            QT_QPA_PLATFORM=wayland XDG_SESSION_TYPE=wayland \
+            timeout --signal=TERM --kill-after=5s 8s ./relocated/bin/hobbits \
+            --config "$XDG_RUNTIME_DIR/hobbits.ini" > "$RUNNER_TEMP/hobbits-wayland.log" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/hobbits-wayland.log" "$RUNNER_TEMP/hobbits-weston.log"
+          test "$status" -eq 124
+      - uses: actions/setup-node@v6
+        if: runner.os == 'Linux' && matrix.python == 'ON'
+        with:
+          node-version: 22
+      - name: Existing batch tests
+        if: runner.os == 'Linux' && matrix.python == 'ON'
+        run: |
+          npm ci
+          cd tests
+          ./prepare_tests.js
+          ./test_hobbits.js "$GITHUB_WORKSPACE/build/bin/hobbits-runner"
+      - name: Package
+        run: cmake --build build --target package
+      - uses: actions/upload-artifact@v7
+        with:
+          name: hobbits-${{ matrix.os }}-python-${{ matrix.python }}
+          path: |
+            build/app/hobbits-*.tar.gz
+            build/app/hobbits-*.zip

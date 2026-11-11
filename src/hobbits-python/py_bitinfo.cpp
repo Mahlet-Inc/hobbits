@@ -42,7 +42,12 @@ static int BitInfoPy_init(BitInfoPyObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    if (!PyCapsule_IsValid(bitArrayCapsule, nullptr)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a Hobbits capsule");
+        return -1;
+    }
     Py_INCREF(bitArrayCapsule);
+    Py_XDECREF(self->bitInfoCapsule);
     self->bitInfoCapsule = bitArrayCapsule;
     return 0;
 }
@@ -62,6 +67,9 @@ static PyObject* BitInfoPy_add_highlight(BitInfoPyObj *self, PyObject *args, PyO
         color = 0x44ff8800;
     }
     BitInfo* info = BITINFO(self->bitInfoCapsule);
+    if (!info) {
+        return nullptr;
+    }
     info->addHighlight(RangeHighlight::simple(category, label, Range(start, end), color));
     Py_RETURN_NONE;
 }
@@ -83,6 +91,9 @@ static PyObject* BitInfoPy_get_highlights(BitInfoPyObj *self, PyObject *args, Py
         return nullptr;
     }
     BitInfo* info = BITINFO(self->bitInfoCapsule);
+    if (!info) {
+        return nullptr;
+    }
     auto highlights = info->highlights(category);
     PyObject* listResult = PyList_New(highlights.size());
     for (int i = 0; i < highlights.size(); i++) {
@@ -100,6 +111,9 @@ static PyObject* BitInfoPy_set_metadata(BitInfoPyObj *self, PyObject *args)
         return nullptr;
     }
     BitInfo* info = BITINFO(self->bitInfoCapsule);
+    if (!info) {
+        return nullptr;
+    }
     info->setMetadata(key, QVariant(value));
     Py_RETURN_NONE;
 }
@@ -107,10 +121,13 @@ static PyObject* BitInfoPy_set_metadata(BitInfoPyObj *self, PyObject *args)
 static PyObject* BitInfoPy_get_metadata(BitInfoPyObj *self, PyObject *args)
 {
     const char *key;
-    if (!PyArg_ParseTuple(args, "s", addHighlightKwargs, &key)) {
+    if (!PyArg_ParseTuple(args, "s", &key)) {
         return nullptr;
     }
     BitInfo* info = BITINFO(self->bitInfoCapsule);
+    if (!info) {
+        return nullptr;
+    }
     return Py_BuildValue("s", info->metadata(key).toString().toStdString().c_str());
 }
 

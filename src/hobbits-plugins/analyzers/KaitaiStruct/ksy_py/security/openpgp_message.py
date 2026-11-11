@@ -1,13 +1,12 @@
 # This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
 
-from pkg_resources import parse_version
 import kaitaistruct
 from kaitaistruct import KaitaiStruct, KaitaiStream, BytesIO
 from enum import Enum
 import collections
 
 
-if parse_version(kaitaistruct.__version__) < parse_version('0.9'):
+if getattr(kaitaistruct, 'API_VERSION', (0, 0)) < (0, 9):
     raise Exception("Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s" % (kaitaistruct.__version__))
 
 class OpenpgpMessage(KaitaiStruct):
@@ -153,26 +152,26 @@ class OpenpgpMessage(KaitaiStruct):
         private_experimental_algorithm_10 = 110
 
     class SubpacketTypes(Enum):
-        reserved = 0
-        reserved = 1
+        reserved_0 = 0
+        reserved_1 = 1
         signature_creation_time = 2
         signature_expiration_time = 3
         exportable_certification = 4
         trust_signature = 5
         regular_expression = 6
         revocable = 7
-        reserved = 8
+        reserved_8 = 8
         key_expiration_time = 9
         placeholder_for_backward_compatibility = 10
         preferred_symmetric_algorithms = 11
         revocation_key = 12
-        reserved = 13
-        reserved = 14
-        reserved = 15
+        reserved_13 = 13
+        reserved_14 = 14
+        reserved_15 = 15
         issuer = 16
-        reserved = 17
-        reserved = 18
-        reserved = 19
+        reserved_17 = 17
+        reserved_18 = 18
+        reserved_19 = 19
         notation_data = 20
         preferred_hash_algorithms = 21
         preferred_compression_algorithms = 22
@@ -358,7 +357,7 @@ class OpenpgpMessage(KaitaiStruct):
 
 
     class RevocationKey(KaitaiStruct):
-        SEQ_FIELDS = ["class", "public_key_algorithm", "fingerprint"]
+        SEQ_FIELDS = ["key_class", "public_key_algorithm", "fingerprint"]
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
             self._parent = _parent
@@ -366,9 +365,9 @@ class OpenpgpMessage(KaitaiStruct):
             self._debug = collections.defaultdict(dict)
 
         def _read(self):
-            self._debug['class']['start'] = self._io.pos()
-            self.class = self._io.read_u1()
-            self._debug['class']['end'] = self._io.pos()
+            self._debug['key_class']['start'] = self._io.pos()
+            self.key_class = self._io.read_u1()
+            self._debug['key_class']['end'] = self._io.pos()
             self._debug['public_key_algorithm']['start'] = self._io.pos()
             self.public_key_algorithm = KaitaiStream.resolve_enum(OpenpgpMessage.PublicKeyAlgorithms, self._io.read_u1())
             self._debug['public_key_algorithm']['end'] = self._io.pos()

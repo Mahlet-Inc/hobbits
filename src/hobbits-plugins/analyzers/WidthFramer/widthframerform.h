@@ -43,6 +43,10 @@ private:
     QSharedPointer<ParameterDelegate> m_delegate;
 
     PeakSelector *m_peakSelector;
+    // Shared with the worker only while AbstractParameterEditor holds its preview mutex.
+    QVector<QPointF> m_pendingAutocorrelation;
+    QVector<QPointF> m_pendingSortedAutocorrelation;
+    // These buffers are accessed exclusively by the UI thread.
     QVector<QPointF> m_autocorrelation;
     QVector<QPointF> m_sortedAutocorrelation;
     QStringListModel *m_listModel;

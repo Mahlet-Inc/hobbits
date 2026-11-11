@@ -37,7 +37,12 @@ static int PyActionProgress_init(PyActionProgressObj *self, PyObject *args, PyOb
         return -1;
     }
 
+    if (!PyCapsule_IsValid(progressCapsule, nullptr)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a Hobbits capsule");
+        return -1;
+    }
     Py_INCREF(progressCapsule);
+    Py_XDECREF(self->progressCapsule);
     self->progressCapsule = progressCapsule;
     return 0;
 }
@@ -45,6 +50,9 @@ static int PyActionProgress_init(PyActionProgressObj *self, PyObject *args, PyOb
 static PyObject* PyActionProgress_is_cancelled(PyActionProgressObj *self, PyObject *Py_UNUSED(ignored))
 {
     PluginActionProgress* progress = PROGRESS(self->progressCapsule);
+    if (!progress) {
+        return nullptr;
+    }
     return PyBool_FromLong(progress->isCancelled());
 }
 
@@ -57,6 +65,9 @@ static PyObject* PyActionProgress_set_progress_percent(PyActionProgressObj *self
     }
 
     PluginActionProgress* progress = PROGRESS(self->progressCapsule);
+    if (!progress) {
+        return nullptr;
+    }
     progress->setProgressPercent(percent);
     Py_RETURN_NONE;
 }
@@ -71,6 +82,9 @@ static PyObject* PyActionProgress_set_progress(PyActionProgressObj *self, PyObje
     }
 
     PluginActionProgress* progress = PROGRESS(self->progressCapsule);
+    if (!progress) {
+        return nullptr;
+    }
     progress->setProgress(current, max);
     Py_RETURN_NONE;
 }

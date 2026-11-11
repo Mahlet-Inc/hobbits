@@ -25,6 +25,7 @@
 #define PYTHONSYNTAXHIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
+#include <QRegularExpression>
 
 //! Container to describe a highlighting rule. Based on a regular expression, a relevant match # and the format.
 class HighlightingRule
@@ -33,13 +34,13 @@ public:
     HighlightingRule(const QString &patternStr, int n, const QTextCharFormat &matchingFormat)
     {
         originalRuleStr = patternStr;
-        pattern = QRegExp(patternStr);
+        pattern = QRegularExpression(patternStr);
         nth = n;
         format = matchingFormat;
     }
 
     QString originalRuleStr;
-    QRegExp pattern;
+    QRegularExpression pattern;
     int nth;
     QTextCharFormat format;
 };
@@ -65,12 +66,12 @@ private:
     void initializeRules();
 
     //! Highlighst multi-line strings, returns true if after processing we are still within the multi-line section.
-    bool matchMultiline(const QString &text, const QRegExp &delimiter, const int inState, const QTextCharFormat &style);
+    bool matchMultiline(const QString &text, const QRegularExpression &delimiter, const int inState, const QTextCharFormat &style);
     const QTextCharFormat getTextCharFormat(const QString &colorName, const QString &style = QString());
 
     QList<HighlightingRule> rules;
-    QRegExp triSingleQuote;
-    QRegExp triDoubleQuote;
+    QRegularExpression triSingleQuote;
+    QRegularExpression triDoubleQuote;
 };
 
 #endif // PYTHONSYNTAXHIGHLIGHTER_H

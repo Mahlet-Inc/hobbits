@@ -13,6 +13,7 @@ PY2 = sys.version_info[0] == 2
 # * distribution utils (setup.py) use this when packaging for PyPI
 #
 __version__ = '0.9'
+API_VERSION = (0, 9)
 
 
 class KaitaiStruct(object):

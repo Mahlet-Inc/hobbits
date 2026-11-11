@@ -1,6 +1,7 @@
 #include "imagebuffer.h"
 #include <structmember.h>
 #include "math.h"
+#include <limits>
 #define UNUSED(expr) do { (void)(expr); } while (0);
 
 typedef struct {
@@ -51,14 +52,20 @@ static int ImageBuffer_init(ImageBufferPyObj *self, PyObject *args, PyObject *kw
 
     Py_buffer * buffer = PyMemoryView_GET_BUFFER(memview);
 
-    if (width * height * 4 != buffer->len) {
+    if (width > std::numeric_limits<Py_ssize_t>::max() / 4 / height ||
+            Py_ssize_t(width) * height * 4 != buffer->len) {
         PyErr_SetString(PyExc_TypeError, "invalid arguments - memoryview length must be equal to width * height * 4 (4 bytes per pixel)");
         return -1;
     }
 
-    PyBuffer_Release(buffer);
+    if (buffer->readonly || !PyBuffer_IsContiguous(buffer, 'C')) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - memoryview must be writable and contiguous");
+        return -1;
+    }
 
+    // PyMemoryView_GET_BUFFER borrows the view's buffer; do not release it.
     Py_INCREF(memview);
+    Py_XDECREF(self->memview);
     self->memview = memview;
     self->width = width;
     self->height = height;
@@ -73,9 +80,14 @@ static PyObject* ImageBuffer_set_bytes(ImageBufferPyObj *self, PyObject *args)
         return nullptr;
     }
 
+    if (!self->memview) {
+        PyBuffer_Release(&buffer);
+        PyErr_SetString(PyExc_RuntimeError, "ImageBuffer is not initialized");
+        return nullptr;
+    }
     Py_buffer* memviewBuffer = PyMemoryView_GET_BUFFER(self->memview);
 
-    int toCopy = buffer.len;
+    Py_ssize_t toCopy = buffer.len;
     if (toCopy > memviewBuffer->len) {
         toCopy = memviewBuffer->len;
     }
@@ -83,7 +95,6 @@ static PyObject* ImageBuffer_set_bytes(ImageBufferPyObj *self, PyObject *args)
     memcpy(memviewBuffer->buf, buffer.buf, toCopy);
 
     PyBuffer_Release(&buffer);
-    PyBuffer_Release(memviewBuffer);
     Py_RETURN_NONE;
 }
 

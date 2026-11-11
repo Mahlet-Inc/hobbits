@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unistd.h>
 #endif
-#include "hobbitsrunnerconfig.h"
+#include <hobbitsrunnerconfig.h>
 #include "pluginactionlineage.h"
 #include "pluginactionmanager.h"
 #include "hobbitspluginmanager.h"
@@ -14,9 +14,10 @@
 
 #include <QTimer>
 
-#include "hobbitspython.h"
-#include "hobbitspythonconfig.h"
+#if HOBBITS_WITH_PYTHON
+#include <hobbitspythonconfig.h>
 #include "pythonpluginconfig.h"
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +27,9 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationVersion(HobbitsRunnerConfig::VERSION);
 
     QString description = "Command-line interface for bitstream analysis and processing";
-    description += QString("(built with embedded python support from %1)").arg(HobbitsPythonConfig::PYTHON_VERSION);
+#if HOBBITS_WITH_PYTHON
+    description += QString(" (Python %1 support)").arg(HobbitsPythonConfig::PYTHON_VERSION);
+#endif
 
     QCommandLineParser parser;
     parser.setApplicationDescription(description);
@@ -35,8 +38,7 @@ int main(int argc, char *argv[])
 
     parser.addPositionalArgument(
             "mode",
-            "The mode to run in\
-'run': applies a given batch to input data - requires a batch parameter");
+            "'run': apply a batch to input data; 'list': list available plugins");
 
     QCommandLineOption inputFileOption(
         QStringList() << "i" << "input",
@@ -72,11 +74,13 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(configFilePathOption);
 
+#if HOBBITS_WITH_PYTHON
     QCommandLineOption pythonHomePathOption(
         QStringList() << "python-home",
-            QCoreApplication::translate("main", "Override the default embedded python location"),
+            QCoreApplication::translate("main", "Override the Python installation used for plugins"),
             QCoreApplication::translate("main", "path"));
     parser.addOption(pythonHomePathOption);
+#endif
 
     parser.process(a);
 
@@ -105,10 +109,12 @@ int main(int argc, char *argv[])
         SettingsManager::setConfigFilePath(parser.value(configFilePathOption));
     }
 
+#if HOBBITS_WITH_PYTHON
     if (parser.isSet(pythonHomePathOption)) {
         SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomePathOption));
         err << QString("Setting python home: '%1'").arg(parser.value(pythonHomePathOption)) << "\n";
     }
+#endif
 
     // Initialize some stuff
     QSharedPointer<HobbitsPluginManager> pluginManager = QSharedPointer<HobbitsPluginManager>(new HobbitsPluginManager);
@@ -118,31 +124,14 @@ int main(int argc, char *argv[])
 
 
     // Load plugins
-    QStringList pluginPaths;
+    const QStringList pluginPaths = SettingsManager::pluginPaths(parser.value(extraPluginPathOption));
     QStringList warnings;
-    if (parser.isSet(extraPluginPathOption)) {
-        pluginPaths.append(parser.value(extraPluginPathOption).split(":"));
-    }
-    pluginPaths.append(
-            SettingsManager::getPluginLoaderSetting(
-                    SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
-    QStringList pathBuffer;
-    for (QString pluginPath : pluginPaths) {
-
-        if (pluginPath.startsWith("~/")) {
-            pluginPath.replace(0, 1, QDir::homePath());
-        }
-        else if (!pluginPath.startsWith("/")) {
-            pluginPath = a.applicationDirPath() + "/" + pluginPath;
-        }
-        pathBuffer.append(pluginPath);
-    }
-    pluginPaths = pathBuffer;
 
     for (QString pluginPath : pluginPaths) {
         warnings.append(pluginManager->loadPlugins(pluginPath));
     }
 
+#if HOBBITS_WITH_PYTHON
     for (QString pluginPath : pluginPaths) {
         warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
                             Q_UNUSED(size)
@@ -150,6 +139,7 @@ int main(int argc, char *argv[])
                             return nullptr;
         }));
     }
+#endif
 
 
     for (auto warning : warnings) {
@@ -158,6 +148,24 @@ int main(int argc, char *argv[])
 
     // Run
     QString mode = parser.positionalArguments().at(0);
+    if (mode == "list") {
+        int count = 0;
+        const auto printPlugins = [&out, &count](const QString &kind, const auto &plugins) {
+            for (const auto &plugin : plugins) {
+                out << kind << ": " << plugin->name() << "\n";
+                ++count;
+            }
+        };
+        printPlugins("Analyzer", pluginManager->analyzers());
+        printPlugins("Operator", pluginManager->operators());
+        printPlugins("Display", pluginManager->displays());
+        printPlugins("Importer/exporter", pluginManager->importerExporters());
+        if (count == 0) {
+            err << "No plugins found. Searched: " << pluginPaths.join(QDir::listSeparator()) << "\n";
+            return 1;
+        }
+        return 0;
+    }
     if (mode == "run") {
         if (!parser.isSet(batchOption)) {
             err << "Error: Cannot run in 'run' mode without a batch specified" << "\n";
@@ -189,15 +197,17 @@ int main(int argc, char *argv[])
         }
         pluginActionManager->setContainerManager(bitManager);
 
+        int resultCode = 0;
         QObject::connect(
                 pluginActionManager.data(),
                 &PluginActionManager::reportError,
-                [&err, &a, pluginActionManager](QString error) {
+                [&err, &a, &resultCode, pluginActionManager](QString error) {
+            resultCode = 1;
             err << "Plugin Action Error: " << error;
             for (auto id : pluginActionManager->runningBatches().keys()) {
                 pluginActionManager->cancelById(id);
             }
-            a.exit(-1);
+            a.exit(resultCode);
         });
 
         QString outputPrefix = "hobbits_output_";
@@ -219,9 +229,9 @@ int main(int argc, char *argv[])
         QObject::connect(
                 pluginActionManager.data(),
                 &PluginActionManager::batchFinished,
-                [&a](QUuid id) {
+                [&a, &resultCode](QUuid id) {
             Q_UNUSED(id)
-            a.exit();
+            a.exit(resultCode);
         });
 
         warnings.clear();
@@ -246,7 +256,7 @@ int main(int argc, char *argv[])
 
         // make sure this runs after the event loop starts
         QTimer::singleShot(5, [pluginActionManager, batch, targetContainers](){pluginActionManager->runBatch(batch, targetContainers);});
-        a.exec();
+        return a.exec();
     }
     else {
         err << QString("Error: Cannot run with mode option '%1'").arg(mode) << "\n";

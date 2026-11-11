@@ -39,7 +39,12 @@ static int BitArrayPy_init(BitArrayPyObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    if (!PyCapsule_IsValid(bitArrayCapsule, nullptr)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a Hobbits capsule");
+        return -1;
+    }
     Py_INCREF(bitArrayCapsule);
+    Py_XDECREF(self->bitsCapsule);
     self->bitsCapsule = bitArrayCapsule;
     return 0;
 }
@@ -47,6 +52,9 @@ static int BitArrayPy_init(BitArrayPyObj *self, PyObject *args, PyObject *kwds)
 static PyObject* BitArrayPy_size(BitArrayPyObj *self, PyObject *Py_UNUSED(ignored))
 {
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     return PyLong_FromLongLong(bits->sizeInBits());
 }
 
@@ -59,6 +67,9 @@ static PyObject* BitArrayPy_at(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     if (bits->sizeInBits() <= idx || idx < 0) {
         PyErr_SetString(PyExc_IndexError, "provided bit index is not valid");
         return nullptr;
@@ -81,6 +92,9 @@ static PyObject* BitArrayPy_resize(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     bits->resize(size);
     Py_RETURN_NONE;
 }
@@ -95,6 +109,9 @@ static PyObject* BitArrayPy_set(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     if (bits->sizeInBits() <= idx || idx < 0) {
         PyErr_SetString(PyExc_IndexError, "provided bit index is not valid");
         return nullptr;
@@ -114,6 +131,9 @@ static PyObject* BitArrayPy_read_bytes(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     if (bits->sizeInBytes() <= byteOffset || byteOffset < 0) {
         PyErr_SetString(PyExc_IndexError, "provided byte offset is not valid");
         return nullptr;
@@ -133,12 +153,18 @@ static PyObject* BitArrayPy_set_bytes(BitArrayPyObj *self, PyObject *args )
         return nullptr;
     }
     if (byteOffset < 0) {
+        PyBuffer_Release(&bytes);
         PyErr_SetString(PyExc_IndexError, "invalid argument - cannot have a negative byte offset");
         return nullptr;
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        PyBuffer_Release(&bytes);
+        return nullptr;
+    }
     bits->setBytes(byteOffset, reinterpret_cast<const char*>(bytes.buf), 0, bytes.len);
+    PyBuffer_Release(&bytes);
 
     Py_RETURN_NONE;
 }
@@ -158,6 +184,9 @@ static PyObject* BitArrayPy_write_to(BitArrayPyObj *self, PyObject *args )
     }
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     bits->writeTo(&file);
 
     file.close();
@@ -189,6 +218,9 @@ static PyObject* BitArrayPy_read_from(BitArrayPyObj *self, PyObject *args )
 
 
     BitArray* bits = BITS(self->bitsCapsule);
+    if (!bits) {
+        return nullptr;
+    }
     otherBits->copyBits(0, bits, byteOffset * 8, otherBits->sizeInBits());
 
     Py_RETURN_NONE;

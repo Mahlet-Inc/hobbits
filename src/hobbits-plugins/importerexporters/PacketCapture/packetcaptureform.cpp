@@ -101,7 +101,7 @@ void PacketCaptureForm::populateDeviceBox()
             if (addr.protocol() == QAbstractSocket::IPv4Protocol) {
                 auto label = QString("%1 %2").arg(dev->name).arg(addr.toString());
                 QStandardItem *item = new QStandardItem(label);
-                item->setData(dev->name, DevData::Name);
+                item->setData(QString::fromUtf8(dev->name), DevData::Name);
                 item->setData(addr.toIPv4Address(), DevData::Address);
                 quint32 mask = 0;
                 if (address->netmask != nullptr) {

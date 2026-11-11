@@ -21,12 +21,12 @@ SymbolRasterControls::SymbolRasterControls(QSharedPointer<ParameterDelegate> del
     connect(ui->sb_bitLength, SIGNAL(valueChanged(int)), m_colorMapModel, SLOT(setRemapLength(int)));
 
     connect(m_colorMapModel,
-            SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&,const QVector<int>&)),
+            &QAbstractItemModel::dataChanged,
             this,
-            SIGNAL(changed()));
-    connect(m_colorMapModel, SIGNAL(rowsInserted(const QModelIndex&,int,int)), this, SIGNAL(changed()));
-    connect(ui->hs_scale, SIGNAL(valueChanged(int)), this, SIGNAL(changed()));
-    connect(ui->cb_showHeaders, SIGNAL(stateChanged(int)), this, SIGNAL(changed()));
+            &SymbolRasterControls::changed);
+    connect(m_colorMapModel, &QAbstractItemModel::rowsInserted, this, &SymbolRasterControls::changed);
+    connect(ui->hs_scale, &QSlider::valueChanged, this, &SymbolRasterControls::changed);
+    connect(ui->cb_showHeaders, &QCheckBox::stateChanged, this, &SymbolRasterControls::changed);
 
     m_stateHelper->addSliderIntParameter("scale", ui->hs_scale);
     m_stateHelper->addCheckBoxBoolParameter("show_headers", ui->cb_showHeaders);

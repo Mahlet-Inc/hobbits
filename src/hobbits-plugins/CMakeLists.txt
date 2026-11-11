@@ -1,10 +1,3 @@
-#
-# Configure RPATH of plugins
-#
-if(LINUX)
-	set(CMAKE_INSTALL_RPATH "$ORIGIN/../../lib;$ORIGIN/../../lib64;$ORIGIN/../../hobbits-cpython/lib;$ORIGIN/../../hobbits-cpython/lib64;")
-endif()
-
 macro(pluginInDir pluginType modName modDir)
 	file(GLOB_RECURSE SRCFILES "${modDir}/*.c" "${modDir}/*.cpp")
         file(GLOB RCFILES "${modDir}/*.qrc" "${modDir}/*.ui")
@@ -13,14 +6,28 @@ macro(pluginInDir pluginType modName modDir)
 	set(pluginName "hobbits-plugin-${pluginType}-${modName}")
         add_library("${pluginName}" "${SRCFILES}" "${RCFILES}" "${HDRFILES}")
 		set_target_properties("${pluginName}"
-							PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${HOBBITS_PLUGIN_OUT_DIR}/${pluginType})
+							PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${HOBBITS_PLUGIN_OUT_DIR}/${pluginType}
+                                       RUNTIME_OUTPUT_DIRECTORY ${HOBBITS_PLUGIN_OUT_DIR}/${pluginType})
 
-		if (BUILDING_WITH_CONAN)
-			set(ALL_LINK_LIBS hobbits-core hobbits-widgets CONAN_PKG::qt)
-		else()
-			set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt::Core Qt::Widgets)
-		endif()
+		set(ALL_LINK_LIBS hobbits-core hobbits-widgets Qt6::Core Qt6::Widgets)
 
+        foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
+            string(TOUPPER "${config}" configUpper)
+            set_target_properties("${pluginName}" PROPERTIES
+                LIBRARY_OUTPUT_DIRECTORY_${configUpper} "${HOBBITS_OUTPUT_ROOT}/${config}/plugins/${pluginType}"
+                RUNTIME_OUTPUT_DIRECTORY_${configUpper} "${HOBBITS_OUTPUT_ROOT}/${config}/plugins/${pluginType}")
+        endforeach()
+        if(APPLE)
+            set_target_properties("${pluginName}" PROPERTIES
+                INSTALL_RPATH "@loader_path/../../../Frameworks")
+        elseif(UNIX)
+            file(RELATIVE_PATH pluginLibraryPath
+                "${CMAKE_INSTALL_PREFIX}/${HOBBITS_PLUGINS_INSTALL_PATH}/${pluginType}"
+                "${CMAKE_INSTALL_FULL_LIBDIR}")
+            set_target_properties("${pluginName}" PROPERTIES
+                INSTALL_RPATH "$ORIGIN/${pluginLibraryPath}")
+        endif()
+        set_property(GLOBAL APPEND PROPERTY HOBBITS_PLUGIN_TARGETS "${pluginName}")
         target_link_libraries("${pluginName}" PRIVATE ${ALL_LINK_LIBS})
         #harden("${pluginName}")
 

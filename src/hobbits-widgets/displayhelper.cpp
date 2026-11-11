@@ -119,7 +119,6 @@ QFont DisplayHelper::monoFont(int pointSize)
 {
     QFont font("Roboto Mono");
     font.setPointSize(pointSize);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
     return font;
 }
 
@@ -268,6 +267,9 @@ QVector<QRectF> DisplayHelper::drawHighlightRects(
 
 QPoint DisplayHelper::getOffset(qint64 bitOffset, int x, int y, int xSize, int ySize, int xGrouping, int bitsPerX)
 {
+    if (x < 0 || y < 0 || xSize <= 0 || ySize <= 0 || bitsPerX <= 0) {
+        return QPoint(-1, -1);
+    }
     int xDiff = x / xSize;
     int yDiff = y / ySize;
 

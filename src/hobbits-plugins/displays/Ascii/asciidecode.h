@@ -18,7 +18,7 @@ QString decodeAsciiBits(const Frame& f, qint64 &bitOffset) {
             }
         }
         if (isprint(byte)) {
-            frameString += byte;
+            frameString += QChar(ushort(byte));
         }
         else {
             frameString += '.';

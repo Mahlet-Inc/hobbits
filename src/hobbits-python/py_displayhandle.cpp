@@ -39,7 +39,12 @@ static int PyDisplayHandle_init(DisplayHandlePyObj *self, PyObject *args, PyObje
         return -1;
     }
 
+    if (!PyCapsule_IsValid(bitArrayCapsule, nullptr)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a Hobbits capsule");
+        return -1;
+    }
     Py_INCREF(bitArrayCapsule);
+    Py_XDECREF(self->handleCapsule);
     self->handleCapsule = bitArrayCapsule;
     return 0;
 }
@@ -47,29 +52,42 @@ static int PyDisplayHandle_init(DisplayHandlePyObj *self, PyObject *args, PyObje
 static PyObject* PyDisplayHandle_frame_offset(DisplayHandlePyObj *self, void *Py_UNUSED(closure))
 {
     DisplayHandle* handle = HANDLE(self->handleCapsule);
-    return PyLong_FromLong(handle->frameOffset());
+    if (!handle) {
+        return nullptr;
+    }
+    return PyLong_FromLongLong(handle->frameOffset());
 }
 
 static PyObject* PyDisplayHandle_bit_offset(DisplayHandlePyObj *self, void *Py_UNUSED(closure))
 {
     DisplayHandle* handle = HANDLE(self->handleCapsule);
-    return PyLong_FromLong(handle->frameOffset());
+    if (!handle) {
+        return nullptr;
+    }
+    return PyLong_FromLongLong(handle->bitOffset());
 }
 
 static PyObject* PyDisplayHandle_total_bit_offset(DisplayHandlePyObj *self, void *Py_UNUSED(closure))
 {
     DisplayHandle* handle = HANDLE(self->handleCapsule);
+    if (!handle) {
+        return nullptr;
+    }
     if (handle->currentContainer().isNull()
+            || handle->frameOffset() < 0
             || handle->currentContainer()->frameCount() <= handle->frameOffset()) {
         return PyLong_FromLong(0);
     }
 
-    return PyLong_FromLong(handle->currentContainer()->frameAt(handle->frameOffset()).start() + handle->bitOffset());
+    return PyLong_FromLongLong(handle->currentContainer()->frameAt(handle->frameOffset()).start() + handle->bitOffset());
 }
 
 static PyObject* PyDisplayHandle_current_container(DisplayHandlePyObj *self, void *Py_UNUSED(closure))
 {
     DisplayHandle* handle = HANDLE(self->handleCapsule);
+    if (!handle) {
+        return nullptr;
+    }
 
     if (handle->currentContainer().isNull()) {
         Py_INCREF(Py_None);

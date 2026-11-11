@@ -95,70 +95,37 @@ qint64 RangeSequence::getMaxSize() const
 
 qint64 RangeSequence::indexOf(qint64 value, Range indexBounds) const
 {
-    if (value < 0 || value >= m_valueCount) {
+    if (value < 0 || value >= m_valueCount || m_size == 0) {
         return -1;
     }
-
-    if (m_constantSize > 0) {
-        return value / m_constantSize;
-    }
-
-    if (!indexBounds.isNull()) {
-        if (indexBounds.end() >= m_size || indexBounds.start() < 0) {
-            return -1;
-        }
-    }
-    else {
+    if (indexBounds.isNull()) {
         indexBounds = Range(0, m_size - 1);
     }
-
-    if (indexBounds.size() < 50) {
-        for (qint64 i = indexBounds.start(); i <= indexBounds.end(); i++) {
-            Range r = at(i);
-            if (r.start() <= value && r.end() >= value) {
-                return int(i);
-            }
-        }
+    if (indexBounds.start() < 0 || indexBounds.end() >= m_size
+            || indexBounds.end() < indexBounds.start()) {
         return -1;
     }
+    if (m_constantSize > 0) {
+        const qint64 index = value / m_constantSize;
+        return index >= indexBounds.start() && index <= indexBounds.end() ? index : -1;
+    }
 
-    qint64 offset = indexBounds.start() + indexBounds.size() / 2;
-    qint64 index = offset;
-    int countdown = 7;
-    qint64 lowNo = indexBounds.start() - 1;
-    while (true) {
-        Range r = at(index);
-        if (r.start() <= value && r.end() >= value) {
-            if (index > lowNo + 1) {
-                qint64 earlierIndex = indexOf(value, Range(lowNo + 1, index - 1));
-                if (earlierIndex >= 0) {
-                    return earlierIndex;
-                }
-            }
-            return int(index);
+    qint64 low = indexBounds.start();
+    qint64 high = indexBounds.end();
+    while (low <= high) {
+        const qint64 index = low + (high - low) / 2;
+        const Range range = at(index);
+        if (value < range.start()) {
+            high = index - 1;
         }
-
-        if (countdown < 1) {
-            return -1;
-        }
-
-        offset /= 2;
-        if (offset < 1) {
-            offset = 1;
-            countdown--;
-        }
-
-        if (value > r.end()) {
-            index += offset;
+        else if (value > range.end()) {
+            low = index + 1;
         }
         else {
-            index -= offset;
-        }
-
-        if (index < indexBounds.start() || index > indexBounds.end()) {
-            return -1;
+            return index;
         }
     }
+    return -1;
 }
 
 void RangeSequence::setConstantSize(qint64 constantSize, qint64 valueCount)
@@ -226,7 +193,7 @@ qint64 *RangeSequence::getLocation(qint64 i) const
             if (m_dirtyCache) {
                 qint64 byteLoc = removeIdx * CACHE_CHUNK_BYTE_SIZE;
                 m_dataFile.seek(byteLoc);
-                qint64 chunkSize = qMin((m_valueCount * 8) - byteLoc, CACHE_CHUNK_BYTE_SIZE);
+                qint64 chunkSize = qMin((m_size * 8) - byteLoc, CACHE_CHUNK_BYTE_SIZE);
                 m_dataFile.write(reinterpret_cast<char*>(m_dataCaches[removeIdx]), chunkSize);
             }
 
@@ -234,7 +201,7 @@ qint64 *RangeSequence::getLocation(qint64 i) const
             m_dataCaches[removeIdx] = nullptr;
         }
 
-        qint64* rangeBuffer = new qint64[CACHE_CHUNK_BYTE_SIZE];
+        qint64* rangeBuffer = new qint64[CACHE_CHUNK_64_SIZE]();
         m_dataFile.seek(cacheIdx * CACHE_CHUNK_BYTE_SIZE);
         m_dataFile.read(reinterpret_cast<char*>(rangeBuffer), CACHE_CHUNK_BYTE_SIZE);
         m_dataCaches[cacheIdx] = rangeBuffer;
@@ -257,7 +224,7 @@ void RangeSequence::syncCacheWithFile() const
 
         qint64 byteLoc = idx * CACHE_CHUNK_BYTE_SIZE;
         m_dataFile.seek(byteLoc);
-        qint64 chunkSize = qMin((m_valueCount * 8) - byteLoc, CACHE_CHUNK_BYTE_SIZE);
+        qint64 chunkSize = qMin((m_size * 8) - byteLoc, CACHE_CHUNK_BYTE_SIZE);
         m_dataFile.write(reinterpret_cast<char*>(m_dataCaches[idx]), chunkSize);
     }
     m_dirtyCache = false;
@@ -294,6 +261,7 @@ void RangeSequence::clearCache() const
     delete[] m_dataCaches;
 
     m_dataCaches = nullptr;
+    m_recentCacheAccess.clear();
 }
 
 qint64 RangeSequence::getValueCount() const

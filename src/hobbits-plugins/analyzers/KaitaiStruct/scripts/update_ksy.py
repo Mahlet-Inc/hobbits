@@ -68,6 +68,59 @@ def compile_ksy_files():
         os.remove(f)
 
 
+def normalize_runtime_version_checks():
+    """Keep generated parsers usable with standard Python, without setuptools."""
+    import re
+    from pathlib import Path
+    version_check = re.compile(
+        r"parse_version\(kaitaistruct\.__version__\) < parse_version\('([0-9.]+)'\)"
+    )
+    # Older compiler releases emit reserved Python identifiers and duplicate
+    # enum names for these formats. Keep their generated modules importable.
+    parser_fixes = {
+        'game/warcraft_2_pud': [
+            ('computer = 1', 'computer_old = 1'),
+        ],
+        'image/dicom': [
+            ('lossy_image_compression = 532752', 'lossy_image_compression_legacy = 532752'),
+        ],
+        'image/wmf': [
+            ('not = 6', 'not_pen = 6'),
+        ],
+        'log/sudoers_ts': [
+            ('global = 1', 'global_timestamp = 1'),
+        ],
+        'serialization/python_pickle': [
+            ('global = 99', 'global_object = 99'),
+            ('Opcode.global:', 'Opcode.global_object:'),
+        ],
+        'security/openpgp_message': [
+            ('"class"', '"key_class"'),
+            ("'class'", "'key_class'"),
+            ('self.class =', 'self.key_class ='),
+        ],
+        'windows/regf': [
+            ('class Regf(KaitaiStruct):\n    """', 'class Regf(KaitaiStruct):\n    r"""'),
+        ],
+    }
+    for path in Path(ksy_py_dir).rglob("*.py"):
+        source = path.read_text(encoding="utf-8")
+        source = source.replace("from pkg_resources import parse_version\n", "")
+        source = version_check.sub(
+            lambda match: "getattr(kaitaistruct, 'API_VERSION', (0, 0)) < "
+            + repr(tuple(int(part) for part in match.group(1).split("."))),
+            source,
+        )
+        name = path.relative_to(ksy_py_dir).with_suffix("").as_posix()
+        for old, new in parser_fixes.get(name, []):
+            source = source.replace(old, new)
+        if name == "security/openpgp_message":
+            source = re.sub(r"^(\s*)reserved = (\d+)$",
+                            lambda match: f"{match[1]}reserved_{match[2]} = {match[2]}",
+                            source, flags=re.MULTILINE)
+        path.write_text(source, encoding="utf-8")
+
+
 def overwrite_resource_file():
     rcc_data = '<RCC><qresource prefix="/kaitaidata">\n'
 
@@ -95,5 +148,6 @@ if __name__ == "__main__":
     clone_ksy_repo()
     collect_useable_ksy_files()
     compile_ksy_files()
+    normalize_runtime_version_checks()
     overwrite_resource_file()
     remove_ksy_repo()

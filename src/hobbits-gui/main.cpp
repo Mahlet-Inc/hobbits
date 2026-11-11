@@ -1,4 +1,4 @@
-#include "hobbitsguiconfig.h"
+#include <hobbitsguiconfig.h>
 #include "mainwindow.h"
 #include <QApplication>
 #include <QCommandLineParser>
@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription("GUI for bitstream analysis and visualization");
     parser.addHelpOption();
     parser.addVersionOption();
+    parser.addPositionalArgument("files", "Files to open on application startup", "[files...]");
 
     QCommandLineOption inputFileOption(
         QStringList() << "i" << "input",
@@ -50,11 +51,13 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "file"));
     parser.addOption(configFilePathOption);
 
+#if HOBBITS_WITH_PYTHON
     QCommandLineOption pythonHomeOption(
         QStringList() << "python-home",
-            QCoreApplication::translate("main", "The python home path (must have binary compatibility with the built-in hobbits python capabilities)"),
+            QCoreApplication::translate("main", "Override the Python installation used for plugins (must match the linked Python version)"),
             QCoreApplication::translate("main", "path"));
     parser.addOption(pythonHomeOption);
+#endif
 
     parser.process(a);
 
@@ -81,9 +84,11 @@ int main(int argc, char *argv[])
         configFilePath = parser.value(configFilePathOption);
     }
 
+#if HOBBITS_WITH_PYTHON
     if (parser.isSet(pythonHomeOption)) {
         SettingsManager::setTransientSetting(SettingsManager::PYTHON_HOME_KEY, parser.value(pythonHomeOption));
     }
+#endif
 
     MainWindow w(extraPluginPath, configFilePath);
     w.setWindowIcon(QIcon(":/hobbitsgui/images/icons/HobbitsRingSmall.png"));
@@ -92,9 +97,11 @@ int main(int argc, char *argv[])
     if (!pipedInData.isEmpty()) {
         w.importBytes(pipedInData, "Piped Input");
     }
-    else {
-        if (parser.isSet(inputFileOption)) {
-            w.importBitfile(parser.value(inputFileOption));
+    QStringList files = parser.values(inputFileOption);
+    files.append(parser.positionalArguments());
+    for (const QString &file : files) {
+        if (file != "-") {
+            w.importBitfile(file);
         }
     }
 

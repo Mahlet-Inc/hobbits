@@ -109,7 +109,7 @@ types:
             'opcode::ext1': u1
             'opcode::ext2': u2
             'opcode::ext4': u4
-            'opcode::global':  stringnl_noescape_pair
+            'opcode::global_object':  stringnl_noescape_pair
             'opcode::stack_global': no_arg
             'opcode::reduce': no_arg
             'opcode::build': no_arg
@@ -422,7 +422,7 @@ enums:
       -orig-id: BUILD
       doc: call __setstate__ or __dict__.update()
     0x63: # "c"
-      id: "global"
+      id: "global_object"
       -orig-id: GLOBAL
       doc: push self.find_class(modname, name); 2 string args
     0x64: # "d"

@@ -68,7 +68,7 @@ private:
 };
 
 
-inline uint qHash(const PluginAction &key, uint seed)
+inline size_t qHash(const PluginAction &key, size_t seed = 0)
 {
     return qHash(key.parameters().values(), seed) ^ uint(key.pluginType()) ^ qHash(key.pluginName(), seed);
 }

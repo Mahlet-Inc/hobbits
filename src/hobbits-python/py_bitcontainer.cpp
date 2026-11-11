@@ -39,7 +39,12 @@ static int BitContainerPy_init(BitContainerPyObj *self, PyObject *args, PyObject
         return -1;
     }
 
+    if (!PyCapsule_IsValid(bitContainerCapsule, nullptr)) {
+        PyErr_SetString(PyExc_TypeError, "invalid arguments - requires a Hobbits capsule");
+        return -1;
+    }
     Py_INCREF(bitContainerCapsule);
+    Py_XDECREF(self->bitContainerCapsule);
     self->bitContainerCapsule = bitContainerCapsule;
     return 0;
 }
@@ -47,6 +52,9 @@ static int BitContainerPy_init(BitContainerPyObj *self, PyObject *args, PyObject
 static PyObject* BitContainerPy_get_bits(BitContainerPyObj *self, void *Py_UNUSED(closure))
 {
     BitContainer* container = BITCON(self->bitContainerCapsule);
+    if (!container) {
+        return nullptr;
+    }
 
     PyObject* hobbitsModuleName = PyUnicode_FromString("hobbits");
     PyObject* hobbitsModule = PyImport_GetModule(hobbitsModuleName);
@@ -63,6 +71,9 @@ static PyObject* BitContainerPy_get_bits(BitContainerPyObj *self, void *Py_UNUSE
 static PyObject* BitContainerPy_get_info(BitContainerPyObj *self, void *Py_UNUSED(closure))
 {
     BitContainer* container = BITCON(self->bitContainerCapsule);
+    if (!container) {
+        return nullptr;
+    }
 
     PyObject* hobbitsModuleName = PyUnicode_FromString("hobbits");
     PyObject* hobbitsModule = PyImport_GetModule(hobbitsModuleName);
@@ -79,6 +90,9 @@ static PyObject* BitContainerPy_get_info(BitContainerPyObj *self, void *Py_UNUSE
 static PyObject* ImmutableBitContainerPy_get_info(BitContainerPyObj *self, void *Py_UNUSED(closure))
 {
     BitContainer* container = BITCON(self->bitContainerCapsule);
+    if (!container) {
+        return nullptr;
+    }
 
     PyObject* hobbitsModuleName = PyUnicode_FromString("hobbits");
     PyObject* hobbitsModule = PyImport_GetModule(hobbitsModuleName);

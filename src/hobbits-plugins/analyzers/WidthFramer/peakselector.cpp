@@ -64,7 +64,8 @@ void PeakSelector::paintEvent(QPaintEvent*)
     }
 
     double yOffset = -1 * m_dataYMin;
-    double yScale = (this->height() * .9) / (m_dataYMax - m_dataYMin);
+    const double yRange = m_dataYMax - m_dataYMin;
+    double yScale = yRange > 0 ? (this->height() * .9) / yRange : 1.0;
 
     int xOffset = 1 + m_hScroll->value() * m_zoomSlider->value();
 
@@ -95,11 +96,9 @@ void PeakSelector::paintEvent(QPaintEvent*)
     painter.drawPath(path);
 
     QFont font = QFont("Roboto Mono", 11);
-    font.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics fontMetrics = QFontMetrics(font, painter.device());
 
     QFont bigFont = QFont("Roboto Mono", 12);
-    bigFont.setStyleStrategy(QFont::ForceIntegerMetrics);
     QFontMetrics bigFontMetrics = QFontMetrics(bigFont, painter.device());
 
     int textPad = 2;
@@ -207,7 +206,7 @@ void PeakSelector::setData(QVector<QPointF> data)
         else if (point.y() > m_dataYMax) {
             m_dataYMax = point.y();
         }
-        if (std::isnan(point.y())) {
+        if (!std::isfinite(point.y())) {
             m_hasNan = true;
         }
     }

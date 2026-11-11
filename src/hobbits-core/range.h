@@ -2,6 +2,7 @@
 #define RANGE_H
 
 #include <QDataStream>
+#include <QMetaType>
 #include "hobbits-core_global.h"
 
 /**

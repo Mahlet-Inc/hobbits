@@ -7,6 +7,6 @@ namespace HobbitsCoreConfig
 {
 
     static const char VERSION[] = "@HOBBITS_CORE_VERSION@";
-    static const char PLUGINS_DEFAULT_PATH[] = "@HOBBITS_PLUGINS_PATH@";
+    static const char PLUGINS_DEFAULT_PATH[] = R"hobbits(@HOBBITS_PLUGINS_PATH@)hobbits";
 
 }

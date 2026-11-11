@@ -24,21 +24,89 @@ documentation and/or watch
 
 ## Building from source
 
-1. Install the required build tools and development libraries.
+The default CMake superbuild downloads pinned, SHA-256-checked releases of Qt
+6.8.3 (including matching QtWayland on Linux), libpcap, libusb, OpenSSL (Linux),
+and a pinned PocketFFT revision. No application libraries or Git submodules need
+to be installed beforehand. The first build includes Qt and can take a while.
+Dependencies stay inside the build directory.
 
-Ubuntu 22.04 LTS example:
-```
-sudo apt-get install -y patchelf libusb-1.0-0-dev libpcap-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-dev ninja-build cmake g++
+You need CMake 3.24+, a C++17 compiler, Ninja (or another CMake generator), and
+your platform SDK. Unix builds also need Make and Perl. Missing m4, Bison and
+Flex are built automatically for libpcap. Windows builds should run in an MSVC
+Developer Command Prompt; packet-capture and USB plugins remain Unix-only.
+
+Linux desktop builds include Wayland by default and need its development headers,
+protocol scanner, and keyboard headers from the OS. Installing the X11/XCB
+headers also enables the X11 backend for desktops that use it. These packages
+provide the native display SDK; Qt itself is built by the superbuild.
+For Ubuntu 24.04, install both backends' SDKs with:
+
+```sh
+sudo apt-get install cmake ninja-build g++ make perl pkg-config patchelf \
+  libwayland-dev wayland-protocols \
+  libx11-dev libx11-xcb-dev libxcb1-dev libxcb-cursor-dev libxcb-glx0-dev \
+  libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev \
+  libxcb-render-util0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev \
+  libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-render0-dev \
+  libxkbcommon-dev libxkbcommon-x11-dev
 ```
 
-2. Build with CMake
-```
-cmake -G Ninja -B build .
-cmake --build build
+See also [Qt's platform requirements](https://doc.qt.io/qt-6/linux-requirements.html).
+Configuration fails if the required desktop SDK is missing. Use
+`-DHOBBITS_ENABLE_WAYLAND=OFF` for an X11-only build; its XCB SDK is then required.
+`-DHOBBITS_HEADLESS=ON` is only for automated offscreen tests: it omits both
+Wayland and X11 support, so that build cannot open a desktop window.
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
+cmake --install build --prefix "$PWD/install"
 ```
 
-If building using the bundled pffft, ensure you clone or checkout with the
-`--recurse-submodules` flag.
+If an existing build uses a headless Qt prefix, create a fresh desktop build
+directory (for example, replace `build` with `build-desktop` above) after
+installing the display SDK. Installing headers alone does not add platform
+plugins to an existing Qt build. The superbuild uses the same version for QtBase
+and QtWayland; do not mix Ubuntu's `qt6-wayland` plugins with the bundled Qt 6.8.3
+runtime.
+
+Build outputs are in `build/bin`, `build/lib`, and `build/plugins`. Run
+`build/bin/hobbits` (on macOS, `build/bin/hobbits.app/Contents/MacOS/hobbits`).
+Visual Studio, Xcode, and Ninja Multi-Config keep each configuration under
+`build/<Config>/bin`, `build/<Config>/lib`, and `build/<Config>/plugins`; select it
+with `cmake --build build --config Release` and `ctest --test-dir build -C Release`.
+Build-tree and installed plugins are discovered automatically; `-p` can add an
+extra plugin search directory. Installed paths are relative to the executable,
+so moving the install directory or using `cmake --install --prefix` works.
+
+Python is optional. If a regular Python 3.8+ interpreter and matching shared embedding
+development library are found, the Python Runner and Kaitai Struct plugins are
+built. On Debian/Ubuntu, install `python3-dev` to enable them. Otherwise these
+plugins and the Python binding library are omitted. Use
+`-DHOBBITS_ENABLE_PYTHON=OFF` to disable them explicitly, or
+`-DPython3_ROOT_DIR=/path/to/python` to select an installation. Python remains a
+runtime dependency when enabled. Its standard library is not bundled; macOS
+deployment may copy the ordinary Python shared library into the app bundle. On
+Windows, its DLL must be available on `PATH`.
+
+Useful build options:
+
+- `-DHOBBITS_USE_SYSTEM_QT=ON`: use an installed Qt 6.8+; other dependencies are
+  still built automatically. Set `CMAKE_PREFIX_PATH` for a nonstandard Qt path.
+  On Linux, use a complete Qt installation with matching Wayland or XCB platform plugins.
+- `-DHOBBITS_ENABLE_WAYLAND=OFF`: build only the X11 desktop backend on Linux.
+- `-DHOBBITS_DEPENDENCY_JOBS=4`: parallel jobs for each dependency/application
+  build. The outer `--parallel` controls how many dependency projects build at once.
+- `-DHOBBITS_DOWNLOAD_DIR=/path/to/cache`: reuse source archives between builds.
+- `-DSELF_CONTAINED_APP=OFF`: omit deployment of Qt runtime libraries.
+- `-DHOBBITS_SUPERBUILD=OFF`: configure the application directly against existing
+  dependencies, useful for packaging or IDE work. The normal superbuild's inner
+  CMake project is `build/app`.
+
+`cmake --build build --target package` creates a package from the inner project.
+Hobbits remains MIT licensed; see [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)
+for bundled dependency licenses. Dependency notices are included in installs.
 
 ## Adding plugins
 Read the

@@ -10,6 +10,7 @@ DisplayHandle::DisplayHandle(QSharedPointer<BitContainerManager> bitManager) :
     m_frameOffsetControl(nullptr),
     m_bitOffsetHover(-1),
     m_frameOffsetHover(-1),
+    m_selectStartBit(0),
     m_selecting(false),
     m_selectionBitChunkSize(1)
 {
@@ -91,8 +92,8 @@ void DisplayHandle::setOffsets(qint64 bitOffset, qint64 frameOffset)
     m_frameOffsetHover = -1;
     m_bitOffsetHover = -1;
 
-    if (currentContainer().isNull()) {
-        // reset offsets if there is no container
+    if (currentContainer().isNull() || currentContainer()->frameCount() == 0) {
+        // Reset offsets if there is no data.
         bitOffset = 0;
         frameOffset = 0;
     }
@@ -159,13 +160,27 @@ void DisplayHandle::setMouseHover(DisplayInterface* display, QPoint mouseHover)
     emit newMouseHover(display, mouseHover);
 }
 
-void DisplayHandle::setSelecting(bool selecting, qint64 bitOffset, qint64 frameOffset, int bitChunkSize) {
-    m_selecting = selecting;
-    if (selecting) {
-        qint64 totalBitOffset = currentContainer()->frameAt(frameOffset).start() + bitOffset;
-        m_selectStartBit = totalBitOffset;
-        m_selectionBitChunkSize = bitChunkSize;
+void DisplayHandle::setSelecting(bool selecting, qint64 bitOffset, qint64 frameOffset, int bitChunkSize)
+{
+    m_selecting = false;
+    auto container = currentContainer();
+    if (!selecting || container.isNull() || bitChunkSize < 1
+            || frameOffset < 0 || bitOffset < 0
+            || frameOffset >= container->frameCount() - m_frameOffset) {
+        return;
     }
+
+    // Mouse coordinates are relative to the visible viewport, just like hover coordinates.
+    frameOffset += m_frameOffset;
+    const Frame frame = container->frameAt(frameOffset);
+    if (bitOffset >= frame.size() - m_bitOffset) {
+        return;
+    }
+    bitOffset += m_bitOffset;
+    m_selectStartBit = frame.start() + bitOffset;
+    m_selectionBitChunkSize = bitChunkSize;
+    m_selecting = true;
+    setBitHover(true, bitOffset - m_bitOffset, frameOffset - m_frameOffset);
 }
 
 void DisplayHandle::setBitHover(bool hovering, qint64 bitOffset, qint64 frameOffset)
@@ -212,7 +227,8 @@ void DisplayHandle::setBitHover(bool hovering, qint64 bitOffset, qint64 frameOff
             currentContainer()->info()->addHighlight(RangeHighlight("mouse_selection", "selection_1", Range(sStart, sEnd), 0x44bb66aa));
         } else {
             qint64 sStart = m_selectStartBit;
-            qint64 sEnd = m_selectStartBit + m_selectionBitChunkSize - 1;
+            qint64 sEnd = qMin(currentContainer()->size() - 1,
+                              m_selectStartBit + m_selectionBitChunkSize - 1);
             currentContainer()->info()->addHighlight(RangeHighlight("mouse_selection", "selection_1", Range(sStart, sEnd), 0x44bb66aa));
         }
     }
@@ -335,14 +351,15 @@ void DisplayHandle::configureControls()
 
 void DisplayHandle::checkCurrentContainer()
 {
+    m_selecting = false;
+    m_mouseHoverMap.clear();
     disconnect(this, SLOT(containerUpdate()));
 
     if (!currentContainer().isNull()) {
         connect(currentContainer().data(), SIGNAL(changed()), this, SLOT(containerUpdate()), Qt::QueuedConnection);
     }
-    emit currentContainerChanged();
-
     containerUpdate();
+    emit currentContainerChanged();
 }
 
 void DisplayHandle::containerUpdate()

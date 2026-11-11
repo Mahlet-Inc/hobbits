@@ -62,7 +62,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         QWidget *parent)
 {
     QVariant value = getter();
-    if (value.type() == QVariant::String) {
+    if (value.typeId() == QMetaType::QString) {
         QLineEdit *editor = new QLineEdit(value.toString(), parent);
         connect(
                 editor,
@@ -72,7 +72,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         });
         return new QWidgetItem(editor);
     }
-    else if (value.type() == QVariant::StringList) {
+    else if (value.typeId() == QMetaType::QStringList) {
         QLineEdit *editor = new QLineEdit(value.toStringList().join(","), parent);
         connect(
                 editor,
@@ -82,7 +82,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         });
         return new QWidgetItem(editor);
     }
-    else if (value.type() == QVariant::Int) {
+    else if (value.typeId() == QMetaType::Int) {
         QSpinBox *editor = new QSpinBox(parent);
         editor->setRange(INT_MIN, INT_MAX);
         editor->setValue(value.toInt());
@@ -94,7 +94,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         });
         return new QWidgetItem(editor);
     }
-    else if (value.type() == QVariant::Double) {
+    else if (value.typeId() == QMetaType::Double) {
         QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
         editor->setValue(value.toInt());
         connect(
@@ -105,7 +105,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         });
         return new QWidgetItem(editor);
     }
-    else if (value.type() == QVariant::Bool) {
+    else if (value.typeId() == QMetaType::Bool) {
         QCheckBox *editor = new QCheckBox(parent);
         editor->setChecked(value.toBool());
         connect(
@@ -116,7 +116,7 @@ QLayoutItem* PreferencesDialog::createEditor(
         });
         return new QWidgetItem(editor);
     }
-    else if (int(value.type()) == QMetaType::QColor) {
+    else if (value.typeId() == QMetaType::QColor) {
         QPushButton *dialogLauncher = new QPushButton("Select Color...", parent);
         QLabel *colorChip = new QLabel(parent);
         QHBoxLayout *layout = new QHBoxLayout();

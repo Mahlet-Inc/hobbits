@@ -1,3 +1,0 @@
-[submodule "external/pffft"]
-	path = external/pffft
-	url = https://bitbucket.org/jpommier/pffft.git

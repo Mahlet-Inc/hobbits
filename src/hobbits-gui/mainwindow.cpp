@@ -13,9 +13,11 @@
 
 #include "displaywidget.h"
 #include "containerselectiondialog.h"
-#include "hobbitscoreconfig.h"
-#include "hobbitsguiconfig.h"
-#include "hobbitspythonconfig.h"
+#include <hobbitscoreconfig.h>
+#include <hobbitsguiconfig.h>
+#if HOBBITS_WITH_PYTHON
+#include <hobbitspythonconfig.h>
+#endif
 #include "pluginactionlineage.h"
 #include "preferencesdialog.h"
 #include "settingsmanager.h"
@@ -25,7 +27,9 @@
 #include "batcheditor.h"
 #include "widgetssettings.h"
 
+#if HOBBITS_WITH_PYTHON
 #include "pythonpluginconfig.h"
+#endif
 #include "simpleparametereditor.h"
 
 const int MAINWINDOW_STATE_VERSION = 1;
@@ -60,9 +64,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     ui->dock_bitContainerSelect->setContentsMargins(0, 0, 0, 0);
     ui->dock_operatorPlugins->setContentsMargins(0, 0, 0, 0);
     ui->dock_findBits->setContentsMargins(0, 0, 0, 0);
-    ui->dock_bitContainerSelect->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_B));
-    ui->dock_operatorPlugins->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
-    ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_A));
+    ui->dock_bitContainerSelect->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B));
+    ui->dock_operatorPlugins->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
+    ui->dock_findBits->toggleViewAction()->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_A));
 
     // More menu initialization
     populateRecentBatchesMenu();
@@ -187,7 +191,7 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
     m_previewScroll->setDisplayHandle(m_displayHandle);
 
     // populate top level "What's This" info
-    ui->action_Whats_This->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_W));
+    ui->action_Whats_This->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_W));
     ui->dock_bitContainerSelect->setWhatsThis("<b>Bit Containers Dock:</b> This is where you can navigate between the various Bit Containers that you are working with and see their lineage.");
 
     // load and initialize plugins
@@ -214,6 +218,9 @@ MainWindow::MainWindow(QString extraPluginPath, QString configFilePath, QWidget 
 
 MainWindow::~MainWindow()
 {
+    // Workers retain editor pointers, so finish them before any editor is destroyed.
+    m_previewThreads.clear();
+    m_previewThreads.waitForDone();
     // release the offset controls from DisplayHandle before deleting UI
     m_displayHandle->deactivate();
 
@@ -251,13 +258,13 @@ void MainWindow::initializeDisplays()
     ui->menu_View->addSeparator();
     auto tabShowToggle = ui->menu_View->addAction("Display Tabs", [this](bool show) {
         m_rootDisplay->setShowViewSelect(show);
-    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V));
+    }, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
     tabShowToggle->setCheckable(true);
     tabShowToggle->setChecked(true);
 
     ui->menu_View->addAction("Collapse All Displays", [this]() {
         m_rootDisplay->unSplit();
-    }, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
+    }, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X));
 }
 
 void MainWindow::initializeImporterExporters()
@@ -401,26 +408,7 @@ void MainWindow::loadPlugins()
     SettingsManager::setPrivateSetting(SettingsManager::PLUGINS_RUNNING_KEY, QStringList());
 
     QStringList warnings;
-    QStringList pluginPaths;
-    if (!m_extraPluginPath.isEmpty()) {
-        pluginPaths.append(m_extraPluginPath.split(":"));
-    }
-    pluginPaths.append(
-            SettingsManager::getPluginLoaderSetting(
-                    SettingsManager::PLUGIN_PATH_KEY).toString().split(":"));
-
-    QStringList pathBuffer;
-    for (QString pluginPath : pluginPaths) {
-
-        if (pluginPath.startsWith("~/")) {
-            pluginPath.replace(0, 1, QDir::homePath());
-        }
-        else if (!pluginPath.startsWith("/")) {
-            pluginPath = QApplication::applicationDirPath() + "/" + pluginPath;
-        }
-        pathBuffer.append(pluginPath);
-    }
-    pluginPaths = pathBuffer;
+    const QStringList pluginPaths = SettingsManager::pluginPaths(m_extraPluginPath);
 
     for (QString pluginPath : pluginPaths) {
         warnings.append(m_pluginManager->loadPlugins(pluginPath));
@@ -434,6 +422,7 @@ void MainWindow::loadPlugins()
         msg.exec();
     }
 
+#if HOBBITS_WITH_PYTHON
     warnings.clear();
     for (QString pluginPath : pluginPaths) {
         warnings.append(PythonPluginConfig::loadPythonPlugins(pluginPath, m_pluginManager, [](QSharedPointer<ParameterDelegate> delegate, QSize size) {
@@ -449,6 +438,7 @@ void MainWindow::loadPlugins()
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
     }
+#endif
 
 
     QSet<QString> queued;
@@ -554,10 +544,10 @@ void MainWindow::sendBitContainerPreview()
         preview = BitContainerPreview::wrap(currContainer());
     }
     for (auto editor : m_analyzerUiMap.values()) {
-        QtConcurrent::run(MainWindow::processBitPreview, preview, editor);
+        (void)QtConcurrent::run(&m_previewThreads, MainWindow::processBitPreview, preview, editor);
     }
     for (auto editor : m_operatorUiMap.values()) {
-        QtConcurrent::run(MainWindow::processBitPreview, preview, editor);
+        (void)QtConcurrent::run(&m_previewThreads, MainWindow::processBitPreview, preview, editor);
     }
 }
 
@@ -872,7 +862,6 @@ void MainWindow::pluginActionProgress(QUuid id, int progress)
     m_pluginProgress.value(id)->progressBar->setValue(progress);
 }
 
-#include "hobbitspython.h"
 
 void MainWindow::on_action_About_triggered()
 {
@@ -880,7 +869,11 @@ void MainWindow::on_action_About_triggered()
     QString guiVersion = HobbitsGuiConfig::VERSION;
 
     QString info =  QString("Hobbits GUI Version: %1\nHobbits Core Version: %2").arg(guiVersion).arg(coreLibVersion);
-    info += QString("\nIntegrated Python: %1").arg(HobbitsPythonConfig::PYTHON_VERSION);
+#if HOBBITS_WITH_PYTHON
+    info += QString("\nPython: %1").arg(HobbitsPythonConfig::PYTHON_VERSION);
+#else
+    info += "\nPython plugins disabled in this build";
+#endif
 
     QMessageBox msg;
     msg.setWindowTitle("About Hobbits");

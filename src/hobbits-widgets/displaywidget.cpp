@@ -18,6 +18,7 @@ DisplayWidget::DisplayWidget(QSharedPointer<DisplayInterface> display,
     m_display(display),
     m_handle(handle),
     m_displayParameters(Parameters::nullParameters()),
+    m_displayResult(DisplayResult::nullResult()),
     m_repaintScheduled(false)
 {
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -303,7 +304,8 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             [this, frame, bitOffsetHover, frameOffsetHover]() {
         bool value = frame.at(bitOffsetHover);
         for (qint64 i = frameOffsetHover + 1; i < m_handle->currentContainer()->frameCount(); i++) {
-            if (m_handle->currentContainer()->frameAt(i).at(bitOffsetHover) != value) {
+            const Frame nextFrame = m_handle->currentContainer()->frameAt(i);
+            if (bitOffsetHover < nextFrame.size() && nextFrame.at(bitOffsetHover) != value) {
                 this->m_handle->setFrameOffset(i);
                 break;
             }
@@ -314,7 +316,8 @@ void DisplayWidget::showContextMenu(const QPoint &point)
             [this, frame, bitOffsetHover, frameOffsetHover]() {
         bool value = frame.at(bitOffsetHover);
         for (qint64 i = frameOffsetHover - 1; i >= 0; i--) {
-            if (m_handle->currentContainer()->frameAt(i).at(bitOffsetHover) != value) {
+            const Frame nextFrame = m_handle->currentContainer()->frameAt(i);
+            if (bitOffsetHover < nextFrame.size() && nextFrame.at(bitOffsetHover) != value) {
                 this->m_handle->setFrameOffset(i);
                 break;
             }

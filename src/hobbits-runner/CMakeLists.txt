@@ -3,8 +3,7 @@
 #
 
 set(HOBBITS_RUNNER_VERSION "${BUILD_VERSION}")
-set(CONFIG_FILE_NAME "hobbitsrunnerconfig.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}.in" "${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}")
+configure_file(hobbitsrunnerconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/hobbitsrunnerconfig.h")
 
 #
 # Build
@@ -12,17 +11,21 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${CONFIG_FILE_NAME}.in" "${CMAKE_CUR
 
 file(GLOB_RECURSE SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HDRFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+list(FILTER HDRFILES EXCLUDE REGEX "/hobbitsrunnerconfig\\.h$")
+list(APPEND HDRFILES "${CMAKE_CURRENT_BINARY_DIR}/hobbitsrunnerconfig.h")
 file(GLOB RCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc" "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
 
 add_executable("hobbits-runner" "${SRCFILES}"  "${HDRFILES}" "${RCFILES}")
 
-if (BUILDING_WITH_CONAN)
-	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core CONAN_PKG::qt)
-else()
-	set(ALL_LINK_LIBS hobbits-python hobbits-widgets hobbits-core Qt::Widgets)
+set(ALL_LINK_LIBS hobbits-widgets hobbits-core Qt6::Widgets)
+if (HOBBITS_WITH_PYTHON)
+    list(APPEND ALL_LINK_LIBS hobbits-python)
 endif()
 
-target_link_libraries("hobbits-runner" ${ALL_LINK_LIBS})
+target_include_directories(hobbits-runner PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries("hobbits-runner" PRIVATE ${ALL_LINK_LIBS})
+target_compile_definitions(hobbits-runner PRIVATE HOBBITS_WITH_PYTHON=$<BOOL:${HOBBITS_WITH_PYTHON}>)
+hobbits_copy_runtime_dlls(hobbits-runner)
 if (UNIX)
 	target_compile_options(hobbits-runner PRIVATE -fPIC)
 endif()

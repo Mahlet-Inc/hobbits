@@ -253,7 +253,7 @@ QSharedPointer<const AnalyzerResult> KaitaiStruct::analyzeBits(
     if (!outputRangeFile.exists()) {
         QString errorString = "No analysis file was produced - check the Output tab to see if ksc or python produced any errors.";
         errorString += "\n\nCommon problems to check for:";
-        errorString += "\n- Are you pointing to a valid Python 3 with the kaitaistruct package 0.9 installed?";
+        errorString += "\n- Is the Python installation compatible with this build? The Kaitai runtime is bundled.";
         errorString += "\n- Are you pointing to a valid kaitai-struct-compiler version 0.9?";
         return AnalyzerResult::error(errorString);
     }

@@ -16,6 +16,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QSplitter>
+#include <QThreadPool>
 
 namespace Ui
 {
@@ -109,6 +110,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QThreadPool m_previewThreads;
 
     QString m_extraPluginPath;
 

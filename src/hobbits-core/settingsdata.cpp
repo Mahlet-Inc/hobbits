@@ -4,7 +4,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QCoreApplication>
-#include "hobbitscoreconfig.h"
+#include <hobbitscoreconfig.h>
 
 SettingsData::SettingsData() :
     m_initialized(false)
@@ -12,8 +12,9 @@ SettingsData::SettingsData() :
 }
 
 SettingsData::SettingsData(const SettingsData &other):
-    m_initialized(true)
+    m_initialized(other.m_initialized)
 {
+    m_transientSettings = other.m_transientSettings;
     m_privateSettings = other.m_privateSettings;
     m_uiSettings = other.m_uiSettings;
     m_pluginSettings = other.m_pluginSettings;
@@ -22,8 +23,9 @@ SettingsData::SettingsData(const SettingsData &other):
 
 SettingsData& SettingsData::operator=(const SettingsData &other)
 {
-    m_initialized = true;
     if (this != &other) {
+        m_initialized = other.m_initialized;
+        m_transientSettings = other.m_transientSettings;
         m_privateSettings = other.m_privateSettings;
         m_uiSettings = other.m_uiSettings;
         m_pluginSettings = other.m_pluginSettings;
@@ -129,30 +131,8 @@ void SettingsData::initialize()
     }
     m_initialized = true;
 
-    QString pythonHome;
-    QString appDirPath = QCoreApplication::applicationDirPath();
-    if (!appDirPath.isEmpty()) {
-        appDirPath += "/";
-    }
-#ifdef Q_OS_LINUX
-    #if EMBEDDED_HOBBITS_CPYTHON
-    pythonHome = appDirPath + "../hobbits-cpython";
-    #else
-    pythonHome = "/usr";
-    #endif
-#endif
-#ifdef Q_OS_MACOS
-    pythonHome = appDirPath + "../Frameworks/hobbits-cpython";
-#endif
-#ifdef Q_OS_WIN
-    pythonHome = appDirPath;
-#endif
-    QString pythonHomeCanonical = QDir(pythonHome).canonicalPath();
-    // The canonical path will be empty if it doesn't exist, so we'll fall back on the base path for easier debugging
-    if (!pythonHomeCanonical.isEmpty()) {
-        pythonHome = pythonHomeCanonical;
-    }
-    m_transientSettings.insert(SettingsManager::PYTHON_HOME_KEY, pythonHome);
+    // An empty override lets the standard Python runtime locate its own installation.
+    m_transientSettings.insert(SettingsManager::PYTHON_HOME_KEY, QString());
 
     m_privateSettings.insert(SettingsManager::WINDOW_SIZE_KEY, QSize(640, 480));
     m_privateSettings.insert(SettingsManager::WINDOW_POSITION_KEY, QPoint(100, 100));

@@ -1,6 +1,7 @@
 #include "edit.h"
 #include "editeditor.h"
 #include "bitarray.h"
+#include <QRegularExpression>
 
 Edit::Edit()
 {
@@ -159,15 +160,15 @@ QSharedPointer<const OperatorResult> Edit::operateOnBits(
     QSharedPointer<BitArray> newBits;
 
     if (parameters.value("edit_type").toString() == "bit" ) { //bits
-        QRegExp re("^[0-1]*$");
-        if (!re.exactMatch(newBitsInRange))
+        QRegularExpression re(QRegularExpression::anchoredPattern("[0-1]*"));
+        if (!re.match(newBitsInRange).hasMatch())
             return OperatorResult::error("You can only use 0 or 1 in bit mode.");
        newBits  = parseBits( newBitsInRange);
 
         
     } else if (parameters.value("edit_type").toString() == "hex") { //hex
-        QRegExp re("^[a-f 0-9]*$");
-        if (!re.exactMatch(newBitsInRange))
+        QRegularExpression re(QRegularExpression::anchoredPattern("[a-f 0-9]*"));
+        if (!re.match(newBitsInRange).hasMatch())
             return OperatorResult::error("Invalid hex character.");
         newBits = parseHex( newBitsInRange);
         

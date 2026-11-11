@@ -83,7 +83,7 @@ private:
     public:
         CacheLoadLocker(qint64 bitIndex, const BitArray* bitArray);
     private:
-        QMutexLocker m_locker;
+        QMutexLocker<QMutex> m_locker;
     };
 
     qint64 readBytesNoSync(char *data, qint64 byteOffset, qint64 maxBytes) const;

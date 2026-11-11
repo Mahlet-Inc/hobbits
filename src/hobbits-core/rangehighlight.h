@@ -2,6 +2,7 @@
 #define RANGEHIGHLIGHT_H
 
 #include <QString>
+#include <QStringList>
 #include "range.h"
 #include "hobbits-core_global.h"
 
