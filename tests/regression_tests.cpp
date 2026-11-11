@@ -3,12 +3,14 @@
 #include <QDir>
 #include <QSettings>
 #include <QTemporaryDir>
+#include <QVariant>
 #include <iostream>
 #include <stdexcept>
 #include "bitcontainermanager.h"
 #include "displayhandle.h"
 #include "displayhelper.h"
 #include "rangesequence.h"
+#include "rangehighlight.h"
 #include "settingsmanager.h"
 
 static void require(bool condition, const char *message)
@@ -22,6 +24,36 @@ static Range selection(QSharedPointer<BitContainer> container)
 {
     const auto highlights = container->info()->highlights("mouse_selection", "selection_1");
     return highlights.isEmpty() ? Range() : highlights.first().range();
+}
+
+static void testHighlightMetaTypeStreaming()
+{
+    const auto child = RangeHighlight::simple("child", "payload", Range(8, 15), 0xff123456);
+    const RangeHighlight original("category", "label", Range(0, 31), 0xffabcdef,
+            {child}, {"tag"});
+    const QVariant value = QVariant::fromValue(original);
+    require(value.metaType().hasRegisteredDataStreamOperators(),
+            "highlight stream operators must be available to Qt metatypes across libraries");
+
+    QByteArray serialized;
+    QDataStream output(&serialized, QIODevice::WriteOnly);
+    output << value;
+    require(output.status() == QDataStream::Ok, "highlight QVariant serialization failed");
+
+    QVariant restored;
+    QDataStream input(serialized);
+    input >> restored;
+    require(input.status() == QDataStream::Ok && restored.metaType() == value.metaType(),
+            "highlight QVariant deserialization failed");
+    const auto result = restored.value<RangeHighlight>();
+    require(result.category() == original.category() && result.label() == original.label()
+            && result.range().start() == 0 && result.range().end() == 31
+            && result.color() == original.color() && result.tags() == original.tags(),
+            "highlight serialization changed its metadata");
+    require(result.children().size() == 1 && result.children().first().label() == child.label()
+            && result.children().first().range().start() == 8
+            && result.children().first().range().end() == 15,
+            "highlight serialization lost its children");
 }
 
 static void testMouseSelection()
@@ -167,6 +199,7 @@ int main(int argc, char **argv)
 {
     QCoreApplication application(argc, argv);
     try {
+        testHighlightMetaTypeStreaming();
         testMouseSelection();
         testRangeCache();
         testPluginPathsAndSettings();

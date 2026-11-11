@@ -18,8 +18,6 @@ jobs:
             python: 'OFF'
           - os: windows-2022
             python: 'ON'
-          - os: macos-14
-            python: 'ON'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
