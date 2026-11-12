@@ -1,3 +1,10 @@
+# [0.56.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.55.0...v0.56.0) (2026-11-12)
+
+
+### Features
+
+* fix and refactor a bunch of stuff ([645f0b8](https://github.com/Mahlet-Inc/hobbits/commit/645f0b8452b437f9126b18ccd51c4253d6e02c29))
+
 # [0.55.0](https://github.com/Mahlet-Inc/hobbits/compare/v0.54.1...v0.55.0) (2025-04-16)
 
 
