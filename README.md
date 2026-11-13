@@ -85,10 +85,39 @@ development library are found, the Python Runner and Kaitai Struct plugins are
 built. On Debian/Ubuntu, install `python3-dev` to enable them. Otherwise these
 plugins and the Python binding library are omitted. Use
 `-DHOBBITS_ENABLE_PYTHON=OFF` to disable them explicitly, or
-`-DPython3_ROOT_DIR=/path/to/python` to select an installation. Python remains a
-runtime dependency when enabled. Its standard library is not bundled; macOS
-deployment may copy the ordinary Python shared library into the app bundle. On
-Windows, its DLL must be available on `PATH`.
+`-DPython3_ROOT_DIR=/path/to/python` to select an installation. Set
+`-DHOBBITS_PYTHON_VERSION=3.14` to require that major/minor version instead of
+automatically choosing any available Python.
+
+CI produces standalone Windows ZIPs and Linux tarballs with Python 3.14, using
+the latest patch available from `setup-python`. They include the matching shared
+library, standard library, and native modules; Linux also bundles the native
+modules' shared-library dependencies, except glibc and the OS loader. These
+packages do not need Python installed. Linux standalone builds target Ubuntu
+24.04 or a compatible newer system. The bundled interpreter ignores system
+Python environment variables and user site-packages. Third-party Python packages
+from the build machine are not included. `--python-home` can explicitly select
+another compatible Python home.
+
+The separate Ubuntu 24.04 `.deb` is built against `/usr/bin/python3.12` and depends
+on Ubuntu's `python3.12` and `libpython3.12t64` packages. It does not bundle Python.
+Install it with `sudo apt install ./hobbits_*.deb` so apt installs the dependencies.
+The application and Qt libraries live under `/usr/lib/hobbits`, with `hobbits`
+and `hobbits-runner` launchers in `/usr/bin` and a desktop menu entry.
+
+For a local Debian package, install `python3.12-dev` and `dpkg-dev`, then configure
+a separate build directory:
+
+```sh
+cmake -S . -B build-deb -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCPACK_GENERATOR=DEB -DCMAKE_INSTALL_PREFIX=/usr \
+  -DHOBBITS_BUNDLE_PYTHON=OFF -DHOBBITS_PYTHON_VERSION=3.12 \
+  -DPython3_EXECUTABLE=/usr/bin/python3.12 -DPython3_ROOT_DIR=/usr
+cmake --build build-deb --target package --parallel 2
+```
+
+Build-tree and non-bundled runs still require the matching Python runtime.
+On macOS, Python's standard library is not bundled.
 
 Useful build options:
 
@@ -99,7 +128,9 @@ Useful build options:
 - `-DHOBBITS_DEPENDENCY_JOBS=4`: parallel jobs for each dependency/application
   build. The outer `--parallel` controls how many dependency projects build at once.
 - `-DHOBBITS_DOWNLOAD_DIR=/path/to/cache`: reuse source archives between builds.
-- `-DSELF_CONTAINED_APP=OFF`: omit deployment of Qt runtime libraries.
+- `-DSELF_CONTAINED_APP=OFF`: omit deployment of Qt; also defaults Python bundling to off.
+- `-DHOBBITS_BUNDLE_PYTHON=OFF`: use an installed Python instead of bundling it,
+  while retaining Qt deployment. Required for the Ubuntu `.deb` build.
 - `-DHOBBITS_SUPERBUILD=OFF`: configure the application directly against existing
   dependencies, useful for packaging or IDE work. The normal superbuild's inner
   CMake project is `build/app`.

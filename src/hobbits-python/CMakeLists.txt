@@ -2,8 +2,17 @@
 # Config Header
 #
 
-set(HOBBITS_PYTHON_VERSION "${BUILD_VERSION}")
+set(HOBBITS_PYTHON_LIBRARY_VERSION "${BUILD_VERSION}")
 set(HOBBITS_PYTHON_PYTHON_VERSION "${Python3_VERSION}")
+set(HOBBITS_PYTHON_HOME_RELATIVE "")
+if(HOBBITS_BUNDLE_PYTHON)
+    if(WIN32)
+        set(HOBBITS_PYTHON_HOME_RELATIVE "python")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        file(RELATIVE_PATH HOBBITS_PYTHON_HOME_RELATIVE "${CMAKE_INSTALL_FULL_BINDIR}"
+            "${CMAKE_INSTALL_FULL_LIBDIR}/hobbits/python")
+    endif()
+endif()
 
 configure_file(hobbitspythonconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/hobbitspythonconfig.h")
 

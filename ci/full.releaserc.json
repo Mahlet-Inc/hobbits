@@ -29,6 +29,9 @@
                     },
                     {
                         "path": "hobbits-*-python-ON/hobbits-*.zip"
+                    },
+                    {
+                        "path": "hobbits-ubuntu-24.04-deb-python-ON/hobbits_*.deb"
                     }
                 ]
             }

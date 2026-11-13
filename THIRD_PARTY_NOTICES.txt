@@ -71,8 +71,13 @@ libpcap 1.10.5 (static library): BSD license; https://github.com/the-tcpdump-gro
 GNU m4 and Bison, and Flex, are used only to build dependencies; they are not
 linked into or installed with Hobbits. Their source archives include their licenses.
 
-Python (optional, supplied by the user): PSF license and its bundled notices;
-https://docs.python.org/3/license.html
+Python (optional, bundled in standalone Windows and Linux packages): PSF license and
+its bundled notices; https://docs.python.org/3/license.html. The bundled runtime's
+license is installed in python/LICENSE.txt on Windows and
+lib/hobbits/python/LICENSE.txt on Linux. Standalone CI builds use Python 3.14;
+the Ubuntu 24.04 Debian package uses the distribution's Python 3.12 packages.
+Notices for Linux native-module dependencies copied from Ubuntu are installed
+under lib/hobbits/python/licenses.
 
 Roboto and Roboto Mono: Apache-2.0. License texts are provided in
 src/hobbits-gui/style/fonts/Roboto/LICENSE.txt and

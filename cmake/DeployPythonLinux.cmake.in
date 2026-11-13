@@ -1,0 +1,64 @@
+set(pythonLibrary "$<TARGET_FILE:Python3::Python>")
+file(GLOB pythonModules "@pythonNativeDir@/*.so")
+set(pythonRuntimeDirs "@Python3_RUNTIME_LIBRARY_DIRS@")
+file(GET_RUNTIME_DEPENDENCIES
+    LIBRARIES "${pythonLibrary}"
+    MODULES ${pythonModules}
+    RESOLVED_DEPENDENCIES_VAR dependencies
+    UNRESOLVED_DEPENDENCIES_VAR unresolved
+    DIRECTORIES ${pythonRuntimeDirs}
+    # The dynamic loader and glibc must come from the host OS. libpython itself
+    # is installed below, where Hobbits' existing relative RPATH can find it.
+    PRE_EXCLUDE_REGEXES "^ld-linux" "^lib(c|m|dl|pthread|rt|util|resolv)[.]so" "^libpython[0-9].*[.]so")
+if(unresolved)
+    message(FATAL_ERROR "Unresolved bundled Python dependencies: ${unresolved}")
+endif()
+file(INSTALL "${pythonLibrary}" DESTINATION "${CMAKE_INSTALL_PREFIX}/@CMAKE_INSTALL_LIBDIR@"
+    TYPE SHARED_LIBRARY FOLLOW_SYMLINK_CHAIN)
+foreach(dependency IN LISTS dependencies)
+    file(INSTALL "${dependency}" DESTINATION "${CMAKE_INSTALL_PREFIX}/@pythonHome@/lib"
+        TYPE SHARED_LIBRARY FOLLOW_SYMLINK_CHAIN)
+endforeach()
+
+# Preserve the distribution's notices for the native libraries copied above.
+find_program(dpkgQuery dpkg-query)
+if(dpkgQuery)
+    foreach(dependency IN LISTS dependencies)
+        file(REAL_PATH "${dependency}" realDependency)
+        execute_process(COMMAND "${dpkgQuery}" -S "${realDependency}"
+            OUTPUT_VARIABLE owner RESULT_VARIABLE result ERROR_QUIET)
+        if(result AND realDependency MATCHES "^/usr/lib/")
+            string(REGEX REPLACE "^/usr" "" realDependency "${realDependency}")
+            execute_process(COMMAND "${dpkgQuery}" -S "${realDependency}"
+                OUTPUT_VARIABLE owner RESULT_VARIABLE result ERROR_QUIET)
+        endif()
+        if(result EQUAL 0)
+            string(REGEX MATCH "^[^:\n]+" package "${owner}")
+            if(EXISTS "/usr/share/doc/${package}/copyright")
+                file(INSTALL "/usr/share/doc/${package}/copyright"
+                    DESTINATION "${CMAKE_INSTALL_PREFIX}/@pythonHome@/licenses/${package}" TYPE FILE)
+            endif()
+        endif()
+    endforeach()
+endif()
+
+set(prefix "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}")
+file(GLOB installedLibraries "${prefix}/@CMAKE_INSTALL_LIBDIR@/libpython*.so*")
+foreach(library IN LISTS installedLibraries)
+    if(NOT IS_SYMLINK "${library}")
+        execute_process(COMMAND "@HOBBITS_PATCHELF@" --set-rpath "$ORIGIN/hobbits/python/lib" "${library}"
+            COMMAND_ERROR_IS_FATAL ANY)
+    endif()
+endforeach()
+file(GLOB installedDependencies "${prefix}/@pythonHome@/lib/*.so*")
+foreach(dependency IN LISTS installedDependencies)
+    if(NOT IS_SYMLINK "${dependency}")
+        execute_process(COMMAND "@HOBBITS_PATCHELF@" --set-rpath "$ORIGIN" "${dependency}"
+            COMMAND_ERROR_IS_FATAL ANY)
+    endif()
+endforeach()
+file(GLOB installedModules "${prefix}/@pythonStdlib@/lib-dynload/*.so")
+foreach(module IN LISTS installedModules)
+    execute_process(COMMAND "@HOBBITS_PATCHELF@" --set-rpath "$ORIGIN/../.." "${module}"
+        COMMAND_ERROR_IS_FATAL ANY)
+endforeach()

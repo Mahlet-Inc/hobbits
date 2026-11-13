@@ -3,6 +3,8 @@
 #include <structmember.h>
 
 #include "pythoninterpreter.h"
+#include <QCoreApplication>
+#include <QDir>
 #include <QTemporaryDir>
 #include <QMutex>
 #include <QFileInfo>
@@ -153,40 +155,75 @@ void PythonInterpreter::initialize()
         return;
     }
 
+    QString pythonHome = SettingsManager::getTransientSetting(SettingsManager::PYTHON_HOME_KEY).toString();
+    bool bundledPython = false;
+    const QString bundledRelative = QString::fromUtf8(HobbitsPythonConfig::BUNDLED_HOME);
+    const QString bundledHome = QCoreApplication::applicationDirPath() + "/" + bundledRelative;
+    if (pythonHome.isEmpty() && !bundledRelative.isEmpty() && QFileInfo(bundledHome).isDir()) {
+        pythonHome = bundledHome;
+        bundledPython = true;
+    }
+
     PyConfig config;
-    PyConfig_InitPythonConfig(&config);
+    if (bundledPython) {
+        // A relocated package must not pick up the build machine's Python or
+        // another installation's PYTHONHOME, PYTHONPATH, or user site-packages.
+        PyConfig_InitIsolatedConfig(&config);
+        // Tcl/Tk use their own data paths, independently of Python's home.
+#ifdef Q_OS_WIN
+        const QDir dataDir(pythonHome + "/tcl");
+#else
+        const QDir dataDir(pythonHome + "/lib");
+#endif
+        for (const QString &language : {QStringLiteral("tcl"), QStringLiteral("tk")}) {
+            for (const QString &directory : dataDir.entryList({language + "[0-9]*"}, QDir::Dirs)) {
+                const QString path = dataDir.absoluteFilePath(directory);
+                const QString initFile = language == "tcl" ? "/init.tcl" : "/tk.tcl";
+                if (QFileInfo::exists(path + initFile)) {
+                    qputenv((language.toUpper() + "_LIBRARY").toLatin1().constData(), QFile::encodeName(path));
+                    break;
+                }
+            }
+        }
+    }
+    else {
+        PyConfig_InitPythonConfig(&config);
+    }
     config.parse_argv = 0;
     config.install_signal_handlers = 0;
 
-    // Preserve the Python selected by CMake (including a virtual environment).
-    // Matching interpreters on PATH allow a relocated installation to recover.
-    QString programPath;
-    const QString versionedName = QString("python%1.%2").arg(PY_MAJOR_VERSION).arg(PY_MINOR_VERSION);
-    const QString configuredProgram = QString::fromUtf8(HobbitsPythonConfig::PYTHON_EXECUTABLE);
-    const QStringList candidates = {configuredProgram,
-                                   QStandardPaths::findExecutable(versionedName),
-                                   QStandardPaths::findExecutable("python3"),
-                                   QStandardPaths::findExecutable("python")};
-    for (const QString &candidate : candidates) {
-        if (candidate.isEmpty() || !QFileInfo::exists(candidate)) {
-            continue;
+    QString programPath = QCoreApplication::applicationFilePath();
+    if (!bundledPython) {
+        // Preserve the Python selected by CMake (including a virtual environment).
+        // Matching interpreters on PATH allow a relocated installation to recover.
+        programPath.clear();
+        const QString versionedName = QString("python%1.%2").arg(PY_MAJOR_VERSION).arg(PY_MINOR_VERSION);
+        const QString configuredProgram = QString::fromUtf8(HobbitsPythonConfig::PYTHON_EXECUTABLE);
+        const QStringList candidates = {configuredProgram,
+                                       QStandardPaths::findExecutable(versionedName),
+                                       QStandardPaths::findExecutable("python3"),
+                                       QStandardPaths::findExecutable("python")};
+        for (const QString &candidate : candidates) {
+            if (candidate.isEmpty() || !QFileInfo::exists(candidate)) {
+                continue;
+            }
+            QProcess probe;
+            probe.start(candidate, {"-I", "-S", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"});
+            if (probe.waitForFinished(5000) && probe.exitCode() == 0 &&
+                    probe.readAllStandardOutput().trimmed() == QByteArray::number(PY_MAJOR_VERSION) + "." + QByteArray::number(PY_MINOR_VERSION)) {
+                programPath = candidate;
+                break;
+            }
+            probe.kill();
+            probe.waitForFinished();
         }
-        QProcess probe;
-        probe.start(candidate, {"-I", "-S", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"});
-        if (probe.waitForFinished(5000) && probe.exitCode() == 0 &&
-                probe.readAllStandardOutput().trimmed() == QByteArray::number(PY_MAJOR_VERSION) + "." + QByteArray::number(PY_MINOR_VERSION)) {
-            programPath = candidate;
-            break;
-        }
-        probe.kill();
-        probe.waitForFinished();
     }
     PyStatus status = PyStatus_Ok();
     if (!programPath.isEmpty()) {
         const std::wstring program = programPath.toStdWString();
         status = PyConfig_SetString(&config, &config.program_name, program.c_str());
     }
-    const std::wstring home = SettingsManager::getTransientSetting(SettingsManager::PYTHON_HOME_KEY).toString().toStdWString();
+    const std::wstring home = pythonHome.toStdWString();
     if (!PyStatus_Exception(status) && !home.empty()) {
         status = PyConfig_SetString(&config, &config.home, home.c_str());
     }

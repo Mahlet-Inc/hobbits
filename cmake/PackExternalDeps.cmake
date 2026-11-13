@@ -48,7 +48,11 @@ function(pack_qt_libs)
         else()
             set(binDir "${CMAKE_INSTALL_BINDIR}")
         endif()
-        set(platformOptions "GENERATE_QT_CONF\n    BIN_DIR \"${binDir}\"\n    LIB_DIR \"${CMAKE_INSTALL_LIBDIR}\"\n    PLUGINS_DIR \"plugins\"")
+        set(qtPluginsDir "plugins")
+        if(CPACK_GENERATOR STREQUAL "DEB")
+            set(qtPluginsDir "lib/hobbits/qt/plugins")
+        endif()
+        set(platformOptions "GENERATE_QT_CONF\n    BIN_DIR \"${binDir}\"\n    LIB_DIR \"${CMAKE_INSTALL_LIBDIR}\"\n    PLUGINS_DIR \"${qtPluginsDir}\"")
     endif()
 
     # The application's own libraries are already installed with their final RPATH.
@@ -60,6 +64,7 @@ function(pack_qt_libs)
         endif()
     endforeach()
     if(HOBBITS_WITH_PYTHON)
+        # Standalone Python is deployed by PackPython; Debian uses system Python.
         string(APPEND excludedLibraries "\n    \"$<TARGET_FILE:Python3::Python>\"")
     endif()
 

@@ -14,10 +14,24 @@ jobs:
         include:
           - os: ubuntu-24.04
             python: 'ON'
+            bundle_python: 'ON'
+            format: TGZ
+            flavor: standalone
           - os: ubuntu-24.04
             python: 'OFF'
+            bundle_python: 'OFF'
+            format: TGZ
+            flavor: standalone
           - os: windows-2022
             python: 'ON'
+            bundle_python: 'ON'
+            format: ZIP
+            flavor: standalone
+          - os: ubuntu-24.04
+            python: 'ON'
+            bundle_python: 'OFF'
+            format: DEB
+            flavor: deb
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -25,9 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v7
-        if: matrix.python == 'ON'
+        id: python
+        if: matrix.bundle_python == 'ON'
         with:
-          python-version: '3.12'
+          python-version: '3.14'
+          check-latest: true
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
       - name: Install Linux build tools and display SDK
@@ -40,7 +56,10 @@ jobs:
             libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev \
             libxcb-render-util0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev \
             libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-render0-dev \
-            libxkbcommon-dev libxkbcommon-x11-dev
+            libxkbcommon-dev libxkbcommon-x11-dev libtcl8.6 libtk8.6
+      - name: Install Ubuntu Python and Debian packaging tools
+        if: matrix.flavor == 'deb'
+        run: sudo apt-get install -y python3.12-dev dpkg-dev
       - uses: actions/cache@v5
         with:
           path: build/downloads
@@ -49,10 +68,23 @@ jobs:
         env:
           BUILD_VERSION: ${{ inputs.build_version }}
           ENABLE_PYTHON: ${{ matrix.python }}
+          BUNDLE_PYTHON: ${{ matrix.bundle_python }}
+          PACKAGE_FORMAT: ${{ matrix.format }}
+          PYTHON_EXECUTABLE: ${{ steps.python.outputs.python-path }}
         run: |
           args=()
           if [[ -n "$BUILD_VERSION" ]]; then args+=("-DBUILD_VERSION=$BUILD_VERSION"); fi
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DHOBBITS_ENABLE_PYTHON="$ENABLE_PYTHON" "${args[@]}"
+          if [[ "$BUNDLE_PYTHON" == ON ]]; then
+            args+=("-DHOBBITS_PYTHON_VERSION=3.14" "-DPython3_EXECUTABLE=$PYTHON_EXECUTABLE")
+          elif [[ "$PACKAGE_FORMAT" == DEB ]]; then
+            args+=(-DHOBBITS_PYTHON_VERSION=3.12 -DPython3_EXECUTABLE=/usr/bin/python3.12
+              -DPython3_ROOT_DIR=/usr -DPython3_INCLUDE_DIR=/usr/include/python3.12
+              "-DPython3_LIBRARY=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/libpython3.12.so"
+              -DCMAKE_INSTALL_PREFIX=/usr)
+          fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DHOBBITS_ENABLE_PYTHON="$ENABLE_PYTHON" -DHOBBITS_BUNDLE_PYTHON="$BUNDLE_PYTHON" \
+            -DCPACK_GENERATOR="$PACKAGE_FORMAT" "${args[@]}"
       - name: Build
         run: cmake --build build --parallel 2
       - name: Regression tests
@@ -62,14 +94,15 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
       - name: Relocatable install
+        if: matrix.flavor == 'standalone'
         run: cmake --install build --prefix "$PWD/install"
       - name: Installed plugin discovery
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.flavor == 'standalone'
         run: |
           mv install relocated
           QT_QPA_PLATFORM=offscreen ./relocated/bin/hobbits-runner list
       - name: Installed X11 GUI startup
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.flavor == 'standalone'
         run: |
           test -f relocated/plugins/platforms/libqxcb.so
           runtime_dir=$(mktemp -d "$RUNNER_TEMP/hobbits-xcb.XXXXXX")
@@ -85,7 +118,7 @@ jobs:
           # A healthy GUI stays open until timeout; early exit or a crash fails.
           test "$status" -eq 124
       - name: Installed Wayland GUI startup
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.flavor == 'standalone'
         run: |
           test -f relocated/plugins/platforms/libqwayland-generic.so
           test -f relocated/plugins/wayland-shell-integration/libxdg-shell.so
@@ -128,9 +161,45 @@ jobs:
           ./test_hobbits.js "$GITHUB_WORKSPACE/build/bin/hobbits-runner"
       - name: Package
         run: cmake --build build --target package
+      - name: Packaged Linux Python runtime
+        if: runner.os == 'Linux' && matrix.python == 'ON'
+        timeout-minutes: 10
+        run: bash ci/test-linux-package.sh '${{ matrix.flavor }}'
+      - name: Packaged Windows Python runtime
+        if: runner.os == 'Windows' && matrix.python == 'ON'
+        shell: pwsh
+        timeout-minutes: 2
+        run: |
+          $archives = @(Get-ChildItem build/app/hobbits-*.zip)
+          if ($archives.Count -ne 1) { throw 'Expected one Windows release ZIP' }
+          $destination = Join-Path $env:RUNNER_TEMP "hobbits relocated package"
+          Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath $destination
+          $runners = @(Get-ChildItem -LiteralPath $destination -Filter hobbits-runner.exe -Recurse)
+          if ($runners.Count -ne 1) { throw 'Expected one packaged runner' }
+          $package = $runners[0].DirectoryName
+          Copy-Item build/bin/hobbits-python-tests.exe -Destination $package
+          # Only Windows itself is on PATH. Poison Python's environment as well:
+          # the package must use its own runtime, even on a machine with Python.
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:PYTHONHOME = Join-Path $destination 'missing-python-home'
+          $env:PYTHONPATH = Join-Path $destination 'missing-python-path'
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          Set-Location $env:RUNNER_TEMP
+          & "$package/hobbits-python-tests.exe" --bundled
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled Python execution failed' }
+          $plugins = & "$package/hobbits-runner.exe" list --config "$destination/hobbits.ini" 2>&1
+          $plugins | Write-Output
+          if ($LASTEXITCODE -ne 0 -or
+              !($plugins -match '^Operator: Python Runner$') -or
+              !($plugins -match '^Analyzer: Kaitai Struct$') -or
+              ($plugins -match 'could not be loaded as a plugin')) {
+            throw 'Packaged Python plugin discovery failed'
+          }
       - uses: actions/upload-artifact@v7
         with:
-          name: hobbits-${{ matrix.os }}-python-${{ matrix.python }}
+          name: hobbits-${{ matrix.os }}-${{ matrix.flavor }}-python-${{ matrix.python }}
+          if-no-files-found: error
           path: |
             build/app/hobbits-*.tar.gz
             build/app/hobbits-*.zip
+            build/app/hobbits_*.deb

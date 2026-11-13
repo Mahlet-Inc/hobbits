@@ -5,6 +5,7 @@ namespace HobbitsPythonConfig
 
     static const char PYTHON_EXECUTABLE[] = R"hobbits(@Python3_EXECUTABLE@)hobbits";
     static const char PYTHON_VERSION[] = "@HOBBITS_PYTHON_PYTHON_VERSION@";
-    static const char VERSION[] = "@HOBBITS_PYTHON_VERSION@";
+    static const char BUNDLED_HOME[] = R"hobbits(@HOBBITS_PYTHON_HOME_RELATIVE@)hobbits";
+    static const char VERSION[] = "@HOBBITS_PYTHON_LIBRARY_VERSION@";
 
 }
